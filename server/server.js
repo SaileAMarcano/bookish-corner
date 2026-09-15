@@ -1,26 +1,40 @@
 const express = require('express');
+const db = require('./db');
 const app = express();
+app.use(express.json());
 const PORT = 3000;
 
-const books = [
-    {
-        id: 1,
-        title: 'Espiritu Salvaje',
-        author: 'Adriana Criado',
-        description: 'Una novela romántica ambientada en el mundo de las carreras de caballos.',
-        coverImage: 'espiritu-salvaje.jpg'
-    },
-    {
-        id: 2,
-        title: 'Blood of Hercules',
-        author: 'Jasmine Mas',
-        description: 'A dark fantasy novel that reimagines Greek mythology.',
-        coverImage: 'blood-of-hercules.webp'
-    },
-]
-
 app.get('/api/books', (req, res) => {
+    const books = db.prepare('SELECT * FROM books').all();
     res.json(books);
+});
+
+app.post('/api/books/:id/like', (req, res) => {
+    const { id } = req.params;
+    db.prepare('UPDATE books SET likes = likes + 1 WHERE id = ?').run(id);
+    const updateBook = db.prepare('SELECT * FROM books WHERE id = ?').get(id);
+    res.json(updateBook);
+});
+
+app.post('/api/books/:id/comments', (req, res) => {
+    const { id } = req.params;
+    const { text } = req.body;
+
+    if (!text || text.trim() === '') {
+        return res.status(400).json({ error: 'El comentario no puede estar vacio' });
+    }
+
+    const insert = db.prepare('INSERT INTO comments (bookId, text) VALUES (?, ?)');
+    const result = insert.run(id, text);
+
+    const newComment = db.prepare('SELECT * FROM comments WHERE id = ?').get(result.lastInsertRowid);
+    res.status(201).json(newComment);
+});
+
+app.get('/api/books/:id/comments', (req, res) => {
+    const { id } = req.params;
+    const comments = db.prepare('SELECT * FROM comments WHERE bookId = ? ORDER BY createdAt DESC').all(id);
+    res.json(comments);
 });
 
 app.listen(PORT, () => {
