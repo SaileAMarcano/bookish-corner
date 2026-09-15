@@ -1,7 +1,9 @@
 const express = require('express');
 const db = require('./db');
+const cors = require('cors');
 const app = express();
 app.use(express.json());
+app.use(cors());
 const PORT = 3000;
 
 app.get('/api/books', (req, res) => {
@@ -21,7 +23,7 @@ app.post('/api/books/:id/comments', (req, res) => {
     const { text } = req.body;
 
     if (!text || text.trim() === '') {
-        return res.status(400).json({ error: 'El comentario no puede estar vacio' });
+        return res.status(400).json({ error: 'Comment cannot be empty' });
     }
 
     const insert = db.prepare('INSERT INTO comments (bookId, text) VALUES (?, ?)');

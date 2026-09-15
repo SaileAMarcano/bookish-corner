@@ -29,7 +29,7 @@ if (row.count === 0) {
         VALUES (?, ?, ?, ?)
     `);
 
-    insert.run('Espiritu Salvaje', 'Adriana Criado', 'Una novela romantica ambientada en el mundo de las carreras de caballos.', 'espiritu-salvaje.jpg');
+    insert.run('Espiritu Salvaje', 'Adriana Criado', 'A romance novel set in the world of horse racing in Maplewood Hollow.', 'espiritu-salvaje.jpg');
     insert.run('Blood of Hercules', 'Jasmine Mas', 'A dark fantasy novel that reimagines Greek mythology.', 'blood-of-hercules.webp');
 }
 
