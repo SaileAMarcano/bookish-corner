@@ -2,3 +2,4 @@ node_modules/
 server/books.db
 server/uploads/
 .env
+!server/uploads/.gitkeep

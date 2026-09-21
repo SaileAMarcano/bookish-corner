@@ -1,17 +1,18 @@
 import { useState, useEffect } from 'react'
-import BookItem from './BookItem'
+import { Routes, Route, Navigate, useNavigate, NavLink } from 'react-router-dom'
 import './App.css'
+import Home from './Home';
+import ProfilePage from './ProfilePage';
 import AuthForm from './AuthForm';
 import Profile from './Profile';
+import Landing from './Landing';
 
 function App() {
   const [books, setBooks] = useState([])
   const [currentUser, setCurrentUser] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [isSearching, setIsSearching] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const navigate = useNavigate();
 
   const loadUserBooks = () => {
     fetch('http://localhost:3000/api/user-books', {
@@ -56,168 +57,71 @@ function App() {
       credentials: 'include',
     }).then(() => {
       setCurrentUser(null);
-    });
-  };
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim() === '') return;
-
-    setIsSearching(true);
-
-    fetch(`http://localhost:3000/api/search-books?q=${encodeURIComponent(searchTerm)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setSearchResults(data);
-        setIsSearching(false);
-      });
-  };
-
-  const handleAddBook = (book) => {
-    fetch('http://localhost:3000/api/user-books/from-search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({
-        openLibraryKey: book.openLibraryKey,
-        title: book.title,
-        author: book.author,
-        coverImage: book.coverImage,
-      }),
-    }).then(() => {
-      loadUserBooks();
-      setSearchTerm('');
-      setSearchResults([]);
+      navigate('/');
     });
   };
 
   if (!currentUser) {
-    return <AuthForm onLogin={setCurrentUser} />;
+    return (
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/login" element={<AuthForm onLogin={(user) => {
+          setCurrentUser(user);
+          navigate('/');
+        }} />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    );
   }
-
-  const alreadyAddedKeys = books.map((b) => b.openLibraryKey);
 
   return (
     <div>
       <header className="site-header">
         <div className="display logo">Bookish Corner</div>
         <nav>
-          <a href="#" className="active">Home</a>
+          <NavLink to="/" end>Home</NavLink>
           <a href="#">Currently Reading</a>
-          <a href="#">About</a>
+          <NavLink to="/profile">Profile</NavLink>
         </nav>
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
-          <button
-            onClick={() => setShowUserMenu(!showUserMenu)}
-            style={{
-              fontSize: '13px',
-              color: 'var(--text-2)',
-              background: 'none',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            hi, {currentUser.username}
+        <div className="header-user-wrap">
+          <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
+            <span className="header-user-name">hi, {currentUser.username}</span>
+            <span className="header-avatar">
+              {currentUser.avatarUrl ? (
+                <img src={`http://localhost:3000${currentUser.avatarUrl}`} alt="" />
+              ) : (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="8" r="3.8" />
+                  <path d="M12 13.5c-4 0-7 2.4-7 5.4 0 .6.5 1.1 1.1 1.1h11.8c.6 0 1.1-.5 1.1-1.1 0-3-3-5.4-7-5.4z" />
+                </svg>
+              )}
+            </span>
           </button>
 
           {showUserMenu && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '30px',
-                right: 0,
-                background: 'white',
-                border: '1px solid #ddd',
-                borderRadius: '8px',
-                padding: '8px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px',
-                zIndex: 10,
-              }}
-            >
-              <button onClick={() => {
+            <div className="header-menu">
+              <button className="ghost-button" onClick={() => {
                 setShowProfile(true);
                 setShowUserMenu(false);
               }}
-                className="like-button">Edit Profile</button>
-              <button onClick={handleLogout} className="like-button">Log out</button>
+              >
+                Edit profile
+              </button>
+              <button className="ghost-button" onClick={handleLogout}>
+                Log out
+              </button>
             </div>
           )}
         </div>
       </header>
 
-      <main className="page">
-        <div className="hero">
-          <div className="display hero-eyebrow">Reviews, thoughts and favorite reads</div>
-          <h1 className="display hero-title">A cozy corner for the books I can't stop thinking about</h1>
-        </div>
-
-        <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <div className="section-label">Add a book</div>
-          <form className="comment-form" onSubmit={handleSearch}>
-            <input
-              type="text"
-              placeholder="Search by tittle or author..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="comment-input" />
-            <button type="submit" className="comment-button">Search</button>
-          </form>
-          {isSearching && <div className="search-empty"> Searching...</div>}
-
-          {isSearching && <div className="search-empty"> Searching...</div>}
-
-          {!isSearching && searchResults.map((book) => (
-            <div key={book.openLibraryKey} className="search-result">
-              {book.coverImage ? (
-                <img className="search-cover" src={book.coverImage} alt={book.title} />
-              ) : (
-                <div className="search-cover search-cover-empty"></div>
-              )}
-
-              <div className="search-info">
-                <div className="search-title">{book.title}</div>
-                <div className="search-author">
-                  {book.author}{book.year ? ` · ${book.year}` : ''}
-                </div>
-              </div>
-
-              {alreadyAddedKeys.includes(book.openLibraryKey) ? (
-                <span className="search-added">Added</span>
-              ) : (
-                <button className="comment-button" onClick={() => handleAddBook(book)}>Add</button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        <div className="section-label">Currently Reading</div>
-
-        <div className="section-label">Currently Reading</div>
-        <div className="card currently-reading">
-          <div className="currently-reading-cover"></div>
-          <div className="currently-reading-info">
-            <div className="display currently-reading-title">Metal Slinger</div>
-            <div className="currently-reading-author">[Author name]</div>
-            <div className="currently-reading-notes">[Notes go here once I'm further into the book]</div>
-
-            <div className="progress">
-              <div classame="progress-track">
-                <div className="progress-fill" style={{ width: '62%' }}></div>
-              </div>
-              <div className="progress-label">62% complete</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="section-label">All Reviews</div>
-        <div className="grid">
-          {books.map((book) => (
-            <BookItem key={book.id} book={book} onLike={handleLike} onUpdate={loadUserBooks} />
-          ))}
-        </div>
-      </main >
+      <Routes>
+        <Route path="/" element={
+          <Home books={books} onLike={handleLike} onUpdate={loadUserBooks} />
+        } />
+        <Route path="/profile" element={<ProfilePage />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
 
       {showProfile && (
         <div className="drawer-overlay" onClick={() => setShowProfile(false)}>
@@ -239,7 +143,7 @@ function App() {
           </div>
         </div>
       )}
-    </div >
+    </div>
   )
 }
 

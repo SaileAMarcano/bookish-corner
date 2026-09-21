@@ -308,13 +308,35 @@ app.get('/api/me', (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
-    res.json(req.session.user);
+
+    const user = db.prepare(
+        'SELECT id, username, email, avatarUrl FROM users WHERE id = ?'
+    ).get(req.session.user.id);
+
+    if (!user) {
+        return res.status(401).json({ error: 'Not logged in' });
+    }
+
+    res.json(user);
 });
 
 app.get('/api/profile', requireAuth, (req, res) => {
-    const user = db.prepare(
-        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl FROM users WHERE id = ?'
-    ).get(req.session.user.id);
+    const user = db.prepare(`
+    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl,
+        (SELECT COUNT(*) FROM user_books
+            WHERE user_books.userId = users.id
+            AND user_books.status = 'finished') AS booksRead,
+        (SELECT COUNT(*) FROM user_books
+            WHERE user_books.userId = users.id
+            AND user_books.review IS NOT NULL
+            AND TRIM (user_books.review) != '') AS reviewsCount,
+        (SELECT COUNT (*) FROM user_books
+            WHERE user_books.userId = users.id
+            AND user_books.status = 'reading') AS currentlyReading
+    FROM users
+    WHERE users.id = ?
+    `).get(req.session.user.id);
+
     res.json(user);
 });
 

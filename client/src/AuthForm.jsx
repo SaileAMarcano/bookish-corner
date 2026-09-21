@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 function AuthForm({ onLogin }) {
     const [isRegistering, setIsRegistering] = useState(false);
@@ -40,42 +41,79 @@ function AuthForm({ onLogin }) {
             .catch((err) => setError(err.message));
     };
 
+    const toggleMode = () => {
+        setIsRegistering(!isRegistering);
+        setError('');
+    };
+
     return (
-        <div className="page">
-            <form onSubmit={handleSubmit} className="card" style={{ padding: '32px', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <h2 className="display">{isRegistering ? 'Create account' : 'Log in'}</h2>
+        <div className="auth-page">
+            <header className="site-header">
+                <Link to="/" className="display logo">Bookish Corner</Link>
+            </header>
 
-                {isRegistering && (
-                    <input
-                        type="text"
-                        placeholder="Username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                    />
-                )}
-                <input
-                    type="email"
-                    placeholder="Email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                />
+            <main className="auth-main">
+                <form onSubmit={handleSubmit} className="card auth-card">
+                    <div className="auth-heading">
+                        <h1 className="display auth-title">
+                            {isRegistering ? 'Create your account' : 'Welcome back'}
+                        </h1>
+                        <p className="auth-subtitle">
+                            {isRegistering
+                                ? 'Start your shelf in less than a minute.'
+                                : 'Log in to get back to your books.'}
+                        </p>
+                    </div>
 
-                {error && <p style={{ color: 'red', fontSize: '13px' }}>{error}</p>}
+                    {isRegistering && (
+                        <div className="profile-field">
+                            <label className="profile-label">Username</label>
+                            <input
+                                className="profile-input"
+                                type="text"
+                                placeholder="suukibo"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </div>
+                    )}
 
-                <button type="submit" className="comment-button">
-                    {isRegistering ? 'Register' : 'Log in'}
-                </button>
+                    <div className="profile-field">
+                        <label className="profile-label">Email</label>
+                        <input
+                            className="profile-input"
+                            type="email"
+                            placeholder="you@example.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                        />
+                    </div>
 
-                <button type="button" onClick={() => setIsRegistering(!isRegistering)} className="like-button">
-                    {isRegistering ? 'Already have an account? Log in' : "Don't have an account? Register"}
-                </button>
-            </form>
+                    <div className="profile-field">
+                        <label className="profile-label">Password</label>
+                        <input
+                            className="profile-input"
+                            type="password"
+                            placeholder="••••••••"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
+
+                    {error && <p className="auth-error">{error}</p>}
+
+                    <button type="submit" className="pill auth-submit">
+                        {isRegistering ? 'Create account' : 'Log in'}
+                    </button>
+
+                    <p className="auth-switch">
+                        {isRegistering ? 'Already have an account?' : "Don't have an account?"}{' '}
+                        <button type="button" className="auth-switch-button" onClick={toggleMode}>
+                            {isRegistering ? 'Log in' : 'Register'}
+                        </button>
+                    </p>
+                </form>
+            </main>
         </div>
     );
 }
