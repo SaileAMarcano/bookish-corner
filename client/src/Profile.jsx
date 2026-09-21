@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 
-function Profile() {
+function Profile({ onSaved }) {
+    const [displayName, setDisplayName] = useState('');
     const [bio, setBio] = useState('');
     const [instagramUrl, setInstagramUrl] = useState('');
     const [tiktokUrl, setTiktokUrl] = useState('');
@@ -13,6 +14,7 @@ function Profile() {
         })
             .then((res) => res.json())
             .then((data) => {
+                setDisplayName(data.displayName || '');
                 setBio(data.bio || '');
                 setInstagramUrl(data.instagramUrl || '');
                 setTiktokUrl(data.tiktokUrl || '');
@@ -24,6 +26,7 @@ function Profile() {
         e.preventDefault();
 
         const formData = new FormData();
+        formData.append('displayName', displayName);
         formData.append('bio', bio);
         formData.append('instagramUrl', instagramUrl);
         formData.append('tiktokUrl', tiktokUrl);
@@ -41,6 +44,7 @@ function Profile() {
             .then((res) => res.json())
             .then((data) => {
                 setAvatarUrl(data.avatarUrl);
+                onSaved();
             });
     };
 
@@ -73,6 +77,16 @@ function Profile() {
 
                 <form className="profile-form" onSubmit={handleSubmit}>
                     <div className="profile-field">
+                        <label className="profile-label">Display Name</label>
+                        <input
+                            className="profile-input"
+                            type="text"
+                            value={displayName}
+                            onChange={(e) => setDisplayName(e.target.value)}
+                            placeholder="How you want to be shown"
+                            maxLength={40}
+                        />
+
                         <label className="profile-label">Bio</label>
                         <textarea
                             className="profile-textarea"
@@ -106,8 +120,8 @@ function Profile() {
 
                     <button className="profile-save" type="submit">Save changes</button>
                 </form>
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }
 

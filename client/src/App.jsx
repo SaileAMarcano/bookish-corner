@@ -12,6 +12,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [showProfile, setShowProfile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [profileVersion, setProfileVersion] = useState(0);
   const navigate = useNavigate();
 
   const loadUserBooks = () => {
@@ -27,7 +28,7 @@ function App() {
     loadUserBooks();
   }, [currentUser]);
 
-  useEffect(() => {
+  const loadCurrentUser = () => {
     fetch('http://localhost:3000/api/me', {
       credentials: 'include',
     })
@@ -40,6 +41,10 @@ function App() {
       .then((user) => {
         setCurrentUser(user);
       });
+  };
+
+  useEffect(() => {
+    loadCurrentUser();
   }, []);
 
   const handleLike = (userBookId, alreadyLiked) => {
@@ -59,6 +64,12 @@ function App() {
       setCurrentUser(null);
       navigate('/');
     });
+  };
+
+  const closeProfileDrawer = () => {
+    setShowProfile(false);
+    setProfileVersion((v) => v + 1);
+    loadCurrentUser();
   };
 
   if (!currentUser) {
@@ -87,14 +98,12 @@ function App() {
           <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
             <span className="header-user-name">hi, {currentUser.username}</span>
             <span className="header-avatar">
-              {currentUser.avatarUrl ? (
-                <img src={`http://localhost:3000${currentUser.avatarUrl}`} alt="" />
-              ) : (
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="8" r="3.8" />
-                  <path d="M12 13.5c-4 0-7 2.4-7 5.4 0 .6.5 1.1 1.1 1.1h11.8c.6 0 1.1-.5 1.1-1.1 0-3-3-5.4-7-5.4z" />
-                </svg>
-              )}
+              <img
+                src={currentUser.avatarUrl
+                  ? `http://localhost:3000${currentUser.avatarUrl}`
+                  : '/default-avatar.png'}
+                alt=""
+              />
             </span>
           </button>
 
@@ -119,14 +128,22 @@ function App() {
         <Route path="/" element={
           <Home books={books} onLike={handleLike} onUpdate={loadUserBooks} />
         } />
-        <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/profile"
+          element={
+            <ProfilePage
+              version={profileVersion}
+              onEditProfile={() => setShowProfile(true)}
+            />
+          }
+        />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
 
       {showProfile && (
-        <div className="drawer-overlay" onClick={() => setShowProfile(false)}>
+        <div className="drawer-overlay" onClick={closeProfileDrawer}>
           <div className="drawer" onClick={(e) => e.stopPropagation()}>
-            <button className="drawer-close" onClick={() => setShowProfile(false)} aria-label="Close">
+            <button className="drawer-close" onClick={closeProfileDrawer} aria-label="Close">
               <svg width="14"
                 height="14"
                 viewBox="0 0 24 24"
@@ -139,7 +156,7 @@ function App() {
               </svg>
             </button>
 
-            <Profile />
+            <Profile onSaved={closeProfileDrawer} />
           </div>
         </div>
       )}

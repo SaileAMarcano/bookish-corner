@@ -1066,7 +1066,7 @@ html {
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: var(--rose);
+  background: var(--clay-soft);
   color: var(--surface);
   display: flex;
   align-items: center;
@@ -1096,4 +1096,128 @@ html {
   gap: 8px;
   z-index: 20;
   box-shadow: 0 8px 24px rgba(58, 54, 42, 0.12);
+}
+
+.profile-view {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-banner {
+  border-radius: 22px;
+  overflow: hidden;
+  line-height: 0;
+}
+
+.profile-banner-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.profile-view-card {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 34px;
+  padding: 30px 34px;
+}
+
+.profile-view-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: var(--clay-soft);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.profile-view-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 6px;
+}
+
+.profile-name {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+}
+
+.profile-username {
+  font-size: 15px;
+  color: var(--rose-deep);
+}
+
+.profile-bio {
+  margin: 10px 0 0;
+  max-width: 560px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-2);
+  white-space: pre-line;
+}
+
+.profile-stats {
+  display: flex;
+  margin-top: 22px;
+}
+
+.profile-stat {
+  padding: 0 26px;
+}
+
+.profile-stat:first-child {
+  padding-left: 0;
+}
+
+.profile-stat+.profile-stat {
+  border-left: 1px solid var(--surface-2);
+}
+
+.profile-stat-number {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--rose-deep);
+}
+
+.profile-stat-label {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.profile-edit {
+  position: absolute;
+  top: 30px;
+  right: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 22px;
+  border: none;
+  border-radius: 999px;
+  background: var(--rose);
+  color: var(--surface);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.profile-edit:hover {
+  background: var(--rose-deep);
 }
