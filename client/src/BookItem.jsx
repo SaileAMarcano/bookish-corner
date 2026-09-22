@@ -5,16 +5,33 @@ const statusLabels = {
     'reading': 'Reading',
     'finished': 'Finished'
 }
+const GENRES = [
+    'Fantasy',
+    'Romance',
+    'Dark Romance',
+    'Contemporary',
+    'Classics',
+    'Mystery',
+    'Sci-fi',
+    'Horror',
+    'Historical',
+    'Non-fiction',
+    'Poetry',
+    'Manga',
+    'Comics',
+];
 
-function BookItem({ book, onLike, onUpdate }) {
+function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
     const [comments, setComments] = useState([])
     const [commentText, setCommentText] = useState('')
     const [showDetail, setShowDetail] = useState(false)
     const [review, setReview] = useState(book.review || '')
     const [status, setStatus] = useState(book.status || 'reading')
     const [progress, setProgress] = useState(book.progress || 0)
+    const [genre, setGenre] = useState(book.genre || '')
     const [isSaving, setIsSaving] = useState(false)
     const [isEditingReview, setIsEditingReview] = useState(false)
+    const [coverFailed, setCoverFailed] = useState(false)
 
     useEffect(() => {
         fetch(`http://localhost:3000/api/user-books/${book.id}/comments`)
@@ -49,24 +66,44 @@ function BookItem({ book, onLike, onUpdate }) {
                 review: review,
                 status: status,
                 progress: Number(progress),
+                genre: genre || null,
             }),
         })
 
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) throw new Error('Could bit save')
+                return res.json()
+            })
             .then(() => {
                 setIsSaving(false)
                 setIsEditingReview(false)
                 onUpdate()
             })
+            .catch(() => {
+                setIsSaving(false)
+            })
     }
 
-    const hasRealCover = book.coverImage && book.coverImage.startsWith('http')
+    const hasRealCover = book.coverImage && book.coverImage.startsWith('http') && !coverFailed
 
     return (
         <>
             <div className="card book-card">
+                <button
+                    className={`cover-heart ${book.isFavorite ? 'is-favorite' : ''}`}
+                    onClick={() => onToggleFavorite(book.id, book.isFavorite)}
+                    aria-label={book.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24"
+                        fill={book.isFavorite ? 'currentColor' : 'none'}
+                        stroke="currentColor" strokeWidth="2"
+                        strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
+                    </svg>
+                </button>
+
                 {hasRealCover ? (
-                    <img className="book-cover book-cover-image" src={book.coverImage} alt={book.title} />
+                    <img className="book-cover book-cover-image" src={book.coverImage} alt={book.title} onError={() => setCoverFailed(true)} />
                 ) : (
                     <div className="book-cover">
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--surface)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
@@ -201,6 +238,17 @@ function BookItem({ book, onLike, onUpdate }) {
                                                 <option value="finished">Finished</option>
                                             </select>
 
+                                            <select
+                                                className="review-select"
+                                                value={genre}
+                                                onChange={(e) => setGenre(e.target.value)}
+                                            >
+                                                <option value="">Genre…</option>
+                                                {GENRES.map((g) => (
+                                                    <option key={g} value={g}>{g}</option>
+                                                ))}
+                                            </select>
+
                                             <div className="review-progress">
                                                 <input
                                                     type="range"
@@ -226,6 +274,7 @@ function BookItem({ book, onLike, onUpdate }) {
                                                     onClick={() => {
                                                         setReview(book.review)
                                                         setStatus(book.status)
+                                                        setGenre(book.genre || '')
                                                         setProgress(book.progress)
                                                         setIsEditingReview(false)
                                                     }}

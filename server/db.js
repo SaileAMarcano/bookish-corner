@@ -82,6 +82,23 @@ try {
 
 }
 
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN aboutMe TEXT`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN favoriteQuote TEXT`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN favoriteThings TEXT`);
+} catch (error) {
+
+}
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS user_books(
@@ -95,6 +112,18 @@ db.exec(`
     UNIQUE(userID, bookId)
     )
     `);
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN isFavorite INTEGER DEFAULT 0`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN genre TEXT`);
+} catch (error) {
+
+}
 
 
 const row = db.prepare('SELECT COUNT(*) AS count FROM books').get();

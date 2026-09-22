@@ -3,6 +3,9 @@ import { useState, useEffect } from "react";
 function Profile({ onSaved }) {
     const [displayName, setDisplayName] = useState('');
     const [bio, setBio] = useState('');
+    const [aboutMe, setAboutMe] = useState('');
+    const [favoriteQuote, setFavoriteQuote] = useState('');
+    const [favoriteThings, setFavoriteThings] = useState('');
     const [instagramUrl, setInstagramUrl] = useState('');
     const [tiktokUrl, setTiktokUrl] = useState('');
     const [avatarFile, setAvatarFile] = useState(null);
@@ -16,6 +19,9 @@ function Profile({ onSaved }) {
             .then((data) => {
                 setDisplayName(data.displayName || '');
                 setBio(data.bio || '');
+                setAboutMe(data.aboutMe || '');
+                setFavoriteQuote(data.favoriteQuote || '');
+                setFavoriteThings(data.favoriteThings || '');
                 setInstagramUrl(data.instagramUrl || '');
                 setTiktokUrl(data.tiktokUrl || '');
                 setAvatarUrl(data.avatarUrl);
@@ -28,6 +34,9 @@ function Profile({ onSaved }) {
         const formData = new FormData();
         formData.append('displayName', displayName);
         formData.append('bio', bio);
+        formData.append('favoriteQuote', favoriteQuote);
+        formData.append('favoriteThings', favoriteThings);
+        formData.append('aboutMe', aboutMe);
         formData.append('instagramUrl', instagramUrl);
         formData.append('tiktokUrl', tiktokUrl);
 
@@ -86,13 +95,51 @@ function Profile({ onSaved }) {
                             placeholder="How you want to be shown"
                             maxLength={40}
                         />
+                    </div>
 
+                    <div className="profile-field">
                         <label className="profile-label">Bio</label>
                         <textarea
                             className="profile-textarea"
                             value={bio}
                             onChange={(e) => setBio(e.target.value)}
                             placeholder="Tell other readers about yourself..."
+                        />
+                    </div>
+
+                    <div className="profile-field">
+                        <label className="profile-label">About Me</label>
+                        <textarea
+                            className="profile-textarea"
+                            value={aboutMe}
+                            onChange={(e) => setAboutMe(e.target.value)}
+                            placeholder="The longer version. What you read, what you love, what you're looking for..."
+                            maxLength={600}
+                        />
+                    </div>
+
+                    <div className="profile-field">
+                        <label className="profile-label">Favorite quote from a book</label>
+                        <textarea
+                            className="profile-textarea"
+                            value={favoriteQuote}
+                            onChange={(e) => setFavoriteQuote(e.target.value)}
+                            placeholder="Good books make good days."
+                            maxLength={200}
+                        />
+                    </div>
+
+                    <div className="profile-field">
+                        <label className="profile-label">A few favorite things</label>
+                        <textarea
+                            className="profile-textarea"
+                            value={favoriteThings}
+                            onChange={(e) => setFavoriteThings(e.target.value)}
+                            placeholder={`One per line:
+Coffee & rainy afternoons
+Annotated paperbacks
+Slow Sundays at bookstores`}
+                            maxLength={300}
                         />
                     </div>
 

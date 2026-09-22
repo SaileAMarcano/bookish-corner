@@ -182,7 +182,7 @@ app.delete('/api/user-books/:id/like', requireAuth, (req, res) => {
 
 app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     const { id } = req.params;
-    const { status, progress, review } = req.body;
+    const { status, progress, review, isFavorite, genre } = req.body;
 
     const userBook = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     if (!userBook) {
@@ -196,9 +196,11 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
         UPDATE user_books
         SET status = COALESCE(?, status),
             progress = COALESCE(?, progress),
-            review = COALESCE(?, review)
+            review = COALESCE(?, review),
+            isFavorite = COALESCE(?, isFavorite),
+            genre = COALESCE(?, genre)
         WHERE id = ?
-    `).run(status, progress, review, id);
+    `).run(status, progress, review, isFavorite, genre, id);
 
     const update = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     res.json(update);
@@ -206,7 +208,7 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
 
 app.get('/api/user-books', requireAuth, (req, res) => {
     const userBooks = db.prepare(`
-        SELECT user_books.id, user_books.status, user_books.progress, user_books.review,
+        SELECT user_books.id, user_books.status, user_books.progress, user_books.review, user_books.isFavorite, user_books.genre,
                books.id AS bookId, books.title, books.author, books.description, books.coverImage, books.openLibraryKey,
                (SELECT COUNT (*) FROM likes WHERE likes.userBookId = user_books.id) AS likeCount,
                (SELECT COUNT(*) FROM likes WHERE likes.userBookId = user_books.id AND likes.userId = ?) AS hasLiked
@@ -284,7 +286,7 @@ app.post('/api/login', (req, res) => {
     }
 
     const user = db.prepare(
-        'SELECT id, username, email, passwordHash, avatarUrl FROM users WHERE email = ?'
+        'SELECT id, username, email, passwordHash, avatarUrl, displayName FROM users WHERE email = ?'
     ).get(email);
 
     if (!user) {
@@ -308,6 +310,7 @@ app.post('/api/login', (req, res) => {
         username: user.username,
         email: user.email,
         avatarUrl: user.avatarUrl,
+        displayName: user.displayName || user.username,
     });
 });
 
@@ -317,7 +320,7 @@ app.get('/api/me', (req, res) => {
     }
 
     const user = db.prepare(
-        'SELECT id, username, email, avatarUrl FROM users WHERE id = ?'
+        `SELECT id, username, email, avatarUrl, COALESCE(displayName, username) AS displayName FROM users WHERE id = ?`
     ).get(req.session.user.id);
 
     if (!user) {
@@ -329,7 +332,7 @@ app.get('/api/me', (req, res) => {
 
 app.get('/api/profile', requireAuth, (req, res) => {
     const user = db.prepare(`
-    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl,
+    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings,
         COALESCE(displayName, username) AS displayName,
         (SELECT COUNT(*) FROM user_books
             WHERE user_books.userId = users.id
@@ -350,6 +353,9 @@ app.get('/api/profile', requireAuth, (req, res) => {
 
 app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
     const { bio, instagramUrl, tiktokUrl } = req.body;
+    const aboutMe = req.body.aboutMe?.trim().slice(0, 600) || null;
+    const favoriteQuote = req.body.favoriteQuote?.trim().slice(0, 200) || null;
+    const favoriteThings = req.body.favoriteThings?.trim().slice(0, 300) || null;
     const displayName = req.body.displayName?.trim().slice(0, 40) || null;
     const avatarUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
@@ -357,14 +363,17 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
         UPDATE users
         SET bio = COALESCE(?, bio),
             displayName = COALESCE(?, displayName),
+            aboutMe = COALESCE(?, aboutMe),
+            favoriteQuote = COALESCE(?,  favoriteQuote),
+            favoriteThings = COALESCE(?, favoriteThings),
             instagramUrl = COALESCE(?, instagramUrl),
             tiktokUrl = COALESCE(?, tiktokUrl),
             avatarUrl = COALESCE(?, avatarUrl)
         WHERE ID = ?
-    `).run(bio, displayName, instagramUrl, tiktokUrl, avatarUrl, req.session.user.id);
+    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, instagramUrl, tiktokUrl, avatarUrl, req.session.user.id);
 
     const update = db.prepare(
-        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
+        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
     ).get(req.session.user.id);
 
     res.json(update);

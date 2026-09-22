@@ -56,6 +56,25 @@ function App() {
     });
   };
 
+  const handleToggleFavorite = (userBookId, isFavorite) => {
+    fetch(`http://localhost:3000/api/user-books/${userBookId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ isFavorite: isFavorite ? 0 : 1 }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error('Could not update favorite');
+        return res.json();
+      })
+      .then(() => {
+        loadUserBooks();
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  };
+
   const handleLogout = () => {
     fetch('http://localhost:3000/api/logout', {
       method: 'POST',
@@ -96,7 +115,7 @@ function App() {
         </nav>
         <div className="header-user-wrap">
           <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
-            <span className="header-user-name">hi, {currentUser.username}</span>
+            <span className="header-user-name">Hi, {currentUser.username}</span>
             <span className="header-avatar">
               <img
                 src={currentUser.avatarUrl
@@ -125,15 +144,27 @@ function App() {
       </header>
 
       <Routes>
-        <Route path="/" element={
-          <Home books={books} onLike={handleLike} onUpdate={loadUserBooks} />
-        } />
+        <Route
+          path="/"
+          element={
+            <Home
+              books={books}
+              onLike={handleLike}
+              onUpdate={loadUserBooks}
+              onToggleFavorite={handleToggleFavorite}
+            />
+          }
+        />
         <Route
           path="/profile"
           element={
             <ProfilePage
               version={profileVersion}
               onEditProfile={() => setShowProfile(true)}
+              books={books}
+              onLike={handleLike}
+              onUpdate={loadUserBooks}
+              onToggleFavorite={handleToggleFavorite}
             />
           }
         />

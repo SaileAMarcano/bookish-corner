@@ -2,7 +2,7 @@ import { useState } from "react";
 import BookItem from "./BookItem";
 
 
-function Home({ books, onLike, onUpdate }) {
+function Home({ books, onLike, onUpdate, onToggleFavorite }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -106,7 +106,7 @@ function Home({ books, onLike, onUpdate }) {
             <div className="section-label">All Reviews</div>
             <div className="grid">
                 {books.map((book) => (
-                    <BookItem key={book.id} book={book} onLike={onLike} onUpdate={onUpdate} />
+                    <BookItem key={book.id} book={book} onLike={onLike} onUpdate={onUpdate} onToggleFavorite={onToggleFavorite} />
                 ))}
             </div>
         </main>
