@@ -1,18 +1,16 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate, useNavigate, NavLink } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, NavLink, Link } from 'react-router-dom'
 import './App.css'
 import Home from './Home';
 import ProfilePage from './ProfilePage';
+import EditProfile from './EditProfile';
 import AuthForm from './AuthForm';
-import Profile from './Profile';
 import Landing from './Landing';
 
 function App() {
   const [books, setBooks] = useState([])
   const [currentUser, setCurrentUser] = useState(null);
-  const [showProfile, setShowProfile] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [profileVersion, setProfileVersion] = useState(0);
   const navigate = useNavigate();
 
   const loadUserBooks = () => {
@@ -85,12 +83,6 @@ function App() {
     });
   };
 
-  const closeProfileDrawer = () => {
-    setShowProfile(false);
-    setProfileVersion((v) => v + 1);
-    loadCurrentUser();
-  };
-
   if (!currentUser) {
     return (
       <Routes>
@@ -128,13 +120,13 @@ function App() {
 
           {showUserMenu && (
             <div className="header-menu">
-              <button className="ghost-button" onClick={() => {
-                setShowProfile(true);
-                setShowUserMenu(false);
-              }}
+              <Link
+                to="/profile/edit"
+                className="ghost-button"
+                onClick={() => setShowUserMenu(false)}
               >
                 Edit profile
-              </button>
+              </Link>
               <button className="ghost-button" onClick={handleLogout}>
                 Log out
               </button>
@@ -159,8 +151,6 @@ function App() {
           path="/profile"
           element={
             <ProfilePage
-              version={profileVersion}
-              onEditProfile={() => setShowProfile(true)}
               books={books}
               onLike={handleLike}
               onUpdate={loadUserBooks}
@@ -168,29 +158,12 @@ function App() {
             />
           }
         />
+        <Route
+          path="/profile/edit"
+          element={<EditProfile onSaved={loadCurrentUser} />}
+        />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-
-      {showProfile && (
-        <div className="drawer-overlay" onClick={closeProfileDrawer}>
-          <div className="drawer" onClick={(e) => e.stopPropagation()}>
-            <button className="drawer-close" onClick={closeProfileDrawer} aria-label="Close">
-              <svg width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round">
-                <line x1="5" y1="5" x2="19" y2="19" />
-                <line x1="19" y1="5" x2="5" y2="19" />
-              </svg>
-            </button>
-
-            <Profile onSaved={closeProfileDrawer} />
-          </div>
-        </div>
-      )}
     </div>
   )
 }

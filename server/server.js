@@ -332,7 +332,7 @@ app.get('/api/me', (req, res) => {
 
 app.get('/api/profile', requireAuth, (req, res) => {
     const user = db.prepare(`
-    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings,
+    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location,
         COALESCE(displayName, username) AS displayName,
         (SELECT COUNT(*) FROM user_books
             WHERE user_books.userId = users.id
@@ -352,7 +352,7 @@ app.get('/api/profile', requireAuth, (req, res) => {
 });
 
 app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
-    const { bio, instagramUrl, tiktokUrl } = req.body;
+    const { bio, instagramUrl, tiktokUrl, location } = req.body;
     const aboutMe = req.body.aboutMe?.trim().slice(0, 600) || null;
     const favoriteQuote = req.body.favoriteQuote?.trim().slice(0, 200) || null;
     const favoriteThings = req.body.favoriteThings?.trim().slice(0, 300) || null;
@@ -366,14 +366,15 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
             aboutMe = COALESCE(?, aboutMe),
             favoriteQuote = COALESCE(?,  favoriteQuote),
             favoriteThings = COALESCE(?, favoriteThings),
+            location = COALESCE(?, location),
             instagramUrl = COALESCE(?, instagramUrl),
             tiktokUrl = COALESCE(?, tiktokUrl),
             avatarUrl = COALESCE(?, avatarUrl)
         WHERE ID = ?
-    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, instagramUrl, tiktokUrl, avatarUrl, req.session.user.id);
+    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, avatarUrl, req.session.user.id);
 
     const update = db.prepare(
-        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
+        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
     ).get(req.session.user.id);
 
     res.json(update);
