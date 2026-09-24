@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate, useNavigate, NavLink, Link } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, Link } from 'react-router-dom'
 import './App.css'
 import Home from './Home';
 import ProfilePage from './ProfilePage';
 import EditProfile from './EditProfile';
 import AuthForm from './AuthForm';
 import Landing from './Landing';
+import Sidebar from './Sidebar';
+import Icon from './Icon';
 
 function App() {
   const [books, setBooks] = useState([])
   const [currentUser, setCurrentUser] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const loadUserBooks = () => {
@@ -83,6 +86,13 @@ function App() {
     });
   };
 
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const term = searchTerm.trim();
+    if (term === '') return;
+    navigate(`/?q=${encodeURIComponent(term)}`);
+  };
+
   if (!currentUser) {
     return (
       <Routes>
@@ -97,73 +107,83 @@ function App() {
   }
 
   return (
-    <div>
-      <header className="site-header">
-        <div className="display logo">Bookish Corner</div>
-        <nav>
-          <NavLink to="/" end>Home</NavLink>
-          <a href="#">Currently Reading</a>
-          <NavLink to="/profile">Profile</NavLink>
-        </nav>
-        <div className="header-user-wrap">
-          <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
-            <span className="header-user-name">Hi, {currentUser.username}</span>
-            <span className="header-avatar">
-              <img
-                src={currentUser.avatarUrl
-                  ? `http://localhost:3000${currentUser.avatarUrl}`
-                  : '/default-avatar.png'}
-                alt=""
+    <div className="app-shell">
+      <Sidebar />
+
+      <div className="app-main">
+        <header className="topbar">
+          <form className="topbar-search" onSubmit={handleSearch}>
+            <Icon name="search" size={18} />
+            <input
+              type="text"
+              placeholder="Search by title or author..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              aria-label="Search books"
+            />
+            <button type="submit" className="pill topbar-search-button">Search</button>
+          </form>
+
+          <div className="header-user-wrap">
+            <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
+              <span className="header-user-name">hi, {currentUser.displayName}</span>
+              <span className="header-avatar">
+                <img
+                  src={currentUser.avatarUrl
+                    ? `http://localhost:3000${currentUser.avatarUrl}`
+                    : '/default-avatar.png'}
+                  alt=""
+                />
+              </span>
+            </button>
+
+            {showUserMenu && (
+              <div className="header-menu">
+                <Link
+                  to="/profile/edit"
+                  className="ghost-button"
+                  onClick={() => setShowUserMenu(false)}
+                >
+                  Edit profile
+                </Link>
+                <button className="ghost-button" onClick={handleLogout}>
+                  Log out
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        <Routes>
+          <Route
+            path="/"
+            element={
+              <Home
+                books={books}
+                onLike={handleLike}
+                onUpdate={loadUserBooks}
+                onToggleFavorite={handleToggleFavorite}
               />
-            </span>
-          </button>
-
-          {showUserMenu && (
-            <div className="header-menu">
-              <Link
-                to="/profile/edit"
-                className="ghost-button"
-                onClick={() => setShowUserMenu(false)}
-              >
-                Edit profile
-              </Link>
-              <button className="ghost-button" onClick={handleLogout}>
-                Log out
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <Home
-              books={books}
-              onLike={handleLike}
-              onUpdate={loadUserBooks}
-              onToggleFavorite={handleToggleFavorite}
-            />
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProfilePage
-              books={books}
-              onLike={handleLike}
-              onUpdate={loadUserBooks}
-              onToggleFavorite={handleToggleFavorite}
-            />
-          }
-        />
-        <Route
-          path="/profile/edit"
-          element={<EditProfile onSaved={loadCurrentUser} />}
-        />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProfilePage
+                books={books}
+                onLike={handleLike}
+                onUpdate={loadUserBooks}
+                onToggleFavorite={handleToggleFavorite}
+              />
+            }
+          />
+          <Route
+            path="/profile/edit"
+            element={<EditProfile onSaved={loadCurrentUser} />}
+          />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
     </div>
   )
 }

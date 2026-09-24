@@ -106,6 +106,12 @@ try {
 
 }
 
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN readingGoal INTEGER`)
+} catch (error) {
+
+}
+
 db.exec(`
     CREATE TABLE IF NOT EXISTS user_books(
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -127,6 +133,36 @@ try {
 
 try {
   db.exec(`ALTER TABLE user_books ADD COLUMN genre TEXT`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN currentChapter INTEGER`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN totalChapters INTEGER`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN startedAt TEXT`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN finishedAt TEXT`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN lastReadAt TEXT`);
 } catch (error) {
 
 }

@@ -65,6 +65,19 @@ app.get('/api/books', (req, res) => {
     res.json(books);
 });
 
+app.get('/api/books/recent', requireAuth, (req, res) => {
+    const books = db.prepare(`
+        SELECT books.id, books.title, books.author, books.coverImage,
+        (SELECT COUNT(*) FROM user_books
+            WHERE user_books.bookId = books.id
+            AND user_books.userId = ?) AS inLibrary
+        FROM books
+        ORDER BY books.id DESC
+        LIMIT 12
+    `).all(req.session.user.id);
+    res.json(books);
+});
+
 app.get('/api/search-books', async (req, res) => {
     const { q } = req.query;
 
@@ -102,7 +115,7 @@ app.post('/api/user-books', requireAuth, (req, res) => {
     }
     try {
         const insert = db.prepare(
-            'INSERT INTO user_books (userId, bookId) VALUES(?, ?)'
+            'INSERT INTO user_books (userId, bookId, startedAt, lastReadAt) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
         );
         const result = insert.run(req.session.user.id, bookId);
         res.status(201).json({ id: result.lastInsertRowid, userId: req.session.user.id, bookId });
@@ -137,7 +150,7 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
         }
 
         const insert = db.prepare(`
-            INSERT INTO books (title, author, description, coverImage, openLibraryKey) 
+            INSERT INTO books (title, author, description, coverImage, openLibraryKey)
             VALUES (?, ?, ?, ?, ?)
         `);
 
@@ -153,7 +166,7 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
     }
 
     try {
-        const insert = db.prepare('INSERT INTO user_books (userId, bookId) VALUES(?, ?)');
+        const insert = db.prepare('INSERT INTO user_books(userId, bookId, startedAt, lastReadAt) VALUES(?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)');
         const result = insert.run(req.session.user.id, book.id);
         res.status(201).json({ id: result.lastInsertRowid, book });
     } catch (error) {
@@ -182,7 +195,7 @@ app.delete('/api/user-books/:id/like', requireAuth, (req, res) => {
 
 app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     const { id } = req.params;
-    const { status, progress, review, isFavorite, genre } = req.body;
+    const { status, progress, review, isFavorite, genre, currentChapter, totalChapters } = req.body;
 
     const userBook = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     if (!userBook) {
@@ -192,15 +205,26 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
         return res.status(403).json({ error: 'You cannot edit this entry' });
     }
 
+    const statusChanged = status !== undefined && status !== userBook.status;
+    const startedNow = statusChanged && status === 'reading' ? 1 : 0;
+    const finishedNow = statusChanged && status === 'finished' ? 1 : 0;
+    const readNow =
+        (progress !== undefined && Number(progress) !== userBook.progress) || (currentChapter !== undefined && Number(currentChapter) !== userBook.currentChapter) ? 1 : 0;
+
     db.prepare(`
         UPDATE user_books
         SET status = COALESCE(?, status),
             progress = COALESCE(?, progress),
             review = COALESCE(?, review),
             isFavorite = COALESCE(?, isFavorite),
-            genre = COALESCE(?, genre)
+            genre = COALESCE(?, genre),
+            currentChapter = COALESCE(?, currentChapter),
+            totalChapters = COALESCE(?, totalChapters),
+            startedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE startedAt END,
+            finishedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE finishedAt END,
+            lastReadAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE lastReadAt END
         WHERE id = ?
-    `).run(status, progress, review, isFavorite, genre, id);
+    `).run(status, progress, review, isFavorite, genre, currentChapter, totalChapters, startedNow, finishedNow, readNow, id);
 
     const update = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     res.json(update);
@@ -208,7 +232,13 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
 
 app.get('/api/user-books', requireAuth, (req, res) => {
     const userBooks = db.prepare(`
-        SELECT user_books.id, user_books.status, user_books.progress, user_books.review, user_books.isFavorite, user_books.genre,
+        SELECT user_books.id, user_books.status, user_books.review, user_books.isFavorite, user_books.genre,
+               user_books.currentChapter, user_books.totalChapters,
+               user_books.startedAt, user_books.finishedAt, user_books.lastReadAt, user_books.createdAt,
+               CASE WHEN user_books.totalChapters > 0
+                    THEN MIN(100, ROUND(COALESCE(user_books.currentChapter, 0) * 100.0 / user_books.totalChapters))
+                    ELSE user_books.progress
+               END AS progress,
                books.id AS bookId, books.title, books.author, books.description, books.coverImage, books.openLibraryKey,
                (SELECT COUNT (*) FROM likes WHERE likes.userBookId = user_books.id) AS likeCount,
                (SELECT COUNT(*) FROM likes WHERE likes.userBookId = user_books.id AND likes.userId = ?) AS hasLiked
@@ -286,7 +316,7 @@ app.post('/api/login', (req, res) => {
     }
 
     const user = db.prepare(
-        'SELECT id, username, email, passwordHash, avatarUrl, displayName FROM users WHERE email = ?'
+        'SELECT id, username, email, passwordHash, avatarUrl, displayName, readingGoal FROM users WHERE email = ?'
     ).get(email);
 
     if (!user) {
@@ -311,6 +341,7 @@ app.post('/api/login', (req, res) => {
         email: user.email,
         avatarUrl: user.avatarUrl,
         displayName: user.displayName || user.username,
+        readingGoal: user.readingGoal,
     });
 });
 
@@ -320,7 +351,7 @@ app.get('/api/me', (req, res) => {
     }
 
     const user = db.prepare(
-        `SELECT id, username, email, avatarUrl, COALESCE(displayName, username) AS displayName FROM users WHERE id = ?`
+        `SELECT id, username, email, avatarUrl, readingGoal, COALESCE(displayName, username) AS displayName FROM users WHERE id = ?`
     ).get(req.session.user.id);
 
     if (!user) {
@@ -332,7 +363,7 @@ app.get('/api/me', (req, res) => {
 
 app.get('/api/profile', requireAuth, (req, res) => {
     const user = db.prepare(`
-    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location,
+    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal,
         COALESCE(displayName, username) AS displayName,
         (SELECT COUNT(*) FROM user_books
             WHERE user_books.userId = users.id
@@ -357,6 +388,8 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
     const favoriteQuote = req.body.favoriteQuote?.trim().slice(0, 200) || null;
     const favoriteThings = req.body.favoriteThings?.trim().slice(0, 300) || null;
     const displayName = req.body.displayName?.trim().slice(0, 40) || null;
+    const goal = parseInt(req.body.readingGoal, 10);
+    const readingGoal = goal >= 1 && goal <= 365 ? goal : null;
     const avatarUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
     db.prepare(`
@@ -369,12 +402,13 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
             location = COALESCE(?, location),
             instagramUrl = COALESCE(?, instagramUrl),
             tiktokUrl = COALESCE(?, tiktokUrl),
+            readingGoal = COALESCE(?, readingGoal),
             avatarUrl = COALESCE(?, avatarUrl)
         WHERE ID = ?
-    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, avatarUrl, req.session.user.id);
+    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, readingGoal, avatarUrl, req.session.user.id);
 
     const update = db.prepare(
-        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
+        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
     ).get(req.session.user.id);
 
     res.json(update);

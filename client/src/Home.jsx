@@ -6,17 +6,28 @@ function Home({ books, onLike, onUpdate, onToggleFavorite }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
+    const [searchError, setSearchError] = useState('');
 
     const handleSearch = (e) => {
         e.preventDefault();
         if (searchTerm.trim() === '') return;
 
         setIsSearching(true);
+        setSearchError('');
 
         fetch(`http://localhost:3000/api/search-books?q=${encodeURIComponent(searchTerm)}`)
-            .then((res) => res.json())
+            .then((res) => {
+                if (!res.ok) throw new Error('Search failed');
+                return res.json();
+            })
             .then((data) => {
                 setSearchResults(data);
+            })
+            .catch(() => {
+                setSearchResults([]);
+                setSearchError("We couldn't reach the book catalog. Please try again in a moment.");
+            })
+            .finally(() => {
                 setIsSearching(false);
             });
     };
@@ -61,6 +72,7 @@ function Home({ books, onLike, onUpdate, onToggleFavorite }) {
                 </form>
 
                 {isSearching && <div className="search-empty">Searching...</div>}
+                {searchError && <div className="search-empty">{searchError}</div>}
 
                 {!isSearching && searchResults.map((book) => (
                     <div key={book.openLibraryKey} className="search-result">
