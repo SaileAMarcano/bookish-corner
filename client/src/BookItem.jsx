@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { pagePercent } from './utils';
 
 const statusLabels = {
     'want-to-read': 'Want to read',
@@ -21,13 +22,18 @@ const GENRES = [
     'Comics',
 ];
 
+const toNumber = (value) => (value === '' ? undefined : Number(value));
+
 function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
     const [comments, setComments] = useState([])
     const [commentText, setCommentText] = useState('')
     const [showDetail, setShowDetail] = useState(false)
     const [review, setReview] = useState(book.review || '')
     const [status, setStatus] = useState(book.status || 'reading')
-    const [progress, setProgress] = useState(book.progress || 0)
+    const [currentPage, setCurrentPage] = useState(book.currentPage ?? '')
+    const [totalPages, setTotalPages] = useState(book.totalPages ?? '')
+    const [currentChapter, setCurrentChapter] = useState(book.currentChapter ?? '')
+    const [isSavingProgress, setIsSavingProgress] = useState(false)
     const [genre, setGenre] = useState(book.genre || '')
     const [isSaving, setIsSaving] = useState(false)
     const [isEditingReview, setIsEditingReview] = useState(false)
@@ -65,7 +71,6 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
             body: JSON.stringify({
                 review: review,
                 status: status,
-                progress: Number(progress),
                 genre: genre || null,
             }),
         })
@@ -83,6 +88,40 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                 setIsSaving(false)
             })
     }
+
+    const handleSaveProgress = () => {
+        setIsSavingProgress(true)
+
+        fetch(`http://localhost:3000/api/user-books/${book.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                currentPage: toNumber(currentPage),
+                totalPages: toNumber(totalPages),
+                currentChapter: toNumber(currentChapter),
+            }),
+        })
+
+            .then((res) => {
+                if (!res.ok) throw new Error('Could not save progress')
+                return res.json()
+            })
+
+            .then(() => onUpdate())
+            .catch((error) => console.error(error))
+            .finally(() => setIsSavingProgress(false))
+    }
+
+    let pageError = ''
+    if (totalPages !== '' && Number(totalPages) < 1) {
+        pageError = 'Total pages must be at least 1.'
+    } else if (currentPage !== '' && totalPages !== '' && Number(currentPage) > Number(totalPages)) {
+        pageError = "Your current page can't be higher than the total."
+    }
+
+    const pagesPercent = pagePercent(Number(currentPage), Number(totalPages))
+    const livePercent = book.status === 'finished' ? 100 : (pagesPercent ?? book.progress ?? 0)
 
     const hasRealCover = book.coverImage && book.coverImage.startsWith('http') && !coverFailed
 
@@ -190,6 +229,37 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                             </div>
 
                             <p className="modal-description">{book.description}</p>
+                            <div className="progress-block">
+                                <div className="section-label">Reading progress</div>
+
+                                <div className="progress-fields">
+                                    <label className="progress-field">Current page
+                                        <input className="progress-input" type="number" min="0" value={currentPage} onChange={(e) => setCurrentPage(e.target.value)} />
+                                    </label>
+
+                                    <label className="progress-field">Total pages
+                                        <input className="progress-input" type="number" min="1" value={totalPages} onChange={(e) => setTotalPages(e.target.value)} />
+                                    </label>
+
+                                    <label className="progress-field">Chapter (optional)
+                                        <input className="progress-input" type="number" min="0" value={currentChapter} onChange={(e) => setCurrentChapter(e.target.value)} />
+                                    </label>
+                                </div>
+
+                                <div className="progress">
+                                    <div className="progress-track">
+                                        <div className="progress-fill" style={{ width: `${livePercent}%` }}></div>
+                                    </div>
+                                    <div className="progress-label">{livePercent}%</div>
+                                </div>
+
+                                {pageError && <div className="progress-error">{pageError}</div>}
+
+                                <button className="comment-button" onClick={handleSaveProgress} disabled={isSavingProgress || pageError !== ''}>
+
+                                    {isSavingProgress ? 'Saving...' : 'Save progress'}
+                                </button>
+                            </div>
 
                             <div className="review-block">
                                 <div className="review-head">
@@ -249,17 +319,6 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                                                 ))}
                                             </select>
 
-                                            <div className="review-progress">
-                                                <input
-                                                    type="range"
-                                                    min="0"
-                                                    max="100"
-                                                    value={progress}
-                                                    onChange={(e) => setProgress(e.target.value)}
-                                                />
-                                                <span className="progress-label">{progress}%</span>
-                                            </div>
-
                                             <button
                                                 className="comment-button"
                                                 onClick={handleSaveReview}
@@ -275,7 +334,6 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                                                         setReview(book.review)
                                                         setStatus(book.status)
                                                         setGenre(book.genre || '')
-                                                        setProgress(book.progress)
                                                         setIsEditingReview(false)
                                                     }}
                                                 >

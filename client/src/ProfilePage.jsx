@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import BookItem from './BookItem';
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import Icon from './Icon';
 
 const TABS = [
@@ -59,7 +59,8 @@ function FavoriteCard({ book, onToggleFavorite }) {
 
 function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     const [profile, setProfile] = useState(null);
-    const [activeTab, setActiveTab] = useState('library');
+    const [searchParams, setSearchParams] = useSearchParams();
+    const activeTab = searchParams.get('tab') || 'library';
 
     useEffect(() => {
         fetch('http://localhost:3000/api/profile', {
@@ -169,8 +170,6 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                 .filter((thing) => thing !== '');
 
             const currentBook = books.find((book) => book.status === 'reading');
-            const hasCover =
-                currentBook && currentBook.coverImage && currentBook.coverImage.startsWith('http');
 
             return (
                 <div className="profile-columns">
@@ -224,9 +223,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     </div>
 
                     <div className="card profile-side">
-                        {hasCover && (
-                            <img className="profile-side-cover" src={currentBook.coverImage} alt="" />
-                        )}
+                        <img className="profile-side-cover" src="/bookish-shelf.jpg" alt="" />
                         <h3 className="display profile-side-title">Bookish at heart</h3>
                         <div className="profile-side-line">{profile.booksRead} books read</div>
                         <div className="profile-side-line">{profile.reviewsCount} reviews shared</div>
@@ -294,7 +291,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     <button
                         key={tab.key}
                         className={`profile-tab ${activeTab === tab.key ? 'active' : ''}`}
-                        onClick={() => setActiveTab(tab.key)}
+                        onClick={() => setSearchParams({ tab: tab.key })}
                     >
                         <Icon name={tab.key} />
                         {tab.label}

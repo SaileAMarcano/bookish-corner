@@ -30,6 +30,7 @@ function EditProfile({ onSaved }) {
     const [displayName, setDisplayName] = useState('');
     const [bio, setBio] = useState('');
     const [location, setLocation] = useState('');
+    const [readingGoal, setReadingGoal] = useState('');
     const [aboutMe, setAboutMe] = useState('');
     const [favoriteQuote, setFavoriteQuote] = useState('');
     const [favoriteThings, setFavoriteThings] = useState('');
@@ -44,6 +45,7 @@ function EditProfile({ onSaved }) {
         setDisplayName(data.displayName || '');
         setBio(data.bio || '');
         setLocation(data.location || '');
+        setReadingGoal(data.readingGoal || '');
         setAboutMe(data.aboutMe || '');
         setFavoriteQuote(data.favoriteQuote || '');
         setFavoriteThings(data.favoriteThings || '');
@@ -74,6 +76,7 @@ function EditProfile({ onSaved }) {
         formData.append('displayName', displayName);
         formData.append('bio', bio);
         formData.append('location', location);
+        formData.append('readingGoal', readingGoal);
         formData.append('aboutMe', aboutMe);
         formData.append('favoriteQuote', favoriteQuote);
         formData.append('favoriteThings', favoriteThings);
@@ -194,8 +197,13 @@ function EditProfile({ onSaved }) {
                                 value={location}
                                 onChange={(e) => setLocation(e.target.value)}
                                 maxLength={60}
-                                placeholder="Bogotá, Colombia"
+                                placeholder="Neverland"
                             />
+                        </div>
+
+                        <div className="edit-field">
+                            <label className="edit-label">Reading goal for this year</label>
+                            <input className="edit-input" type="number" min="1" max="365" value={readingGoal} onChange={(e) => setReadingGoal(e.target.value)} placeholder="20" />
                         </div>
                     </Section>
 

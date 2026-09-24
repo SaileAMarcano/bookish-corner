@@ -144,7 +144,13 @@ try {
 }
 
 try {
-  db.exec(`ALTER TABLE user_books ADD COLUMN totalChapters INTEGER`);
+  db.exec(`ALTER TABLE user_books ADD COLUMN currentPage INTEGER`);
+} catch (error) {
+
+}
+
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN totalPages INTEGER`);
 } catch (error) {
 
 }

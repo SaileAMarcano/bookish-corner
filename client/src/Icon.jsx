@@ -41,6 +41,7 @@ const ICONS = {
             <path d="M16 16l4.5 4.5" />
         </>
     ),
+    sparkle: <path d="M12 3l2 6.6L20 12l-6 2.4L12 21l-2-6.6L4 12l6-2.4z" />,
 };
 
 function Icon({ name, size = 17 }) {

@@ -195,7 +195,7 @@ app.delete('/api/user-books/:id/like', requireAuth, (req, res) => {
 
 app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     const { id } = req.params;
-    const { status, progress, review, isFavorite, genre, currentChapter, totalChapters } = req.body;
+    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter } = req.body;
 
     const userBook = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     if (!userBook) {
@@ -205,11 +205,27 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
         return res.status(403).json({ error: 'You cannot edit this entry' });
     }
 
+    const pageFields = [currentPage, totalPages, currentChapter];
+    const invalidNumber = pageFields.some(
+        (value) => value !== undefined && (!Number.isInteger(value) || value < 0)
+    );
+    if (invalidNumber) {
+        return res.status(400).json({ error: 'Pages and chapters must be whole numbers' });
+    }
+
+    const newTotal = totalPages !== undefined ? totalPages : userBook.totalPages;
+    const newPage = currentPage !== undefined ? currentPage : userBook.currentPage;
+    if (newTotal && newPage > newTotal) {
+        return res.status(400).json({ error: 'Current page cannot be higher than the total' });
+    }
+
     const statusChanged = status !== undefined && status !== userBook.status;
     const startedNow = statusChanged && status === 'reading' ? 1 : 0;
     const finishedNow = statusChanged && status === 'finished' ? 1 : 0;
     const readNow =
-        (progress !== undefined && Number(progress) !== userBook.progress) || (currentChapter !== undefined && Number(currentChapter) !== userBook.currentChapter) ? 1 : 0;
+        (progress !== undefined && Number(progress) !== userBook.progress) ||
+            (currentPage !== undefined && Number(currentPage) !== userBook.currentPage) ||
+            (currentChapter !== undefined && Number(currentChapter) !== userBook.currentChapter) ? 1 : 0;
 
     db.prepare(`
         UPDATE user_books
@@ -218,13 +234,14 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
             review = COALESCE(?, review),
             isFavorite = COALESCE(?, isFavorite),
             genre = COALESCE(?, genre),
+            currentPage = COALESCE(?, currentPage),
+            totalPages = COALESCE(?, totalPages),
             currentChapter = COALESCE(?, currentChapter),
-            totalChapters = COALESCE(?, totalChapters),
             startedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE startedAt END,
             finishedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE finishedAt END,
             lastReadAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE lastReadAt END
         WHERE id = ?
-    `).run(status, progress, review, isFavorite, genre, currentChapter, totalChapters, startedNow, finishedNow, readNow, id);
+    `).run(status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, startedNow, finishedNow, readNow, id);
 
     const update = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     res.json(update);
@@ -233,10 +250,11 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
 app.get('/api/user-books', requireAuth, (req, res) => {
     const userBooks = db.prepare(`
         SELECT user_books.id, user_books.status, user_books.review, user_books.isFavorite, user_books.genre,
-               user_books.currentChapter, user_books.totalChapters,
+               user_books.currentPage, user_books.totalPages, user_books.currentChapter,
                user_books.startedAt, user_books.finishedAt, user_books.lastReadAt, user_books.createdAt,
-               CASE WHEN user_books.totalChapters > 0
-                    THEN MIN(100, ROUND(COALESCE(user_books.currentChapter, 0) * 100.0 / user_books.totalChapters))
+               CASE WHEN user_books.status = 'finished' THEN 100
+                    WHEN user_books.totalPages > 0
+                    THEN MIN(100, ROUND(COALESCE(user_books.currentPage, 0) * 100.0 / user_books.totalPages))
                     ELSE user_books.progress
                END AS progress,
                books.id AS bookId, books.title, books.author, books.description, books.coverImage, books.openLibraryKey,

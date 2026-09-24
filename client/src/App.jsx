@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Routes, Route, Navigate, useNavigate, Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom'
 import './App.css'
 import Home from './Home';
 import ProfilePage from './ProfilePage';
@@ -7,6 +7,7 @@ import EditProfile from './EditProfile';
 import AuthForm from './AuthForm';
 import Landing from './Landing';
 import Sidebar from './Sidebar';
+import ReadingPage from './ReadingPage';
 import Icon from './Icon';
 
 function App() {
@@ -47,6 +48,34 @@ function App() {
   useEffect(() => {
     loadCurrentUser();
   }, []);
+
+  const menuRef = useRef(null);
+  const location = useLocation();
+  useEffect(() => {
+    if (!showUserMenu) return;
+
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setShowUserMenu(false);
+      }
+    };
+
+    const handleEscape = (e) => {
+      if (e.key === 'Escape') setShowUserMenu(false);
+    };
+
+    document.addEventListener('pointerdown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('pointerdown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [showUserMenu]);
+
+  useEffect(() => {
+    setShowUserMenu(false);
+  }, [location]);
 
   const handleLike = (userBookId, alreadyLiked) => {
     fetch(`http://localhost:3000/api/user-books/${userBookId}/like`, {
@@ -124,7 +153,7 @@ function App() {
             <button type="submit" className="pill topbar-search-button">Search</button>
           </form>
 
-          <div className="header-user-wrap">
+          <div className="header-user-wrap" ref={menuRef}>
             <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
               <span className="header-user-name">hi, {currentUser.displayName}</span>
               <span className="header-avatar">
@@ -160,9 +189,8 @@ function App() {
             element={
               <Home
                 books={books}
-                onLike={handleLike}
+                currentUser={currentUser}
                 onUpdate={loadUserBooks}
-                onToggleFavorite={handleToggleFavorite}
               />
             }
           />
@@ -181,6 +209,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
+          <Route path="/reading" element={<ReadingPage books={books} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
