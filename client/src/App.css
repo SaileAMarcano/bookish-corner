@@ -1818,7 +1818,7 @@ html {
 
 .app-shell {
   display: grid;
-  grid-template-columns: 232px 1fr;
+  grid-template-columns: 248px 1fr;
   min-height: 100vh;
 }
 
@@ -1881,11 +1881,6 @@ html {
   font-weight: 600;
 }
 
-.siderbar-link.active {
-  background: rgba(196, 150, 161, 0.2);
-  color: var(--rose-deep);
-  font-weight: 600;
-}
 
 .sidebar-illustration {
   display: block;
@@ -1950,7 +1945,7 @@ html {
   cursor: pointer;
 }
 
-.topbar .hearder-user-wrap {
+.topbar .header-user-wrap {
   margin-left: auto;
 }
 
@@ -2008,4 +2003,8 @@ html {
   .page {
     padding: 20px 16px;
   }
+}
+
+.app-main .page {
+  margin: 0;
 }
