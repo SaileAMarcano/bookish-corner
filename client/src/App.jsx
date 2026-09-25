@@ -4,7 +4,7 @@ import './App.css'
 import Home from './Home';
 import ProfilePage from './ProfilePage';
 import EditProfile from './EditProfile';
-import AuthForm from './AuthForm';
+import AuthPage from './AuthPage';
 import Landing from './Landing';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
@@ -115,6 +115,11 @@ function App() {
     });
   };
 
+  const handleLogin = (user) => {
+    setCurrentUser(user);
+    navigate('/');
+  };
+
   const handleSearch = (e) => {
     e.preventDefault();
     const term = searchTerm.trim();
@@ -126,10 +131,8 @@ function App() {
     return (
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/login" element={<AuthForm onLogin={(user) => {
-          setCurrentUser(user);
-          navigate('/');
-        }} />} />
+        <Route path="/login" element={<AuthPage key="login" mode="login" onLogin={handleLogin} />} />
+        <Route path="/signup" element={<AuthPage key="signup" mode="signup" onLogin={handleLogin} />} />
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );

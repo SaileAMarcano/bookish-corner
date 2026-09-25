@@ -2809,3 +2809,240 @@ html {
     padding: 4px 0 0;
   }
 }
+
+.access-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 16px;
+  background-size: cover;
+  background-position: center;
+  min-height: 100dvh;
+}
+
+.access-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 36px;
+  border-radius: 28px;
+  background: rgba(255, 250, 246, 0.92);
+  box-shadow: 0 20px 50px rgba(120, 70, 80, 0.18);
+}
+
+.access-brand {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 22px;
+}
+
+.access-logo {
+  width: 230px;
+  height: auto;
+}
+
+.access-title {
+  margin: 0;
+  text-align: center;
+  font-size: 30px;
+}
+
+.access-subtitle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin: 6px 0 24px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.access-subtitle svg {
+  color: var(--rose);
+}
+
+.access-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.access-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.access-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.access-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid var(--surface-2);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--text-2);
+}
+
+.access-input-wrap:focus-within {
+  border-color: var(--rose);
+}
+
+.access-input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px 0;
+  border: none;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 15px;
+}
+
+.access-input:focus {
+  outline: none;
+}
+
+.access-eye {
+  display: flex;
+  padding: 4px;
+  border: none;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.access-eye:hover {
+  color: var(--rose-deep);
+}
+
+.access-switch {
+  margin: 22px 0 0;
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.access-switch a {
+  color: var(--rose-deep);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.access-switch a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .access-page {
+    padding: 20px 14px;
+  }
+
+  .access-card {
+    padding: 28px 22px;
+    border-radius: 22px;
+  }
+
+  .access-brand {
+    margin-bottom: 16px;
+  }
+
+  .access-title {
+    font-size: 26px;
+  }
+
+  .access-subtitle {
+    margin-bottom: 20px;
+  }
+
+  .access-logo {
+    width: 190px;
+  }
+}
+
+.access-error {
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: var(--error-soft);
+  color: var(--error);
+  font-size: 13px;
+}
+
+.access-submit {
+  margin-top: 4px;
+  padding: 13px;
+  border: none;
+  border-radius: 999px;
+  background: var(--rose);
+  color: #fff;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.access-submit:hover:not(:disabled) {
+  background: var(--rose-deep);
+}
+
+.access-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.access-rules {
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--surface);
+  font-size: 13px;
+}
+
+.access-rules-title {
+  margin: 0 0 8px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.access-rules-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.access-rule {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+}
+
+.access-rule.passed {
+  color: var(--ink);
+}
+
+.access-rule-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid var(--surface-2);
+  border-radius: 5px;
+  background: #fff;
+}
+
+.access-rule.passed .access-rule-box {
+  border-color: var(--rose);
+  background: var(--rose);
+  color: #fff;
+}

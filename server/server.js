@@ -301,11 +301,30 @@ app.get('/api/user-books/:id/comments', (req, res) => {
     res.json(comments);
 });
 
+const passwordProblem = (password) => {
+    if (typeof password !== 'string' || password.length < 8) {
+        return 'Password must be at least 8 characters';
+    }
+
+    if (!/\d/.test(password)) {
+        return 'Password must include a number';
+    }
+    if (!/[a-z]/i.test(password)) {
+        return 'Password must include a letter';
+    }
+    return null;
+}
+
 app.post('/api/register', (req, res) => {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
         return res.status(400).json({ error: 'Username, email and password are required' });
+    }
+
+    const problem = passwordProblem(password);
+    if (problem) {
+        return res.status(400).json({ error: problem });
     }
 
     const passwordHash = bcrypt.hashSync(password, 10);
@@ -344,7 +363,7 @@ app.post('/api/login', (req, res) => {
     const passwordMatches = bcrypt.compareSync(password, user.passwordHash);
 
     if (!passwordMatches) {
-        return res.status(401).json({ error: 'Invalid email or password ' });
+        return res.status(401).json({ error: 'Invalid email or password' });
     }
 
     req.session.user = {
