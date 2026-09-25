@@ -26,7 +26,7 @@ function Landing() {
                     </p>
 
                     <div className="landing-actions">
-                        <Link to="/login" className="pill landing-cta">Start reading</Link>
+                        <Link to="/signup" className="pill landing-cta">Start reading</Link>
                         <a href="#features" className="pill ghost-button">Learn more</a>
                     </div>
                 </section>
