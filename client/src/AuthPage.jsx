@@ -66,6 +66,9 @@ function AuthPage({ mode, onLogin }) {
 
     return (
         <div className="access-page" style={{ backgroundImage: `url(${text.background})` }}>
+            <Link to="/" className="access-back">
+                <Icon name="home" size={20} />
+            </Link>
             <div className="access-card">
                 <Link to="/" className="access-brand">
                     <img src="/logo.png" alt="Bookish Corner" className="access-logo" />

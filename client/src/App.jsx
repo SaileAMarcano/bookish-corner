@@ -7,6 +7,7 @@ import EditProfile from './EditProfile';
 import AuthPage from './AuthPage';
 import Landing from './Landing';
 import AboutPage from './AboutPage';
+import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
 import Icon from './Icon';
@@ -133,6 +134,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/features" element={<FeaturesPages />} />
         <Route path="/login" element={<AuthPage key="login" mode="login" onLogin={handleLogin} />} />
         <Route path="/signup" element={<AuthPage key="signup" mode="signup" onLogin={handleLogin} />} />
         <Route path="*" element={<Navigate to="/" />} />

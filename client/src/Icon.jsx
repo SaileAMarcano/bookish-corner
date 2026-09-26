@@ -73,6 +73,8 @@ const ICONS = {
     check: <path d="M5 12.5l4.5 4.5L19 7.5" />,
 
     arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
+
+    arrowLeft: <path d="M19 12H5M11 6l-6 6 6 6" />,
 };
 
 function Icon({ name, size = 17 }) {
