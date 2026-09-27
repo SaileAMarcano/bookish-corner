@@ -174,13 +174,19 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
     }
 });
 
-app.post('/api/user-books/:id/Like', requireAuth, (req, res) => {
+app.post('/api/user-books/:id/like', requireAuth, (req, res) => {
     const { id } = req.params;
+
+    const userBook = db.prepare('SELECT userId FROM user_books WHERE id = ?').get(id);
+    if (!userBook) {
+        return res.status(404).json({ error: 'Review not found' });
+    }
+    if (userBook.userId === req.session.user.id) {
+        return res.status(403).json({ error: "You can't like your own review" });
+    }
+
     try {
-        const insert = db.prepare(
-            'INSERT INTO likes (userId, userBookId) VALUES (?, ?)'
-        );
-        insert.run(req.session.user.id, id);
+        db.prepare('INSERT INTO likes (userId, userBookId) VALUES (?, ?)').run(req.session.user.id, id);
         res.status(201).json({ message: 'Liked' });
     } catch (error) {
         res.status(400).json({ error: 'You already liked this' });
@@ -247,6 +253,27 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     res.json(update);
 });
 
+app.delete('/api/user-books/:id', requireAuth, (req, res) => {
+    const { id } = req.params;
+
+    const userBook = db.prepare('SELECT userId FROM user_books WHERE id = ?').get(id);
+    if (!userBook) {
+        return res.status(404).json({ error: 'Not found' });
+    }
+    if (userBook.userId !== req.session.user.id) {
+        return res.status(403).json({ error: 'You cannot remove this entry' });
+    }
+
+    const removeBook = db.transaction(() => {
+        db.prepare('DELETE FROM likes WHERE userBookId = ?').run(id);
+        db.prepare('DELETE FROM comments WHERE userBookId = ?').run(id);
+        db.prepare('DELETE FROM user_books WHERE id = ?').run(id);
+    });
+    removeBook();
+
+    res.json({ message: 'Removed from library' });
+});
+
 app.get('/api/user-books', requireAuth, (req, res) => {
     const userBooks = db.prepare(`
         SELECT user_books.id, user_books.status, user_books.review, user_books.isFavorite, user_books.genre,
@@ -259,6 +286,7 @@ app.get('/api/user-books', requireAuth, (req, res) => {
                END AS progress,
                books.id AS bookId, books.title, books.author, books.description, books.coverImage, books.openLibraryKey,
                (SELECT COUNT (*) FROM likes WHERE likes.userBookId = user_books.id) AS likeCount,
+               (SELECT COUNT (*) FROM comments WHERE comments.userBookId = user_books.id) AS commentCount,
                (SELECT COUNT(*) FROM likes WHERE likes.userBookId = user_books.id AND likes.userId = ?) AS hasLiked
         FROM user_books
         JOIN books ON user_books.bookId = books.id

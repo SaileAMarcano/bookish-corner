@@ -11,26 +11,47 @@ import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
 import Icon from './Icon';
+import { apiFetch } from './api';
+import BookModal from './BookModal';
+import Notice from './Notice';
 
 function App() {
   const [books, setBooks] = useState([])
+  const [booksStatus, setBooksStatus] = useState('loading');
+  const [booksError, setBooksError] = useState('');
+  const [toast, setToast] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const loadUserBooks = () => {
-    fetch('http://localhost:3000/api/user-books', {
-      credentials: 'include',
-    })
-      .then((res) => res.json())
-      .then((data) => setBooks(data));
+    apiFetch('/api/user-books')
+      .then((data) => {
+        setBooks(data);
+        setBooksStatus('ready');
+      })
+      .catch((error) => {
+        setBooksError(error.message);
+        setBooksStatus('error');
+      });
   };
+
+  const retryBooks = () => {
+    setBooksStatus('loading');
+    loadUserBooks();
+  }
 
   useEffect(() => {
     if (!currentUser) return;
     loadUserBooks();
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(''), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const loadCurrentUser = () => {
     fetch('http://localhost:3000/api/me', {
@@ -80,41 +101,30 @@ function App() {
   }, [location]);
 
   const handleLike = (userBookId, alreadyLiked) => {
-    fetch(`http://localhost:3000/api/user-books/${userBookId}/like`, {
+    apiFetch(`/api/user-books/${userBookId}/like`, {
       method: alreadyLiked ? 'DELETE' : 'POST',
-      credentials: 'include',
-    }).then(() => {
-      loadUserBooks();
-    });
+    })
+
+      .then(() => loadUserBooks())
+      .catch((error) => setToast(error.message));
   };
 
   const handleToggleFavorite = (userBookId, isFavorite) => {
-    fetch(`http://localhost:3000/api/user-books/${userBookId}`, {
+    apiFetch(`/api/user-books/${userBookId}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ isFavorite: isFavorite ? 0 : 1 }),
+      body: { isFavorite: isFavorite ? 0 : 1 },
     })
-      .then((res) => {
-        if (!res.ok) throw new Error('Could not update favorite');
-        return res.json();
-      })
-      .then(() => {
-        loadUserBooks();
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+      .then(() => loadUserBooks())
+      .catch((error) => setToast(error.message));
   };
 
   const handleLogout = () => {
-    fetch('http://localhost:3000/api/logout', {
-      method: 'POST',
-      credentials: 'include',
-    }).then(() => {
-      setCurrentUser(null);
-      navigate('/');
-    });
+    apiFetch('/api/Logout', { method: 'POST' })
+      .then(() => {
+        setCurrentUser(null);
+        navigate('/');
+      })
+      .catch((error) => setToast(error.message));
   };
 
   const handleLogin = (user) => {
@@ -190,6 +200,10 @@ function App() {
           </div>
         </header>
 
+        {booksStatus === 'error' && (
+          <Notice message={booksError} onRetry={retryBooks} />
+        )}
+
         <Routes>
           <Route
             path="/"
@@ -198,6 +212,7 @@ function App() {
                 books={books}
                 currentUser={currentUser}
                 onUpdate={loadUserBooks}
+                onError={setToast}
               />
             }
           />
@@ -216,10 +231,15 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
-          <Route path="/reading" element={<ReadingPage books={books} />} />
+          <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>
+      {toast && (
+        <div className="toast" role="status">
+          {toast}
+        </div>
+      )}
     </div>
   )
 }

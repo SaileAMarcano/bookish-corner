@@ -86,7 +86,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         return (
             <div className="grid">
                 {list.map((book) => (
-                    <BookItem key={book.id} book={book} onLike={onLike} onUpdate={onUpdate} />
+                    <BookItem key={book.id} book={book} onLike={onLike} onUpdate={onUpdate} onToggleFavorite={onToggleFavorite} />
                 ))}
             </div>
         );

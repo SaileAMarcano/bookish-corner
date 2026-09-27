@@ -1,8 +1,10 @@
+import { useState } from 'react';
+import BookModal from './BookModal';
 import Icon from './Icon';
 import BookCover from './BookCover';
 import { timeAgo, formatDate, sortByLastRead, pageSummary } from './utils';
 
-function FeaturedBook({ book }) {
+function FeaturedBook({ book, onOpen }) {
     const progress = book.progress || 0;
 
     return (
@@ -46,12 +48,15 @@ function FeaturedBook({ book }) {
                         </li>
                     )}
                 </ul>
+                <button type="button" className="pill reading-add reading-updates" onClick={onOpen}>
+                    Update progress
+                </button>
             </div>
         </section>
     );
 }
 
-function ProgressCard({ book }) {
+function ProgressCard({ book, onOpen }) {
     const progress = book.progress || 0;
 
     return (
@@ -66,13 +71,18 @@ function ProgressCard({ book }) {
                 </div>
                 <div className="progress-label">{progress}%</div>
             </div>
+            <button type="button" className="read-more reading-card-open" onClick={onOpen}>
+                Update progress
+            </button>
         </div>
     );
 }
 
-function ReadingPage({ books }) {
+function ReadingPage({ books, onUpdate }) {
     const readingBooks = sortByLastRead(books.filter((book) => book.status === 'reading'));
     const [featured, ...others] = readingBooks;
+    const [selectedId, setSelectId] = useState(null);
+    const selectedBook = books.find((book) => book.id === selectedId);
 
     const focusSearch = () => {
         document.querySelector('.topbar-search input')?.focus();
@@ -94,19 +104,26 @@ function ReadingPage({ books }) {
                 </div>
             ) : (
                 <>
-                    <FeaturedBook key={featured.id} book={featured} />
+                    <FeaturedBook key={featured.id} book={featured} onOpen={() => setSelectId(featured.id)} />
 
                     {others.length > 0 && (
                         <section className="home-section">
                             <h2 className="display home-section-title">Other books in progress</h2>
                             <div className="recent-row">
                                 {others.map((book) => (
-                                    <ProgressCard key={book.id} book={book} />
+                                    <ProgressCard key={book.id} book={book} onOpen={() => setSelectId(book.id)} />
                                 ))}
                             </div>
                         </section>
                     )}
                 </>
+            )}
+            {selectedBook && (
+                <BookModal
+                    book={selectedBook}
+                    onClose={() => setSelectId(null)}
+                    onUpdate={onUpdate}
+                />
             )}
         </main>
     );

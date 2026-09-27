@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Icon from './Icon';
 import { timeAgo, quoteOfTheDay, sortByLastRead, pageSummary } from './utils';
+import { apiFetch } from './api';
+import BookModal from './BookModal';
 
 const QUICK_LINKS = [
     { to: './profile?tab=library', label: 'My Library', icon: 'library' },
@@ -10,7 +12,7 @@ const QUICK_LINKS = [
     { to: '/profile?tab=following', label: 'Following', icon: 'following' },
 ]
 
-function ContinueReading({ book }) {
+function ContinueReading({ book, onOpen }) {
     const [coverFailed, setCoverFailed] = useState(false);
     const hasCover = book.coverImage && book.coverImage.startsWith('http') && !coverFailed;
 
@@ -43,7 +45,9 @@ function ContinueReading({ book }) {
                     <div className="continue-last">Last read {timeAgo(book.lastReadAt)}</div>
                 )}
             </div>
-            <Link to="/reading" className="pill continue-button">Continue reading</Link>
+            <button type="button" className="pill continue-button" onClick={onOpen}>
+                Update progress
+            </button>
         </div>
     );
 }
@@ -72,7 +76,7 @@ function RecentCard({ book, onAdd }) {
     );
 }
 
-function Home({ books, currentUser, onUpdate }) {
+function Home({ books, currentUser, onUpdate, onError }) {
     const [searchParams, setSearchParams] = useSearchParams();
     const q = searchParams.get('q') || '';
 
@@ -150,23 +154,16 @@ function Home({ books, currentUser, onUpdate }) {
     };
 
     const handleAddToLibrary = (bookId) => {
-        fetch('http://localhost:3000/api/user-books', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ bookId }),
-        })
-
-            .then((res) => {
-                if (!res.ok) throw new Error('Could not add book');
-                onUpdate();
-            })
-            .catch((error) => console.error(error));
+        apiFetch('/api/user-books', { method: 'POST', body: { bookId } })
+            .then(() => onUpdate())
+            .catch((error) => onError(error.message));
     };
 
     const alreadyAddedKeys = books.map((b) => b.openLibraryKey);
     const readingBooks = books.filter((book) => book.status === 'reading');
     const continueBook = sortByLastRead(readingBooks)[0];
+    const [selectedId, setSelectedId] = useState(null);
+    const selectedBook = books.find((book) => book.id === selectedId);
     const thisYear = String(new Date().getFullYear());
     const booksThisYear = books.filter(
         (book) => book.status === 'finished' && book.finishedAt?.startsWith(thisYear)).length;
@@ -230,7 +227,7 @@ function Home({ books, currentUser, onUpdate }) {
                     </div>
 
                     {continueBook ? (
-                        <ContinueReading key={continueBook.id} book={continueBook} />
+                        <ContinueReading key={continueBook.id} book={continueBook} onOpen={() => setSelectedId(continueBook.id)} />
                     ) : (
                         <div className="card home-empty">
                             Nothing on your nightstand yet. Search for a book to get started.
@@ -309,6 +306,10 @@ function Home({ books, currentUser, onUpdate }) {
                     <Icon name="favorites" size={16} />
                 </div>
             </aside>
+            {selectedBook && (<BookModal book={selectedBook} onClose={() => setSelectedId(null)}
+                onUpdate={onUpdate}
+            />
+            )}
         </main>
     );
 }
