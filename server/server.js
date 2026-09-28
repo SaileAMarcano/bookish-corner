@@ -201,7 +201,7 @@ app.delete('/api/user-books/:id/like', requireAuth, (req, res) => {
 
 app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     const { id } = req.params;
-    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter } = req.body;
+    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating } = req.body;
 
     const userBook = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     if (!userBook) {
@@ -217,6 +217,11 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     );
     if (invalidNumber) {
         return res.status(400).json({ error: 'Pages and chapters must be whole numbers' });
+    }
+
+    const badRating = typeof rating !== 'number' || !Number.isInteger(rating * 2) || rating < 0 || rating > 5;
+    if (rating !== undefined && badRating) {
+        return res.status(400).json({ error: 'Rating must be a whole number from 0 to 5, in half steps' });
     }
 
     const newTotal = totalPages !== undefined ? totalPages : userBook.totalPages;
@@ -243,11 +248,12 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
             currentPage = COALESCE(?, currentPage),
             totalPages = COALESCE(?, totalPages),
             currentChapter = COALESCE(?, currentChapter),
+            rating = COALESCE(?, rating),
             startedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE startedAt END,
             finishedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE finishedAt END,
             lastReadAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE lastReadAt END
         WHERE id = ?
-    `).run(status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, startedNow, finishedNow, readNow, id);
+    `).run(status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, startedNow, finishedNow, readNow, id);
 
     const update = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     res.json(update);
@@ -276,7 +282,7 @@ app.delete('/api/user-books/:id', requireAuth, (req, res) => {
 
 app.get('/api/user-books', requireAuth, (req, res) => {
     const userBooks = db.prepare(`
-        SELECT user_books.id, user_books.status, user_books.review, user_books.isFavorite, user_books.genre,
+        SELECT user_books.id, user_books.status, user_books.review, user_books.isFavorite, user_books.genre, user_books.rating,
                user_books.currentPage, user_books.totalPages, user_books.currentChapter,
                user_books.startedAt, user_books.finishedAt, user_books.lastReadAt, user_books.createdAt,
                CASE WHEN user_books.status = 'finished' THEN 100
@@ -309,7 +315,7 @@ app.post('/api/user-books/:id/comments', requireAuth, (req, res) => {
     const result = insert.run(req.session.user.id, id, text);
 
     const newComment = db.prepare(`
-        SELECT comments.id, comments.text, comments.createdAt, users.username
+        SELECT comments.id, comments.text, comments.createdAt, users.username, users.avatarUrl
         FROM comments
         JOIN users ON comments.userId = users.id
         WHERE comments.id = ?
@@ -320,7 +326,7 @@ app.post('/api/user-books/:id/comments', requireAuth, (req, res) => {
 app.get('/api/user-books/:id/comments', (req, res) => {
     const { id } = req.params;
     const comments = db.prepare(`
-        SELECT comments.id, comments.text, comments.createdAt, users.username
+        SELECT comments.id, comments.text, comments.createdAt, users.username, users.avatarUrl
         FROM comments
         JOIN users ON comments.userId = users.id
         WHERE comments.userBookId = ?

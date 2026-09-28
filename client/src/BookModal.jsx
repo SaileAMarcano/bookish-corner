@@ -1,14 +1,23 @@
 import { useState, useEffect } from 'react';
 import BookCover from './BookCover';
-import { pagePercent } from './utils';
-import { apiFetch } from './api';
+import { pagePercent, pageSummary } from './utils';
+import { apiFetch, API_URL } from './api';
 import Notice from './Notice';
+import Icon from './Icon';
+import StarRating from './StarRating';
 
 export const statusLabels = {
     'want-to-read': 'Want to read',
     'reading': 'Reading',
     'finished': 'Finished'
 }
+
+const STATUS_ICONS = {
+    'want-to-read': 'reading',
+    'reading': 'library',
+    'finished': 'check',
+}
+
 const GENRES = [
     'Fantasy',
     'Romance',
@@ -26,6 +35,7 @@ const GENRES = [
 ];
 
 const toNumber = (value) => (value === '' ? undefined : Number(value));
+const avatarSrc = (url) => (url ? `${API_URL}${url}` : '/default-avatar.png');
 
 function BookModal({ book, onClose, onUpdate }) {
     const [comments, setComments] = useState([])
@@ -42,6 +52,8 @@ function BookModal({ book, onClose, onUpdate }) {
     const [confirmingRemove, setConfirmingRemove] = useState(false)
     const [isRemoving, setIsRemoving] = useState(false)
     const [removeError, setRemoveError] = useState('')
+    const [rating, setRating] = useState(book.rating || 0)
+    const [ratingError, setRatingError] = useState('')
 
     useEffect(() => {
         fetch(`http://localhost:3000/api/user-books/${book.id}/comments`)
@@ -117,6 +129,18 @@ function BookModal({ book, onClose, onUpdate }) {
             .catch((error) => console.error(error))
             .finally(() => setIsSavingProgress(false))
     }
+    const handleRate = (newRating) => {
+        const previous = rating
+        setRating(newRating)
+        setRatingError('')
+
+        apiFetch(`/api/user-books/${book.id}`, { method: 'PATCH', body: { rating: newRating } })
+            .then(() => onUpdate())
+            .catch((error) => {
+                setRating(previous)
+                setRatingError(error.message)
+            })
+    }
 
     const handleRemove = () => {
         setIsRemoving(true)
@@ -143,12 +167,18 @@ function BookModal({ book, onClose, onUpdate }) {
     const pagesPercent = pagePercent(Number(currentPage), Number(totalPages))
     const livePercent = book.status === 'finished' ? 100 : (pagesPercent ?? book.progress ?? 0)
 
+    const progressFields = [
+        { label: 'Current page', icon: 'library', value: currentPage, onChange: setCurrentPage, min: 0 },
+        { label: 'Total pages', icon: 'posts', value: totalPages, onChange: setTotalPages, min: 1 },
+        { label: 'Chapter', icon: 'reading', value: currentChapter, onChange: setCurrentChapter, min: 0, placeholder: 'Optional' },
+    ]
+
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-body">
                     <button
-                        className="drawer-close"
+                        className="modal-close"
                         onClick={onClose}
                         aria-label="Close"
                     >
@@ -167,51 +197,75 @@ function BookModal({ book, onClose, onUpdate }) {
                         <div className="modal-heading">
                             <h2 className="display modal-title">{book.title}</h2>
                             <div className="modal-author">{book.author}</div>
+
+                            <span className={`pill modal-status status-${book.status}`}>
+                                <Icon name={STATUS_ICONS[book.status]} size={15} />
+                                {statusLabels[book.status] || book.status}
+                            </span>
+                            <StarRating value={rating} onChange={handleRate} />
                         </div>
                     </div>
 
+                    {ratingError && <Notice message={ratingError} />}
+
                     <p className="modal-description">{book.description}</p>
-                    <div className="progress-block">
-                        <div className="section-label">Reading progress</div>
+                    <section className="modal-section">
+                        <h3 className="section-label">Reading progress</h3>
 
-                        <div className="progress-fields">
-                            <label className="progress-field">Current page
-                                <input className="progress-input" type="number" min="0" value={currentPage} onChange={(e) => setCurrentPage(e.target.value)} />
-                            </label>
-
-                            <label className="progress-field">Total pages
-                                <input className="progress-input" type="number" min="1" value={totalPages} onChange={(e) => setTotalPages(e.target.value)} />
-                            </label>
-
-                            <label className="progress-field">Chapter (optional)
-                                <input className="progress-input" type="number" min="0" value={currentChapter} onChange={(e) => setCurrentChapter(e.target.value)} />
-                            </label>
+                        <div className="progress-summary">
+                            <p className="progress-big">
+                                <span className="display progress-percent">{livePercent}%</span>
+                                complete
+                            </p>
+                            <span className="progress-pages">{pageSummary({ currentPage, totalPages })}</span>
                         </div>
 
-                        <div className="progress">
-                            <div className="progress-track">
-                                <div className="progress-fill" style={{ width: `${livePercent}%` }}></div>
-                            </div>
-                            <div className="progress-label">{livePercent}%</div>
+                        <div className="progress-track progress-track-big">
+                            <div className="progress-fill" style={{ width: `${livePercent}%` }}></div>
+                        </div>
+
+                        <div className="progress-fields">
+                            {progressFields.map((field) => (
+                                <label key={field.label} className="progress-field">
+                                    <Icon name={field.icon} size={22} />
+                                    <span className="progress-field-text">
+                                        {field.label}
+                                        <input
+                                            className="progress-input"
+                                            type="number"
+                                            min={field.min}
+                                            placeholder={field.placeholder}
+                                            value={field.value}
+                                            onChange={(e) => field.onChange(e.target.value)}
+                                        />
+                                    </span>
+                                </label>
+                            ))}
                         </div>
 
                         {pageError && <div className="progress-error">{pageError}</div>}
 
-                        <button className="comment-button" onClick={handleSaveProgress} disabled={isSavingProgress || pageError !== ''}>
-
+                        <button
+                            type="button"
+                            className="pill modal-primary"
+                            onClick={handleSaveProgress}
+                            disabled={isSavingProgress || pageError !== ''}
+                        >
                             {isSavingProgress ? 'Saving...' : 'Save progress'}
                         </button>
-                    </div>
+                    </section>
 
-                    <div className="review-block">
+                    <section className="modal-section">
                         <div className="review-head">
-                            <div className="section-label">Your review</div>
+                            <h3 className="section-label">Your review</h3>
 
                             {book.review && !isEditingReview && (
                                 <button
-                                    className="read-more"
+                                    type="button"
+                                    className="review-edit"
                                     onClick={() => setIsEditingReview(true)}
                                 >
+                                    <Icon name="pencil" size={15} />
                                     Edit
                                 </button>
                             )}
@@ -219,7 +273,7 @@ function BookModal({ book, onClose, onUpdate }) {
 
                         {book.review && !isEditingReview ? (
                             <>
-                                <p className="modal-review">{book.review}</p>
+                                <blockquote className="modal-review">{book.review}</blockquote>
 
                                 <div className="book-meta">
                                     <span className={`pill book-status status-${book.status}`}>
@@ -233,7 +287,7 @@ function BookModal({ book, onClose, onUpdate }) {
                         ) : (
                             <>
                                 <textarea
-                                    className="profile-textarea"
+                                    className="profile-textarea review-textarea"
                                     value={review}
                                     onChange={(e) => setReview(e.target.value)}
                                     placeholder="What did you think of this book?"
@@ -262,7 +316,8 @@ function BookModal({ book, onClose, onUpdate }) {
                                     </select>
 
                                     <button
-                                        className="comment-button"
+                                        type="button"
+                                        className="pill review-save"
                                         onClick={handleSaveReview}
                                         disabled={isSaving}
                                     >
@@ -271,6 +326,7 @@ function BookModal({ book, onClose, onUpdate }) {
 
                                     {book.review && (
                                         <button
+                                            type="button"
                                             className="ghost-button"
                                             onClick={() => {
                                                 setReview(book.review)
@@ -285,35 +341,53 @@ function BookModal({ book, onClose, onUpdate }) {
                                 </div>
                             </>
                         )}
-                    </div>
+                    </section>
 
-                    <div className="comment-form">
-                        <input
-                            className="comment-input"
-                            type="text"
-                            value={commentText}
-                            onChange={(e) => setCommentText(e.target.value)}
-                            placeholder="Write a comment..."
-                        />
-                        <button className="comment-button" onClick={handleAddComment}>Comment</button>
-                    </div>
+                    <section className="modal-section">
+                        <h3 className="section-label">Comments · {comments.length}</h3>
 
-                    <ul className="comment-list">
-                        {comments.map((comment) => (
-                            <li key={comment.id} className="comment-item">
-                                <div className="comment-head">
-                                    <span className="comment-author">{comment.username}</span>
-                                    <span className="comment-date">
-                                        {new Date(comment.createdAt + 'Z').toLocaleDateString('en-US', {
-                                            month: 'short',
-                                            day: 'numeric',
-                                        })}
-                                    </span>
-                                </div>
-                                {comment.text}
-                            </li>
-                        ))}
-                    </ul>
+                        {comments.length === 0 ? (
+                            <p className="comment-empty">No comments yet. Be the first to say something!</p>
+                        ) : (
+                            <ul className="comment-list">
+                                {comments.map((comment) => (
+                                    <li key={comment.id} className="comment-item">
+                                        <img className="comment-avatar" src={avatarSrc(comment.avatarUrl)} alt="" />
+                                        <div className="comment-body">
+                                            <div className="comment-head">
+                                                <span className="comment-author">{comment.username}</span>
+                                                <span className="comment-date">
+                                                    · {new Date(comment.createdAt + 'Z').toLocaleDateString('en-US', {
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                    })}
+                                                </span>
+                                            </div>
+                                            <p className="comment-text">{comment.text}</p>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+
+                        <form
+                            className="comment-form"
+                            onSubmit={(e) => {
+                                e.preventDefault()
+                                handleAddComment()
+                            }}
+                        >
+                            <input
+                                className="comment-input"
+                                type="text"
+                                value={commentText}
+                                onChange={(e) => setCommentText(e.target.value)}
+                                placeholder="Write a comment..."
+                                aria-label="Write a comment"
+                            />
+                            <button type="submit" className="pill comment-send">Comment</button>
+                        </form>
+                    </section>
                     <div className="modal-remove">
                         {removeError && <Notice message={removeError} />}
 
@@ -346,7 +420,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                 type="button"
                                 className="modal-remove-button"
                                 onClick={() => setConfirmingRemove(true)}
-                            >
+                            > <Icon name="trash" size={17} />
                                 Remove from library
                             </button>
                         )}

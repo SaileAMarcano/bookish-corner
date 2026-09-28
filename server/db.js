@@ -173,6 +173,12 @@ try {
 
 }
 
+try {
+  db.exec(`ALTER TABLE user_books ADD COLUMN rating INTEGER DEFAULT 0`);
+} catch (error) {
+
+}
+
 
 const row = db.prepare('SELECT COUNT(*) AS count FROM books').get();
 
