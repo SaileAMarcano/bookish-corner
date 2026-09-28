@@ -112,6 +112,12 @@ try {
 
 }
 
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN readerType TEXT`);
+} catch (error) {
+
+}
+
 db.exec(`
     CREATE TABLE IF NOT EXISTS user_books(
     id INTEGER PRIMARY KEY AUTOINCREMENT,

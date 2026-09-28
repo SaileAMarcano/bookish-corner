@@ -21,7 +21,11 @@ export function apiFetch(path, { body, ...options } = {}) {
             res.json()
                 .catch(() => null)
                 .then((data) => {
-                    if (!res.ok) throw new Error(data?.error || GENERIC_ERROR);
+                    if (!res.ok) {
+                        const error = new Error(data?.error || GENERIC_ERROR);
+                        error.status = res.status;
+                        throw error;
+                    }
                     return data;
                 })
         );

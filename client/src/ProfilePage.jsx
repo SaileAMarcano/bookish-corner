@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import BookItem from './BookItem';
 import { Link, useSearchParams } from 'react-router-dom'
 import Icon from './Icon';
+import { apiFetch, API_URL } from './api';
+import Notice from './Notice';
+import BookCover from './BookCover';
 
 const TABS = [
     { key: 'library', label: 'My Library' },
@@ -20,22 +23,12 @@ const THING_ICONS = [
 ];
 
 function FavoriteCard({ book, onToggleFavorite }) {
-    const [coverFailed, setCoverFailed] = useState(false);
-    const hasCover =
-        book.coverImage && book.coverImage.startsWith('http') && !coverFailed;
+
 
     return (
         <div className="fav-card">
-            {hasCover ? (
-                <img
-                    className="fav-cover"
-                    src={book.coverImage}
-                    alt=""
-                    onError={() => setCoverFailed(true)}
-                />
-            ) : (
-                <div className="fav-cover fav-cover-empty"></div>
-            )}
+
+            <BookCover src={book.coverImage} className="fav-cover" />
 
             {book.genre && <span className="pill fav-genre">{book.genre}</span>}
 
@@ -59,16 +52,28 @@ function FavoriteCard({ book, onToggleFavorite }) {
 
 function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     const [profile, setProfile] = useState(null);
+    const [profileError, setProfileError] = useState('');
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'library';
 
+    const loadProfile = () => {
+        setProfileError('');
+        apiFetch('/api/profile')
+            .then((data) => setProfile(data))
+            .catch((error) => setProfileError(error.message));
+    };
+
     useEffect(() => {
-        fetch('http://localhost:3000/api/profile', {
-            credentials: 'include',
-        })
-            .then((res) => res.json())
-            .then((data) => setProfile(data));
+        loadProfile();
     }, []);
+
+    if (profileError) {
+        return (
+            <main className="page">
+                <Notice message={profileError} onRetry={loadProfile} />
+            </main>
+        );
+    }
 
     if (!profile) {
         return (
@@ -239,7 +244,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     }
 
     const avatarSrc = profile.avatarUrl
-        ? `http://localhost:3000${profile.avatarUrl}`
+        ? `${API_URL}${profile.avatarUrl}`
         : '/default-avatar.png';
 
     return (

@@ -11,9 +11,10 @@ import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
 import Icon from './Icon';
-import { apiFetch } from './api';
+import { apiFetch, API_URL } from './api';
 import BookModal from './BookModal';
 import Notice from './Notice';
+import Welcome from './Welcome';
 
 function App() {
   const [books, setBooks] = useState([])
@@ -21,6 +22,8 @@ function App() {
   const [booksError, setBooksError] = useState('');
   const [toast, setToast] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
+  const [userStatus, setUserStatus] = useState('loading');
+  const [userError, setUserError] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
@@ -54,18 +57,25 @@ function App() {
   }, [toast]);
 
   const loadCurrentUser = () => {
-    fetch('http://localhost:3000/api/me', {
-      credentials: 'include',
-    })
-      .then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
-        return null;
-      })
+    apiFetch('/api/me')
       .then((user) => {
         setCurrentUser(user);
+        setUserStatus('ready');
+      })
+      .catch((error) => {
+        if (error.status === 401) {
+          setCurrentUser(null);
+          setUserStatus('ready');
+        } else {
+          setUserError(error.message);
+          setUserStatus('error');
+        }
       });
+  };
+
+  const retryUser = () => {
+    setUserStatus('loading')
+    loadCurrentUser();
   };
 
   useEffect(() => {
@@ -119,7 +129,7 @@ function App() {
   };
 
   const handleLogout = () => {
-    apiFetch('/api/Logout', { method: 'POST' })
+    apiFetch('/api/logout', { method: 'POST' })
       .then(() => {
         setCurrentUser(null);
         navigate('/');
@@ -139,6 +149,18 @@ function App() {
     navigate(`/?q=${encodeURIComponent(term)}`);
   };
 
+  if (userStatus === 'loading') {
+    return <div className="app-status">Opening Bookish Corner...</div>;
+  }
+
+  if (userStatus === 'error') {
+    return (
+      <div className="app-status">
+        <Notice message={userError} onRetry={retryUser} />
+      </div>
+    );
+  }
+
   if (!currentUser) {
     return (
       <Routes>
@@ -150,6 +172,10 @@ function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     );
+  }
+
+  if (!currentUser.readerType) {
+    return <Welcome currentUser={currentUser} onDone={loadCurrentUser} />;
   }
 
   return (
@@ -176,7 +202,7 @@ function App() {
               <span className="header-avatar">
                 <img
                   src={currentUser.avatarUrl
-                    ? `http://localhost:3000${currentUser.avatarUrl}`
+                    ? `${API_URL}${currentUser.avatarUrl}`
                     : '/default-avatar.png'}
                   alt=""
                 />
@@ -213,6 +239,7 @@ function App() {
                 currentUser={currentUser}
                 onUpdate={loadUserBooks}
                 onError={setToast}
+                booksStatus={booksStatus}
               />
             }
           />
@@ -231,7 +258,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
-          <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} />} />
+          <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

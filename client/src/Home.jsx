@@ -1,29 +1,25 @@
 import { useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import Icon from './Icon';
-import { timeAgo, quoteOfTheDay, sortByLastRead, pageSummary } from './utils';
+import { timeAgo, quoteOfTheDay, sortByLastRead, pageSummary, nightstandMessage } from './utils';
 import { apiFetch } from './api';
 import BookModal from './BookModal';
+import Notice from './Notice';
+import BookCover from './BookCover';
 
 const QUICK_LINKS = [
-    { to: './profile?tab=library', label: 'My Library', icon: 'library' },
+    { to: '/profile?tab=library', label: 'My Library', icon: 'library' },
     { to: '/profile?tab=favorites', label: 'Favorites', icon: 'favorites' },
     { to: '/profile?tab=reviews', label: 'Reviews', icon: 'reviews' },
     { to: '/profile?tab=following', label: 'Following', icon: 'following' },
 ]
 
 function ContinueReading({ book, onOpen }) {
-    const [coverFailed, setCoverFailed] = useState(false);
-    const hasCover = book.coverImage && book.coverImage.startsWith('http') && !coverFailed;
 
 
     return (
         <div className="card continue-card">
-            {hasCover ? (
-                <img className="continue-cover" src={book.coverImage} alt="" onError={() => setCoverFailed(true)} />
-            ) : (
-                <div className="continue-cover continue-cover-empty"></div>
-            )}
+            <BookCover src={book.coverImage} className="continue-cover" />
 
             <div className="continue-info">
                 <div className="display continue-title">{book.title}</div>
@@ -53,16 +49,10 @@ function ContinueReading({ book, onOpen }) {
 }
 
 function RecentCard({ book, onAdd }) {
-    const [coverFailed, setCoverFailed] = useState(false);
-    const hasCover = book.coverImage && book.coverImage.startsWith('http') && !coverFailed;
 
     return (
         <div className="card recent-card">
-            {hasCover ? (
-                <img className="recent-cover" src={book.coverImage} alt="" onError={() => setCoverFailed(true)} />
-            ) : (
-                <div className="recent-cover recent-cover-empty"></div>
-            )}
+            <BookCover src={book.coverImage} className="recent-cover" />
 
             <div className="display recent-title">{book.title}</div>
             <div className="recent-author">{book.author}</div>
@@ -76,7 +66,7 @@ function RecentCard({ book, onAdd }) {
     );
 }
 
-function Home({ books, currentUser, onUpdate, onError }) {
+function Home({ books, currentUser, onUpdate, onError, booksStatus }) {
     const [searchParams, setSearchParams] = useSearchParams();
     const q = searchParams.get('q') || '';
 
@@ -84,18 +74,15 @@ function Home({ books, currentUser, onUpdate, onError }) {
     const [isSearching, setIsSearching] = useState(false);
     const [searchError, setSearchError] = useState('');
     const [recentBooks, setRecentBooks] = useState([]);
+    const [recentError, setRecentError] = useState('');
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/books/recent', {
-            credentials: 'include',
-        })
-
-            .then((res) => {
-                if (!res.ok) throw new Error('Could not load recent books');
-                return res.json();
+        apiFetch('/api/books/recent')
+            .then((data) => {
+                setRecentBooks(data);
+                setRecentError('');
             })
-            .then((data) => setRecentBooks(data))
-            .catch((error) => console.error(error));
+            .catch((error) => setRecentError(error.message));
     }, [books]);
 
     useEffect(() => {
@@ -109,18 +96,14 @@ function Home({ books, currentUser, onUpdate, onError }) {
         setIsSearching(true);
         setSearchError('');
 
-        fetch(`http://localhost:3000/api/search-books?q=${encodeURIComponent(q)}`)
-            .then((res) => {
-                if (!res.ok) throw new Error('Search failed');
-                return res.json();
-            })
+        apiFetch(`/api/search-books?q=${encodeURIComponent(q)}`)
             .then((data) => {
                 if (!ignore) setSearchResults(data);
             })
-            .catch(() => {
+            .catch((error) => {
                 if (!ignore) {
                     setSearchResults([]);
-                    setSearchError("We couldn't reach the book catalog. Please try again in a moment.");
+                    setSearchError(error.message);
                 }
             })
             .finally(() => {
@@ -133,24 +116,17 @@ function Home({ books, currentUser, onUpdate, onError }) {
     }, [q]);
 
     const handleAddBook = (book) => {
-        fetch('http://localhost:3000/api/user-books/from-search', {
+        apiFetch('/api/user-books/from-search', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
+            body: {
                 openLibraryKey: book.openLibraryKey,
                 title: book.title,
                 author: book.author,
                 coverImage: book.coverImage,
-            }),
+            },
         })
-            .then((res) => {
-                if (!res.ok) throw new Error('Could not add book');
-                onUpdate();
-            })
-            .catch(() => {
-                setSearchError("We couldn't add that book. Please try again.");
-            });
+            .then(() => onUpdate())
+            .catch((error) => onError(error.message));
     };
 
     const handleAddToLibrary = (bookId) => {
@@ -170,6 +146,7 @@ function Home({ books, currentUser, onUpdate, onError }) {
     const goal = currentUser.readingGoal;
     const goalPercent = goal ? Math.min(100, Math.round((booksThisYear * 100) / goal)) : 0;
     const quote = quoteOfTheDay();
+    const emptyMessage = nightstandMessage(booksStatus, books);
 
     return (
         <main className="page home">
@@ -229,9 +206,7 @@ function Home({ books, currentUser, onUpdate, onError }) {
                     {continueBook ? (
                         <ContinueReading key={continueBook.id} book={continueBook} onOpen={() => setSelectedId(continueBook.id)} />
                     ) : (
-                        <div className="card home-empty">
-                            Nothing on your nightstand yet. Search for a book to get started.
-                        </div>
+                        emptyMessage && <div className="card home-empty">{emptyMessage}</div>
                     )}
                 </section>
                 <section className="home-section">
@@ -240,9 +215,13 @@ function Home({ books, currentUser, onUpdate, onError }) {
                         <span className="home-section-note">New in the community</span>
                     </div>
 
-                    {recentBooks.length === 0 ? (
+                    {recentError && <Notice message={recentError} />}
+
+                    {!recentError && recentBooks.length === 0 && (
                         <div className="card home-empty">No books in the catalog yet.</div>
-                    ) : (
+                    )}
+
+                    {recentBooks.length > 0 && (
                         <div className="recent-row">
                             {recentBooks.map((book) => (
                                 <RecentCard key={book.id} book={book} onAdd={handleAddToLibrary} />

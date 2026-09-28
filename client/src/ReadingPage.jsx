@@ -2,7 +2,7 @@ import { useState } from 'react';
 import BookModal from './BookModal';
 import Icon from './Icon';
 import BookCover from './BookCover';
-import { timeAgo, formatDate, sortByLastRead, pageSummary } from './utils';
+import { timeAgo, formatDate, sortByLastRead, pageSummary, nightstandMessage } from './utils';
 
 function FeaturedBook({ book, onOpen }) {
     const progress = book.progress || 0;
@@ -78,11 +78,12 @@ function ProgressCard({ book, onOpen }) {
     );
 }
 
-function ReadingPage({ books, onUpdate }) {
+function ReadingPage({ books, onUpdate, booksStatus }) {
     const readingBooks = sortByLastRead(books.filter((book) => book.status === 'reading'));
     const [featured, ...others] = readingBooks;
     const [selectedId, setSelectId] = useState(null);
     const selectedBook = books.find((book) => book.id === selectedId);
+    const emptyMessage = nightstandMessage(booksStatus, books);
 
     const focusSearch = () => {
         document.querySelector('.topbar-search input')?.focus();
@@ -97,11 +98,8 @@ function ReadingPage({ books, onUpdate }) {
                 </div>
                 <button className="pill reading-add" onClick={focusSearch}>+ Add book</button>
             </section>
-
             {!featured ? (
-                <div className="card home-empty">
-                    Nothing on your nightstand yet. Search for a book to get started.
-                </div>
+                emptyMessage && <div className="card home-empty">{emptyMessage}</div>
             ) : (
                 <>
                     <FeaturedBook key={featured.id} book={featured} onOpen={() => setSelectId(featured.id)} />

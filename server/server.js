@@ -387,7 +387,7 @@ app.post('/api/login', (req, res) => {
     }
 
     const user = db.prepare(
-        'SELECT id, username, email, passwordHash, avatarUrl, displayName, readingGoal FROM users WHERE email = ?'
+        'SELECT id, username, email, passwordHash, avatarUrl, displayName, readingGoal, readerType FROM users WHERE email = ?'
     ).get(email);
 
     if (!user) {
@@ -413,6 +413,7 @@ app.post('/api/login', (req, res) => {
         avatarUrl: user.avatarUrl,
         displayName: user.displayName || user.username,
         readingGoal: user.readingGoal,
+        readerType: user.readerType,
     });
 });
 
@@ -422,7 +423,7 @@ app.get('/api/me', (req, res) => {
     }
 
     const user = db.prepare(
-        `SELECT id, username, email, avatarUrl, readingGoal, COALESCE(displayName, username) AS displayName FROM users WHERE id = ?`
+        `SELECT id, username, email, avatarUrl, readingGoal, readerType, COALESCE(displayName, username) AS displayName FROM users WHERE id = ?`
     ).get(req.session.user.id);
 
     if (!user) {
@@ -434,7 +435,7 @@ app.get('/api/me', (req, res) => {
 
 app.get('/api/profile', requireAuth, (req, res) => {
     const user = db.prepare(`
-    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal,
+    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal, readerType,
         COALESCE(displayName, username) AS displayName,
         (SELECT COUNT(*) FROM user_books
             WHERE user_books.userId = users.id
@@ -453,8 +454,13 @@ app.get('/api/profile', requireAuth, (req, res) => {
     res.json(user);
 });
 
+const READER_TYPES = ['first-time', 'casual', 'avid'];
+
 app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
-    const { bio, instagramUrl, tiktokUrl, location } = req.body;
+    const { bio, instagramUrl, tiktokUrl, location, readerType } = req.body;
+    if (readerType !== undefined && !READER_TYPES.includes(readerType)) {
+        return res.status(400).json({ error: 'Please choose one of the reader types' });
+    }
     const aboutMe = req.body.aboutMe?.trim().slice(0, 600) || null;
     const favoriteQuote = req.body.favoriteQuote?.trim().slice(0, 200) || null;
     const favoriteThings = req.body.favoriteThings?.trim().slice(0, 300) || null;
@@ -474,12 +480,13 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
             instagramUrl = COALESCE(?, instagramUrl),
             tiktokUrl = COALESCE(?, tiktokUrl),
             readingGoal = COALESCE(?, readingGoal),
+            readerType = COALESCE(?, readerType),
             avatarUrl = COALESCE(?, avatarUrl)
         WHERE ID = ?
-    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, readingGoal, avatarUrl, req.session.user.id);
+    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, readingGoal, readerType, avatarUrl, req.session.user.id);
 
     const update = db.prepare(
-        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
+        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal, readerType, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
     ).get(req.session.user.id);
 
     res.json(update);

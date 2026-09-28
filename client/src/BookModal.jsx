@@ -54,81 +54,62 @@ function BookModal({ book, onClose, onUpdate }) {
     const [removeError, setRemoveError] = useState('')
     const [rating, setRating] = useState(book.rating || 0)
     const [ratingError, setRatingError] = useState('')
+    const [commentError, setCommentError] = useState('')
+    const [reviewError, setReviewError] = useState('')
+    const [progressError, setProgressError] = useState('')
 
     useEffect(() => {
-        fetch(`http://localhost:3000/api/user-books/${book.id}/comments`)
-            .then((res) => res.json())
+        apiFetch(`/api/user-books/${book.id}/comments`)
             .then((data) => setComments(data))
+            .catch((error) => setCommentError(error.message))
     }, [book.id])
 
     const handleAddComment = () => {
         if (commentText.trim() === '') return
+        setCommentError('')
 
-        fetch(`http://localhost:3000/api/user-books/${book.id}/comments`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ text: commentText }),
-        })
-            .then((res) => res.json())
+        apiFetch(`/api/user-books/${book.id}/comments`, { method: 'POST', body: { text: commentText } })
             .then((newComment) => {
                 setComments((prevComments) => [newComment, ...prevComments])
                 setCommentText('')
                 onUpdate()
             })
+            .catch((error) => setCommentError(error.message))
     }
 
     const handleSaveReview = () => {
         setIsSaving(true)
+        setReviewError('')
 
-        fetch(`http://localhost:3000/api/user-books/${book.id}`, {
+        apiFetch(`/api/user-books/${book.id}`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
-                review: review,
-                status: status,
-                genre: genre || null,
-            }),
+            body: { review, status, genre: genre || null },
         })
-
-            .then((res) => {
-                if (!res.ok) throw new Error('Could bit save')
-                return res.json()
-            })
             .then(() => {
-                setIsSaving(false)
                 setIsEditingReview(false)
                 onUpdate()
             })
-            .catch(() => {
-                setIsSaving(false)
-            })
+            .catch((error) => setReviewError(error.message))
+            .finally(() => setIsSaving(false))
     }
 
     const handleSaveProgress = () => {
         setIsSavingProgress(true)
+        setProgressError('')
 
-        fetch(`http://localhost:3000/api/user-books/${book.id}`, {
+        apiFetch(`/api/user-books/${book.id}`, {
             method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({
+            body: {
                 currentPage: toNumber(currentPage),
                 totalPages: toNumber(totalPages),
                 currentChapter: toNumber(currentChapter),
-            }),
+            },
         })
-
-            .then((res) => {
-                if (!res.ok) throw new Error('Could not save progress')
-                return res.json()
-            })
-
             .then(() => onUpdate())
-            .catch((error) => console.error(error))
+            .catch((error) => setProgressError(error.message))
             .finally(() => setIsSavingProgress(false))
     }
+
     const handleRate = (newRating) => {
         const previous = rating
         setRating(newRating)
@@ -244,6 +225,7 @@ function BookModal({ book, onClose, onUpdate }) {
                         </div>
 
                         {pageError && <div className="progress-error">{pageError}</div>}
+                        {progressError && <Notice message={progressError} />}
 
                         <button
                             type="button"
@@ -341,6 +323,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                 </div>
                             </>
                         )}
+                        {reviewError && <Notice message={reviewError} />}
                     </section>
 
                     <section className="modal-section">
@@ -369,7 +352,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                 ))}
                             </ul>
                         )}
-
+                        {commentError && <Notice message={commentError} />}
                         <form
                             className="comment-form"
                             onSubmit={(e) => {

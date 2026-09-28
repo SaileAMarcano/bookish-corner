@@ -72,3 +72,10 @@ export function pageSummary(book) {
     const chapter = book.currentChapter ? ` · Chapter ${book.currentChapter}` : '';
     return pages + chapter;
 }
+
+export function nightstandMessage(booksStatus, books) {
+    if (booksStatus === 'loading') return 'Loading your books...';
+    if (booksStatus === 'error') return '';
+    if (books.length === 0) return 'Your shelf is ready! Search for your first book to get started.';
+    return 'Nothing on your nightstand yet. Search for a book to get started.';
+}

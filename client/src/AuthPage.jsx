@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Icon from './Icon';
+import { apiFetch } from './api';
 
 const MODES = {
     login: {
@@ -52,11 +53,11 @@ function AuthPage({ mode, onLogin }) {
 
         const cleanEmail = email.trim();
         const register = isSignup
-            ? postJson('/api/register', { username: username.trim(), email: cleanEmail, password })
+            ? apiFetch('/api/register', { method: 'POST', body: { username: username.trim(), email: cleanEmail, password } })
             : Promise.resolve();
 
         register
-            .then(() => postJson('/api/login', { email: cleanEmail, password }))
+            .then(() => apiFetch('/api/login', { method: 'POST', body: { email: cleanEmail, password } }))
             .then((user) => onLogin(user))
             .catch((er) => {
                 setError(er.message);
@@ -167,18 +168,5 @@ function AuthPage({ mode, onLogin }) {
         </div>
     );
 }
-
-const postJson = (url, body) =>
-    fetch(`http://localhost:3000${url}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(body),
-    }).then((res) =>
-        res.json().then((data) => {
-            if (!res.ok) throw new Error(data.error);
-            return data;
-        })
-    );
 
 export default AuthPage;
