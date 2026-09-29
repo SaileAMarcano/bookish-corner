@@ -15,8 +15,10 @@
     "bcryptjs": "^3.0.3",
     "better-sqlite3": "^13.0.3",
     "cors": "^2.8.6",
+    "dotenv": "^18.0.4",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
-    "multer": "^2.4.0"
+    "multer": "^2.4.0",
+    "pg": "^8.23.0"
   }
 }

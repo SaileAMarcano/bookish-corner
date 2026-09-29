@@ -340,7 +340,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                             <div className="comment-head">
                                                 <span className="comment-author">{comment.username}</span>
                                                 <span className="comment-date">
-                                                    · {new Date(comment.createdAt + 'Z').toLocaleDateString('en-US', {
+                                                    · {new Date(comment.createdAt).toLocaleDateString('en-US', {
                                                         month: 'short',
                                                         day: 'numeric',
                                                     })}

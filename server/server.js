@@ -1,5 +1,6 @@
 const express = require('express');
 const db = require('./db');
+const { query } = require('./database');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -60,21 +61,22 @@ function cleanDescription(text) {
     return clean === '' ? null : clean;
 }
 
-app.get('/api/books', (req, res) => {
-    const books = db.prepare('SELECT * FROM books').all();
+app.get('/api/books', async (req, res) => {
+    const books = await query('SELECT * FROM works ORDER BY id');
     res.json(books);
 });
 
-app.get('/api/books/recent', requireAuth, (req, res) => {
-    const books = db.prepare(`
-        SELECT books.id, books.title, books.author, books.coverImage,
-        (SELECT COUNT(*) FROM user_books
-            WHERE user_books.bookId = books.id
-            AND user_books.userId = ?) AS inLibrary
-        FROM books
-        ORDER BY books.id DESC
+app.get('/api/books/recent', requireAuth, async (req, res) => {
+    const books = await query(`
+        SELECT works.id, works.title, works.author, works.cover_image,
+               EXISTS (
+                   SELECT 1 FROM user_books
+                   WHERE user_books.work_id = works.id AND user_books.user_id = $1
+               ) AS in_library
+        FROM works
+        ORDER BY works.id DESC
         LIMIT 12
-    `).all(req.session.user.id);
+    `, [req.session.user.id]);
     res.json(books);
 });
 
@@ -108,19 +110,28 @@ app.get('/api/search-books', async (req, res) => {
     }
 });
 
-app.post('/api/user-books', requireAuth, (req, res) => {
+app.post('/api/user-books', requireAuth, async (req, res) => {
     const { bookId } = req.body;
     if (!bookId) {
         return res.status(400).json({ error: 'bookId is required' });
     }
+
     try {
-        const insert = db.prepare(
-            'INSERT INTO user_books (userId, bookId, startedAt, lastReadAt) VALUES (?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)'
-        );
-        const result = insert.run(req.session.user.id, bookId);
-        res.status(201).json({ id: result.lastInsertRowid, userId: req.session.user.id, bookId });
+        const [entry] = await query(`
+            INSERT INTO user_books (user_id, work_id, started_at, last_read_at)
+            VALUES ($1, $2, now(), now())
+            RETURNING id, user_id, work_id AS book_id
+        `, [req.session.user.id, bookId]);
+        res.status(201).json(entry);
     } catch (error) {
-        res.status(400).json({ error: 'You already added this book to your profile' });
+        if (error.code === '23505') {
+            return res.status(400).json({ error: 'You already added this book to your profile' });
+        }
+        // 23503 = foreign_key_violation: that book does not exist
+        if (error.code === '23503') {
+            return res.status(404).json({ error: 'Book not found' });
+        }
+        throw error;
     }
 });
 
@@ -128,10 +139,10 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
     const { openLibraryKey, title, author, coverImage } = req.body;
 
     if (!openLibraryKey || !title) {
-        return res.status(400).json({ error: 'openLibraryKey and title are required' })
+        return res.status(400).json({ error: 'openLibraryKey and title are required' });
     }
 
-    let book = db.prepare('SELECT * FROM books WHERE openLibraryKey = ?').get(openLibraryKey);
+    let [book] = await query('SELECT * FROM works WHERE open_library_key = $1', [openLibraryKey]);
 
     if (!book) {
         let description = null;
@@ -149,35 +160,32 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
             console.error('Could not load description', error);
         }
 
-        const insert = db.prepare(`
-            INSERT INTO books (title, author, description, coverImage, openLibraryKey)
-            VALUES (?, ?, ?, ?, ?)
-        `);
-
-        const result = insert.run(
-            title,
-            author || 'Unknown author',
-            description,
-            coverImage || null,
-            openLibraryKey
-        );
-
-        book = db.prepare('SELECT * FROM books WHERE id = ?').get(result.lastInsertRowid);
+        [book] = await query(`
+            INSERT INTO works (title, author, description, cover_image, open_library_key)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING *
+        `, [title, author || 'Unknown author', description, coverImage || null, openLibraryKey]);
     }
 
     try {
-        const insert = db.prepare('INSERT INTO user_books(userId, bookId, startedAt, lastReadAt) VALUES(?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)');
-        const result = insert.run(req.session.user.id, book.id);
-        res.status(201).json({ id: result.lastInsertRowid, book });
+        const [entry] = await query(`
+            INSERT INTO user_books (user_id, work_id, started_at, last_read_at)
+            VALUES ($1, $2, now(), now())
+            RETURNING id
+        `, [req.session.user.id, book.id]);
+        res.status(201).json({ id: entry.id, book });
     } catch (error) {
-        res.status(400).json({ error: 'You already added this book to your profile' });
+        if (error.code === '23505') {
+            return res.status(400).json({ error: 'You already added this book to your profile' });
+        }
+        throw error;
     }
 });
 
-app.post('/api/user-books/:id/like', requireAuth, (req, res) => {
+app.post('/api/user-books/:id/like', requireAuth, async (req, res) => {
     const { id } = req.params;
 
-    const userBook = db.prepare('SELECT userId FROM user_books WHERE id = ?').get(id);
+    const [userBook] = await query('SELECT user_id FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
         return res.status(404).json({ error: 'Review not found' });
     }
@@ -186,26 +194,31 @@ app.post('/api/user-books/:id/like', requireAuth, (req, res) => {
     }
 
     try {
-        db.prepare('INSERT INTO likes (userId, userBookId) VALUES (?, ?)').run(req.session.user.id, id);
+        await query('INSERT INTO likes (user_id, user_book_id) VALUES ($1, $2)', [req.session.user.id, id]);
         res.status(201).json({ message: 'Liked' });
     } catch (error) {
-        res.status(400).json({ error: 'You already liked this' });
+        if (error.code === '23505') {
+            return res.status(400).json({ error: 'You already liked this' });
+        }
+        throw error;
     }
 });
 
-app.delete('/api/user-books/:id/like', requireAuth, (req, res) => {
-    const { id } = req.params;
-    db.prepare('DELETE FROM likes WHERE userId = ? AND userBookId = ?').run(req.session.user.id, id);
+app.delete('/api/user-books/:id/like', requireAuth, async (req, res) => {
+    await query(
+        'DELETE FROM likes WHERE user_id = $1 AND user_book_id = $2',
+        [req.session.user.id, req.params.id]
+    );
     res.json({ message: 'Unliked' });
 });
 
 const keepOrSet = (value, current) => (value === undefined ? current : value);
 
-app.patch('/api/user-books/:id', requireAuth, (req, res) => {
+app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating } = req.body;
 
-    const userBook = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
+    const [userBook] = await query('SELECT * FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
         return res.status(404).json({ error: 'Not found' });
     }
@@ -223,7 +236,7 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
 
     const badRating = typeof rating !== 'number' || !Number.isInteger(rating * 2) || rating < 0 || rating > 5;
     if (rating !== undefined && badRating) {
-        return res.status(400).json({ error: 'Rating must be a whole number from 0 to 5, in half steps' });
+        return res.status(400).json({ error: 'Rating must be between 0 and 5, in half steps' });
     }
 
     const newTotal = keepOrSet(totalPages, userBook.totalPages);
@@ -238,38 +251,38 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     }
 
     const statusChanged = status !== undefined && status !== userBook.status;
-    const startedNow = statusChanged && status === 'reading' ? 1 : 0;
-    const finishedNow = statusChanged && status === 'finished' ? 1 : 0;
+    const startedNow = statusChanged && status === 'reading';
+    const finishedNow = statusChanged && status === 'finished';
     const readNow =
         (progress !== undefined && Number(progress) !== userBook.progress) ||
-            newPage !== userBook.currentPage ||
-            newChapter !== userBook.currentChapter ? 1 : 0;
+        newPage !== userBook.currentPage ||
+        newChapter !== userBook.currentChapter;
 
-    db.prepare(`
+    const [updated] = await query(`
         UPDATE user_books
-        SET status = COALESCE(?, status),
-            progress = COALESCE(?, progress),
-            review = ?,
-            isFavorite = COALESCE(?, isFavorite),
-            genre = ?,
-            currentPage = ?,
-            totalPages = ?,
-            currentChapter = ?,
-            rating = COALESCE(?, rating),
-            startedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE startedAt END,
-            finishedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE finishedAt END,
-            lastReadAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE lastReadAt END
-        WHERE id = ?
-    `).run(status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id);
+        SET status = COALESCE($1, status),
+            progress = COALESCE($2, progress),
+            review = $3,
+            is_favorite = COALESCE($4, is_favorite),
+            genre = $5,
+            current_page = $6,
+            total_pages = $7,
+            current_chapter = $8,
+            rating = COALESCE($9, rating),
+            started_at = CASE WHEN $10 THEN now() ELSE started_at END,
+            finished_at = CASE WHEN $11 THEN now() ELSE finished_at END,
+            last_read_at = CASE WHEN $12 THEN now() ELSE last_read_at END
+        WHERE id = $13
+        RETURNING *
+    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id]);
 
-    const update = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
-    res.json(update);
+    res.json(updated);
 });
 
-app.delete('/api/user-books/:id', requireAuth, (req, res) => {
+app.delete('/api/user-books/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
 
-    const userBook = db.prepare('SELECT userId FROM user_books WHERE id = ?').get(id);
+    const [userBook] = await query('SELECT user_id FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
         return res.status(404).json({ error: 'Not found' });
     }
@@ -277,38 +290,36 @@ app.delete('/api/user-books/:id', requireAuth, (req, res) => {
         return res.status(403).json({ error: 'You cannot remove this entry' });
     }
 
-    const removeBook = db.transaction(() => {
-        db.prepare('DELETE FROM likes WHERE userBookId = ?').run(id);
-        db.prepare('DELETE FROM comments WHERE userBookId = ?').run(id);
-        db.prepare('DELETE FROM user_books WHERE id = ?').run(id);
-    });
-    removeBook();
+    await query('DELETE FROM user_books WHERE id = $1', [id]);
 
     res.json({ message: 'Removed from library' });
 });
 
-app.get('/api/user-books', requireAuth, (req, res) => {
-    const userBooks = db.prepare(`
-        SELECT user_books.id, user_books.status, user_books.review, user_books.isFavorite, user_books.genre, user_books.rating,
-               user_books.currentPage, user_books.totalPages, user_books.currentChapter,
-               user_books.startedAt, user_books.finishedAt, user_books.lastReadAt, user_books.createdAt,
-               CASE WHEN user_books.status = 'finished' THEN 100
-                    WHEN user_books.totalPages > 0
-                    THEN MIN(100, ROUND(COALESCE(user_books.currentPage, 0) * 100.0 / user_books.totalPages))
-                    ELSE user_books.progress
+app.get('/api/user-books', requireAuth, async (req, res) => {
+    const userBooks = await query(`
+        SELECT ub.id, ub.status, ub.review, ub.is_favorite, ub.genre, ub.rating,
+               ub.current_page, ub.total_pages, ub.current_chapter,
+               ub.started_at, ub.finished_at, ub.last_read_at, ub.created_at,
+               CASE WHEN ub.status = 'finished' THEN 100
+                    WHEN ub.total_pages > 0
+                    THEN LEAST(100, ROUND(COALESCE(ub.current_page, 0) * 100.0 / ub.total_pages))
+                    ELSE ub.progress
                END AS progress,
-               books.id AS bookId, books.title, books.author, books.description, books.coverImage, books.openLibraryKey,
-               (SELECT COUNT (*) FROM likes WHERE likes.userBookId = user_books.id) AS likeCount,
-               (SELECT COUNT (*) FROM comments WHERE comments.userBookId = user_books.id) AS commentCount,
-               (SELECT COUNT(*) FROM likes WHERE likes.userBookId = user_books.id AND likes.userId = ?) AS hasLiked
-        FROM user_books
-        JOIN books ON user_books.bookId = books.id
-        WHERE user_books.userId = ?
-    `).all(req.session.user.id, req.session.user.id);
+               w.id AS book_id, w.title, w.author, w.description, w.cover_image, w.open_library_key,
+               (SELECT COUNT(*) FROM likes WHERE likes.user_book_id = ub.id) AS like_count,
+               (SELECT COUNT(*) FROM comments WHERE comments.user_book_id = ub.id) AS comment_count,
+               EXISTS (
+                   SELECT 1 FROM likes WHERE likes.user_book_id = ub.id AND likes.user_id = $1
+               ) AS has_liked
+        FROM user_books ub
+        JOIN works w ON w.id = ub.work_id
+        WHERE ub.user_id = $1
+    `, [req.session.user.id]);
+
     res.json(userBooks);
 });
 
-app.post('/api/user-books/:id/comments', requireAuth, (req, res) => {
+app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { text } = req.body;
 
@@ -316,29 +327,37 @@ app.post('/api/user-books/:id/comments', requireAuth, (req, res) => {
         return res.status(400).json({ error: 'Comment cannot be empty' });
     }
 
-    const insert = db.prepare(
-        'INSERT INTO comments (userId, userBookId, text) VALUES (?, ?, ?)'
-    );
-    const result = insert.run(req.session.user.id, id, text);
+    try {
+        const [comment] = await query(
+            'INSERT INTO comments (user_id, user_book_id, text) VALUES ($1, $2, $3) RETURNING id',
+            [req.session.user.id, id, text.trim()]
+        );
 
-    const newComment = db.prepare(`
-        SELECT comments.id, comments.text, comments.createdAt, users.username, users.avatarUrl
-        FROM comments
-        JOIN users ON comments.userId = users.id
-        WHERE comments.id = ?
-        `).get(result.lastInsertRowid);
-    res.status(201).json(newComment);
+        const [newComment] = await query(`
+            SELECT comments.id, comments.text, comments.created_at, users.username, users.avatar_url
+            FROM comments
+            JOIN users ON comments.user_id = users.id
+            WHERE comments.id = $1
+        `, [comment.id]);
+
+        res.status(201).json(newComment);
+    } catch (error) {
+        if (error.code === '23503') {
+            return res.status(404).json({ error: 'Review not found' });
+        }
+        throw error;
+    }
 });
 
-app.get('/api/user-books/:id/comments', (req, res) => {
-    const { id } = req.params;
-    const comments = db.prepare(`
-        SELECT comments.id, comments.text, comments.createdAt, users.username, users.avatarUrl
+app.get('/api/user-books/:id/comments', async (req, res) => {
+    const comments = await query(`
+        SELECT comments.id, comments.text, comments.created_at, users.username, users.avatar_url
         FROM comments
-        JOIN users ON comments.userId = users.id
-        WHERE comments.userBookId = ?
-        ORDER BY comments.createdAt DESC
-    `).all(id);
+        JOIN users ON comments.user_id = users.id
+        WHERE comments.user_book_id = $1
+        ORDER BY comments.created_at DESC
+    `, [req.params.id]);
+
     res.json(comments);
 });
 
@@ -356,7 +375,7 @@ const passwordProblem = (password) => {
     return null;
 }
 
-app.post('/api/register', (req, res) => {
+app.post('/api/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     if (!username || !email || !password) {
@@ -368,40 +387,40 @@ app.post('/api/register', (req, res) => {
         return res.status(400).json({ error: problem });
     }
 
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     try {
-        const insert = db.prepare(
-            'INSERT INTO users (username, email, passwordHash) VALUES (?, ?, ?)'
+        const [user] = await query(
+            'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
+            [username, email, passwordHash]
         );
-        const result = insert.run(username, email, passwordHash);
-
-        res.status(201).json({
-            id: result.lastInsertRowid,
-            username: username,
-            email: email,
-        });
+        res.status(201).json(user);
     } catch (error) {
-        res.status(400).json({ error: 'Username or email already in use' });
+        if (error.code === '23505') {
+            return res.status(400).json({ error: 'Username or email already in use' });
+        }
+        throw error;
     }
 });
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
         return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = db.prepare(
-        'SELECT id, username, email, passwordHash, avatarUrl, displayName, readingGoal, readerType FROM users WHERE email = ?'
-    ).get(email);
+    const [user] = await query(
+        `SELECT id, username, email, password_hash, avatar_url, display_name, reading_goal, reader_type
+         FROM users WHERE email = $1`,
+        [email]
+    );
 
     if (!user) {
         return res.status(401).json({ error: 'Invalid email or password' });
     }
 
-    const passwordMatches = bcrypt.compareSync(password, user.passwordHash);
+    const passwordMatches = await bcrypt.compare(password, user.passwordHash);
 
     if (!passwordMatches) {
         return res.status(401).json({ error: 'Invalid email or password' });
@@ -424,14 +443,17 @@ app.post('/api/login', (req, res) => {
     });
 });
 
-app.get('/api/me', (req, res) => {
+app.get('/api/me', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: 'Not logged in' });
     }
 
-    const user = db.prepare(
-        `SELECT id, username, email, avatarUrl, readingGoal, readerType, COALESCE(displayName, username) AS displayName FROM users WHERE id = ?`
-    ).get(req.session.user.id);
+    const [user] = await query(
+        `SELECT id, username, email, avatar_url, reading_goal, reader_type,
+                COALESCE(display_name, username) AS display_name
+         FROM users WHERE id = $1`,
+        [req.session.user.id]
+    );
 
     if (!user) {
         return res.status(401).json({ error: 'Not logged in' });
@@ -440,30 +462,27 @@ app.get('/api/me', (req, res) => {
     res.json(user);
 });
 
-app.get('/api/profile', requireAuth, (req, res) => {
-    const user = db.prepare(`
-    SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal, readerType,
-        COALESCE(displayName, username) AS displayName,
-        (SELECT COUNT(*) FROM user_books
-            WHERE user_books.userId = users.id
-            AND user_books.status = 'finished') AS booksRead,
-        (SELECT COUNT(*) FROM user_books
-            WHERE user_books.userId = users.id
-            AND user_books.review IS NOT NULL
-            AND TRIM (user_books.review) != '') AS reviewsCount,
-        (SELECT COUNT (*) FROM user_books
-            WHERE user_books.userId = users.id
-            AND user_books.status = 'reading') AS currentlyReading
-    FROM users
-    WHERE users.id = ?
-    `).get(req.session.user.id);
+app.get('/api/profile', requireAuth, async (req, res) => {
+    const [user] = await query(`
+        SELECT id, username, email, bio, avatar_url, instagram_url, tiktok_url, about_me, favorite_quote,
+               favorite_things, location, reading_goal, reader_type,
+               COALESCE(display_name, username) AS display_name,
+               (SELECT COUNT(*) FROM user_books
+                   WHERE user_books.user_id = users.id AND user_books.status = 'finished') AS books_read,
+               (SELECT COUNT(*) FROM user_books
+                   WHERE user_books.user_id = users.id AND user_books.review IS NOT NULL) AS reviews_count,
+               (SELECT COUNT(*) FROM user_books
+                   WHERE user_books.user_id = users.id AND user_books.status = 'reading') AS currently_reading
+        FROM users
+        WHERE users.id = $1
+    `, [req.session.user.id]);
 
     res.json(user);
 });
 
 const READER_TYPES = ['first-time', 'casual', 'avid'];
 
-app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
+app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res) => {
     const { bio, instagramUrl, tiktokUrl, location, readerType } = req.body;
     if (readerType !== undefined && !READER_TYPES.includes(readerType)) {
         return res.status(400).json({ error: 'Please choose one of the reader types' });
@@ -476,27 +495,26 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), (req, res) => {
     const readingGoal = goal >= 1 && goal <= 365 ? goal : null;
     const avatarUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
-    db.prepare(`
+    const [user] = await query(`
         UPDATE users
-        SET bio = COALESCE(?, bio),
-            displayName = COALESCE(?, displayName),
-            aboutMe = COALESCE(?, aboutMe),
-            favoriteQuote = COALESCE(?,  favoriteQuote),
-            favoriteThings = COALESCE(?, favoriteThings),
-            location = COALESCE(?, location),
-            instagramUrl = COALESCE(?, instagramUrl),
-            tiktokUrl = COALESCE(?, tiktokUrl),
-            readingGoal = COALESCE(?, readingGoal),
-            readerType = COALESCE(?, readerType),
-            avatarUrl = COALESCE(?, avatarUrl)
-        WHERE ID = ?
-    `).run(bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, readingGoal, readerType, avatarUrl, req.session.user.id);
+        SET bio = COALESCE($1, bio),
+            display_name = COALESCE($2, display_name),
+            about_me = COALESCE($3, about_me),
+            favorite_quote = COALESCE($4, favorite_quote),
+            favorite_things = COALESCE($5, favorite_things),
+            location = COALESCE($6, location),
+            instagram_url = COALESCE($7, instagram_url),
+            tiktok_url = COALESCE($8, tiktok_url),
+            reading_goal = COALESCE($9, reading_goal),
+            reader_type = COALESCE($10, reader_type),
+            avatar_url = COALESCE($11, avatar_url)
+        WHERE id = $12
+        RETURNING id, username, email, bio, avatar_url, instagram_url, tiktok_url, about_me, favorite_quote,
+                  favorite_things, location, reading_goal, reader_type,
+                  COALESCE(display_name, username) AS display_name
+    `, [bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, readingGoal, readerType, avatarUrl, req.session.user.id]);
 
-    const update = db.prepare(
-        'SELECT id, username, email, bio, avatarUrl, instagramUrl, tiktokUrl, aboutMe, favoriteQuote, favoriteThings, location, readingGoal, readerType, COALESCE(displayName, username) AS displayName FROM users WHERE id = ? '
-    ).get(req.session.user.id);
-
-    res.json(update);
+    res.json(user);
 });
 
 app.post('/api/logout', (req, res) => {
@@ -506,6 +524,11 @@ app.post('/api/logout', (req, res) => {
         }
         res.json({ message: 'Logged out successfully' });
     });
+});
+
+app.use((error, req, res, next) => {
+    console.error(error);
+    res.status(500).json({ error: 'Something went wrong on our side. Please try again.' });
 });
 
 app.listen(PORT, () => {

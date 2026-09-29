@@ -1,5 +1,5 @@
 export function parseDbDate(dateString) {
-    return new Date(dateString.replace(' ', 'T') + 'Z');
+    return new Date(dateString);
 }
 
 export function timeAgo(dateString) {

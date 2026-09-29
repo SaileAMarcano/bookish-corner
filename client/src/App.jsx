@@ -122,7 +122,7 @@ function App() {
   const handleToggleFavorite = (userBookId, isFavorite) => {
     apiFetch(`/api/user-books/${userBookId}`, {
       method: 'PATCH',
-      body: { isFavorite: isFavorite ? 0 : 1 },
+      body: { isFavorite: !isFavorite },
     })
       .then(() => loadUserBooks())
       .catch((error) => setToast(error.message));
