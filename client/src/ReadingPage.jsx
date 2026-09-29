@@ -48,7 +48,7 @@ function FeaturedBook({ book, onOpen }) {
                         </li>
                     )}
                 </ul>
-                <button type="button" className="pill reading-add reading-updates" onClick={onOpen}>
+                <button type="button" className="pill reading-add reading-update" onClick={onOpen}>
                     Update progress
                 </button>
             </div>

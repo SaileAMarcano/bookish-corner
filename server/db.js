@@ -185,6 +185,8 @@ try {
 
 }
 
+db.exec(`UPDATE user_books SET review = NULL WHERE TRIM(review) = ''`);
+
 
 const row = db.prepare('SELECT COUNT(*) AS count FROM books').get();
 

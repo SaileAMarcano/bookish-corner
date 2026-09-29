@@ -131,7 +131,7 @@ body {
   margin: 0;
 }
 
-.bool-author {
+.book-author {
   font-size: 12px;
   color: var(--text-2);
   margin: 0;
@@ -302,7 +302,7 @@ body {
   justify-content: center;
   padding: 24px;
   z-index: 60;
-  animation: fade-in 0.2 ease;
+  animation: fade-in 0.2s ease;
 }
 
 .modal {
@@ -1002,6 +1002,12 @@ html {
   display: flex;
   flex-direction: column;
   gap: 11px;
+}
+
+.fav-dot-list li {
+  position: relative;
+  font-size: 14px;
+  color: var(--text-2);
 }
 
 .fav-dot-list li::before {
@@ -2014,7 +2020,7 @@ html {
   border-left: 1px solid var(--surface-2);
 }
 
-.readind-progress-label {
+.reading-progress-label {
   font-size: 14px;
   font-weight: 600;
   color: var(--rose-deep);

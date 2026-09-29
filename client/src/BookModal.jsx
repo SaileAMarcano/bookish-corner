@@ -34,7 +34,7 @@ const GENRES = [
     'Comics',
 ];
 
-const toNumber = (value) => (value === '' ? undefined : Number(value));
+const toNumber = (value) => (value === '' ? null : Number(value));
 const avatarSrc = (url) => (url ? `${API_URL}${url}` : '/default-avatar.png');
 
 function BookModal({ book, onClose, onUpdate }) {

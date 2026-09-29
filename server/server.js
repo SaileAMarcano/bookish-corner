@@ -199,6 +199,8 @@ app.delete('/api/user-books/:id/like', requireAuth, (req, res) => {
     res.json({ message: 'Unliked' });
 });
 
+const keepOrSet = (value, current) => (value === undefined ? current : value);
+
 app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     const { id } = req.params;
     const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating } = req.body;
@@ -213,7 +215,7 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
 
     const pageFields = [currentPage, totalPages, currentChapter];
     const invalidNumber = pageFields.some(
-        (value) => value !== undefined && (!Number.isInteger(value) || value < 0)
+        (value) => value !== undefined && value !== null && (!Number.isInteger(value) || value < 0)
     );
     if (invalidNumber) {
         return res.status(400).json({ error: 'Pages and chapters must be whole numbers' });
@@ -224,8 +226,13 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
         return res.status(400).json({ error: 'Rating must be a whole number from 0 to 5, in half steps' });
     }
 
-    const newTotal = totalPages !== undefined ? totalPages : userBook.totalPages;
-    const newPage = currentPage !== undefined ? currentPage : userBook.currentPage;
+    const newTotal = keepOrSet(totalPages, userBook.totalPages);
+    const newPage = keepOrSet(currentPage, userBook.currentPage);
+    const newChapter = keepOrSet(currentChapter, userBook.currentChapter);
+    const newGenre = keepOrSet(genre, userBook.genre);
+    const cleanReview = typeof review === 'string' ? review.trim() || null : review;
+    const newReview = keepOrSet(cleanReview, userBook.review);
+
     if (newTotal && newPage > newTotal) {
         return res.status(400).json({ error: 'Current page cannot be higher than the total' });
     }
@@ -235,25 +242,25 @@ app.patch('/api/user-books/:id', requireAuth, (req, res) => {
     const finishedNow = statusChanged && status === 'finished' ? 1 : 0;
     const readNow =
         (progress !== undefined && Number(progress) !== userBook.progress) ||
-            (currentPage !== undefined && Number(currentPage) !== userBook.currentPage) ||
-            (currentChapter !== undefined && Number(currentChapter) !== userBook.currentChapter) ? 1 : 0;
+            newPage !== userBook.currentPage ||
+            newChapter !== userBook.currentChapter ? 1 : 0;
 
     db.prepare(`
         UPDATE user_books
         SET status = COALESCE(?, status),
             progress = COALESCE(?, progress),
-            review = COALESCE(?, review),
+            review = ?,
             isFavorite = COALESCE(?, isFavorite),
-            genre = COALESCE(?, genre),
-            currentPage = COALESCE(?, currentPage),
-            totalPages = COALESCE(?, totalPages),
-            currentChapter = COALESCE(?, currentChapter),
+            genre = ?,
+            currentPage = ?,
+            totalPages = ?,
+            currentChapter = ?,
             rating = COALESCE(?, rating),
             startedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE startedAt END,
             finishedAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE finishedAt END,
             lastReadAt = CASE WHEN ? = 1 THEN CURRENT_TIMESTAMP ELSE lastReadAt END
         WHERE id = ?
-    `).run(status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, startedNow, finishedNow, readNow, id);
+    `).run(status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id);
 
     const update = db.prepare('SELECT * FROM user_books WHERE id = ?').get(id);
     res.json(update);
