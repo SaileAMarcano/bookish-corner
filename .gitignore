@@ -1,5 +1,5 @@
 node_modules/
-server/books.db
+*.dbnp
 server/uploads/
 .env
 !server/uploads/.gitkeep

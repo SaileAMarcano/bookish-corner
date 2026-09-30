@@ -89,3 +89,12 @@ CREATE INDEX ON editions (work_id);
 CREATE INDEX ON user_books (work_id);
 CREATE INDEX ON likes (user_book_id);
 CREATE INDEX ON comments (user_book_id);
+
+-- Row Level Security on, with no policies: only the owner (our server) can read or write.
+-- In Supabase this closes the automatic Data API to these tables.
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+ALTER TABLE works ENABLE ROW LEVEL SECURITY;
+ALTER TABLE editions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_books ENABLE ROW LEVEL SECURITY;
+ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;

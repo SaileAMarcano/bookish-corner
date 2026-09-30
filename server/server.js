@@ -1,9 +1,9 @@
 const express = require('express');
-const db = require('./db');
-const { query } = require('./database');
+const { query, pool } = require('./database');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
+const PgSession = require('connect-pg-simple')(session);
 const multer = require('multer');
 const path = require('path');
 const app = express();
@@ -13,8 +13,13 @@ app.use(cors({
     credentials: true,
 }));
 
+if (!process.env.SESSION_SECRET) {
+    throw new Error('SESSION_SECRET is missing in server/.env');
+}
+
 app.use(session({
-    secret: 'bookish-corner-secret-key',
+    store: new PgSession({ pool, createTableIfMissing: true }),
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
