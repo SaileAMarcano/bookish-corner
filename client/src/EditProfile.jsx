@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { apiFetch, API_URL } from './api';
+import { apiFetch } from './api';
+import { getAvatarSrc } from './utils';
 import Notice from './Notice';
 
 const BIO_MAX = 160;
@@ -109,9 +110,7 @@ function EditProfile({ onSaved }) {
             .finally(() => setIsSaving(false));
     };
 
-    const avatarSrc = avatarUrl
-        ? `${API_URL}${avatarUrl}`
-        : '/default-avatar.png';
+    const avatarSrc = getAvatarSrc(avatarUrl);
 
     return (
         <main className="page edit-page">

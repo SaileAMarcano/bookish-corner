@@ -11,7 +11,8 @@ import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
 import Icon from './Icon';
-import { apiFetch, API_URL } from './api';
+import { apiFetch } from './api';
+import { getAvatarSrc } from './utils';
 import BookModal from './BookModal';
 import Notice from './Notice';
 import Welcome from './Welcome';
@@ -201,9 +202,7 @@ function App() {
               <span className="header-user-name">hi, {currentUser.displayName}</span>
               <span className="header-avatar">
                 <img
-                  src={currentUser.avatarUrl
-                    ? `${API_URL}${currentUser.avatarUrl}`
-                    : '/default-avatar.png'}
+                  src={getAvatarSrc(currentUser.avatarUrl)}
                   alt=""
                 />
               </span>

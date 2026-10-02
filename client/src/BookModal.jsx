@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import BookCover from './BookCover';
-import { pagePercent, pageSummary } from './utils';
-import { apiFetch, API_URL } from './api';
+import { pagePercent, pageSummary, getAvatarSrc } from './utils';
+import { apiFetch } from './api';
 import Notice from './Notice';
 import Icon from './Icon';
 import StarRating from './StarRating';
@@ -35,7 +35,6 @@ const GENRES = [
 ];
 
 const toNumber = (value) => (value === '' ? null : Number(value));
-const avatarSrc = (url) => (url ? `${API_URL}${url}` : '/default-avatar.png');
 
 function BookModal({ book, onClose, onUpdate }) {
     const [comments, setComments] = useState([])
@@ -335,7 +334,7 @@ function BookModal({ book, onClose, onUpdate }) {
                             <ul className="comment-list">
                                 {comments.map((comment) => (
                                     <li key={comment.id} className="comment-item">
-                                        <img className="comment-avatar" src={avatarSrc(comment.avatarUrl)} alt="" />
+                                        <img className="comment-avatar" src={getAvatarSrc(comment.avatarUrl)} alt="" />
                                         <div className="comment-body">
                                             <div className="comment-head">
                                                 <span className="comment-author">{comment.username}</span>

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import BookItem from './BookItem';
 import { Link, useSearchParams } from 'react-router-dom'
 import Icon from './Icon';
-import { apiFetch, API_URL } from './api';
+import { apiFetch } from './api';
+import { getAvatarSrc } from './utils';
 import Notice from './Notice';
 import BookCover from './BookCover';
 
@@ -243,9 +244,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         return <div className="card profile-empty">Coming soon.</div>
     }
 
-    const avatarSrc = profile.avatarUrl
-        ? `${API_URL}${profile.avatarUrl}`
-        : '/default-avatar.png';
+    const avatarSrc = getAvatarSrc(profile.avatarUrl);
 
     return (
         <main className="page profile-view">

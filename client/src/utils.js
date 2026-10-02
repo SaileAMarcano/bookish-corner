@@ -1,3 +1,10 @@
+import { API_URL } from './api';
+
+export function getAvatarSrc(url) {
+    if (!url) return '/default-avatar.png';
+    return url.startsWith('http') ? url : `${API_URL}${url}`;
+}
+
 export function parseDbDate(dateString) {
     return new Date(dateString);
 }

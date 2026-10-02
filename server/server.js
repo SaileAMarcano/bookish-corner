@@ -1,6 +1,7 @@
 const express = require('express');
 const { query, pool } = require('./database');
 const { descriptionFrom } = require('./openLibrary');
+const { uploadAvatar } = require('./storage');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -29,18 +30,22 @@ app.use(session({
     },
 }));
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        const uniqueName = Date.now() + '-' + file.originalname;
-        cb(null, uniqueName);
+const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+
+const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 5 * 1024 * 1024 },
+    fileFilter: (req, file, cb) => {
+        if (!AVATAR_TYPES.includes(file.mimetype)) {
+            const error = new Error('The photo must be a JPG, PNG or GIF image');
+            error.status = 400;
+            return cb(error);
+        }
+        cb(null, true);
     },
 });
 
-const upload = multer({ storage });
-
+// Old profile photos (before Supabase Storage). Remove when nobody uses /uploads anymore.
 app.use('/uploads', express.static('uploads'));
 
 const PORT = 3000;
@@ -479,7 +484,7 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res)
     const displayName = req.body.displayName?.trim().slice(0, 40) || null;
     const goal = parseInt(req.body.readingGoal, 10);
     const readingGoal = goal >= 1 && goal <= 365 ? goal : null;
-    const avatarUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const avatarUrl = req.file ? await uploadAvatar(req.file) : null;
 
     const [user] = await query(`
         UPDATE users
@@ -513,6 +518,12 @@ app.post('/api/logout', (req, res) => {
 });
 
 app.use((error, req, res, next) => {
+    if (error.code === 'LIMIT_FILE_SIZE') {
+        return res.status(400).json({ error: 'The photo must be 5 MB or smaller' });
+    }
+    if (error.status === 400) {
+        return res.status(400).json({ error: error.message });
+    }
     console.error(error);
     res.status(500).json({ error: 'Something went wrong on our side. Please try again.' });
 });
