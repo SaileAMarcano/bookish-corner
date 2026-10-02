@@ -31,4 +31,23 @@ async function uploadAvatar(file) {
     return data.publicUrl;
 }
 
-module.exports = { uploadAvatar };
+// Deletes an old photo from the bucket. Only photos that live in our bucket:
+// old local ones (/uploads/...) or empty values are ignored.
+async function deleteAvatar(publicUrl) {
+    const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl('');
+    const bucketUrl = data.publicUrl; // ".../storage/v1/object/public/avatars/"
+
+    if (!publicUrl || !publicUrl.startsWith(bucketUrl)) return;
+
+    const fileName = publicUrl.slice(bucketUrl.length);
+
+    // The new photo is already saved, so a failed delete is only logged.
+    try {
+        const { error } = await supabase.storage.from(AVATAR_BUCKET).remove([fileName]);
+        if (error) throw error;
+    } catch (error) {
+        console.error(`Could not delete the old photo ${fileName}: ${error.message}`);
+    }
+}
+
+module.exports = { uploadAvatar, deleteAvatar };

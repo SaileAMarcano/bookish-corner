@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
-import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import './App.css'
 import Home from './Home';
@@ -11,12 +11,13 @@ import AboutPage from './AboutPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
-import Icon from './Icon';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import BookModal from './BookModal';
 import Notice from './Notice';
 import Welcome from './Welcome';
+import SearchPanel from './SearchPanel';
+import SearchBox from './SearchBox';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 
@@ -37,8 +38,11 @@ function App() {
   const [userStatus, setUserStatus] = useState('loading');
   const [userError, setUserError] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+
+  // The search lives in the URL (?q=) of the page you are on, so it never sends you to Home.
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get('q') || '';
 
   const loadUserBooks = () => {
     apiFetch('/api/user-books')
@@ -163,11 +167,24 @@ function App() {
       .catch((error) => setToast(error.message));
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    const term = searchTerm.trim();
-    if (term === '') return;
-    navigate(`/?q=${encodeURIComponent(term)}`);
+  const handleSearch = (term) => {
+    // Keeps the rest of the URL (for example ?tab=favorites) and only adds q.
+    setSearchParams((params) => {
+      params.set('q', term);
+      return params;
+    });
+  };
+
+  const closeSearch = () => {
+    setSearchParams((params) => {
+      params.delete('q');
+      return params;
+    });
+  };
+
+  const handleBookAdded = () => {
+    loadUserBooks();
+    closeSearch();
   };
 
   if (userStatus === 'loading') {
@@ -205,17 +222,14 @@ function App() {
 
       <div className="app-main">
         <header className="topbar">
-          <form className="topbar-search" onSubmit={handleSearch}>
-            <Icon name="search" size={18} />
-            <input
-              type="text"
-              placeholder={t('app.searchPlaceholder')}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label={t('app.searchLabel')}
-            />
-            <button type="submit" className="pill topbar-search-button">{t('app.search')}</button>
-          </form>
+          <SearchBox
+            q={q}
+            books={books}
+            onSubmit={handleSearch}
+            onClear={closeSearch}
+            onAdded={loadUserBooks}
+            onError={setToast}
+          />
 
           <div className="header-user-wrap" ref={menuRef}>
             <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
@@ -248,6 +262,19 @@ function App() {
 
         {booksStatus === 'error' && (
           <Notice message={booksError} onRetry={retryBooks} />
+        )}
+
+        {q && (
+          <div className="page search-page">
+            <SearchPanel
+              key={q}
+              q={q}
+              books={books}
+              onAdded={handleBookAdded}
+              onError={setToast}
+              onClose={closeSearch}
+            />
+          </div>
         )}
 
         <Routes>
@@ -291,4 +318,4 @@ function App() {
   )
 }
 
-export default App
+export default App

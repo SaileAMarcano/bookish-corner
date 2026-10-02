@@ -202,8 +202,17 @@ function writeReport(report) {
 }
 
 async function main() {
-    const books = readSeedList();
-    console.log(`Seed list: ${books.length} books. This takes about 15 minutes.`);
+    // Optional: node catalog/import-catalog.js "The Roommate" imports only the books with that title.
+    const onlyTitle = process.argv[2];
+    const books = readSeedList().filter((book) => !onlyTitle || book.title === onlyTitle);
+
+    if (books.length === 0) {
+        console.log(`No book called "${onlyTitle}" in seed-books.csv`);
+        return;
+    }
+    console.log(onlyTitle
+        ? `Importing only: ${onlyTitle}`
+        : `Seed list: ${books.length} books. This takes about 15 minutes.`);
 
     const report = {
         newEditions: 0,
@@ -262,4 +271,4 @@ main()
         console.error('Import failed:', error.message);
         process.exitCode = 1;
     })
-    .finally(() => pool.end());
+    .finally(() => pool.end());

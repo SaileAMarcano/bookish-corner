@@ -1,0 +1,264 @@
+title;title_es
+# Spanish titles for the catalog. The first column is the title EXACTLY as in seed-books.csv.
+# Lines that start with #? are guesses: check the Spanish edition, fix it if needed and delete the #? to load it.
+# Books whose Spanish title is the same as the English one (Verity, Pachinko...) are not listed: the app shows the original.
+
+Tomorrow, and Tomorrow, and Tomorrow;Mañana, y mañana, y mañana
+#? Remarkably Bright Creatures;Criaturas extraordinariamente brillantes
+The Covenant of Water;El pacto del agua
+The Secret History;El secreto
+The Goldfinch;El jilguero
+Anxious People;Gente ansiosa
+The Vanishing Half;La mitad evanescente
+A Gentleman in Moscow;Un caballero en Moscú
+The Invisible Life of Addie LaRue;La vida invisible de Addie LaRue
+The Poppy War;La guerra de la amapola
+Mistborn: The Final Empire;Nacidos de la bruma: El imperio final
+The Name of the Wind;El nombre del viento
+The Way of Kings;El camino de los reyes
+The Three-Body Problem;El problema de los tres cuerpos
+Neuromancer;Neuromante
+The Guest List;La lista de invitados
+The Woman in Cabin 10;La mujer del camarote 10
+The Girl with the Dragon Tattoo;Los hombres que no amaban a las mujeres
+#? The Last Thing He Told Me;Lo último que me dijo
+#? Beach Read;Lectura de verano
+#? People We Meet on Vacation;Gente que conocemos en vacaciones
+Red, White & Royal Blue;Rojo, blanco y sangre azul
+The Love Hypothesis;La hipótesis del amor
+The Count of Monte Cristo;El conde de Montecristo
+The Picture of Dorian Gray;El retrato de Dorian Gray
+The Odyssey;La Odisea
+The Perks of Being a Wallflower;Las ventajas de ser invisible
+The Maze Runner;Correr o morir
+The Cruel Prince;El príncipe cruel
+The Absolutely True Diary of a Part-Time Indian;Diario absolutamente verídico de un indio a tiempo parcial
+The Outsiders;Rebeldes
+The Power of Now;El poder del ahora
+The Psychology of Money;La psicología del dinero
+#? Can't Hurt Me;Nada me puede lastimar
+#? Greenlights;Luz verde
+#? Crying in H Mart;Llorando en H Mart
+#? When Breath Becomes Air;Recuerda que vas a morir. Vive
+The Immortal Life of Henrietta Lacks;La vida inmortal de Henrietta Lacks
+Killers of the Flower Moon;Los asesinos de la luna
+Night;La noche
+The Autobiography of Malcolm X;Autobiografía de Malcolm X
+The Four Agreements;Los cuatro acuerdos
+Mindset: The New Psychology of Success;Mindset: La actitud del éxito
+The Alchemist;El alquimista
+The Kite Runner;Cometas en el cielo
+A Thousand Splendid Suns;Mil soles espléndidos
+The Road;La carretera
+My Brilliant Friend;La amiga estupenda
+A Man Called Ove;Un hombre llamado Ove
+#? The Storied Life of A.J. Fikry;La vida secreta de A. J. Fikry
+East of Eden;Al este del Edén
+Of Mice and Men;De ratones y hombres
+The Color Purple;El color púrpura
+Animal Farm;Rebelión en la granja
+The Sun Also Rises;Fiesta
+The Things They Carried;Las cosas que llevaban los hombres que lucharon
+Life of Pi;La vida de Pi
+The Grapes of Wrath;Las uvas de la ira
+The Da Vinci Code;El código Da Vinci
+The Girl on the Train;La chica del tren
+Big Little Lies;Pequeñas mentiras
+The Lincoln Lawyer;El inocente
+In the Woods;En el bosque
+The Cuckoo's Calling;El canto del cuco
+A Game of Thrones;Juego de tronos
+The Eye of the World;El ojo del mundo
+The Lies of Locke Lamora;Las mentiras de Locke Lamora
+The Priory of the Orange Tree;El priorato del naranjo
+The Fifth Season;La quinta estación
+The Golden Compass;Luces del norte
+Ender's Game;El juego de Ender
+The Left Hand of Darkness;La mano izquierda de la oscuridad
+The Long Way to a Small, Angry Planet;El largo viaje a un pequeño planeta iracundo
+All Systems Red;Sistemas críticos
+The Hitchhiker's Guide to the Galaxy;Guía del autoestopista galáctico
+Twilight;Crepúsculo
+The Sun Is Also a Star;El sol también es una estrella
+They Both Die at the End;Al final mueren los dos
+A Good Girl's Guide to Murder;Manual de asesinato para buenas chicas
+#? The Notebook;El cuaderno de Noah
+#? The Kiss Quotient;El cociente del beso
+The Selection;La selección
+The 5 Love Languages: The Secret to Love That Lasts;Los 5 lenguajes del amor
+The 48 Laws of Power;Las 48 leyes del poder
+Quiet: The Power of Introverts in a World That Can't Stop Talking;El poder de los introvertidos
+Outliers: The Story of Success;Fuera de serie
+The Omnivore's Dilemma: A Natural History of Four Meals;El dilema del omnívoro
+The Devil in the White City: Murder, Magic, and Madness at the Fair That Changed America;El diablo en la ciudad blanca
+Into the Wild;Hacia rutas salvajes
+#? The Warmth of Other Suns: The Epic Story of America's Great Migration;El calor de otros soles
+The Wright Brothers;Los hermanos Wright
+Never Let Me Go;Nunca me abandones
+Klara and the Sun;Klara y el Sol
+The Remains of the Day;Lo que queda del día
+Homegoing;Volver a casa
+The Poisonwood Bible;La Biblia envenenada
+The Namesake;El buen nombre
+Slaughterhouse-Five;Matadero cinco
+Their Eyes Were Watching God;Sus ojos miraban a Dios
+The Bell Jar;La campana de cristal
+The Stranger;El extranjero
+The Metamorphosis;La metamorfosis
+The Secret Garden;El jardín secreto
+The Adventures of Huckleberry Finn;Las aventuras de Huckleberry Finn
+The Adventures of Sherlock Holmes;Las aventuras de Sherlock Holmes
+A Clash of Kings;Choque de reyes
+A Storm of Swords;Tormenta de espadas
+The Blade Itself;La voz de las espadas
+The Colour of Magic;El color de la magia
+The Starless Sea;El mar sin estrellas
+A Wizard of Earthsea;Un mago de Terramar
+Leviathan Wakes;El despertar del Leviatán
+The Time Machine;La máquina del tiempo
+#? The Hating Game;Te odio, te quiero
+The Rosie Project;El proyecto esposa
+#? The Flatshare;Piso compartido
+#? The Wedding Date;La cita de la boda
+The Woman in the Window;La mujer en la ventana
+The Couple Next Door;La pareja de al lado
+The Chain;La cadena
+The 7 1/2 Deaths of Evelyn Hardcastle;Las siete muertes de Evelyn Hardcastle
+#? The Poet X;Poet X
+One of Us Is Lying;Uno de nosotros miente
+We Were Liars;Éramos mentirosos
+The Inheritance Games;Una herencia en juego
+The Book of Three;El libro de los tres
+Spare;En la sombra
+I Am Malala;Yo soy Malala
+Shoe Dog;Nunca te pares
+Maybe You Should Talk to Someone;Quizás deberías hablar con alguien
+The Power of Habit;El poder de los hábitos
+The Creative Act: A Way of Being;El acto creativo: una forma de ser
+Why We Sleep;Por qué dormimos
+How to Be an Antiracist;Cómo ser antirracista
+A Brief History of Time;Breve historia del tiempo
+The Gene: An Intimate History;El gen: una historia personal
+The House on Mango Street;La casa en Mango Street
+The Old Man and the Sea;El viejo y el mar
+One Hundred Years of Solitude;Cien años de soledad
+The God of Small Things;El dios de las pequeñas cosas
+The Amazing Adventures of Kavalier & Clay;Las asombrosas aventuras de Kavalier y Clay
+The Unbearable Lightness of Being;La insoportable levedad del ser
+The Brothers Karamazov;Los hermanos Karamázov
+Crime and Punishment;Crimen y castigo
+Don Quixote;Don Quijote de la Mancha
+The Scarlet Letter;La letra escarlata
+The Call of the Wild;La llamada de lo salvaje
+The Fellowship of the Ring;La comunidad del anillo
+The Two Towers;Las dos torres
+The Return of the King;El retorno del rey
+The Night Circus;El circo de la noche
+Red Rising;Amanecer rojo
+A Wrinkle in Time;Una arruga en el tiempo
+Caliban's War;La guerra de Calibán
+The Long Earth;La Tierra larga
+Ancillary Justice;Justicia auxiliar
+A Memory Called Empire;Un recuerdo llamado imperio
+#? It Happened One Summer;Sucedió un verano
+#? The Spanish Love Deception;Un novio de mentira
+#? Love, Theoretically;Amor, en teoría
+The Paris Apartment;El apartamento de París
+The Murder of Roger Ackroyd;El asesinato de Roger Ackroyd
+Murder on the Orient Express;Asesinato en el Orient Express
+In a Dark, Dark Wood;En un bosque muy oscuro
+#? The Kind Worth Killing;Los que merecen morir
+The Snowman;El muñeco de nieve
+Divergent;Divergente
+Scythe;Siega
+Simon vs. the Homo Sapiens Agenda;Yo, Simon, Homo Sapiens
+Red Queen;La reina roja
+#? The Wager;La apuesta
+Into Thin Air;Mal de altura
+The Diary of a Young Girl;El diario de Ana Frank
+Unbroken;Invencible
+The Subtle Art of Not Giving a F*ck;El sutil arte de que (casi todo) te importe una mierda
+Tess of the d'Urbervilles;Tess, la de los d'Urberville
+Persuasion;Persuasión
+The Canterbury Tales;Los cuentos de Canterbury
+The Divine Comedy;La divina comedia
+The Hunchback of Notre-Dame;Nuestra Señora de París
+The Red Badge of Courage;La roja insignia del valor
+The Crucible;Las brujas de Salem
+The Master and Margarita;El maestro y Margarita
+Assassin's Apprentice;Aprendiz de asesino
+The Black Prism;El prisma negro
+Jonathan Strange & Mr Norrell;Jonathan Strange y el señor Norrell
+The Ocean at the End of the Lane;El océano al final del camino
+The Last Unicorn;El último unicornio
+The Dispossessed;Los desposeídos
+The Stars My Destination;Las estrellas, mi destino
+2001: A Space Odyssey;2001: Una odisea espacial
+The War of the Worlds;La guerra de los mundos
+I, Robot;Yo, robot
+Outlander;Forastera
+A Walk to Remember;Un paseo para recordar
+The Time Traveler's Wife;La mujer del viajero en el tiempo
+Me Before You;Yo antes de ti
+Sharp Objects;Heridas abiertas
+The Silkworm;El gusano de seda
+The Black Echo;El eco negro
+The Secret Place;El lugar secreto
+#? No Exit;Sin salida
+Before I Go to Sleep;No confíes en nadie
+The Graveyard Book;El libro del cementerio
+The Raven Boys;Los chicos cuervo
+Six of Crows;Seis de cuervos
+#? We Hunt the Flame;Cazamos la llama
+The Anxious Generation;La generación ansiosa
+Braiding Sweetgrass;Una trenza de hierba sagrada
+#? Just Mercy;Solo misericordia
+Bad Blood;Mala sangre
+#? The Splendid and the Vile;El esplendor y la vileza
+Say Nothing;No digas nada
+Kitchen Confidential;Confesiones de un chef
+The Art of War;El arte de la guerra
+Meditations;Meditaciones
+Guns, Germs, and Steel;Armas, gérmenes y acero
+The Corrections;Las correcciones
+The Shipping News;Atando cabos
+The Secret Life of Bees;La vida secreta de las abejas
+The Help;Criadas y señoras
+The Lovely Bones;Desde mi cielo
+The Brief Wondrous Life of Oscar Wao;La maravillosa vida breve de Óscar Wao
+White Teeth;Dientes blancos
+Atonement;Expiación
+The English Patient;El paciente inglés
+Rebecca;Rebeca
+The Magicians;Los magos
+The City of Brass;La ciudad de bronce
+The Golem and the Jinni;El gólem y el genio
+The Shadow of the Wind;La sombra del viento
+The Book of Life;El libro de la vida
+The Martian Chronicles;Crónicas marcianas
+Contact;Contacto
+The Andromeda Strain;La amenaza de Andrómeda
+The Windup Girl;La chica mecánica
+The Peripheral;Periféricos
+The Power;El poder
+The Duke and I;El duque y yo
+The Wedding;La boda
+The Bourne Identity;El caso Bourne
+#? The Firm;La firma
+The Client;El cliente
+The Silence of the Lambs;El silencio de los corderos
+The Alienist;El alienista
+Gone Baby Gone;Desapareció una noche
+The 5th Wave;La quinta ola
+The Darkest Minds;Mentes poderosas
+The Knife of Never Letting Go;El cuchillo en la mano
+Miss Peregrine's Home for Peculiar Children;El hogar de Miss Peregrine para niños peculiares
+Before I Fall;Si no despierto
+Einstein: His Life and Universe;Einstein: su vida y su universo
+Team of Rivals;Equipo de rivales
+#? The Boys in the Boat;Los chicos del bote
+The Code Breaker;El código de la vida
+The Rise and Fall of the Third Reich;Auge y caída del Tercer Reich
+Stiff;Fiambres
+The Happiness Project;Objetivo: felicidad
+The Life-Changing Magic of Tidying Up;La magia del orden

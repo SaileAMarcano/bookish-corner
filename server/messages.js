@@ -83,4 +83,4 @@ function msg(req, key) {
     return MESSAGES[languageOf(req)][key] || MESSAGES.en[key] || key;
 }
 
-module.exports = { LANGUAGES, msg };
+module.exports = { LANGUAGES, languageOf, msg };

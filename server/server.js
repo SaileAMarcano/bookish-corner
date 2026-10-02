@@ -1,8 +1,8 @@
 const express = require('express');
 const { query, pool } = require('./database');
 const { descriptionFrom } = require('./openLibrary');
-const { uploadAvatar } = require('./storage');
-const { LANGUAGES, msg } = require('./messages');
+const { uploadAvatar, deleteAvatar } = require('./storage');
+const { LANGUAGES, languageOf, msg } = require('./messages');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -58,53 +58,140 @@ function requireAuth(req, res, next) {
 }
 
 
+// Book titles and descriptions in the language of the request:
+// the translation if there is one, if not the original from works.
+const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
+const TRANSLATED_DESCRIPTION = 'COALESCE(t.description, w.description)';
+const JOIN_TRANSLATION = 'LEFT JOIN work_translations t ON t.work_id = w.id AND t.language';
+
 app.get('/api/books', async (req, res) => {
-    const books = await query('SELECT * FROM works ORDER BY id');
+    const books = await query(`
+        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, ${TRANSLATED_DESCRIPTION} AS description,
+               w.cover_image, w.first_published_year, w.open_library_key, w.created_at
+        FROM works w
+        ${JOIN_TRANSLATION} = $1
+        ORDER BY w.id
+    `, [languageOf(req)]);
     res.json(books);
 });
 
 app.get('/api/books/recent', requireAuth, async (req, res) => {
     const books = await query(`
-        SELECT works.id, works.title, works.author, works.cover_image,
+        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
                EXISTS (
                    SELECT 1 FROM user_books
-                   WHERE user_books.work_id = works.id AND user_books.user_id = $1
+                   WHERE user_books.work_id = w.id AND user_books.user_id = $1
                ) AS in_library
-        FROM works
-        ORDER BY works.id DESC
+        FROM works w
+        ${JOIN_TRANSLATION} = $2
+        ORDER BY w.id DESC
         LIMIT 12
-    `, [req.session.user.id]);
+    `, [req.session.user.id, languageOf(req)]);
     res.json(books);
 });
 
-app.get('/api/search-books', async (req, res) => {
-    const { q } = req.query;
+// Search: first our own catalog (in English and Spanish), then Open Library
+// fills the list up to the limit with books we do not have yet.
+// ?limit=4 is used by the quick results under the search bar (default and maximum: 10).
+const SEARCH_LIMIT = 10;
 
-    if (!q || q.trim() === '') {
+// Accents and capitals do not matter: "cien anos" finds "Cien años".
+const plainText = (sql) => `translate(lower(${sql}), 'áàäâãéèëêíìïîóòöôõúùüûñç', 'aaaaaeeeeiiiiooooouuuunc')`;
+const plainSearch = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+// % and _ are wildcards in LIKE; a backslash in front makes them normal characters.
+const escapeLike = (text) => text.replace(/[\\%_]/g, (char) => `\\${char}`);
+
+async function searchCatalog(q, language, limit) {
+    const term = escapeLike(plainSearch(q));
+
+    return query(`
+        SELECT w.id AS book_id, w.open_library_key, ${TRANSLATED_TITLE} AS title, w.author,
+               w.first_published_year AS year, w.cover_image
+        FROM works w
+        ${JOIN_TRANSLATION} = $3
+        WHERE ${plainText('w.title')} LIKE $1
+           OR ${plainText('w.author')} LIKE $1
+           OR EXISTS (
+               SELECT 1 FROM work_translations any_t
+               WHERE any_t.work_id = w.id AND ${plainText('any_t.title')} LIKE $1
+           )
+        ORDER BY ${plainText(TRANSLATED_TITLE)} LIKE $2 DESC, ${TRANSLATED_TITLE}
+        LIMIT ${limit}
+    `, [`%${term}%`, `${term}%`, language]);
+}
+
+async function searchOpenLibrary(q, limit) {
+    const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year,cover_i`;
+
+    // If Open Library takes more than 8 seconds, we stop waiting.
+    const response = await fetch(url, {
+        headers: { 'User-Agent': 'BookishCorner/1.0' },
+        signal: AbortSignal.timeout(8000),
+    });
+    const data = await response.json();
+
+    return data.docs.map((doc) => ({
+        bookId: null,
+        openLibraryKey: doc.key,
+        title: doc.title,
+        author: doc.author_name ? doc.author_name[0] : 'Unknown author',
+        year: doc.first_publish_year || null,
+        coverImage: doc.cover_i
+            ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
+            : null,
+    }));
+}
+
+app.get('/api/search-books', async (req, res) => {
+    const q = (req.query.q || '').trim();
+
+    if (q === '') {
         return res.status(400).json({ error: msg(req, 'searchTermRequired') });
     }
 
-    try {
-        const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=10&fields=key,title,author_name,first_publish_year,cover_i`;
+    const language = languageOf(req);
+    const asked = parseInt(req.query.limit, 10);
+    const limit = asked >= 1 && asked <= SEARCH_LIMIT ? asked : SEARCH_LIMIT;
+    const results = await searchCatalog(q, language, limit);
 
-        const response = await fetch(url);
-        const data = await response.json();
-
-        const results = data.docs.map((doc) => ({
-            openLibraryKey: doc.key,
-            title: doc.title,
-            author: doc.author_name ? doc.author_name[0] : 'Unknown author',
-            year: doc.first_publish_year || null,
-            coverImage: doc.cover_i
-                ? `https://covers.openlibrary.org/b/id/${doc.cover_i}-M.jpg`
-                : null,
-        }));
-
-        res.json(results);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: msg(req, 'searchUnavailable') });
+    if (results.length >= limit) {
+        return res.json(results);
     }
+
+    let fromOpenLibrary = [];
+    try {
+        fromOpenLibrary = await searchOpenLibrary(q, limit);
+    } catch (error) {
+        console.error('Open Library search failed', error);
+        // With some results from our catalog, we show those; with none, it is an error.
+        if (results.length === 0) {
+            return res.status(500).json({ error: msg(req, 'searchUnavailable') });
+        }
+        return res.json(results);
+    }
+
+    // Open Library can return books we already have under another title:
+    // those use our catalog (translated title, our id).
+    const keys = fromOpenLibrary.map((book) => book.openLibraryKey);
+    const known = await query(`
+        SELECT w.id AS book_id, w.open_library_key, ${TRANSLATED_TITLE} AS title, w.author,
+               w.first_published_year AS year, w.cover_image
+        FROM works w
+        ${JOIN_TRANSLATION} = $2
+        WHERE w.open_library_key = ANY($1)
+    `, [keys, language]);
+    const knownByKey = new Map(known.map((book) => [book.openLibraryKey, book]));
+    const shownKeys = new Set(results.map((book) => book.openLibraryKey));
+
+    for (const book of fromOpenLibrary) {
+        if (results.length >= limit) break;
+        if (shownKeys.has(book.openLibraryKey)) continue;
+
+        results.push(knownByKey.get(book.openLibraryKey) || book);
+        shownKeys.add(book.openLibraryKey);
+    }
+
+    res.json(results);
 });
 
 app.post('/api/user-books', requireAuth, async (req, res) => {
@@ -297,7 +384,8 @@ app.get('/api/user-books', requireAuth, async (req, res) => {
                     THEN LEAST(100, ROUND(COALESCE(ub.current_page, 0) * 100.0 / ub.total_pages))
                     ELSE ub.progress
                END AS progress,
-               w.id AS book_id, w.title, w.author, w.description, w.cover_image, w.open_library_key,
+               w.id AS book_id, ${TRANSLATED_TITLE} AS title, w.author,
+               ${TRANSLATED_DESCRIPTION} AS description, w.cover_image, w.open_library_key,
                (SELECT COUNT(*) FROM likes WHERE likes.user_book_id = ub.id) AS like_count,
                (SELECT COUNT(*) FROM comments WHERE comments.user_book_id = ub.id) AS comment_count,
                EXISTS (
@@ -305,8 +393,9 @@ app.get('/api/user-books', requireAuth, async (req, res) => {
                ) AS has_liked
         FROM user_books ub
         JOIN works w ON w.id = ub.work_id
+        ${JOIN_TRANSLATION} = $2
         WHERE ub.user_id = $1
-    `, [req.session.user.id]);
+    `, [req.session.user.id, languageOf(req)]);
 
     res.json(userBooks);
 });
@@ -501,6 +590,13 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res)
     const readingGoal = goal >= 1 && goal <= 365 ? goal : null;
     const avatarUrl = req.file ? await uploadAvatar(req.file) : null;
 
+    // Remember the old photo so it can be deleted once the new one is saved.
+    let oldAvatarUrl = null;
+    if (avatarUrl) {
+        const [current] = await query('SELECT avatar_url FROM users WHERE id = $1', [req.session.user.id]);
+        oldAvatarUrl = current?.avatarUrl || null;
+    }
+
     const [user] = await query(`
         UPDATE users
         SET bio = COALESCE($1, bio),
@@ -519,6 +615,10 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res)
                   favorite_things, location, reading_goal, reader_type,
                   COALESCE(display_name, username) AS display_name
     `, [bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, readingGoal, readerType, avatarUrl, req.session.user.id]);
+
+    if (oldAvatarUrl && oldAvatarUrl !== avatarUrl) {
+        await deleteAvatar(oldAvatarUrl);
+    }
 
     res.json(user);
 });
@@ -545,4 +645,4 @@ app.use((error, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-});
+});

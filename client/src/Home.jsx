@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import { timeAgo, quoteOfTheDay, sortByLastRead, pageSummary, nightstandMessage } from './utils';
@@ -70,12 +70,6 @@ function RecentCard({ book, onAdd }) {
 
 function Home({ books, currentUser, onUpdate, onError, booksStatus }) {
     const { t } = useTranslation();
-    const [searchParams, setSearchParams] = useSearchParams();
-    const q = searchParams.get('q') || '';
-
-    const [searchResults, setSearchResults] = useState([]);
-    const [isSearching, setIsSearching] = useState(false);
-    const [searchError, setSearchError] = useState('');
     const [recentBooks, setRecentBooks] = useState([]);
     const [recentError, setRecentError] = useState('');
 
@@ -88,57 +82,12 @@ function Home({ books, currentUser, onUpdate, onError, booksStatus }) {
             .catch((error) => setRecentError(error.message));
     }, [books]);
 
-    useEffect(() => {
-        if (q.trim() === '') {
-            setSearchResults([]);
-            setSearchError('');
-            return;
-        }
-
-        let ignore = false;
-        setIsSearching(true);
-        setSearchError('');
-
-        apiFetch(`/api/search-books?q=${encodeURIComponent(q)}`)
-            .then((data) => {
-                if (!ignore) setSearchResults(data);
-            })
-            .catch((error) => {
-                if (!ignore) {
-                    setSearchResults([]);
-                    setSearchError(error.message);
-                }
-            })
-            .finally(() => {
-                if (!ignore) setIsSearching(false);
-            });
-
-        return () => {
-            ignore = true;
-        };
-    }, [q]);
-
-    const handleAddBook = (book) => {
-        apiFetch('/api/user-books/from-search', {
-            method: 'POST',
-            body: {
-                openLibraryKey: book.openLibraryKey,
-                title: book.title,
-                author: book.author,
-                coverImage: book.coverImage,
-            },
-        })
-            .then(() => onUpdate())
-            .catch((error) => onError(error.message));
-    };
-
     const handleAddToLibrary = (bookId) => {
         apiFetch('/api/user-books', { method: 'POST', body: { bookId } })
             .then(() => onUpdate())
             .catch((error) => onError(error.message));
     };
 
-    const alreadyAddedKeys = books.map((b) => b.openLibraryKey);
     const readingBooks = books.filter((book) => book.status === 'reading');
     const continueBook = sortByLastRead(readingBooks)[0];
     const [selectedId, setSelectedId] = useState(null);
@@ -159,46 +108,6 @@ function Home({ books, currentUser, onUpdate, onError, booksStatus }) {
                     <h1 className="display home-hero-title">{t('home.heroLine1')}<br />{t('home.heroLine2')}</h1>
                     <p className="home-hero-text">{t('home.heroText')}</p>
                 </section>
-
-                {q && (
-                    <section className="card home-search">
-                        <div className="home-search-head">
-                            <div className="section-label">{t('home.resultsFor', { q })}</div>
-                            <button className="home-search-clear" onClick={() => setSearchParams({})}>
-                                {t('home.clear')}
-                            </button>
-                        </div>
-
-                        {isSearching && <div className="search-empty">{t('home.searching')}</div>}
-                        {searchError && <div className="search-empty">{searchError}</div>}
-                        {!isSearching && !searchError && searchResults.length === 0 && (
-                            <div className="search-empty">{t('home.noBooks')}</div>
-                        )}
-
-                        {!isSearching && searchResults.map((book) => (
-                            <div key={book.openLibraryKey} className="search-result">
-                                {book.coverImage ? (
-                                    <img className="search-cover" src={book.coverImage} alt={book.title} />
-                                ) : (
-                                    <div className="search-cover search-cover-empty"></div>
-                                )}
-
-                                <div className="search-info">
-                                    <div className="search-title">{book.title}</div>
-                                    <div className="search-author">
-                                        {book.author}{book.year ? ` · ${book.year}` : ''}
-                                    </div>
-                                </div>
-
-                                {alreadyAddedKeys.includes(book.openLibraryKey) ? (
-                                    <span className="search-added">{t('home.added')}</span>
-                                ) : (
-                                    <button className="comment-button" onClick={() => handleAddBook(book)}>{t('home.add')}</button>
-                                )}
-                            </div>
-                        ))}
-                    </section>
-                )}
 
                 <section className="home-section">
                     <div className="home-section-head">
