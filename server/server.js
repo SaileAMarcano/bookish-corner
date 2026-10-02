@@ -1,5 +1,6 @@
 const express = require('express');
 const { query, pool } = require('./database');
+const { descriptionFrom } = require('./openLibrary');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -50,21 +51,6 @@ function requireAuth(req, res, next) {
     next();
 }
 
-function cleanDescription(text) {
-    if (!text) return null;
-
-    let clean = text;
-
-    clean = clean.split(/\n-{3,}/)[0];
-
-    clean = clean.replace(/\[[^\]]*\]\(https?:\/\/[^)]*\)/g, '');
-
-    clean = clean.replace(/https?:\/\/\S+/g, '');
-
-    clean = clean.replace(/\s+/g, ' ').trim();
-
-    return clean === '' ? null : clean;
-}
 
 app.get('/api/books', async (req, res) => {
     const books = await query('SELECT * FROM works ORDER BY id');
@@ -155,12 +141,7 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
         try {
             const workResponse = await fetch(`https://openlibrary.org${openLibraryKey}.json`);
             const work = await workResponse.json();
-
-            if (typeof work.description === 'string') {
-                description = cleanDescription(work.description);
-            } else if (work.description && work.description.value) {
-                description = cleanDescription(work.description.value);
-            }
+            description = descriptionFrom(work);
         } catch (error) {
             console.error('Could not load description', error);
         }
