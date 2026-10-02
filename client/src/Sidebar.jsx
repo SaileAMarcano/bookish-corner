@@ -1,14 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 
 const NAV_ITEMS = [
-    { to: '/', label: 'Home', icon: 'home' },
-    { to: '/reading', label: 'Currently Reading', icon: 'reading' },
-    { to: '/profile?tab=library', label: 'My Library', icon: 'library' },
-    { to: '/profile?tab=reviews', label: 'Reviews', icon: 'reviews' },
-    { to: '/profile?tab=favorites', label: 'Favorites', icon: 'favorites' },
-    { to: '/profile?tab=following', label: 'Following', icon: 'following' },
-    { to: '/profile?tab=about', label: 'About me', icon: 'about' },
+    { to: '/', label: 'nav.home', icon: 'home' },
+    { to: '/reading', label: 'nav.reading', icon: 'reading' },
+    { to: '/profile?tab=library', label: 'nav.library', icon: 'library' },
+    { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
+    { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },
+    { to: '/profile?tab=following', label: 'nav.following', icon: 'following' },
+    { to: '/profile?tab=about', label: 'nav.about', icon: 'about' },
 ];
 
 function isActive(item, location) {
@@ -23,6 +24,7 @@ function isActive(item, location) {
 
 function Sidebar() {
     const location = useLocation();
+    const { t } = useTranslation();
 
     return (
         <aside className="sidebar">
@@ -33,9 +35,9 @@ function Sidebar() {
 
             <nav className="sidebar-nav">
                 {NAV_ITEMS.map((item) => (
-                    <Link key={item.to} to={item.to} className={`sidebar-link ${isActive(item, location) ? 'active' : ''}`} aria-label={item.label}>
+                    <Link key={item.to} to={item.to} className={`sidebar-link ${isActive(item, location) ? 'active' : ''}`} aria-label={t(item.label)}>
                         <Icon name={item.icon} size={20} />
-                        <span className="sidebar-label">{item.label}</span>
+                        <span className="sidebar-label">{t(item.label)}</span>
                     </Link>
                 ))}
             </nav>

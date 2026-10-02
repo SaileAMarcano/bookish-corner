@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Routes, Route, Navigate, useNavigate, useLocation, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import './App.css'
 import Home from './Home';
 import ProfilePage from './ProfilePage';
@@ -16,8 +17,18 @@ import { getAvatarSrc } from './utils';
 import BookModal from './BookModal';
 import Notice from './Notice';
 import Welcome from './Welcome';
+import LanguageSwitcher from './LanguageSwitcher';
+import i18n from './i18n';
+
+// A logged-in user's saved language wins over the one chosen on this browser.
+function applyUserLanguage(user) {
+  if (user.language && user.language !== i18n.language) {
+    i18n.changeLanguage(user.language);
+  }
+}
 
 function App() {
+  const { t } = useTranslation();
   const [books, setBooks] = useState([])
   const [booksStatus, setBooksStatus] = useState('loading');
   const [booksError, setBooksError] = useState('');
@@ -60,6 +71,7 @@ function App() {
   const loadCurrentUser = () => {
     apiFetch('/api/me')
       .then((user) => {
+        applyUserLanguage(user);
         setCurrentUser(user);
         setUserStatus('ready');
       })
@@ -139,8 +151,16 @@ function App() {
   };
 
   const handleLogin = (user) => {
+    applyUserLanguage(user);
     setCurrentUser(user);
     navigate('/');
+  };
+
+  // The switcher already changed the language on screen; here it is saved in the profile.
+  const handleLanguageChange = (language) => {
+    setCurrentUser((user) => ({ ...user, language }));
+    apiFetch('/api/me/language', { method: 'PATCH', body: { language } })
+      .catch((error) => setToast(error.message));
   };
 
   const handleSearch = (e) => {
@@ -151,7 +171,7 @@ function App() {
   };
 
   if (userStatus === 'loading') {
-    return <div className="app-status">Opening Bookish Corner...</div>;
+    return <div className="app-status">{t('app.opening')}</div>;
   }
 
   if (userStatus === 'error') {
@@ -176,7 +196,7 @@ function App() {
   }
 
   if (!currentUser.readerType) {
-    return <Welcome currentUser={currentUser} onDone={loadCurrentUser} />;
+    return <Welcome currentUser={currentUser} onDone={loadCurrentUser} onLanguageChange={handleLanguageChange} />;
   }
 
   return (
@@ -189,17 +209,17 @@ function App() {
             <Icon name="search" size={18} />
             <input
               type="text"
-              placeholder="Search by title or author..."
+              placeholder={t('app.searchPlaceholder')}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              aria-label="Search books"
+              aria-label={t('app.searchLabel')}
             />
-            <button type="submit" className="pill topbar-search-button">Search</button>
+            <button type="submit" className="pill topbar-search-button">{t('app.search')}</button>
           </form>
 
           <div className="header-user-wrap" ref={menuRef}>
             <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
-              <span className="header-user-name">hi, {currentUser.displayName}</span>
+              <span className="header-user-name">{t('app.hi', { name: currentUser.displayName })}</span>
               <span className="header-avatar">
                 <img
                   src={getAvatarSrc(currentUser.avatarUrl)}
@@ -210,15 +230,16 @@ function App() {
 
             {showUserMenu && (
               <div className="header-menu">
+                <LanguageSwitcher onChange={handleLanguageChange} />
                 <Link
                   to="/profile/edit"
                   className="ghost-button"
                   onClick={() => setShowUserMenu(false)}
                 >
-                  Edit profile
+                  {t('app.editProfile')}
                 </Link>
                 <button className="ghost-button" onClick={handleLogout}>
-                  Log out
+                  {t('app.logout')}
                 </button>
               </div>
             )}

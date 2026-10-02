@@ -1,40 +1,31 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from './LanguageSwitcher';
 import Icon from './Icon';
 import { apiFetch } from './api';
 
 const MODES = {
     login: {
         background: '/auth-login.jpg',
-        title: 'Welcome back',
-        subtitle: 'So good to see you again!',
         subtitleIcon: 'favorites',
-        button: 'Log in',
-        busy: 'Logging in...',
-        switchText: "Don't have an account?",
-        switchLink: 'Sign up',
         switchTo: '/signup',
     },
     signup: {
         background: '/auth-signup.jpg',
-        title: 'Create account',
-        subtitle: 'A new chapter awaits',
         subtitleIcon: 'sparkle',
-        button: 'Create account',
-        busy: 'Creating account...',
-        switchText: "Already have an account?",
-        switchLink: 'Log in',
         switchTo: '/login',
     },
 };
 
 const PASSWORD_RULES = [
-    { label: 'At least 8 characters', test: (p) => p.length >= 8 },
-    { label: 'A number', test: (p) => /\d/.test(p) },
-    { label: 'A letter', test: (p) => /[a-z]/i.test(p) },
+    { label: 'auth.rules.length', test: (p) => p.length >= 8 },
+    { label: 'auth.rules.number', test: (p) => /\d/.test(p) },
+    { label: 'auth.rules.letter', test: (p) => /[a-z]/i.test(p) },
 ];
 
 function AuthPage({ mode, onLogin }) {
+    const { t, i18n } = useTranslation();
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -53,7 +44,7 @@ function AuthPage({ mode, onLogin }) {
 
         const cleanEmail = email.trim();
         const register = isSignup
-            ? apiFetch('/api/register', { method: 'POST', body: { username: username.trim(), email: cleanEmail, password } })
+            ? apiFetch('/api/register', { method: 'POST', body: { username: username.trim(), email: cleanEmail, password, language: i18n.language } })
             : Promise.resolve();
 
         register
@@ -67,29 +58,32 @@ function AuthPage({ mode, onLogin }) {
 
     return (
         <div className="access-page" style={{ backgroundImage: `url(${text.background})` }}>
-            <Link to="/" className="access-back">
+            <Link to="/" className="access-back" aria-label={t('auth.backHome')}>
                 <Icon name="home" size={20} />
             </Link>
+            <div className="access-language">
+                <LanguageSwitcher />
+            </div>
             <div className="access-card">
                 <Link to="/" className="access-brand">
                     <img src="/logo.png" alt="Bookish Corner" className="access-logo" />
                 </Link>
 
-                <h1 className="display access-title">{text.title}</h1>
+                <h1 className="display access-title">{t(`auth.${mode}.title`)}</h1>
                 <p className="access-subtitle">
-                    {text.subtitle}
+                    {t(`auth.${mode}.subtitle`)}
                     <Icon name={text.subtitleIcon} size={14} />
                 </p>
                 <form className="access-form" onSubmit={handleSubmit}>
                     {isSignup && (
                         <label className="access-field">
-                            <span className="access-label">Username</span>
+                            <span className="access-label">{t('auth.username')}</span>
                             <span className="access-input-wrap">
                                 <Icon name="about" size={18} />
                                 <input
                                     className="access-input"
                                     type="text"
-                                    placeholder="Choose a username"
+                                    placeholder={t('auth.usernamePlaceholder')}
                                     autoComplete="username"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
@@ -99,13 +93,13 @@ function AuthPage({ mode, onLogin }) {
                     )}
 
                     <label className="access-field">
-                        <span className="access-label">Email</span>
+                        <span className="access-label">{t('auth.email')}</span>
                         <span className="access-input-wrap">
                             <Icon name="mail" size={18} />
                             <input
                                 className="access-input"
                                 type="email"
-                                placeholder="you@example.com"
+                                placeholder={t('auth.emailPlaceholder')}
                                 autoComplete="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -114,13 +108,13 @@ function AuthPage({ mode, onLogin }) {
                     </label>
 
                     <label className="access-field">
-                        <span className="access-label">Password</span>
+                        <span className="access-label">{t('auth.password')}</span>
                         <span className="access-input-wrap">
                             <Icon name="lock" size={18} />
                             <input
                                 className="access-input"
                                 type={showPassword ? 'text' : 'password'}
-                                placeholder={isSignup ? 'Create a password' : 'Your password'}
+                                placeholder={isSignup ? t('auth.passwordPlaceholderNew') : t('auth.passwordPlaceholder')}
                                 autoComplete={isSignup ? 'new-password' : 'current-password'}
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -129,7 +123,7 @@ function AuthPage({ mode, onLogin }) {
                                 type="button"
                                 className="access-eye"
                                 onClick={() => setShowPassword(!showPassword)}
-                                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                                aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
                             >
                                 <Icon name={showPassword ? 'eyeOff' : 'eye'} size={18} />
                             </button>
@@ -138,7 +132,7 @@ function AuthPage({ mode, onLogin }) {
 
                     {isSignup && (
                         <div className="access-rules">
-                            <p className="access-rules-title">Your password must have:</p>
+                            <p className="access-rules-title">{t('auth.rulesTitle')}</p>
                             <ul className="access-rules-list">
                                 {PASSWORD_RULES.map((rule) => {
                                     const passed = rule.test(password);
@@ -147,7 +141,7 @@ function AuthPage({ mode, onLogin }) {
                                             <span className="access-rule-box">
                                                 {passed && <Icon name="check" size={12} />}
                                             </span>
-                                            {rule.label}
+                                            {t(rule.label)}
                                         </li>
                                     );
                                 })}
@@ -157,12 +151,12 @@ function AuthPage({ mode, onLogin }) {
 
                     {error && <p className="access-error">{error}</p>}
                     <button type="submit" className="access-submit" disabled={isSubmitting || (isSignup && !passwordOk)}>
-                        {isSubmitting ? text.busy : text.button}
+                        {isSubmitting ? t(`auth.${mode}.busy`) : t(`auth.${mode}.button`)}
                     </button>
                 </form>
 
                 <p className="access-switch">
-                    {text.switchText} <Link to={text.switchTo}>{text.switchLink}</Link>
+                    {t(`auth.${mode}.switchText`)} <Link to={text.switchTo}>{t(`auth.${mode}.switchLink`)}</Link>
                 </p>
             </div>
         </div>

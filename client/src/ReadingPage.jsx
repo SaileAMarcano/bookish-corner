@@ -1,10 +1,12 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import BookModal from './BookModal';
 import Icon from './Icon';
 import BookCover from './BookCover';
-import { timeAgo, formatDate, sortByLastRead, pageSummary, nightstandMessage } from './utils';
+import { timeAgo, formatDate, sortByLastRead, pageSummary, nightstandMessage, genreLabel } from './utils';
 
 function FeaturedBook({ book, onOpen }) {
+    const { t } = useTranslation();
     const progress = book.progress || 0;
 
     return (
@@ -14,14 +16,14 @@ function FeaturedBook({ book, onOpen }) {
 
                 <div className="reading-featured-info">
                     <h2 className="display reading-featured-title">{book.title}</h2>
-                    <div className="reading-featured-author">by {book.author}</div>
-                    {book.genre && <span className="pill reading-genre">{book.genre}</span>}
+                    <div className="reading-featured-author">{t('reading.by', { author: book.author })}</div>
+                    {book.genre && <span className="pill reading-genre">{genreLabel(book.genre)}</span>}
                     {book.description && <p className="reading-description">"{book.description}"</p>}
                 </div>
             </div>
 
             <div className="reading-featured-progress">
-                <div className="reading-progress-label">Reading progress</div>
+                <div className="reading-progress-label">{t('reading.progress')}</div>
 
                 <div className="progress">
                     <div className="progress-track">
@@ -38,18 +40,18 @@ function FeaturedBook({ book, onOpen }) {
                     {book.startedAt && (
                         <li>
                             <Icon name="reading" size={16} />
-                            Started on {formatDate(book.startedAt)}
+                            {t('reading.startedOn', { date: formatDate(book.startedAt) })}
                         </li>
                     )}
                     {book.lastReadAt && (
                         <li>
                             <Icon name="sparkle" size={16} />
-                            Last read {timeAgo(book.lastReadAt)}
+                            {t('home.lastRead', { time: timeAgo(book.lastReadAt) })}
                         </li>
                     )}
                 </ul>
                 <button type="button" className="pill reading-add reading-update" onClick={onOpen}>
-                    Update progress
+                    {t('home.updateProgress')}
                 </button>
             </div>
         </section>
@@ -57,6 +59,7 @@ function FeaturedBook({ book, onOpen }) {
 }
 
 function ProgressCard({ book, onOpen }) {
+    const { t } = useTranslation();
     const progress = book.progress || 0;
 
     return (
@@ -72,13 +75,14 @@ function ProgressCard({ book, onOpen }) {
                 <div className="progress-label">{progress}%</div>
             </div>
             <button type="button" className="read-more reading-card-open" onClick={onOpen}>
-                Update progress
+                {t('home.updateProgress')}
             </button>
         </div>
     );
 }
 
 function ReadingPage({ books, onUpdate, booksStatus }) {
+    const { t } = useTranslation();
     const readingBooks = sortByLastRead(books.filter((book) => book.status === 'reading'));
     const [featured, ...others] = readingBooks;
     const [selectedId, setSelectId] = useState(null);
@@ -93,10 +97,10 @@ function ReadingPage({ books, onUpdate, booksStatus }) {
         <main className="page reading-page">
             <section className="card reading-head">
                 <div>
-                    <h1 className="display reading-title">Currently Reading</h1>
-                    <p className="reading-lead">The books you're reading right now.</p>
+                    <h1 className="display reading-title">{t('reading.title')}</h1>
+                    <p className="reading-lead">{t('reading.lead')}</p>
                 </div>
-                <button className="pill reading-add" onClick={focusSearch}>+ Add book</button>
+                <button className="pill reading-add" onClick={focusSearch}>{t('reading.addBook')}</button>
             </section>
             {!featured ? (
                 emptyMessage && <div className="card home-empty">{emptyMessage}</div>
@@ -106,7 +110,7 @@ function ReadingPage({ books, onUpdate, booksStatus }) {
 
                     {others.length > 0 && (
                         <section className="home-section">
-                            <h2 className="display home-section-title">Other books in progress</h2>
+                            <h2 className="display home-section-title">{t('reading.otherBooks')}</h2>
                             <div className="recent-row">
                                 {others.map((book) => (
                                     <ProgressCard key={book.id} book={book} onOpen={() => setSelectId(book.id)} />

@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
-import { pagePercent, pageSummary, getAvatarSrc } from './utils';
+import { pagePercent, pageSummary, getAvatarSrc, genreLabel } from './utils';
 import { apiFetch } from './api';
 import Notice from './Notice';
 import Icon from './Icon';
 import StarRating from './StarRating';
 
-export const statusLabels = {
-    'want-to-read': 'Want to read',
-    'reading': 'Reading',
-    'finished': 'Finished'
-}
+const STATUSES = ['want-to-read', 'reading', 'finished'];
 
 const STATUS_ICONS = {
     'want-to-read': 'reading',
@@ -37,6 +34,8 @@ const GENRES = [
 const toNumber = (value) => (value === '' ? null : Number(value));
 
 function BookModal({ book, onClose, onUpdate }) {
+    const { t, i18n } = useTranslation()
+    const statusLabel = (value) => t(`status.${value}`, { defaultValue: value })
     const [comments, setComments] = useState([])
     const [commentText, setCommentText] = useState('')
     const [review, setReview] = useState(book.review || '')
@@ -139,18 +138,18 @@ function BookModal({ book, onClose, onUpdate }) {
 
     let pageError = ''
     if (totalPages !== '' && Number(totalPages) < 1) {
-        pageError = 'Total pages must be at least 1.'
+        pageError = t('modal.totalTooLow')
     } else if (currentPage !== '' && totalPages !== '' && Number(currentPage) > Number(totalPages)) {
-        pageError = "Your current page can't be higher than the total."
+        pageError = t('modal.pageTooHigh')
     }
 
     const pagesPercent = pagePercent(Number(currentPage), Number(totalPages))
     const livePercent = book.status === 'finished' ? 100 : (pagesPercent ?? book.progress ?? 0)
 
     const progressFields = [
-        { label: 'Current page', icon: 'library', value: currentPage, onChange: setCurrentPage, min: 0 },
-        { label: 'Total pages', icon: 'posts', value: totalPages, onChange: setTotalPages, min: 1 },
-        { label: 'Chapter', icon: 'reading', value: currentChapter, onChange: setCurrentChapter, min: 0, placeholder: 'Optional' },
+        { label: t('modal.currentPage'), icon: 'library', value: currentPage, onChange: setCurrentPage, min: 0 },
+        { label: t('modal.totalPages'), icon: 'posts', value: totalPages, onChange: setTotalPages, min: 1 },
+        { label: t('modal.chapter'), icon: 'reading', value: currentChapter, onChange: setCurrentChapter, min: 0, placeholder: t('modal.optional') },
     ]
 
     return (
@@ -160,7 +159,7 @@ function BookModal({ book, onClose, onUpdate }) {
                     <button
                         className="modal-close"
                         onClick={onClose}
-                        aria-label="Close"
+                        aria-label={t('common.close')}
                     >
                         <svg
                             width="14" height="14" viewBox="0 0 24 24"
@@ -180,7 +179,7 @@ function BookModal({ book, onClose, onUpdate }) {
 
                             <span className={`pill modal-status status-${book.status}`}>
                                 <Icon name={STATUS_ICONS[book.status]} size={15} />
-                                {statusLabels[book.status] || book.status}
+                                {statusLabel(book.status)}
                             </span>
                             <StarRating value={rating} onChange={handleRate} />
                         </div>
@@ -190,12 +189,12 @@ function BookModal({ book, onClose, onUpdate }) {
 
                     <p className="modal-description">{book.description}</p>
                     <section className="modal-section">
-                        <h3 className="section-label">Reading progress</h3>
+                        <h3 className="section-label">{t('modal.progressTitle')}</h3>
 
                         <div className="progress-summary">
                             <p className="progress-big">
                                 <span className="display progress-percent">{livePercent}%</span>
-                                complete
+                                {t('modal.complete')}
                             </p>
                             <span className="progress-pages">{pageSummary({ currentPage, totalPages })}</span>
                         </div>
@@ -232,13 +231,13 @@ function BookModal({ book, onClose, onUpdate }) {
                             onClick={handleSaveProgress}
                             disabled={isSavingProgress || pageError !== ''}
                         >
-                            {isSavingProgress ? 'Saving...' : 'Save progress'}
+                            {isSavingProgress ? t('common.saving') : t('modal.saveProgress')}
                         </button>
                     </section>
 
                     <section className="modal-section">
                         <div className="review-head">
-                            <h3 className="section-label">Your review</h3>
+                            <h3 className="section-label">{t('modal.yourReview')}</h3>
 
                             {book.review && !isEditingReview && (
                                 <button
@@ -247,7 +246,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                     onClick={() => setIsEditingReview(true)}
                                 >
                                     <Icon name="pencil" size={15} />
-                                    Edit
+                                    {t('modal.edit')}
                                 </button>
                             )}
                         </div>
@@ -258,10 +257,10 @@ function BookModal({ book, onClose, onUpdate }) {
 
                                 <div className="book-meta">
                                     <span className={`pill book-status status-${book.status}`}>
-                                        {statusLabels[book.status] || book.status}
+                                        {statusLabel(book.status)}
                                     </span>
                                     {book.status !== 'want-to-read' && (
-                                        <span className="progress-label">{book.progress}% complete</span>
+                                        <span className="progress-label">{t('book.complete', { percent: book.progress })}</span>
                                     )}
                                 </div>
                             </>
@@ -271,7 +270,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                     className="profile-textarea review-textarea"
                                     value={review}
                                     onChange={(e) => setReview(e.target.value)}
-                                    placeholder="What did you think of this book?"
+                                    placeholder={t('modal.reviewPlaceholder')}
                                 />
 
                                 <div className="review-controls">
@@ -280,9 +279,9 @@ function BookModal({ book, onClose, onUpdate }) {
                                         value={status}
                                         onChange={(e) => setStatus(e.target.value)}
                                     >
-                                        <option value="want-to-read">Want to read</option>
-                                        <option value="reading">Reading</option>
-                                        <option value="finished">Finished</option>
+                                        {STATUSES.map((value) => (
+                                            <option key={value} value={value}>{statusLabel(value)}</option>
+                                        ))}
                                     </select>
 
                                     <select
@@ -290,9 +289,9 @@ function BookModal({ book, onClose, onUpdate }) {
                                         value={genre}
                                         onChange={(e) => setGenre(e.target.value)}
                                     >
-                                        <option value="">Genre…</option>
+                                        <option value="">{t('modal.genrePlaceholder')}</option>
                                         {GENRES.map((g) => (
-                                            <option key={g} value={g}>{g}</option>
+                                            <option key={g} value={g}>{genreLabel(g)}</option>
                                         ))}
                                     </select>
 
@@ -302,7 +301,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                         onClick={handleSaveReview}
                                         disabled={isSaving}
                                     >
-                                        {isSaving ? 'Saving...' : 'Save'}
+                                        {isSaving ? t('common.saving') : t('common.save')}
                                     </button>
 
                                     {book.review && (
@@ -316,7 +315,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                                 setIsEditingReview(false)
                                             }}
                                         >
-                                            Cancel
+                                            {t('common.cancel')}
                                         </button>
                                     )}
                                 </div>
@@ -326,10 +325,10 @@ function BookModal({ book, onClose, onUpdate }) {
                     </section>
 
                     <section className="modal-section">
-                        <h3 className="section-label">Comments · {comments.length}</h3>
+                        <h3 className="section-label">{t('modal.commentsTitle', { count: comments.length })}</h3>
 
                         {comments.length === 0 ? (
-                            <p className="comment-empty">No comments yet. Be the first to say something!</p>
+                            <p className="comment-empty">{t('modal.noComments')}</p>
                         ) : (
                             <ul className="comment-list">
                                 {comments.map((comment) => (
@@ -339,7 +338,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                             <div className="comment-head">
                                                 <span className="comment-author">{comment.username}</span>
                                                 <span className="comment-date">
-                                                    · {new Date(comment.createdAt).toLocaleDateString('en-US', {
+                                                    · {new Date(comment.createdAt).toLocaleDateString(i18n.language, {
                                                         month: 'short',
                                                         day: 'numeric',
                                                     })}
@@ -364,10 +363,10 @@ function BookModal({ book, onClose, onUpdate }) {
                                 type="text"
                                 value={commentText}
                                 onChange={(e) => setCommentText(e.target.value)}
-                                placeholder="Write a comment..."
-                                aria-label="Write a comment"
+                                placeholder={t('modal.writeComment')}
+                                aria-label={t('modal.writeComment')}
                             />
-                            <button type="submit" className="pill comment-send">Comment</button>
+                            <button type="submit" className="pill comment-send">{t('modal.comment')}</button>
                         </form>
                     </section>
                     <div className="modal-remove">
@@ -376,7 +375,7 @@ function BookModal({ book, onClose, onUpdate }) {
                         {confirmingRemove ? (
                             <>
                                 <p className="modal-remove-text">
-                                    Remove this book from your library? Your progress, review, likes and comments on it will be deleted too.
+                                    {t('modal.removeText')}
                                 </p>
                                 <div className="modal-remove-actions">
                                     <button
@@ -385,7 +384,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                         onClick={handleRemove}
                                         disabled={isRemoving}
                                     >
-                                        {isRemoving ? 'Removing...' : 'Yes, remove it'}
+                                        {isRemoving ? t('modal.removing') : t('modal.removeYes')}
                                     </button>
                                     <button
                                         type="button"
@@ -393,7 +392,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                         onClick={() => setConfirmingRemove(false)}
                                         disabled={isRemoving}
                                     >
-                                        Cancel
+                                        {t('common.cancel')}
                                     </button>
                                 </div>
                             </>
@@ -403,7 +402,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                 className="modal-remove-button"
                                 onClick={() => setConfirmingRemove(true)}
                             > <Icon name="trash" size={17} />
-                                Remove from library
+                                {t('modal.removeButton')}
                             </button>
                         )}
                     </div>

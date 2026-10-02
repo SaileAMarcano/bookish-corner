@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const STARS = [1, 2, 3, 4, 5];
 const STAR_PATH = 'M13.9 5.3L15 6.6Q15.9 7.7 17.2 8.2L18.7 8.8Q21.5 9.9 19.9 12.4L19 13.9Q18.3 15 18.2 16.4L18.1 18.1Q17.9 21.1 15 20.4L13.4 19.9Q12 19.6 10.6 19.9L9 20.4Q6.1 21.1 5.9 18.1L5.8 16.4Q5.7 15 5 13.9L4.1 12.4Q2.5 9.9 5.3 8.8L6.8 8.2Q8.1 7.7 9 6.6L10.1 5.3Q12 3 13.9 5.3Z';
@@ -12,6 +13,7 @@ function StarShape({ size }) {
 }
 
 function StarRating({ value, onChange, size = 26 }) {
+    const { t } = useTranslation();
     const [hovered, setHovered] = useState(0);
     const shown = hovered || value;
 
@@ -22,7 +24,7 @@ function StarRating({ value, onChange, size = 26 }) {
             className="star-rating"
             onMouseLeave={() => setHovered(0)}
             role={onChange ? undefined : 'img'}
-            aria-label={onChange ? undefined : `${value} out of 5 stars`}
+            aria-label={onChange ? undefined : t('stars.outOf', { value })}
         >
             {STARS.map((star) => {
                 let fill = 0;
@@ -43,14 +45,14 @@ function StarRating({ value, onChange, size = 26 }) {
                                 <button
                                     type="button"
                                     className="star-half star-half-left"
-                                    aria-label={`Rate ${star - 0.5} out of 5`}
+                                    aria-label={t('stars.rate', { value: star - 0.5 })}
                                     onClick={() => choose(star - 0.5)}
                                     onMouseEnter={() => setHovered(star - 0.5)}
                                 />
                                 <button
                                     type="button"
                                     className="star-half star-half-right"
-                                    aria-label={`Rate ${star} out of 5`}
+                                    aria-label={t('stars.rate', { value: star })}
                                     onClick={() => choose(star)}
                                     onMouseEnter={() => setHovered(star)}
                                 />

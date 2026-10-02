@@ -3699,3 +3699,61 @@ html {
 .cover-empty {
   background: linear-gradient(150deg, var(--rose), var(--lavender));
 }
+/* ---------- Language switcher (EN / ES) ---------- */
+
+.language-switcher {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--surface-2);
+  border-radius: 999px;
+  background: var(--surface);
+}
+
+.language-option {
+  min-width: 38px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-2);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.language-option:hover {
+  color: var(--ink);
+}
+
+.language-option.active {
+  background: var(--rose);
+  color: #fff;
+}
+
+.header-menu .language-switcher {
+  align-self: center;
+}
+
+.access-language {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+}
+
+.access-language .language-switcher {
+  border-color: transparent;
+  background: rgba(255, 250, 246, 0.92);
+  box-shadow: 0 6px 18px rgba(120, 70, 80, 0.12);
+}
+
+@media (max-width: 480px) {
+  .access-language {
+    position: static;
+    align-self: flex-end;
+    margin-bottom: 14px;
+  }
+}

@@ -1,0 +1,86 @@
+// Messages the server sends to the app, in every language the app speaks.
+// The app says which language it wants with the Accept-Language header (see client/src/api.js).
+
+const LANGUAGES = ['en', 'es'];
+
+const MESSAGES = {
+    en: {
+        loginRequired: 'You must be logged in',
+        notLoggedIn: 'Not logged in',
+        searchTermRequired: 'A search term is required',
+        searchUnavailable: 'Could not search books right now',
+        bookIdRequired: 'bookId is required',
+        searchDataRequired: 'openLibraryKey and title are required',
+        alreadyAdded: 'You already added this book to your profile',
+        bookNotFound: 'Book not found',
+        reviewNotFound: 'Review not found',
+        ownReviewLike: "You can't like your own review",
+        alreadyLiked: 'You already liked this',
+        notFound: 'Not found',
+        cannotEdit: 'You cannot edit this entry',
+        cannotRemove: 'You cannot remove this entry',
+        wholeNumbers: 'Pages and chapters must be whole numbers',
+        ratingRange: 'Rating must be between 0 and 5, in half steps',
+        pageOverTotal: 'Current page cannot be higher than the total',
+        commentEmpty: 'Comment cannot be empty',
+        passwordLength: 'Password must be at least 8 characters',
+        passwordNumber: 'Password must include a number',
+        passwordLetter: 'Password must include a letter',
+        registerFieldsRequired: 'Username, email and password are required',
+        userTaken: 'Username or email already in use',
+        loginFieldsRequired: 'Email and password are required',
+        invalidLogin: 'Invalid email or password',
+        readerTypeInvalid: 'Please choose one of the reader types',
+        languageInvalid: 'Please choose English or Spanish',
+        logoutFailed: 'Could not log out',
+        photoType: 'The photo must be a JPG, PNG or GIF image',
+        photoSize: 'The photo must be 5 MB or smaller',
+        serverError: 'Something went wrong on our side. Please try again.',
+    },
+    es: {
+        loginRequired: 'Tienes que iniciar sesión',
+        notLoggedIn: 'No has iniciado sesión',
+        searchTermRequired: 'Escribe algo para buscar',
+        searchUnavailable: 'No pudimos buscar libros en este momento',
+        bookIdRequired: 'Falta bookId',
+        searchDataRequired: 'Faltan openLibraryKey y title',
+        alreadyAdded: 'Ya añadiste este libro a tu perfil',
+        bookNotFound: 'No encontramos ese libro',
+        reviewNotFound: 'No encontramos esa reseña',
+        ownReviewLike: 'No puedes dar me gusta a tu propia reseña',
+        alreadyLiked: 'Ya le diste me gusta',
+        notFound: 'No encontrado',
+        cannotEdit: 'No puedes editar esta entrada',
+        cannotRemove: 'No puedes quitar esta entrada',
+        wholeNumbers: 'Las páginas y los capítulos deben ser números enteros',
+        ratingRange: 'La calificación debe estar entre 0 y 5, de medio en medio',
+        pageOverTotal: 'La página actual no puede ser mayor que el total',
+        commentEmpty: 'El comentario no puede estar vacío',
+        passwordLength: 'La contraseña debe tener al menos 8 caracteres',
+        passwordNumber: 'La contraseña debe incluir un número',
+        passwordLetter: 'La contraseña debe incluir una letra',
+        registerFieldsRequired: 'El nombre de usuario, el correo y la contraseña son obligatorios',
+        userTaken: 'Ese nombre de usuario o correo ya está en uso',
+        loginFieldsRequired: 'El correo y la contraseña son obligatorios',
+        invalidLogin: 'Correo o contraseña incorrectos',
+        readerTypeInvalid: 'Elige uno de los tipos de lector',
+        languageInvalid: 'Elige inglés o español',
+        logoutFailed: 'No pudimos cerrar la sesión',
+        photoType: 'La foto debe ser una imagen JPG, PNG o GIF',
+        photoSize: 'La foto debe pesar 5 MB o menos',
+        serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
+    },
+};
+
+// The language the app asked for: "es..." means Spanish; anything else, English.
+function languageOf(req) {
+    const header = (req.get('Accept-Language') || '').toLowerCase();
+    return header.startsWith('es') ? 'es' : 'en';
+}
+
+// msg(req, 'invalidLogin') -> the message in the language of that request.
+function msg(req, key) {
+    return MESSAGES[languageOf(req)][key] || MESSAGES.en[key] || key;
+}
+
+module.exports = { LANGUAGES, msg };

@@ -1,19 +1,20 @@
 import { useState, useEffect } from 'react'
 import BookItem from './BookItem';
 import { Link, useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import { apiFetch } from './api';
-import { getAvatarSrc } from './utils';
+import { getAvatarSrc, genreLabel } from './utils';
 import Notice from './Notice';
 import BookCover from './BookCover';
 
 const TABS = [
-    { key: 'library', label: 'My Library' },
-    { key: 'reviews', label: 'Reviews' },
-    { key: 'favorites', label: 'Favorites' },
-    { key: 'about', label: 'About me' },
-    { key: 'posts', label: 'Posts' },
-    { key: 'following', label: 'Following' },
+    { key: 'library' },
+    { key: 'reviews' },
+    { key: 'favorites' },
+    { key: 'about' },
+    { key: 'posts' },
+    { key: 'following' },
 ];
 
 const THING_ICONS = [
@@ -24,14 +25,14 @@ const THING_ICONS = [
 ];
 
 function FavoriteCard({ book, onToggleFavorite }) {
-
+    const { t } = useTranslation();
 
     return (
         <div className="fav-card">
 
             <BookCover src={book.coverImage} className="fav-cover" />
 
-            {book.genre && <span className="pill fav-genre">{book.genre}</span>}
+            {book.genre && <span className="pill fav-genre">{genreLabel(book.genre)}</span>}
 
             <div className="fav-title">{book.title}</div>
 
@@ -40,7 +41,7 @@ function FavoriteCard({ book, onToggleFavorite }) {
                 <button
                     className="fav-heart"
                     onClick={() => onToggleFavorite(book.id, book.isFavorite)}
-                    aria-label="Remove from favorites"
+                    aria-label={t('book.removeFavorite')}
                 >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
@@ -52,6 +53,7 @@ function FavoriteCard({ book, onToggleFavorite }) {
 }
 
 function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
+    const { t } = useTranslation();
     const [profile, setProfile] = useState(null);
     const [profileError, setProfileError] = useState('');
     const [searchParams, setSearchParams] = useSearchParams();
@@ -79,7 +81,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     if (!profile) {
         return (
             <main className="page">
-                <div className="section-label">Loading profile...</div>
+                <div className="section-label">{t('profile.loading')}</div>
             </main>
         );
     }
@@ -102,7 +104,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         if (activeTab === 'library') {
             return renderBookGrid(
                 books,
-                'No books yet. Search for one from the home page to get started.'
+                t('profile.emptyLibrary')
             );
         }
 
@@ -113,7 +115,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
 
             return renderBookGrid(
                 reviewed,
-                "No reviews yet. Open a book from your library and write what you thought."
+                t('profile.emptyReviews')
             );
         }
 
@@ -125,12 +127,12 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
             return (
                 <div className="profile-fav-layout">
                     <div className="card profile-about">
-                        <h2 className="display profile-about-title">My favorites</h2>
-                        <p className="profile-about-lead">Books I never get tired of recommending</p>
+                        <h2 className="display profile-about-title">{t('profile.myFavorites')}</h2>
+                        <p className="profile-about-lead">{t('profile.favoritesLead')}</p>
 
                         {favorites.length === 0 ? (
                             <p className="profile-about-empty">
-                                No favorites yet. Tap the heart on any book cover to add it here.
+                                {t('profile.noFavorites')}
                             </p>
                         ) : (
                             <div className="fav-row">
@@ -143,20 +145,20 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     </div>
 
                     <div className="card profile-side">
-                        <h3 className="display profile-side-title">Favorite genres</h3>
+                        <h3 className="display profile-side-title">{t('profile.favoriteGenres')}</h3>
                         {genres.length === 0 ? (
-                            <p className="profile-about-empty">Pick a genre when you edit a review.</p>
+                            <p className="profile-about-empty">{t('profile.pickGenre')}</p>
                         ) : (
                             <ul className="fav-dot-list">
                                 {genres.map((genre) => (
-                                    <li key={genre}>{genre}</li>
+                                    <li key={genre}>{genreLabel(genre)}</li>
                                 ))}
                             </ul>
                         )}
 
-                        <h3 className="display profile-side-title fav-second-title">Favorite authors</h3>
+                        <h3 className="display profile-side-title fav-second-title">{t('profile.favoriteAuthors')}</h3>
                         {authors.length === 0 ? (
-                            <p className="profile-about-empty">Nothing yet.</p>
+                            <p className="profile-about-empty">{t('profile.nothingYet')}</p>
                         ) : (
                             <div className="fav-author-list">
                                 {authors.map((author) => (
@@ -180,30 +182,30 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
             return (
                 <div className="profile-columns">
                     <div className="card profile-about">
-                        <h2 className="display profile-about-title">About {profile.displayName}</h2>
+                        <h2 className="display profile-about-title">{t('profile.aboutTitle', { name: profile.displayName })}</h2>
                         {profile.bio && <p className="profile-about-lead">{profile.bio}</p>}
 
                         {profile.aboutMe ? (
                             <p className="profile-about-text">{profile.aboutMe}</p>
                         ) : (
                             <p className="profile-about-text profile-about-empty">
-                                Nothing here yet. Use "Edit profile" to introduce yourself.
+                                {t('profile.aboutEmpty')}
                             </p>
                         )}
 
                         {profile.favoriteQuote && (
                             <div className="profile-quote">
-                                <div className="profile-quote-label">Favorite quote from a book</div>
+                                <div className="profile-quote-label">{t('profile.favoriteQuote')}</div>
                                 <p className="profile-quote-text">{profile.favoriteQuote}</p>
                             </div>
                         )}
                     </div>
 
                     <div className="card profile-things">
-                        <h3 className="display profile-side-title">A few favorite things</h3>
+                        <h3 className="display profile-side-title">{t('profile.favoriteThings')}</h3>
 
                         {things.length === 0 ? (
-                            <p className="profile-about-empty">Nothing added yet.</p>
+                            <p className="profile-about-empty">{t('profile.nothingAdded')}</p>
                         ) : (
                             <ul className="profile-things-list">
                                 {things.map((thing, index) => (
@@ -221,7 +223,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
 
                         {currentBook && (
                             <div className="profile-now">
-                                <div className="profile-now-label">Currently reading</div>
+                                <div className="profile-now-label">{t('profile.currentlyReading')}</div>
                                 <div className="profile-now-title">{currentBook.title}</div>
                                 <div className="profile-now-author">{currentBook.author}</div>
                             </div>
@@ -230,18 +232,18 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
 
                     <div className="card profile-side">
                         <img className="profile-side-cover" src="/bookish-shelf.jpg" alt="" />
-                        <h3 className="display profile-side-title">Bookish at heart</h3>
-                        <div className="profile-side-line">{profile.booksRead} books read</div>
-                        <div className="profile-side-line">{profile.reviewsCount} reviews shared</div>
+                        <h3 className="display profile-side-title">{t('profile.bookishAtHeart')}</h3>
+                        <div className="profile-side-line">{t('profile.booksRead', { count: profile.booksRead })}</div>
+                        <div className="profile-side-line">{t('profile.reviewsShared', { count: profile.reviewsCount })}</div>
                         <div className="profile-side-line">
-                            {profile.currentlyReading} books on the nightstand
+                            {t('profile.nightstand', { count: profile.currentlyReading })}
                         </div>
                     </div>
                 </div>
             );
         }
 
-        return <div className="card profile-empty">Coming soon.</div>
+        return <div className="card profile-empty">{t('profile.comingSoon')}</div>
     }
 
     const avatarSrc = getAvatarSrc(profile.avatarUrl);
@@ -266,15 +268,15 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     <div className="profile-stats">
                         <div className="profile-stat">
                             <div className="profile-stat-number">{profile.booksRead}</div>
-                            <div className="profile-stat-label">Books read</div>
+                            <div className="profile-stat-label">{t('profile.statBooksRead')}</div>
                         </div>
                         <div className="profile-stat">
                             <div className="profile-stat-number">{profile.reviewsCount}</div>
-                            <div className="profile-stat-label">Reviews</div>
+                            <div className="profile-stat-label">{t('profile.statReviews')}</div>
                         </div>
                         <div className="profile-stat">
                             <div className="profile-stat-number">{profile.currentlyReading}</div>
-                            <div className="profile-stat-label">Currently reading</div>
+                            <div className="profile-stat-label">{t('profile.statReading')}</div>
                         </div>
                     </div>
                 </div>
@@ -286,7 +288,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                         <path d="M12 20h9" />
                         <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
                     </svg>
-                    Edit profile
+                    {t('profile.editProfile')}
                 </Link>
             </div>
 
@@ -298,7 +300,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                         onClick={() => setSearchParams({ tab: tab.key })}
                     >
                         <Icon name={tab.key} />
-                        {tab.label}
+                        {t(`profile.tabs.${tab.key}`)}
                     </button>
                 ))}
             </div>

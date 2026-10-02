@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import BookModal, { statusLabels } from './BookModal';
+import { useTranslation } from 'react-i18next';
+import BookModal from './BookModal';
 
 function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
+    const { t } = useTranslation();
     const [showDetail, setShowDetail] = useState(false)
     const [coverFailed, setCoverFailed] = useState(false)
 
@@ -13,7 +15,7 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                 <button
                     className={`cover-heart ${book.isFavorite ? 'is-favorite' : ''}`}
                     onClick={() => onToggleFavorite(book.id, book.isFavorite)}
-                    aria-label={book.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    aria-label={book.isFavorite ? t('book.removeFavorite') : t('book.addFavorite')}
                 >
                     <svg width="16" height="16" viewBox="0 0 24 24"
                         fill={book.isFavorite ? 'currentColor' : 'none'}
@@ -38,9 +40,9 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                 <p className="book-author">{book.author}</p>
 
                 <div className="book-meta">
-                    <span className={`pill book-status status-${book.status}`}>{statusLabels[book.status] || book.status}</span>
+                    <span className={`pill book-status status-${book.status}`}>{t(`status.${book.status}`, { defaultValue: book.status })}</span>
                     {book.status !== 'want-to-read' && (
-                        <span className="progress-label">{book.progress}% complete</span>
+                        <span className="progress-label">{t('book.complete', { percent: book.progress })}</span>
                     )}
                 </div>
 
@@ -53,18 +55,18 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                 )}
 
                 <button className="read-more" onClick={() => setShowDetail(true)}>
-                    Read more
+                    {t('book.readMore')}
                 </button>
 
                 <div className="book-footer">
                     <button
                         className="like-button"
-                        onClick={() => onLike(book.id, book.hasLiked === 1)}
+                        onClick={() => onLike(book.id, book.hasLiked)}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
                         <svg
                             width="16" height="16" viewBox="0 0 24 24"
-                            fill={book.hasLiked === 1 ? 'var(--rose)' : 'none'}
+                            fill={book.hasLiked ? 'var(--rose)' : 'none'}
                             stroke="var(--rose)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
                         >
                             <path d="M12 20.5C12 20.5 4 15.7 4 9.9 4 7.1 6.1 5 8.8 5c1.6 0 3.1.8 3.9 2.1C13.5 5.8 15 5 16.6 5 19.3 5 21.4 7.1 21.4 9.9 21.4 15.7 12 20.5 12 20.5z"></path>
@@ -73,7 +75,7 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                     </button>
 
                     <span className="comment-count">
-                        {book.commentCount} {book.commentCount === 1 ? 'comment' : 'comments'}
+                        {t('book.comments', { count: book.commentCount })}
                     </span>
                 </div>
             </div>

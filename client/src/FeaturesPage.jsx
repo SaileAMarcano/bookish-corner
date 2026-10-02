@@ -1,57 +1,24 @@
 import PublicHeader from './PublicHeader';
 import PublicBand from './PublicBand';
 import PublicFooter from './PublicFooter';
+import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 
 const FEATURES = [
-    {
-        image: '/feature-track.jpg',
-        title: 'Track your reading',
-        text: 'Log your page and chapter, and watch your progress bar fill up as you go.',
-    },
-    {
-        image: '/feature-reviews.jpg',
-        title: 'Write and share reviews',
-        text: 'Say what a book made you feel, and read what others wrote about the same story.',
-    },
-    {
-        image: '/feature-comments.jpg',
-        title: 'Talk about the stories',
-        text: 'Like and comment on reviews, and keep the conversation kind and bookish.',
-    },
-    {
-        image: '/feature-library.jpg',
-        title: 'Build your personal library',
-        text: 'Every book you add lives on your shelf, with its status, your review and your favorites.',
-    },
-    {
-        image: '/feature-discover.jpg',
-        title: 'Discover new books',
-        text: 'Search millions of titles and open any book to see every review it has.',
-    },
-    {
-        image: '/feature-people.jpg',
-        title: 'Find your people',
-        text: "Visit other readers' profiles and follow the ones whose taste you love.",
-    },
-    {
-        image: '/feature-memories.jpg',
-        title: 'Keep your reading memories',
-        text: 'Set a yearly goal, save your favorites and look back on every book you finished.',
-    },
-    {
-        image: '/feature-cozy.jpg',
-        title: 'A cozy, ad-free space',
-        text: 'No ads and no noisy feeds. Just you, your books and a few kind people.',
-    },
-    {
-        image: '/feature-anywhere.jpg',
-        title: 'Read from anywhere',
-        text: 'Works in any browser, on your laptop or on your phone.',
-    },
+    { image: '/feature-track.jpg', key: 'track' },
+    { image: '/feature-reviews.jpg', key: 'reviews' },
+    { image: '/feature-comments.jpg', key: 'comments' },
+    { image: '/feature-library.jpg', key: 'library' },
+    { image: '/feature-discover.jpg', key: 'discover' },
+    { image: '/feature-people.jpg', key: 'people' },
+    { image: '/feature-memories.jpg', key: 'memories' },
+    { image: '/feature-cozy.jpg', key: 'cozy' },
+    { image: '/feature-anywhere.jpg', key: 'anywhere' },
 ];
 
 function FeaturesPages() {
+    const { t } = useTranslation();
+
     return (
         <div className="public-page">
             <PublicHeader />
@@ -59,34 +26,31 @@ function FeaturesPages() {
             <main>
                 <section className="public-hero public-hero-features">
                     <div className="public-hero-text">
-                        <p className="public-eyebrow">Features</p>
+                        <p className="public-eyebrow">{t('features.eyebrow')}</p>
                         <h1 className="display public-hero-title">
-                            Small tools for a bigger reading journey
+                            {t('features.title')}
                             <span className="public-title-heart">
                                 <Icon name="favorites" size={36} />
                             </span>
                         </h1>
 
-                        <p className="public-hero-lead">
-                            Everything you need to keep your reading life in one cozy place,
-                            and nothing that gets in the way of the books.
-                        </p>
+                        <p className="public-hero-lead">{t('features.lead')}</p>
                     </div>
                 </section>
 
                 <ul className="features-grid">
                     {FEATURES.map((feature) => (
-                        <li key={feature.title} className="features-item">
+                        <li key={feature.key} className="features-item">
                             <img src={feature.image} alt="" className="features-image" />
-                            <h2 className="display features-title">{feature.title}</h2>
-                            <p className="features-text">{feature.text}</p>
+                            <h2 className="display features-title">{t(`features.items.${feature.key}.title`)}</h2>
+                            <p className="features-text">{t(`features.items.${feature.key}.text`)}</p>
                         </li>
                     ))}
                 </ul>
 
                 <PublicBand
-                    quote="Good tools for brighter days."
-                    text="More than features, it's a home for your reading life."
+                    quote={t('features.bandQuote')}
+                    text={t('features.bandText')}
                 />
             </main>
 

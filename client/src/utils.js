@@ -1,4 +1,5 @@
 import { API_URL } from './api';
+import i18n from './i18n';
 
 export function getAvatarSrc(url) {
     if (!url) return '/default-avatar.png';
@@ -13,7 +14,7 @@ export function timeAgo(dateString) {
     if (!dateString) return '';
 
     const seconds = Math.round((parseDbDate(dateString) - Date.now()) / 1000);
-    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+    const rtf = new Intl.RelativeTimeFormat(i18n.language, { numeric: 'auto' });
 
     const units = [
         ['year', 31536000],
@@ -30,13 +31,13 @@ export function timeAgo(dateString) {
         }
     }
 
-    return 'just now';
+    return i18n.t('time.justNow');
 }
 
 export function formatDate(dateString) {
     if (!dateString) return '';
 
-    return parseDbDate(dateString).toLocaleDateString('en-US', {
+    return parseDbDate(dateString).toLocaleDateString(i18n.language, {
         month: 'short',
         day: 'numeric',
         year: 'numeric',
@@ -48,22 +49,14 @@ export function pagePercent(currentPage, totalPages) {
     return Math.min(100, Math.round(((currentPage || 0) * 100) / totalPages));
 }
 
-export const QUOTES = [
-    { text: 'I declare after all there is no enjoyment like reading!', author: 'Jane Austen' },
-    { text: 'Once you learn to read, you will be forever free.', author: 'Frederick Douglass' },
-    { text: 'Reading is to the mind what exercise is to the body.', author: 'Joseph Addison' },
-    { text: 'Books are the quietest and most constant of friends.', author: 'Charles W. Eliot' },
-    { text: 'A book is a garden, an orchard, a storehouse, a party.', author: 'Henry Ward Beecher' },
-    { text: 'A room without books is like a body without a soul.', author: 'Cicero' },
-    { text: 'Books are the treasured wealth of the world.', author: 'Henry David Thoreau' },
-];
-
 export function quoteOfTheDay() {
     const now = new Date();
     const startOfYear = new Date(now.getFullYear(), 0, 0);
     const dayOfYear = Math.floor((now - startOfYear) / 86400000);
 
-    return QUOTES[dayOfYear % QUOTES.length];
+    // The quotes live in the translation files, so they change with the language.
+    const quotes = i18n.t('quotes', { returnObjects: true });
+    return quotes[dayOfYear % quotes.length];
 }
 
 export function sortByLastRead(books) {
@@ -74,15 +67,20 @@ export function sortByLastRead(books) {
 
 export function pageSummary(book) {
     const pages = book.totalPages
-        ? `Page ${book.currentPage || 0} of ${book.totalPages}`
-        : 'Add the page count to track your progress';
-    const chapter = book.currentChapter ? ` · Chapter ${book.currentChapter}` : '';
+        ? i18n.t('pages.progress', { current: book.currentPage || 0, total: book.totalPages })
+        : i18n.t('pages.addCount');
+    const chapter = book.currentChapter ? i18n.t('pages.chapter', { chapter: book.currentChapter }) : '';
     return pages + chapter;
 }
 
 export function nightstandMessage(booksStatus, books) {
-    if (booksStatus === 'loading') return 'Loading your books...';
+    if (booksStatus === 'loading') return i18n.t('nightstand.loading');
     if (booksStatus === 'error') return '';
-    if (books.length === 0) return 'Your shelf is ready! Search for your first book to get started.';
-    return 'Nothing on your nightstand yet. Search for a book to get started.';
+    if (books.length === 0) return i18n.t('nightstand.emptyShelf');
+    return i18n.t('nightstand.nothing');
+}
+
+// Genre label in the current language. The database keeps the English name ("Fantasy").
+export function genreLabel(genre) {
+    return i18n.t(`genres.${genre}`, { defaultValue: genre });
 }

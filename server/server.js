@@ -2,6 +2,7 @@ const express = require('express');
 const { query, pool } = require('./database');
 const { descriptionFrom } = require('./openLibrary');
 const { uploadAvatar } = require('./storage');
+const { LANGUAGES, msg } = require('./messages');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -37,7 +38,7 @@ const upload = multer({
     limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         if (!AVATAR_TYPES.includes(file.mimetype)) {
-            const error = new Error('The photo must be a JPG, PNG or GIF image');
+            const error = new Error(msg(req, 'photoType'));
             error.status = 400;
             return cb(error);
         }
@@ -51,7 +52,7 @@ app.use('/uploads', express.static('uploads'));
 const PORT = 3000;
 function requireAuth(req, res, next) {
     if (!req.session.user) {
-        return res.status(401).json({ error: 'You must be logged in' });
+        return res.status(401).json({ error: msg(req, 'loginRequired') });
     }
     next();
 }
@@ -80,7 +81,7 @@ app.get('/api/search-books', async (req, res) => {
     const { q } = req.query;
 
     if (!q || q.trim() === '') {
-        return res.status(400).json({ error: 'A search term is required' });
+        return res.status(400).json({ error: msg(req, 'searchTermRequired') });
     }
 
     try {
@@ -102,14 +103,14 @@ app.get('/api/search-books', async (req, res) => {
         res.json(results);
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Could not search books right now' });
+        res.status(500).json({ error: msg(req, 'searchUnavailable') });
     }
 });
 
 app.post('/api/user-books', requireAuth, async (req, res) => {
     const { bookId } = req.body;
     if (!bookId) {
-        return res.status(400).json({ error: 'bookId is required' });
+        return res.status(400).json({ error: msg(req, 'bookIdRequired') });
     }
 
     try {
@@ -121,11 +122,11 @@ app.post('/api/user-books', requireAuth, async (req, res) => {
         res.status(201).json(entry);
     } catch (error) {
         if (error.code === '23505') {
-            return res.status(400).json({ error: 'You already added this book to your profile' });
+            return res.status(400).json({ error: msg(req, 'alreadyAdded') });
         }
         // 23503 = foreign_key_violation: that book does not exist
         if (error.code === '23503') {
-            return res.status(404).json({ error: 'Book not found' });
+            return res.status(404).json({ error: msg(req, 'bookNotFound') });
         }
         throw error;
     }
@@ -135,7 +136,7 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
     const { openLibraryKey, title, author, coverImage } = req.body;
 
     if (!openLibraryKey || !title) {
-        return res.status(400).json({ error: 'openLibraryKey and title are required' });
+        return res.status(400).json({ error: msg(req, 'searchDataRequired') });
     }
 
     let [book] = await query('SELECT * FROM works WHERE open_library_key = $1', [openLibraryKey]);
@@ -167,7 +168,7 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
         res.status(201).json({ id: entry.id, book });
     } catch (error) {
         if (error.code === '23505') {
-            return res.status(400).json({ error: 'You already added this book to your profile' });
+            return res.status(400).json({ error: msg(req, 'alreadyAdded') });
         }
         throw error;
     }
@@ -178,10 +179,10 @@ app.post('/api/user-books/:id/like', requireAuth, async (req, res) => {
 
     const [userBook] = await query('SELECT user_id FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
-        return res.status(404).json({ error: 'Review not found' });
+        return res.status(404).json({ error: msg(req, 'reviewNotFound') });
     }
     if (userBook.userId === req.session.user.id) {
-        return res.status(403).json({ error: "You can't like your own review" });
+        return res.status(403).json({ error: msg(req, 'ownReviewLike') });
     }
 
     try {
@@ -189,7 +190,7 @@ app.post('/api/user-books/:id/like', requireAuth, async (req, res) => {
         res.status(201).json({ message: 'Liked' });
     } catch (error) {
         if (error.code === '23505') {
-            return res.status(400).json({ error: 'You already liked this' });
+            return res.status(400).json({ error: msg(req, 'alreadyLiked') });
         }
         throw error;
     }
@@ -211,10 +212,10 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
 
     const [userBook] = await query('SELECT * FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
-        return res.status(404).json({ error: 'Not found' });
+        return res.status(404).json({ error: msg(req, 'notFound') });
     }
     if (userBook.userId !== req.session.user.id) {
-        return res.status(403).json({ error: 'You cannot edit this entry' });
+        return res.status(403).json({ error: msg(req, 'cannotEdit') });
     }
 
     const pageFields = [currentPage, totalPages, currentChapter];
@@ -222,12 +223,12 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
         (value) => value !== undefined && value !== null && (!Number.isInteger(value) || value < 0)
     );
     if (invalidNumber) {
-        return res.status(400).json({ error: 'Pages and chapters must be whole numbers' });
+        return res.status(400).json({ error: msg(req, 'wholeNumbers') });
     }
 
     const badRating = typeof rating !== 'number' || !Number.isInteger(rating * 2) || rating < 0 || rating > 5;
     if (rating !== undefined && badRating) {
-        return res.status(400).json({ error: 'Rating must be between 0 and 5, in half steps' });
+        return res.status(400).json({ error: msg(req, 'ratingRange') });
     }
 
     const newTotal = keepOrSet(totalPages, userBook.totalPages);
@@ -238,7 +239,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const newReview = keepOrSet(cleanReview, userBook.review);
 
     if (newTotal && newPage > newTotal) {
-        return res.status(400).json({ error: 'Current page cannot be higher than the total' });
+        return res.status(400).json({ error: msg(req, 'pageOverTotal') });
     }
 
     const statusChanged = status !== undefined && status !== userBook.status;
@@ -275,10 +276,10 @@ app.delete('/api/user-books/:id', requireAuth, async (req, res) => {
 
     const [userBook] = await query('SELECT user_id FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
-        return res.status(404).json({ error: 'Not found' });
+        return res.status(404).json({ error: msg(req, 'notFound') });
     }
     if (userBook.userId !== req.session.user.id) {
-        return res.status(403).json({ error: 'You cannot remove this entry' });
+        return res.status(403).json({ error: msg(req, 'cannotRemove') });
     }
 
     await query('DELETE FROM user_books WHERE id = $1', [id]);
@@ -315,7 +316,7 @@ app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
     const { text } = req.body;
 
     if (!text || text.trim() === '') {
-        return res.status(400).json({ error: 'Comment cannot be empty' });
+        return res.status(400).json({ error: msg(req, 'commentEmpty') });
     }
 
     try {
@@ -334,7 +335,7 @@ app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
         res.status(201).json(newComment);
     } catch (error) {
         if (error.code === '23503') {
-            return res.status(404).json({ error: 'Review not found' });
+            return res.status(404).json({ error: msg(req, 'reviewNotFound') });
         }
         throw error;
     }
@@ -354,41 +355,42 @@ app.get('/api/user-books/:id/comments', async (req, res) => {
 
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
-        return 'Password must be at least 8 characters';
+        return 'passwordLength';
     }
 
     if (!/\d/.test(password)) {
-        return 'Password must include a number';
+        return 'passwordNumber';
     }
     if (!/[a-z]/i.test(password)) {
-        return 'Password must include a letter';
+        return 'passwordLetter';
     }
     return null;
 }
 
 app.post('/api/register', async (req, res) => {
     const { username, email, password } = req.body;
+    const language = LANGUAGES.includes(req.body.language) ? req.body.language : 'en';
 
     if (!username || !email || !password) {
-        return res.status(400).json({ error: 'Username, email and password are required' });
+        return res.status(400).json({ error: msg(req, 'registerFieldsRequired') });
     }
 
     const problem = passwordProblem(password);
     if (problem) {
-        return res.status(400).json({ error: problem });
+        return res.status(400).json({ error: msg(req, problem) });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
 
     try {
         const [user] = await query(
-            'INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING id, username, email',
-            [username, email, passwordHash]
+            'INSERT INTO users (username, email, password_hash, language) VALUES ($1, $2, $3, $4) RETURNING id, username, email',
+            [username, email, passwordHash, language]
         );
         res.status(201).json(user);
     } catch (error) {
         if (error.code === '23505') {
-            return res.status(400).json({ error: 'Username or email already in use' });
+            return res.status(400).json({ error: msg(req, 'userTaken') });
         }
         throw error;
     }
@@ -398,23 +400,23 @@ app.post('/api/login', async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required' });
+        return res.status(400).json({ error: msg(req, 'loginFieldsRequired') });
     }
 
     const [user] = await query(
-        `SELECT id, username, email, password_hash, avatar_url, display_name, reading_goal, reader_type
+        `SELECT id, username, email, password_hash, avatar_url, display_name, reading_goal, reader_type, language
          FROM users WHERE email = $1`,
         [email]
     );
 
     if (!user) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+        return res.status(401).json({ error: msg(req, 'invalidLogin') });
     }
 
     const passwordMatches = await bcrypt.compare(password, user.passwordHash);
 
     if (!passwordMatches) {
-        return res.status(401).json({ error: 'Invalid email or password' });
+        return res.status(401).json({ error: msg(req, 'invalidLogin') });
     }
 
     req.session.user = {
@@ -431,26 +433,39 @@ app.post('/api/login', async (req, res) => {
         displayName: user.displayName || user.username,
         readingGoal: user.readingGoal,
         readerType: user.readerType,
+        language: user.language,
     });
 });
 
 app.get('/api/me', async (req, res) => {
     if (!req.session.user) {
-        return res.status(401).json({ error: 'Not logged in' });
+        return res.status(401).json({ error: msg(req, 'notLoggedIn') });
     }
 
     const [user] = await query(
-        `SELECT id, username, email, avatar_url, reading_goal, reader_type,
+        `SELECT id, username, email, avatar_url, reading_goal, reader_type, language,
                 COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
         [req.session.user.id]
     );
 
     if (!user) {
-        return res.status(401).json({ error: 'Not logged in' });
+        return res.status(401).json({ error: msg(req, 'notLoggedIn') });
     }
 
     res.json(user);
+});
+
+// Saves the language chosen with the EN / ES switcher.
+app.patch('/api/me/language', requireAuth, async (req, res) => {
+    const { language } = req.body;
+
+    if (!LANGUAGES.includes(language)) {
+        return res.status(400).json({ error: msg(req, 'languageInvalid') });
+    }
+
+    await query('UPDATE users SET language = $1 WHERE id = $2', [language, req.session.user.id]);
+    res.json({ language });
 });
 
 app.get('/api/profile', requireAuth, async (req, res) => {
@@ -476,7 +491,7 @@ const READER_TYPES = ['first-time', 'casual', 'avid'];
 app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res) => {
     const { bio, instagramUrl, tiktokUrl, location, readerType } = req.body;
     if (readerType !== undefined && !READER_TYPES.includes(readerType)) {
-        return res.status(400).json({ error: 'Please choose one of the reader types' });
+        return res.status(400).json({ error: msg(req, 'readerTypeInvalid') });
     }
     const aboutMe = req.body.aboutMe?.trim().slice(0, 600) || null;
     const favoriteQuote = req.body.favoriteQuote?.trim().slice(0, 200) || null;
@@ -511,7 +526,7 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res)
 app.post('/api/logout', (req, res) => {
     req.session.destroy((err) => {
         if (err) {
-            return res.status(500).json({ error: 'Could not log out' });
+            return res.status(500).json({ error: msg(req, 'logoutFailed') });
         }
         res.json({ message: 'Logged out successfully' });
     });
@@ -519,13 +534,13 @@ app.post('/api/logout', (req, res) => {
 
 app.use((error, req, res, next) => {
     if (error.code === 'LIMIT_FILE_SIZE') {
-        return res.status(400).json({ error: 'The photo must be 5 MB or smaller' });
+        return res.status(400).json({ error: msg(req, 'photoSize') });
     }
     if (error.status === 400) {
         return res.status(400).json({ error: error.message });
     }
     console.error(error);
-    res.status(500).json({ error: 'Something went wrong on our side. Please try again.' });
+    res.status(500).json({ error: msg(req, 'serverError') });
 });
 
 app.listen(PORT, () => {

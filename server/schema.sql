@@ -17,6 +17,7 @@ CREATE TABLE users(
     tiktok_url      TEXT,
     reading_goal    SMALLINT CHECK (reading_goal BETWEEN 1 AND 365),
     reader_type     TEXT CHECK (reader_type IN ('first-time', 'casual', 'avid')),
+    language        TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en', 'es')),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now() 
 );
 
