@@ -90,6 +90,16 @@ const ICONS = {
     comment: <path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-9l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z" />,
 
     bookmark: <path d="M6.5 4.5A1.5 1.5 0 0 1 8 3h8a1.5 1.5 0 0 1 1.5 1.5V21L12 17l-5.5 4z" />,
+
+    image: (
+        <>
+            <rect x="3.5" y="5" width="17" height="14" rx="2.5" />
+            <circle cx="9" cy="10" r="1.6" />
+            <path d="M20.5 16l-5-5L6 19" />
+        </>
+    ),
+
+    close: <path d="M6 6l12 12M18 6L6 18" />,
 };
 
 function Icon({ name, size = 17 }) {

@@ -8,6 +8,7 @@ import { getAvatarSrc, genreLabel } from './utils';
 import Notice from './Notice';
 import BookCover from './BookCover';
 import PostCard from './PostCard';
+import PostComposer from './PostComposer';
 
 const TABS = [
     { key: 'library' },
@@ -88,6 +89,10 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         setPosts((current) =>
             current.map((post) => (post.id === postId ? { ...post, ...changes } : post))
         );
+    };
+
+    const handlePostCreated = (post) => {
+        setPosts((current) => [post, ...(current || [])]);
     };
 
     if (profileError) {
@@ -264,26 +269,26 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         }
 
         if (activeTab === 'posts') {
-            if (postsError) {
-                return <Notice message={postsError} onRetry={loadPosts} />;
-            }
-            if (posts === null) {
-                return <div className="card profile-empty">{t('posts.loading')}</div>;
-            }
-            if (posts.length === 0) {
-                return <div className="card profile-empty">{t('posts.empty')}</div>;
-            }
-
             return (
                 <div className="post-list">
-                    {posts.map((post) => (
+                    <PostComposer books={books} onCreated={handlePostCreated} />
+
+                    {postsError && <Notice message={postsError} onRetry={loadPosts} />}
+
+                    {!postsError && posts === null && (
+                        <div className="card profile-empty">{t('posts.loading')}</div>
+                    )}
+
+                    {posts && posts.length === 0 && (
+                        <div className="card profile-empty">{t('posts.empty')}</div>
+                    )}
+
+                    {posts && posts.map((post) => (
                         <PostCard key={post.id} post={post} onChange={handlePostChange} />
                     ))}
                 </div>
             );
         }
-
-
         return <div className="card profile-empty">{t('profile.comingSoon')}</div>
     }
 
