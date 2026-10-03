@@ -94,6 +94,8 @@ CREATE TABLE comments (
     created_at   TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+
+
 CREATE INDEX ON editions (work_id);
 CREATE INDEX ON user_books (work_id);
 CREATE INDEX ON likes (user_book_id);

@@ -1,6 +1,3 @@
-// Messages the server sends to the app, in every language the app speaks.
-// The app says which language it wants with the Accept-Language header (see client/src/api.js).
-
 const LANGUAGES = ['en', 'es'];
 
 const MESSAGES = {
@@ -35,6 +32,9 @@ const MESSAGES = {
         logoutFailed: 'Could not log out',
         photoType: 'The photo must be a JPG, PNG or GIF image',
         photoSize: 'The photo must be 5 MB or smaller',
+        postEmpty: 'Write something, add an image or add a book',
+        postTooLong: 'A post can have up to 2000 characters',
+        tooManyBooks: 'A post can have up to 4 books',
         serverError: 'Something went wrong on our side. Please try again.',
     },
     es: {
@@ -68,17 +68,18 @@ const MESSAGES = {
         logoutFailed: 'No pudimos cerrar la sesión',
         photoType: 'La foto debe ser una imagen JPG, PNG o GIF',
         photoSize: 'La foto debe pesar 5 MB o menos',
+        postEmpty: 'Escribe algo, añade una imagen o añade un libro',
+        postTooLong: 'Un post puede tener hasta 2000 caracteres',
+        tooManyBooks: 'Un post puede tener hasta 4 libros',
         serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
     },
 };
 
-// The language the app asked for: "es..." means Spanish; anything else, English.
 function languageOf(req) {
     const header = (req.get('Accept-Language') || '').toLowerCase();
     return header.startsWith('es') ? 'es' : 'en';
 }
 
-// msg(req, 'invalidLogin') -> the message in the language of that request.
 function msg(req, key) {
     return MESSAGES[languageOf(req)][key] || MESSAGES.en[key] || key;
 }

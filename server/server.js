@@ -46,7 +46,6 @@ const upload = multer({
     },
 });
 
-// Old profile photos (before Supabase Storage). Remove when nobody uses /uploads anymore.
 app.use('/uploads', express.static('uploads'));
 
 const PORT = 3000;
@@ -58,8 +57,6 @@ function requireAuth(req, res, next) {
 }
 
 
-// Book titles and descriptions in the language of the request:
-// the translation if there is one, if not the original from works.
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
 const TRANSLATED_DESCRIPTION = 'COALESCE(t.description, w.description)';
 const JOIN_TRANSLATION = 'LEFT JOIN work_translations t ON t.work_id = w.id AND t.language';
@@ -90,15 +87,10 @@ app.get('/api/books/recent', requireAuth, async (req, res) => {
     res.json(books);
 });
 
-// Search: first our own catalog (in English and Spanish), then Open Library
-// fills the list up to the limit with books we do not have yet.
-// ?limit=4 is used by the quick results under the search bar (default and maximum: 10).
 const SEARCH_LIMIT = 10;
 
-// Accents and capitals do not matter: "cien anos" finds "Cien años".
 const plainText = (sql) => `translate(lower(${sql}), 'áàäâãéèëêíìïîóòöôõúùüûñç', 'aaaaaeeeeiiiiooooouuuunc')`;
 const plainSearch = (text) => text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-// % and _ are wildcards in LIKE; a backslash in front makes them normal characters.
 const escapeLike = (text) => text.replace(/[\\%_]/g, (char) => `\\${char}`);
 
 async function searchCatalog(q, language, limit) {
@@ -123,7 +115,6 @@ async function searchCatalog(q, language, limit) {
 async function searchOpenLibrary(q, limit) {
     const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year,cover_i`;
 
-    // If Open Library takes more than 8 seconds, we stop waiting.
     const response = await fetch(url, {
         headers: { 'User-Agent': 'BookishCorner/1.0' },
         signal: AbortSignal.timeout(8000),
@@ -163,15 +154,12 @@ app.get('/api/search-books', async (req, res) => {
         fromOpenLibrary = await searchOpenLibrary(q, limit);
     } catch (error) {
         console.error('Open Library search failed', error);
-        // With some results from our catalog, we show those; with none, it is an error.
         if (results.length === 0) {
             return res.status(500).json({ error: msg(req, 'searchUnavailable') });
         }
         return res.json(results);
     }
 
-    // Open Library can return books we already have under another title:
-    // those use our catalog (translated title, our id).
     const keys = fromOpenLibrary.map((book) => book.openLibraryKey);
     const known = await query(`
         SELECT w.id AS book_id, w.open_library_key, ${TRANSLATED_TITLE} AS title, w.author,
@@ -442,6 +430,98 @@ app.get('/api/user-books/:id/comments', async (req, res) => {
     res.json(comments);
 });
 
+const POST_MAX_LENGTH = 2000;
+const POST_MAX_BOOKS = 4;
+
+function parseBookIds(value) {
+    const list = Array.isArray(value) ? value : String(value ?? '').split(',');
+    const ids = list
+        .map((item) => Number(item))
+        .filter((id) => Number.isInteger(id) && id > 0);
+    return [...new Set(ids)];
+}
+
+async function findPosts(req, column, value) {
+    return query(`
+        SELECT p.id, p.text, p.image_url, p.created_at,
+               u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
+               (SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id) AS comment_count,
+               EXISTS (SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $2) AS has_liked,
+               EXISTS (SELECT 1 FROM saved_posts sp WHERE sp.post_id = p.id AND sp.user_id = $2) AS has_saved,
+               COALESCE((
+                   SELECT json_agg(json_build_object(
+                              'id', w.id,
+                              'title', ${TRANSLATED_TITLE},
+                              'author', w.author,
+                              'coverImage', w.cover_image
+                          ) ORDER BY pb.position)
+                   FROM post_books pb
+                   JOIN works w ON w.id = pb.work_id
+                   ${JOIN_TRANSLATION} = $3
+                   WHERE pb.post_id = p.id
+               ), '[]') AS books
+        FROM posts p
+        JOIN users u ON u.id = p.user_id
+        WHERE ${column} = $1
+        ORDER BY p.created_at DESC
+    `, [value, req.session.user.id, languageOf(req)]);
+}
+
+app.post('/api/posts', requireAuth, async (req, res) => {
+    const text = req.body.text?.trim() || null;
+    const bookIds = parseBookIds(req.body.bookIds);
+
+    if (!text && bookIds.length === 0) {
+        return res.status(400).json({ error: msg(req, 'postEmpty') });
+    }
+    if (text && text.length > POST_MAX_LENGTH) {
+        return res.status(400).json({ error: msg(req, 'postTooLong') });
+    }
+    if (bookIds.length > POST_MAX_BOOKS) {
+        return res.status(400).json({ error: msg(req, 'tooManyBooks') });
+    }
+
+    const client = await pool.connect();
+    let postId;
+
+    try {
+        await client.query('BEGIN');
+
+        const result = await client.query(
+            'INSERT INTO posts (user_id, text) VALUES ($1, $2) RETURNING id',
+            [req.session.user.id, text]
+        );
+        postId = result.rows[0].id;
+
+        for (let i = 0; i < bookIds.length; i++) {
+            await client.query(
+                'INSERT INTO post_books (post_id, work_id, position) VALUES ($1, $2, $3)',
+                [postId, bookIds[i], i]
+            );
+        }
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        if (error.code === '23503') {
+            return res.status(404).json({ error: msg(req, 'bookNotFound') });
+        }
+        throw error;
+    } finally {
+        client.release();
+    }
+
+    const [post] = await findPosts(req, 'p.id', postId);
+    res.status(201).json(post);
+});
+
+app.get('/api/post', requireAuth, async (req, res) => {
+    const posts = await findPosts(req, 'p.user_id', req.session.user.id);
+    res.json(posts);
+});
+
+
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
         return 'passwordLength';
@@ -533,7 +613,7 @@ app.get('/api/me', async (req, res) => {
 
     const [user] = await query(
         `SELECT id, username, email, avatar_url, reading_goal, reader_type, language,
-                COALESCE(display_name, username) AS display_name
+    COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
         [req.session.user.id]
     );
@@ -545,7 +625,6 @@ app.get('/api/me', async (req, res) => {
     res.json(user);
 });
 
-// Saves the language chosen with the EN / ES switcher.
 app.patch('/api/me/language', requireAuth, async (req, res) => {
     const { language } = req.body;
 
@@ -560,13 +639,13 @@ app.patch('/api/me/language', requireAuth, async (req, res) => {
 app.get('/api/profile', requireAuth, async (req, res) => {
     const [user] = await query(`
         SELECT id, username, email, bio, avatar_url, instagram_url, tiktok_url, about_me, favorite_quote,
-               favorite_things, location, reading_goal, reader_type,
-               COALESCE(display_name, username) AS display_name,
-               (SELECT COUNT(*) FROM user_books
+    favorite_things, location, reading_goal, reader_type,
+    COALESCE(display_name, username) AS display_name,
+        (SELECT COUNT(*) FROM user_books
                    WHERE user_books.user_id = users.id AND user_books.status = 'finished') AS books_read,
-               (SELECT COUNT(*) FROM user_books
+    (SELECT COUNT(*) FROM user_books
                    WHERE user_books.user_id = users.id AND user_books.review IS NOT NULL) AS reviews_count,
-               (SELECT COUNT(*) FROM user_books
+    (SELECT COUNT(*) FROM user_books
                    WHERE user_books.user_id = users.id AND user_books.status = 'reading') AS currently_reading
         FROM users
         WHERE users.id = $1
@@ -590,7 +669,6 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res)
     const readingGoal = goal >= 1 && goal <= 365 ? goal : null;
     const avatarUrl = req.file ? await uploadAvatar(req.file) : null;
 
-    // Remember the old photo so it can be deleted once the new one is saved.
     let oldAvatarUrl = null;
     if (avatarUrl) {
         const [current] = await query('SELECT avatar_url FROM users WHERE id = $1', [req.session.user.id]);
@@ -600,20 +678,20 @@ app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res)
     const [user] = await query(`
         UPDATE users
         SET bio = COALESCE($1, bio),
-            display_name = COALESCE($2, display_name),
-            about_me = COALESCE($3, about_me),
-            favorite_quote = COALESCE($4, favorite_quote),
-            favorite_things = COALESCE($5, favorite_things),
-            location = COALESCE($6, location),
-            instagram_url = COALESCE($7, instagram_url),
-            tiktok_url = COALESCE($8, tiktok_url),
-            reading_goal = COALESCE($9, reading_goal),
-            reader_type = COALESCE($10, reader_type),
-            avatar_url = COALESCE($11, avatar_url)
+    display_name = COALESCE($2, display_name),
+    about_me = COALESCE($3, about_me),
+    favorite_quote = COALESCE($4, favorite_quote),
+    favorite_things = COALESCE($5, favorite_things),
+    location = COALESCE($6, location),
+    instagram_url = COALESCE($7, instagram_url),
+    tiktok_url = COALESCE($8, tiktok_url),
+    reading_goal = COALESCE($9, reading_goal),
+    reader_type = COALESCE($10, reader_type),
+    avatar_url = COALESCE($11, avatar_url)
         WHERE id = $12
         RETURNING id, username, email, bio, avatar_url, instagram_url, tiktok_url, about_me, favorite_quote,
-                  favorite_things, location, reading_goal, reader_type,
-                  COALESCE(display_name, username) AS display_name
+    favorite_things, location, reading_goal, reader_type,
+    COALESCE(display_name, username) AS display_name
     `, [bio, displayName, aboutMe, favoriteQuote, favoriteThings, location, instagramUrl, tiktokUrl, readingGoal, readerType, avatarUrl, req.session.user.id]);
 
     if (oldAvatarUrl && oldAvatarUrl !== avatarUrl) {
@@ -645,4 +723,4 @@ app.use((error, req, res, next) => {
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
-});
+});
