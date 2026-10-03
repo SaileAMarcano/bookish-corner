@@ -3697,7 +3697,7 @@ html {
 .cover-empty {
   background: linear-gradient(150deg, var(--rose), var(--lavender));
 }
-/* ---------- Language switcher (EN / ES) ---------- */
+
 
 .language-switcher {
   display: inline-flex;
@@ -3756,16 +3756,14 @@ html {
   }
 }
 
-/* ===== Search results on any page (Session 19) ===== */
 .app-main .search-page {
   padding-bottom: 24px;
 }
 
-.app-main .search-page + .page {
+.app-main .search-page+.page {
   padding-top: 0;
 }
 
-/* ===== Search bar with quick results (Session 19) ===== */
 .search-box {
   position: relative;
   width: 100%;
@@ -3967,7 +3965,6 @@ html {
     display: none;
   }
 
-  /* On a phone the label is too long: the check / plus icon is enough. */
   .quick-label {
     display: none;
   }
@@ -3977,5 +3974,148 @@ html {
     width: 36px;
     padding: 0;
     justify-content: center;
+  }
+}
+
+.post-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 720px;
+}
+
+.post-card {
+  padding: 24px 28px 14px;
+}
+
+.post-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.post-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-author {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.post-date {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.post-text {
+  margin: 0 0 16px;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+.post-image {
+  display: block;
+  width: 100%;
+  max-height: 480px;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.post-books {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.post-book {
+  display: flex;
+  flex: 1 1 220px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  background: var(--bg);
+}
+
+.post-book-cover {
+  flex-shrink: 0;
+  width: 48px;
+  height: 72px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.post-book-info {
+  min-width: 0;
+}
+
+.post-book-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.post-book-author {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.post-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding-top: 10px;
+  border-top: 1px solid var(--surface-2);
+}
+
+.post-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 999px;
+  background: none;
+  color: var(--text-2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+button.post-action {
+  cursor: pointer;
+}
+
+button.post-action:hover {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.post-action.active {
+  color: var(--rose-ink);
+}
+
+.post-action.active svg {
+  fill: currentColor;
+}
+
+@media (max-width: 480px) {
+  .post-card {
+    padding: 18px 16px 10px;
+  }
+
+  .post-action {
+    padding: 0 10px;
   }
 }

@@ -86,6 +86,10 @@ const ICONS = {
     arrowRight: <path d="M5 12h14M13 6l6 6-6 6" />,
 
     arrowLeft: <path d="M19 12H5M11 6l-6 6 6 6" />,
+
+    comment: <path d="M5 5h14a1.5 1.5 0 0 1 1.5 1.5v9A1.5 1.5 0 0 1 19 17h-9l-4.5 3.5V17H5a1.5 1.5 0 0 1-1.5-1.5v-9A1.5 1.5 0 0 1 5 5z" />,
+
+    bookmark: <path d="M6.5 4.5A1.5 1.5 0 0 1 8 3h8a1.5 1.5 0 0 1 1.5 1.5V21L12 17l-5.5 4z" />,
 };
 
 function Icon({ name, size = 17 }) {

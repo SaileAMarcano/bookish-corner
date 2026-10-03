@@ -302,6 +302,14 @@ const en = {
         statReading: 'Currently reading',
         editProfile: 'Edit profile',
     },
+    posts: {
+        loading: 'Loading posts...',
+        empty: "No posts yet. Share what you're reading or thinking.",
+        like: 'Like',
+        comment: 'Comment',
+        save: 'Save',
+        saved: 'Saved',
+    },
     edit: {
         myProfile: 'My profile',
         title: 'Edit profile',

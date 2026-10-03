@@ -302,6 +302,14 @@ const es = {
         statReading: 'Leyendo ahora',
         editProfile: 'Editar perfil',
     },
+    posts: {
+        loading: 'Cargando publicaciones...',
+        empty: 'Todavía no hay publicaciones. Comparte qué estás leyendo o pensando.',
+        like: 'Me gusta',
+        comment: 'Comentar',
+        save: 'Guardar',
+        saved: 'Guardado',
+    },
     edit: {
         myProfile: 'Mi perfil',
         title: 'Editar perfil',

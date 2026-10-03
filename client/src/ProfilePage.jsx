@@ -7,6 +7,7 @@ import { apiFetch } from './api';
 import { getAvatarSrc, genreLabel } from './utils';
 import Notice from './Notice';
 import BookCover from './BookCover';
+import PostCard from './PostCard';
 
 const TABS = [
     { key: 'library' },
@@ -53,11 +54,13 @@ function FavoriteCard({ book, onToggleFavorite }) {
 }
 
 function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
-    const { t } = useTranslation();
+    const { t, i18n } = useTranslation();
     const [profile, setProfile] = useState(null);
     const [profileError, setProfileError] = useState('');
     const [searchParams, setSearchParams] = useSearchParams();
     const activeTab = searchParams.get('tab') || 'library';
+    const [posts, setPosts] = useState(null);
+    const [postsError, setPostsError] = useState('');
 
     const loadProfile = () => {
         setProfileError('');
@@ -69,6 +72,23 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     useEffect(() => {
         loadProfile();
     }, []);
+
+    const loadPosts = () => {
+        setPostsError('');
+        apiFetch('/api/posts')
+            .then((data) => setPosts(data))
+            .catch((error) => setPostsError(error.message));
+    };
+
+    useEffect(() => {
+        loadPosts();
+    }, [i18n.language]);
+
+    const handlePostChange = (postId, changes) => {
+        setPosts((current) =>
+            current.map((post) => (post.id === postId ? { ...post, ...changes } : post))
+        );
+    };
 
     if (profileError) {
         return (
@@ -242,6 +262,27 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                 </div>
             );
         }
+
+        if (activeTab === 'posts') {
+            if (postsError) {
+                return <Notice message={postsError} onRetry={loadPosts} />;
+            }
+            if (posts === null) {
+                return <div className="card profile-empty">{t('posts.loading')}</div>;
+            }
+            if (posts.length === 0) {
+                return <div className="card profile-empty">{t('posts.empty')}</div>;
+            }
+
+            return (
+                <div className="post-list">
+                    {posts.map((post) => (
+                        <PostCard key={post.id} post={post} onChange={handlePostChange} />
+                    ))}
+                </div>
+            );
+        }
+
 
         return <div className="card profile-empty">{t('profile.comingSoon')}</div>
     }
