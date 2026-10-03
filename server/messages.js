@@ -35,6 +35,8 @@ const MESSAGES = {
         postEmpty: 'Write something, add an image or add a book',
         postTooLong: 'A post can have up to 2000 characters',
         tooManyBooks: 'A post can have up to 4 books',
+        postNotFound: 'Post not found',
+        cannotDeletePost: 'You can only delete your own posts',
         serverError: 'Something went wrong on our side. Please try again.',
     },
     es: {
@@ -71,6 +73,8 @@ const MESSAGES = {
         postEmpty: 'Escribe algo, añade una imagen o añade un libro',
         postTooLong: 'Un post puede tener hasta 2000 caracteres',
         tooManyBooks: 'Un post puede tener hasta 4 libros',
+        postNotFound: 'No encontramos esa publicación',
+        cannotDeletePost: 'Solo puedes borrar tus propias publicaciones',
         serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
     },
 };

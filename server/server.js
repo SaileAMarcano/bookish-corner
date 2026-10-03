@@ -525,6 +525,84 @@ app.get('/api/posts', requireAuth, async (req, res) => {
     res.json(posts);
 });
 
+async function postFromUrl(req) {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return undefined;
+
+    const [post] = await query('SELECT id, user_id, image_url FROM posts WHERE id = $1', [id]);
+    return post;
+}
+
+async function likeState(req, postId) {
+    const [state] = await query(`
+        SELECT (SELECT COUNT(*) FROM post_likes WHERE post_id = $1) AS like_count,
+               EXISTS (SELECT 1 FROM post_likes WHERE post_id = $1 AND user_id = $2) AS has_liked
+    `, [postId, req.session.user.id]);
+    return state;
+}
+
+app.post('/api/posts/:id/like', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    await query(
+        'INSERT INTO post_likes (user_id, post_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [req.session.user.id, post.id]
+    );
+    res.json(await likeState(req, post.id));
+});
+
+app.delete('/api/posts/:id/like', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    await query('DELETE FROM post_likes WHERE user_id = $1 AND post_id = $2', [req.session.user.id, post.id]);
+    res.json(await likeState(req, post.id));
+});
+
+app.post('/api/posts/:id/save', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    await query(
+        'INSERT INTO saved_posts (user_id, post_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [req.session.user.id, post.id]
+    );
+    res.json({ hasSaved: true });
+});
+
+app.delete('/api/posts/:id/save', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    await query('DELETE FROM saved_posts WHERE user_id = $1 AND post_id = $2', [req.session.user.id, post.id]);
+    res.json({ hasSaved: false });
+});
+
+app.delete('/api/posts/:id', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+    if (post.userId !== req.session.user.id) {
+        return res.status(403).json({ error: msg(req, 'cannotDeletePost') });
+    }
+
+    await query('DELETE FROM posts WHERE id = $1', [post.id]);
+
+    if (post.imageUrl) {
+        await deletePostImage(post.imageUrl);
+    }
+    res.json({ message: 'Post deleted' });
+});
 
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
