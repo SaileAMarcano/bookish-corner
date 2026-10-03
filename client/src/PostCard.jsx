@@ -3,12 +3,17 @@ import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import BookCover from './BookCover';
 import Notice from './Notice';
+import PostComments from './PostComments';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
-function PostCard({ post, onChange }) {
+function PostCard({ post, currentUserId, onChange, onDeleted }) {
     const { t } = useTranslation();
     const [error, setError] = useState('');
+    const [showComments, setShowComments] = useState(false);
+    const [confirmDelete, setConfirmDelete] = useState(false);
+
+    const isOwner = post.userId === currentUserId;
 
     const handleLike = () => {
         setError('');
@@ -24,6 +29,16 @@ function PostCard({ post, onChange }) {
             .catch((err) => setError(err.message));
     };
 
+    const handleDelete = () => {
+        setError('');
+        apiFetch(`/api/posts/${post.id}`, { method: 'DELETE' })
+            .then(() => onDeleted(post.id))
+            .catch((err) => {
+                setError(err.message);
+                setConfirmDelete(false);
+            });
+    };
+
     return (
         <article className="card post-card">
             <header className="post-head">
@@ -32,7 +47,33 @@ function PostCard({ post, onChange }) {
                     <div className="post-author">{post.displayName}</div>
                     <div className="post-date">{timeAgo(post.createdAt)}</div>
                 </div>
+
+                {isOwner && (
+                    <button
+                        type="button"
+                        className="post-delete"
+                        onClick={() => setConfirmDelete(true)}
+                        aria-label={t('posts.deletePost')}
+                        title={t('posts.deletePost')}
+                    >
+                        <Icon name="trash" />
+                    </button>
+                )}
             </header>
+
+            {confirmDelete && (
+                <div className="post-confirm" role="alert">
+                    <p>{t('posts.confirmDelete')}</p>
+                    <div className="post-confirm-actions">
+                        <button type="button" className="post-confirm-cancel" onClick={() => setConfirmDelete(false)}>
+                            {t('common.cancel')}
+                        </button>
+                        <button type="button" className="post-confirm-delete" onClick={handleDelete}>
+                            {t('posts.delete')}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {post.text && <p className="post-text">{post.text}</p>}
 
@@ -65,10 +106,15 @@ function PostCard({ post, onChange }) {
                     {t('posts.like')} ({post.likeCount})
                 </button>
 
-                <span className="post-action">
+                <button
+                    type="button"
+                    className={`post-action ${showComments ? 'open' : ''}`}
+                    onClick={() => setShowComments(!showComments)}
+                    aria-expanded={showComments}
+                >
                     <Icon name="comment" />
                     {t('posts.comment')} ({post.commentCount})
-                </span>
+                </button>
 
                 <button
                     type="button"
@@ -80,6 +126,14 @@ function PostCard({ post, onChange }) {
                     {post.hasSaved ? t('posts.saved') : t('posts.save')}
                 </button>
             </footer>
+
+            {showComments && (
+                <PostComments
+                    post={post}
+                    currentUserId={currentUserId}
+                    onCountChange={(count) => onChange(post.id, { commentCount: count })}
+                />
+            )}
         </article>
     );
 }

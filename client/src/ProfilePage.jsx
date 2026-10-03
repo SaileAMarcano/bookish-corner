@@ -95,6 +95,10 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         setPosts((current) => [post, ...(current || [])]);
     };
 
+    const handlePostDeleted = (postId) => {
+        setPosts((current) => current.filter((post) => post.id !== postId));
+    };
+
     if (profileError) {
         return (
             <main className="page">
@@ -284,7 +288,13 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     )}
 
                     {posts && posts.map((post) => (
-                        <PostCard key={post.id} post={post} onChange={handlePostChange} />
+                        <PostCard
+                            key={post.id}
+                            post={post}
+                            currentUserId={profile.id}
+                            onChange={handlePostChange}
+                            onDeleted={handlePostDeleted}
+                        />
                     ))}
                 </div>
             );
