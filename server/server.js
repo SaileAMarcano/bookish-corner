@@ -1,7 +1,7 @@
 const express = require('express');
 const { query, pool } = require('./database');
 const { descriptionFrom } = require('./openLibrary');
-const { uploadAvatar, deleteAvatar } = require('./storage');
+const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage } = require('./storage');
 const { LANGUAGES, languageOf, msg } = require('./messages');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
@@ -199,7 +199,6 @@ app.post('/api/user-books', requireAuth, async (req, res) => {
         if (error.code === '23505') {
             return res.status(400).json({ error: msg(req, 'alreadyAdded') });
         }
-        // 23503 = foreign_key_violation: that book does not exist
         if (error.code === '23503') {
             return res.status(404).json({ error: msg(req, 'bookNotFound') });
         }
@@ -468,11 +467,11 @@ async function findPosts(req, column, value) {
     `, [value, req.session.user.id, languageOf(req)]);
 }
 
-app.post('/api/posts', requireAuth, async (req, res) => {
+app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => {
     const text = req.body.text?.trim() || null;
     const bookIds = parseBookIds(req.body.bookIds);
 
-    if (!text && bookIds.length === 0) {
+    if (!text && bookIds.length === 0 && !req.file) {
         return res.status(400).json({ error: msg(req, 'postEmpty') });
     }
     if (text && text.length > POST_MAX_LENGTH) {
@@ -482,6 +481,8 @@ app.post('/api/posts', requireAuth, async (req, res) => {
         return res.status(400).json({ error: msg(req, 'tooManyBooks') });
     }
 
+    const imageUrl = req.file ? await uploadPostImage(req.file) : null;
+
     const client = await pool.connect();
     let postId;
 
@@ -489,8 +490,8 @@ app.post('/api/posts', requireAuth, async (req, res) => {
         await client.query('BEGIN');
 
         const result = await client.query(
-            'INSERT INTO posts (user_id, text) VALUES ($1, $2) RETURNING id',
-            [req.session.user.id, text]
+            'INSERT INTO posts (user_id, text, image_url) VALUES ($1, $2, $3) RETURNING id',
+            [req.session.user.id, text, imageUrl]
         );
         postId = result.rows[0].id;
 
@@ -504,6 +505,9 @@ app.post('/api/posts', requireAuth, async (req, res) => {
         await client.query('COMMIT');
     } catch (error) {
         await client.query('ROLLBACK');
+        if (imageUrl) {
+            await deletePostImage(imageUrl);
+        }
         if (error.code === '23503') {
             return res.status(404).json({ error: msg(req, 'bookNotFound') });
         }
@@ -516,7 +520,7 @@ app.post('/api/posts', requireAuth, async (req, res) => {
     res.status(201).json(post);
 });
 
-app.get('/api/post', requireAuth, async (req, res) => {
+app.get('/api/posts', requireAuth, async (req, res) => {
     const posts = await findPosts(req, 'p.user_id', req.session.user.id);
     res.json(posts);
 });

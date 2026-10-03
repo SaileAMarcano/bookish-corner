@@ -13,41 +13,44 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SEC
 });
 
 const AVATAR_BUCKET = 'avatars';
+const POST_IMAGE_BUCKET = 'post-images';
 const EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif' };
 
 
-async function uploadAvatar(file) {
+async function uploadImage(bucket, file) {
     const fileName = `${crypto.randomUUID()}.${EXTENSIONS[file.mimetype]}`;
 
     const { error } = await supabase.storage
-        .from(AVATAR_BUCKET)
+        .from(bucket)
         .upload(fileName, file.buffer, { contentType: file.mimetype });
 
     if (error) {
-        throw new Error(`Could not upload the photo: ${error.message}`);
+        throw new Error(`Could not upload the image: ${error.message}`);
     }
 
-    const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl(fileName);
+    const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
     return data.publicUrl;
 }
 
-// Deletes an old photo from the bucket. Only photos that live in our bucket:
-// old local ones (/uploads/...) or empty values are ignored.
-async function deleteAvatar(publicUrl) {
-    const { data } = supabase.storage.from(AVATAR_BUCKET).getPublicUrl('');
-    const bucketUrl = data.publicUrl; // ".../storage/v1/object/public/avatars/"
+async function deleteImage(bucket, publicUrl) {
+    const { data } = supabase.storage.from(bucket).getPublicUrl('');
+    const bucketUrl = data.publicUrl;
 
     if (!publicUrl || !publicUrl.startsWith(bucketUrl)) return;
 
     const fileName = publicUrl.slice(bucketUrl.length);
 
-    // The new photo is already saved, so a failed delete is only logged.
     try {
-        const { error } = await supabase.storage.from(AVATAR_BUCKET).remove([fileName]);
+        const { error } = await supabase.storage.from(bucket).remove([fileName]);
         if (error) throw error;
     } catch (error) {
-        console.error(`Could not delete the old photo ${fileName}: ${error.message}`);
+        console.error(`Could not delete the image ${fileName}: ${error.message}`);
     }
 }
 
-module.exports = { uploadAvatar, deleteAvatar };
+const uploadAvatar = (file) => uploadImage(AVATAR_BUCKET, file);
+const deleteAvatar = (publicUrl) => deleteImage(AVATAR_BUCKET, publicUrl);
+const uploadPostImage = (file) => uploadImage(POST_IMAGE_BUCKET, file);
+const deletePostImage = (publicUrl) => deleteImage(POST_IMAGE_BUCKET, publicUrl);
+
+module.exports = { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage };
