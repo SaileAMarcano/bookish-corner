@@ -604,6 +604,86 @@ app.delete('/api/posts/:id', requireAuth, async (req, res) => {
     res.json({ message: 'Post deleted' });
 });
 
+const COMMENT_MAX_LENGTH = 1000;
+
+const POST_COMMENT_FIELDS = `
+    c.id, c.text, c.created_at,
+    u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url
+`;
+
+app.post('/api/posts/:id/comments', requireAuth, async (req, res) => {
+    const text = req.body.text?.trim() || '';
+
+    if (text === '') {
+        return res.status(400).json({ error: msg(req, 'commentEmpty') });
+    }
+    if (text.length > COMMENT_MAX_LENGTH) {
+        return res.status(400).json({ error: msg(req, 'commentTooLong') });
+    }
+
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    const [created] = await query(
+        'INSERT INTO post_comments (user_id, post_id, text) VALUES ($1, $2, $3) RETURNING id',
+        [req.session.user.id, post.id, text]
+    );
+
+    const [comment] = await query(`
+        SELECT ${POST_COMMENT_FIELDS}
+        FROM post_comments c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.id = $1
+    `, [created.id]);
+
+    res.status(201).json(comment);
+});
+
+app.get('/api/posts/:id/comments', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    const comments = await query(`
+        SELECT ${POST_COMMENT_FIELDS}
+        FROM post_comments c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.post_id = $1
+        ORDER BY c.created_at
+    `, [post.id]);
+
+    res.json(comments);
+});
+
+app.delete('/api/post-comments/:id', requireAuth, async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'commentNotFound') });
+    }
+
+    const [comment] = await query(`
+        SELECT c.id, c.user_id, p.user_id AS post_author_id
+        FROM post_comments c
+        JOIN posts p ON p.id = c.post_id
+        WHERE c.id = $1
+    `, [id]);
+
+    if (!comment) {
+        return res.status(404).json({ error: msg(req, 'commentNotFound') });
+    }
+
+    const me = req.session.user.id;
+    if (comment.userId !== me && comment.postAuthorId !== me) {
+        return res.status(403).json({ error: msg(req, 'cannotDeleteComment') });
+    }
+
+    await query('DELETE FROM post_comments WHERE id = $1', [comment.id]);
+    res.json({ message: 'Comment deleted' });
+});
+
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
         return 'passwordLength';

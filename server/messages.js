@@ -37,6 +37,9 @@ const MESSAGES = {
         tooManyBooks: 'A post can have up to 4 books',
         postNotFound: 'Post not found',
         cannotDeletePost: 'You can only delete your own posts',
+        commentTooLong: 'A comment can have up to 1000 characters',
+        commentNotFound: 'Comment not found',
+        cannotDeleteComment: 'You can only delete your own comments or comments on your posts',
         serverError: 'Something went wrong on our side. Please try again.',
     },
     es: {
@@ -75,6 +78,9 @@ const MESSAGES = {
         tooManyBooks: 'Un post puede tener hasta 4 libros',
         postNotFound: 'No encontramos esa publicación',
         cannotDeletePost: 'Solo puedes borrar tus propias publicaciones',
+        commentTooLong: 'Un comentario puede tener hasta 1000 caracteres',
+        commentNotFound: 'No encontramos ese comentario',
+        cannotDeleteComment: 'Solo puedes borrar tus comentarios o los comentarios de tus publicaciones',
         serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
     },
 };
