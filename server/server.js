@@ -580,7 +580,7 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
         client.release();
     }
 
-    const [post] = await findPosts(req, 'p.id', postId);
+    const [post] = await findPosts(req, 'p.id = $1', postId);
     res.status(201).json(post);
 });
 
