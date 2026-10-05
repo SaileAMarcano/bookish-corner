@@ -4570,7 +4570,7 @@ button.post-action:hover {
 }
 
 .tag-input-hash {
-  font-family: 'Fraunces', sans-serif;
+  font-family: 'Fraunces', serif;
   font-size: 18px;
   font-weight: 600;
   color: var(--rose-deep);
@@ -4681,4 +4681,166 @@ button.post-action:hover {
   color: var(--rose-ink);
   font-size: 13px;
   font-weight: 600;
+  text-decoration: none;
+}
+
+a.post-tag:hover,
+.post-tag.active {
+  background: var(--rose);
+  color: var(--surface);
+}
+
+.tagged-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+  padding: 28px 32px;
+  background: linear-gradient(120deg, var(--rose-soft), var(--surface) 70%);
+}
+
+.tagged-kicker {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rose-deep);
+}
+
+.tagged-title {
+  margin: 6px 0 4px;
+  font-size: 40px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.tagged-count {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.tagged-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 720px) minmax(0, 320px);
+  grid-template-areas:
+    "posts related"
+    "posts books";
+  grid-template-rows: auto 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.tagged-posts {
+  grid-area: posts;
+}
+
+.tagged-related {
+  grid-area: related;
+}
+
+.tagged-books {
+  grid-area: books;
+}
+
+.tagged-box {
+  padding: 22px 24px;
+}
+
+.tagged-box-title {
+  margin: 0 0 14px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.tagged-book {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.tagged-book-cover {
+  flex-shrink: 0;
+  width: 40px;
+  height: 60px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.tagged-book-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.tagged-book-meta {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.tags-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.tags-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 12px;
+  padding: 18px 20px;
+  text-decoration: none;
+}
+
+.tags-card:hover {
+  outline: 2px solid var(--rose);
+}
+
+.tags-rank {
+  grid-row: span 2;
+  align-self: center;
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--rose);
+}
+
+.tags-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.tags-count {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.tags-empty {
+  color: var(--text-2);
+}
+
+@media (max-width: 860px) {
+  .tagged-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "related"
+      "posts"
+      "books";
+    grid-template-rows: auto;
+  }
+
+  .tagged-hero {
+    padding: 22px 20px;
+  }
+
+  .tagged-title {
+    font-size: 30px;
+  }
 }

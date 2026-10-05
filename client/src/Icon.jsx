@@ -100,6 +100,13 @@ const ICONS = {
     ),
 
     close: <path d="M6 6l12 12M18 6L6 18" />,
+
+    tag: (
+        <>
+            <path d="M3.5 4.5v6.6a1 1 0 0 0 .3.7l8.9 8.9a1 1 0 0 0 1.4 0l6.6-6.6a1 1 0 0 0 0-1.4L11.8 3.8a1 1 0 0 0-.7-.3H4.5a1 1 0 0 0-1 1z" />
+            <circle cx="8" cy="8" r="1.4" />
+        </>
+    ),
 };
 
 function Icon({ name, size = 17 }) {

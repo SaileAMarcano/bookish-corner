@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import BookCover from './BookCover';
@@ -7,7 +8,7 @@ import PostComments from './PostComments';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
-function PostCard({ post, currentUserId, onChange, onDeleted }) {
+function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
     const { t } = useTranslation();
     const [error, setError] = useState('');
     const [showComments, setShowComments] = useState(false);
@@ -98,7 +99,13 @@ function PostCard({ post, currentUserId, onChange, onDeleted }) {
             {post.tags.length > 0 && (
                 <div className="post-tags">
                     {post.tags.map((tag) => (
-                        <span key={tag.slug} className="pill post-tag">#{tag.name}</span>
+                        <Link
+                            key={tag.slug}
+                            to={`/tagged/${tag.slug}`}
+                            className={`pill post-tag ${tag.slug === activeTag ? 'active' : ''}`}
+                        >
+                            #{tag.name}
+                        </Link>
                     ))}
                 </div>
             )}

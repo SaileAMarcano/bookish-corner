@@ -5,6 +5,7 @@ import Icon from './Icon';
 const NAV_ITEMS = [
     { to: '/', label: 'nav.home', icon: 'home' },
     { to: '/reading', label: 'nav.reading', icon: 'reading' },
+    { to: '/tags', label: 'nav.tags', icon: 'tag' },
     { to: '/profile?tab=library', label: 'nav.library', icon: 'library' },
     { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
     { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },

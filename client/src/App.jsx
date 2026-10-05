@@ -11,6 +11,8 @@ import AboutPage from './AboutPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
+import TaggedPage from './TaggedPage';
+import TagsPage from './TagsPage';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import BookModal from './BookModal';
@@ -305,6 +307,8 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
+          <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
+          <Route path="/tags" element={<TagsPage />} />
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
@@ -318,4 +322,4 @@ function App() {
   )
 }
 
-export default App
+export default App
