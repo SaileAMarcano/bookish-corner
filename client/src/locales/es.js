@@ -326,6 +326,11 @@ const es = {
         writeComment: 'Escribe un comentario…',
         send: 'Enviar',
         deleteComment: 'Borrar comentario',
+        tagsPlaceholder: 'Añade etiquetas(Enter o coma)',
+        removeTag: 'Quitar la etiqueta {{name}}',
+        tagSuggestions: 'Sugerencias de etiquetas',
+        tagUses_one: '{{count}} uso',
+        tagUses_other: '{{count}} usos',
     },
     edit: {
         myProfile: 'Mi perfil',

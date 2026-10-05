@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import BookCover from './BookCover';
 import Notice from './Notice';
+import TagInput from './TagInput';
 import { apiFetch } from './api';
 
 const TEXT_MAX = 2000;
@@ -14,6 +15,7 @@ function PostComposer({ books, onCreated }) {
     const [imageFile, setImageFile] = useState(null);
     const [imagePreview, setImagePreview] = useState('');
     const [chosenBooks, setChosenBooks] = useState([]);
+    const [tags, setTags] = useState([]);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [filter, setFilter] = useState('');
     const [error, setError] = useState('');
@@ -66,6 +68,7 @@ function PostComposer({ books, onCreated }) {
         setImageFile(null);
         setImagePreview('');
         setChosenBooks([]);
+        setTags([]);
         setPickerOpen(false);
         setFilter('');
     };
@@ -77,6 +80,7 @@ function PostComposer({ books, onCreated }) {
         const formData = new FormData();
         formData.append('text', text);
         formData.append('bookIds', chosenIds.join(','));
+        formData.append('tags', tags.join(','));
         if (imageFile) {
             formData.append('image', imageFile);
         }
@@ -136,6 +140,7 @@ function PostComposer({ books, onCreated }) {
                 </div>
             )}
 
+            <TagInput tags={tags} onChange={setTags} />
             {pickerOpen && (
                 <div className="post-picker">
                     <input

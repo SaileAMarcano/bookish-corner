@@ -54,7 +54,6 @@ export function quoteOfTheDay() {
     const startOfYear = new Date(now.getFullYear(), 0, 0);
     const dayOfYear = Math.floor((now - startOfYear) / 86400000);
 
-    // The quotes live in the translation files, so they change with the language.
     const quotes = i18n.t('quotes', { returnObjects: true });
     return quotes[dayOfYear % quotes.length];
 }
@@ -80,7 +79,15 @@ export function nightstandMessage(booksStatus, books) {
     return i18n.t('nightstand.nothing');
 }
 
-// Genre label in the current language. The database keeps the English name ("Fantasy").
 export function genreLabel(genre) {
     return i18n.t(`genres.${genre}`, { defaultValue: genre });
+}
+
+export function slugify(text) {
+    return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
 }

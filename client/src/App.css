@@ -4547,3 +4547,138 @@ button.post-action:hover {
   opacity: 0.55;
   cursor: not-allowed;
 }
+
+.tag-input {
+  position: relative;
+}
+
+.tag-input-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-height: 46px;
+  padding: 6px 12px;
+  border: 1px solid var(--surface-2);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.tag-input-box:focus-within {
+  outline: 2px solid var(--rose);
+  outline-offset: 1px;
+}
+
+.tag-input-hash {
+  font-family: 'Fraunces', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--rose-deep);
+}
+
+.tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 4px 3px 12px;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.tag-pill button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tag-pill button:hover {
+  background: var(--surface);
+}
+
+.tag-input-field {
+  flex: 1;
+  min-width: 140px;
+  min-height: 32px;
+  border: none;
+  background: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.tag-input-field:focus {
+  outline: none;
+}
+
+.tag-input-count {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.tag-suggestions {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 20;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 12px 28px rgba(58, 54, 42, 0.16);
+}
+
+.tag-suggestions button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 10px;
+  background: none;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rose-ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.tag-suggestions button:hover {
+  background: var(--rose-soft);
+}
+
+.tag-suggestion-uses {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-2);
+}
+
+.post-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.post-tag {
+  padding: 5px 12px;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-size: 13px;
+  font-weight: 600;
+}

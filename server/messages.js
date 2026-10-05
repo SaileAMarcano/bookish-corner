@@ -40,6 +40,8 @@ const MESSAGES = {
         commentTooLong: 'A comment can have up to 1000 characters',
         commentNotFound: 'Comment not found',
         cannotDeleteComment: 'You can only delete your own comments or comments on your posts',
+        tooManyTags: 'You can add up to 10 tags',
+        tagTooLong: 'Each tag can have up to 40 characters',
         serverError: 'Something went wrong on our side. Please try again.',
     },
     es: {
@@ -81,6 +83,8 @@ const MESSAGES = {
         commentTooLong: 'Un comentario puede tener hasta 1000 caracteres',
         commentNotFound: 'No encontramos ese comentario',
         cannotDeleteComment: 'Solo puedes borrar tus comentarios o los comentarios de tus publicaciones',
+        tooManyTags: 'Puedes añadir hasta 10 etiquetas',
+        tagTooLong: 'Cada etiqueta puede tener hasta 40 caracteres',
         serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
     },
 };

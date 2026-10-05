@@ -95,6 +95,14 @@ function PostCard({ post, currentUserId, onChange, onDeleted }) {
 
             {error && <Notice message={error} />}
 
+            {post.tags.length > 0 && (
+                <div className="post-tags">
+                    {post.tags.map((tag) => (
+                        <span key={tag.slug} className="pill post-tag">#{tag.name}</span>
+                    ))}
+                </div>
+            )}
+
             <footer className="post-actions">
                 <button
                     type="button"

@@ -440,6 +440,49 @@ function parseBookIds(value) {
     return [...new Set(ids)];
 }
 
+const TAGS_MAX = 10;
+const TAG_MAX_LENGTH = 40;
+
+function slugify(text) {
+    return text
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+
+function parseTags(value) {
+    const list = Array.isArray(value) ? value : String(value ?? '').split(',');
+    const tags = [];
+    const seen = new Set();
+
+    for (const item of list) {
+        const name = String(item).trim().replace(/^#+/, '').replace(/\s+/g, ' ');
+        const slug = slugify(name);
+        if (slug === '' || seen.has(slug)) continue;
+
+        seen.add(slug);
+        tags.push({ name, slug });
+    }
+
+    return tags;
+}
+
+async function findOrCreateTags(client, tags) {
+    const ids = [];
+    for (const tag of tags) {
+        const result = await client.query(`
+            INSERT INTO tags (name, slug) VALUES ($1, $2)
+            ON CONFLICT (slug) DO UPDATE SET slug = EXCLUDED.slug
+            RETURNING id
+            `, [tag.name, tag.slug]);
+        ids.push(result.rows[0].id);
+    }
+
+    return ids;
+}
+
 async function findPosts(req, column, value) {
     return query(`
         SELECT p.id, p.text, p.image_url, p.created_at,
@@ -459,7 +502,13 @@ async function findPosts(req, column, value) {
                    JOIN works w ON w.id = pb.work_id
                    ${JOIN_TRANSLATION} = $3
                    WHERE pb.post_id = p.id
-               ), '[]') AS books
+        ), '[]') AS books,
+                   COALESCE((
+                   SELECT json_agg(json_build_object('name', tg.name, 'slug', tg.slug) ORDER BY pt.position)
+                   FROM post_tags pt
+                   JOIN tags tg ON tg.id = pt.tag_id
+                   WHERE pt.post_id = p.id
+               ), '[]') AS tags
         FROM posts p
         JOIN users u ON u.id = p.user_id
         WHERE ${column} = $1
@@ -470,6 +519,7 @@ async function findPosts(req, column, value) {
 app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => {
     const text = req.body.text?.trim() || null;
     const bookIds = parseBookIds(req.body.bookIds);
+    const tags = parseTags(req.body.tags);
 
     if (!text && bookIds.length === 0 && !req.file) {
         return res.status(400).json({ error: msg(req, 'postEmpty') });
@@ -479,6 +529,12 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
     }
     if (bookIds.length > POST_MAX_BOOKS) {
         return res.status(400).json({ error: msg(req, 'tooManyBooks') });
+    }
+    if (tags.length > TAGS_MAX) {
+        return res.status(400).json({ error: msg(req, 'tooManyTags') });
+    }
+    if (tags.some((tag) => tag.name.length > TAG_MAX_LENGTH)) {
+        return res.status(400).json({ error: msg(req, 'tagTooLong') });
     }
 
     const imageUrl = req.file ? await uploadPostImage(req.file) : null;
@@ -499,6 +555,14 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
             await client.query(
                 'INSERT INTO post_books (post_id, work_id, position) VALUES ($1, $2, $3)',
                 [postId, bookIds[i], i]
+            );
+        }
+
+        const tagIds = await findOrCreateTags(client, tags);
+        for (let i = 0; i < tagIds.length; i++) {
+            await client.query(
+                'INSERT INTO post_tags (post_id, tag_id, position) VALUES ($1, $2, $3)',
+                [postId, tagIds[i], i]
             );
         }
 
@@ -523,6 +587,25 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
 app.get('/api/posts', requireAuth, async (req, res) => {
     const posts = await findPosts(req, 'p.user_id', req.session.user.id);
     res.json(posts);
+});
+
+app.get('/api/tags', requireAuth, async (req, res) => {
+    const slug = slugify(String(req.query.q ?? ''));
+    if (slug === '') {
+        return res.json([]);
+    }
+
+    const tags = await query(`
+        SELECT tg.name, tg.slug,
+               (SELECT COUNT(*) FROM post_tags pt WHERE pt.tag_id = tg.id)
+             + (SELECT COUNT(*) FROM user_book_tags ut WHERE ut.tag_id = tg.id) AS uses
+        FROM tags tg
+        WHERE tg.slug LIKE $1 OR tg.slug LIKE $2
+        ORDER BY uses DESC, tg.name
+        LIMIT 8
+    `, [slug + '%', '%-' + slug + '%']);
+
+    res.json(tags);
 });
 
 async function postFromUrl(req) {

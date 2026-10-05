@@ -326,6 +326,10 @@ const en = {
         writeComment: 'Write a comment…',
         send: 'Send',
         deleteComment: 'Delete comment',
+        tagsPlaceholder: 'Add tags (Enter or comma)',
+        removeTag: 'Remove tag {{name}}',
+        tagSuggestions: 'Tag suggestions',
+        tagUses_one: '{{count}} uses',
     },
     edit: {
         myProfile: 'My profile',
