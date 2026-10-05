@@ -7,11 +7,15 @@ import { apiFetch } from "./api";
 function TagsPage() {
     const { t } = useTranslation();
     const [tags, setTags] = useState(null);
+    const [followed, setFollowed] = useState(null);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        apiFetch('/api/tags/popular')
-            .then((data) => setTags(data))
+        Promise.all([apiFetch('/api/tags/followed'), apiFetch('/api/tags/popular')])
+            .then(([followedData, popularData]) => {
+                setFollowed(followedData);
+                setTags(popularData);
+            })
             .catch((err) => setError(err.message));
     }, []);
 
@@ -26,18 +30,41 @@ function TagsPage() {
             </div>
             {error && <Notice message={error} />}
 
-            {tags && tags.length === 0 && <p className="tags-empty">{t('tagged.empty')}</p>}
+            {followed && (
+                <section>
+                    <h2 className="section-label tags-section-title">{t('tagged.followedTitle')}</h2>
+                    {followed.length === 0 ? (
+                        <p className="tags-empty">{t('tagged.followedEmpty')}</p>
+                    ) : (
+                        <div className="tags-grid">
+                            {followed.map((tag) => (
+                                <Link key={tag.slug} to={`/tagged/${tag.slug}`} className="card tags-card tags-card-followed">
+                                    <span className="display tags-name">#{tag.name}</span>
+                                    <span className="tags-count">{t('tagged.postCount', { count: tag.postCount })}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </section>
+            )}
 
-            {tags && tags.length > 0 && (
-                <div className="tags-grid">
-                    {tags.map((tag, index) => (
-                        <Link key={tag.slug} to={`/tagged/${tag.slug}`} className="card tags-card">
-                            <span className="tags-rank">{index + 1}</span>
-                            <span className="display tags-name">#{tag.name}</span>
-                            <span className="tags-count">{t('tagged.postCount', { count: tag.postCount })}</span>
-                        </Link>
-                    ))}
-                </div>
+            {tags && (
+                <section>
+                    <h2 className="section-label tags-section-title">{t('tagged.popularTitle')}</h2>
+                    {tags.length === 0 ? (
+                        <p className="tags-empty">{t('tagged.empty')}</p>
+                    ) : (
+                        <div className="tags-grid">
+                            {tags.map((tag, index) => (
+                                <Link key={tag.slug} to={`/tagged/${tag.slug}`} className="card tags-card">
+                                    <span className="tags-rank">{index + 1}</span>
+                                    <span className="display tags-name">#{tag.name}</span>
+                                    <span className="tags-count">{t('tagged.postCount', { count: tag.postCount })}</span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
+                </section>
             )}
         </main>
     );

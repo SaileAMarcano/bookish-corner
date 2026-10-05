@@ -620,6 +620,19 @@ app.get('/api/tags/popular', requireAuth, async (req, res) => {
     res.json(tags);
 });
 
+app.get('/api/tags/followed', requireAuth, async (req, res) => {
+    const tags = await query(`
+        SELECT tg.name, tg.slug, COUNT(pt.post_id) AS post_count
+        FROM tag_follows tf
+        JOIN tags tg ON tg.id = tf.tag_id
+        LEFT JOIN post_tags pt ON pt.tag_id = tg.id
+        WHERE tf.user_id = $1
+        GROUP BY tg.id, tf.created_at
+        ORDER BY tf.created_at DESC, tg.name
+    `, [req.session.user.id]);
+    res.json(tags);
+});
+
 app.get('/api/tagged/:slug', requireAuth, async (req, res) => {
     const [tag] = await query('SELECT id, name, slug FROM tags WHERE slug = $1', [slugify(req.params.slug)]);
     if (!tag) {
@@ -655,7 +668,47 @@ app.get('/api/tagged/:slug', requireAuth, async (req, res) => {
         LIMIT 5
     `, [tag.id, languageOf(req)]);
 
-    res.json({ tag: { name: tag.name, slug: tag.slug }, posts, relatedTags, books });
+    const follow = await followState(req, tag.id);
+    res.json({ tag: { name: tag.name, slug: tag.slug, ...follow }, posts, relatedTags, books });
+});
+
+async function followState(req, tagId) {
+    const [state] = await query(`
+        SELECT (SELECT COUNT(*) FROM tag_follows WHERE tag_id = $1) AS follower_count,
+               EXISTS (SELECT 1 FROM tag_follows WHERE tag_id = $1 AND user_id = $2) AS is_following
+    `, [tagId, req.session.user.id]);
+    return state;
+}
+
+async function tagFromUrl(req) {
+    const [tag] = await query('SELECT id FROM tags WHERE slug = $1', [slugify(req.params.slug)]);
+    return tag;
+}
+
+app.post('/api/tags/:slug/follow', requireAuth, async (req, res) => {
+    const tag = await tagFromUrl(req);
+    if (!tag) {
+        return res.status(404).json({ error: msg(req, 'tagNotFound') });
+    }
+
+    await query(
+        'INSERT INTO tag_follows (user_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [req.session.user.id, tag.id]
+    );
+    res.json(await followState(req, tag.id));
+});
+
+app.delete('/api/tags/:slug/follow', requireAuth, async (req, res) => {
+    const tag = await tagFromUrl(req);
+    if (!tag) {
+        return res.status(404).json({ error: msg(req, 'tagNotFound') });
+    }
+
+    await query(
+        'DELETE FROM tag_follows WHERE user_id = $1 AND tag_id = $2',
+        [req.session.user.id, tag.id]
+    );
+    res.json(await followState(req, tag.id));
 });
 
 async function postFromUrl(req) {

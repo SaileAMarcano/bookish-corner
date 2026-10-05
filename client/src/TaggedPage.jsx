@@ -11,6 +11,7 @@ function TaggedPage({ currentUser }) {
     const { t, i18n } = useTranslation();
     const [data, setData] = useState(null);
     const [error, setError] = useState('');
+    const [followError, setFollowError] = useState('');
 
     useEffect(() => {
         let ignore = false;
@@ -45,6 +46,15 @@ function TaggedPage({ currentUser }) {
         }));
     };
 
+    const handleFollow = () => {
+        setFollowError('');
+        apiFetch(`/api/tags/${data.tag.slug}/follow`, { method: data.tag.isFollowing ? 'DELETE' : 'POST' })
+            .then((state) => {
+                setData((current) => ({ ...current, tag: { ...current.tag, ...state } }));
+            })
+            .catch((err) => setFollowError(err.message))
+    }
+
     if (error) {
         return (
             <main className="page tagged-page">
@@ -73,9 +83,22 @@ function TaggedPage({ currentUser }) {
                 <div>
                     <div className="tagged-kicker">{t('tagged.kicker')}</div>
                     <h1 className="display tagged-title">#{data.tag.name}</h1>
-                    <p className="tagged-count">{t('tagged.postCount', { count: data.posts.length })}</p>
+                    <p className="tagged-count">
+                        {t('tagged.postCount', { count: data.posts.length })} · {t('tagged.followers', { count: data.tag.followerCount })}
+                    </p>
                 </div>
+
+                <button
+                    type="button"
+                    className={`tag-follow ${data.tag.isFollowing ? 'following' : ''}`}
+                    onClick={handleFollow}
+                    aria-pressed={data.tag.isFollowing}
+                >
+                    {data.tag.isFollowing ? t('tagged.followingTag') : t('tagged.follow')}
+                </button>
             </div>
+
+            {followError && <Notice message={followError} />}
 
             <div className="tagged-layout">
                 <div className="post-list tagged-posts">

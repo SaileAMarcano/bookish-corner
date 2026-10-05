@@ -4844,3 +4844,39 @@ a.post-tag:hover,
     font-size: 30px;
   }
 }
+
+.tag-follow {
+  min-height: 44px;
+  padding: 0 24px;
+  border: 2px solid var(--rose);
+  border-radius: 999px;
+  background: var(--rose);
+  color: var(--surface);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tag-follow:hover {
+  border-color: var(--rose-deep);
+  background: var(--rose-deep);
+}
+
+.tag-follow.following {
+  background: var(--surface);
+  color: var(--rose-ink);
+}
+
+.tag-follow.following:hover {
+  border-color: var(--rose);
+  background: var(--rose-soft);
+}
+
+.tags-section-title {
+  margin: 0 0 14px;
+}
+
+.tags-card-followed {
+  grid-template-columns: 1fr;
+}

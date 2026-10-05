@@ -152,6 +152,13 @@ CREATE TABLE user_book_tags (
     PRIMARY KEY (user_book_id, tag_id)
 );
 
+CREATE TABLE tag_follows (
+    user_id    INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    tag_id     INTEGER NOT NULL REFERENCES tags (id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, tag_id)
+);
+
 CREATE INDEX ON editions (work_id);
 CREATE INDEX ON user_books (work_id);
 CREATE INDEX ON likes (user_book_id);
@@ -163,6 +170,7 @@ CREATE INDEX post_likes_post_idx ON post_likes (post_id);
 CREATE INDEX post_comments_post_idx ON post_comments (post_id);
 CREATE INDEX post_tags_tag_idx ON post_tags (tag_id);
 CREATE INDEX user_book_tags_tag_idx ON user_book_tags (tag_id);
+CREATE INDEX tag_follows_tag_idx ON tag_follows (tag_id);
 
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -180,3 +188,4 @@ ALTER TABLE saved_posts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_book_tags ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tag_follows ENABLE ROW LEVEL SECURITY;
