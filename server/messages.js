@@ -42,6 +42,7 @@ const MESSAGES = {
         cannotDeleteComment: 'You can only delete your own comments or comments on your posts',
         tooManyTags: 'You can add up to 10 tags',
         tagTooLong: 'Each tag can have up to 40 characters',
+        tagNotFound: 'Nobody has used this tag yet',
         serverError: 'Something went wrong on our side. Please try again.',
     },
     es: {
@@ -85,6 +86,7 @@ const MESSAGES = {
         cannotDeleteComment: 'Solo puedes borrar tus comentarios o los comentarios de tus publicaciones',
         tooManyTags: 'Puedes añadir hasta 10 etiquetas',
         tagTooLong: 'Cada etiqueta puede tener hasta 40 caracteres',
+        tagNotFound: 'Nadie ha usado esta etiqueta todavía',
         serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
     },
 };

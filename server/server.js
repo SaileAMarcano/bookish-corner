@@ -483,7 +483,7 @@ async function findOrCreateTags(client, tags) {
     return ids;
 }
 
-async function findPosts(req, column, value) {
+async function findPosts(req, condition, value) {
     return query(`
         SELECT p.id, p.text, p.image_url, p.created_at,
                u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
@@ -511,7 +511,7 @@ async function findPosts(req, column, value) {
                ), '[]') AS tags
         FROM posts p
         JOIN users u ON u.id = p.user_id
-        WHERE ${column} = $1
+        WHERE ${condition}
         ORDER BY p.created_at DESC
     `, [value, req.session.user.id, languageOf(req)]);
 }
@@ -585,7 +585,7 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
 });
 
 app.get('/api/posts', requireAuth, async (req, res) => {
-    const posts = await findPosts(req, 'p.user_id', req.session.user.id);
+    const posts = await findPosts(req, 'p.user_id = $1', req.session.user.id);
     res.json(posts);
 });
 
@@ -606,6 +606,56 @@ app.get('/api/tags', requireAuth, async (req, res) => {
     `, [slug + '%', '%-' + slug + '%']);
 
     res.json(tags);
+});
+
+app.get('/api/tags/popular', requireAuth, async (req, res) => {
+    const tags = await query(`
+        SELECT tg.name, tg.slug, COUNT(pt.post_id) AS post_count
+        FROM tags tg
+        JOIN post_tags pt ON pt.tag_id = tg.id
+        GROUP BY tg.id
+        ORDER BY post_count DESC, tg.name
+        LIMIT 30
+    `);
+    res.json(tags);
+});
+
+app.get('/api/tagged/:slug', requireAuth, async (req, res) => {
+    const [tag] = await query('SELECT id, name, slug FROM tags WHERE slug = $1', [slugify(req.params.slug)]);
+    if (!tag) {
+        return res.status(404).json({ error: msg(req, 'tagNotFound') });
+    }
+
+    const posts = await findPosts(
+        req,
+        'EXISTS (SELECT 1 FROM post_tags x WHERE x.post_id = p.id AND x.tag_id = $1)',
+        tag.id
+    );
+
+    const relatedTags = await query(`
+        SELECT tg.name, tg.slug, COUNT(*) AS together
+        FROM post_tags a
+        JOIN post_tags b ON b.post_id = a.post_id AND b.tag_id <> a.tag_id
+        JOIN tags tg ON tg.id = b.tag_id
+        WHERE a.tag_id = $1
+        GROUP BY tg.id
+        ORDER BY together DESC, tg.name
+        LIMIT 8
+    `, [tag.id]);
+
+    const books = await query(`
+        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image, COUNT(*) AS mentions
+        FROM post_tags pt
+        JOIN post_books pb ON pb.post_id = pt.post_id
+        JOIN works w ON w.id = pb.work_id
+        ${JOIN_TRANSLATION} = $2
+        WHERE pt.tag_id = $1
+        GROUP BY w.id, t.title
+        ORDER BY mentions DESC, title
+        LIMIT 5
+    `, [tag.id, languageOf(req)]);
+
+    res.json({ tag: { name: tag.name, slug: tag.slug }, posts, relatedTags, books });
 });
 
 async function postFromUrl(req) {
