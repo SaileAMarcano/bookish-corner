@@ -52,8 +52,8 @@ function TaggedPage({ currentUser }) {
             .then((state) => {
                 setData((current) => ({ ...current, tag: { ...current.tag, ...state } }));
             })
-            .catch((err) => setFollowError(err.message))
-    }
+            .catch((err) => setFollowError(err.message));
+    };
 
     if (error) {
         return (
