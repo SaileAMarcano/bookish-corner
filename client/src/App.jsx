@@ -13,6 +13,8 @@ import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
 import TaggedPage from './TaggedPage';
 import TagsPage from './TagsPage';
+import GenresPage from './GenresPage';
+import GenrePage from './GenrePage';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import BookModal from './BookModal';
@@ -309,6 +311,8 @@ function App() {
           />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
           <Route path="/tags" element={<TagsPage />} />
+          <Route path="/genres" element={<GenresPage />} />
+          <Route path="/genre/:slug" element={<GenrePage />} />
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

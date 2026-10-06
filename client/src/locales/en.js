@@ -43,6 +43,7 @@ const en = {
         following: 'Following',
         about: 'About me',
         tags: 'Tags',
+        genres: 'Genres',
     },
     public: {
         home: 'Home',
@@ -353,6 +354,18 @@ const en = {
         followedTitle: 'Tags you follow',
         followedEmpty: 'You are not following any tags yet. Open one and press "Follow".',
         popularTitle: 'Most used',
+    },
+    genrePage: {
+        kicker: 'Genre',
+        exploreKicker: 'Explore',
+        exploreTitle: 'Genres',
+        exploreLead: 'Each book goes in the genre most readers chose for it.',
+        bookCount_one: '{{count}} book',
+        bookCount_other: '{{count}} books',
+        readers_one: '{{count}} reader',
+        readers_other: '{{count}} readers',
+        allGenres: 'All genres',
+        empty: 'Nobody has filed a book under {{genre}} yet.',
     },
     edit: {
         myProfile: 'My profile',

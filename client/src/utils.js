@@ -79,6 +79,11 @@ export function nightstandMessage(booksStatus, books) {
     return i18n.t('nightstand.nothing');
 }
 
+export const GENRES = [
+    'Fantasy', 'Romance', 'Dark Romance', 'Contemporary', 'Classics', 'Mystery', 'Sci-fi',
+    'Horror', 'Historical', 'Non-fiction', 'Poetry', 'Manga', 'Comics',
+];
+
 export function genreLabel(genre) {
     return i18n.t(`genres.${genre}`, { defaultValue: genre });
 }

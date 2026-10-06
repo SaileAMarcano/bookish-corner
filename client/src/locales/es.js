@@ -43,6 +43,7 @@ const es = {
         following: 'Siguiendo',
         about: 'Sobre mí',
         tags: 'Etiquetas',
+        genres: 'Generos',
     },
     public: {
         home: 'Inicio',
@@ -353,6 +354,18 @@ const es = {
         followedTitle: 'Etiquetas que sigues',
         followedEmpty: 'Todavía no sigues ninguna etiqueta. Abre una y pulsa "Seguir".',
         popularTitle: 'Las más usadas',
+    },
+    genrePage: {
+        kicker: 'Género',
+        exploreKicker: 'Explorar',
+        exploreTitle: 'Géneros',
+        exploreLead: 'Cada libro va en el género que más lectoras eligieron para él.',
+        bookCount_one: '{{count}} libro',
+        bookCount_other: '{{count}} libros',
+        readers_one: '{{count}} lectora',
+        readers_other: '{{count}} lectoras',
+        allGenres: 'Todos los géneros',
+        empty: 'Todavía nadie ha puesto un libro en {{genre}}.',
     },
     edit: {
         myProfile: 'Mi perfil',

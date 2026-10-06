@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
-import { pagePercent, pageSummary, getAvatarSrc, genreLabel } from './utils';
+import { pagePercent, pageSummary, getAvatarSrc, genreLabel, GENRES } from './utils';
 import { apiFetch } from './api';
 import Notice from './Notice';
 import Icon from './Icon';
@@ -14,22 +14,6 @@ const STATUS_ICONS = {
     'reading': 'library',
     'finished': 'check',
 }
-
-const GENRES = [
-    'Fantasy',
-    'Romance',
-    'Dark Romance',
-    'Contemporary',
-    'Classics',
-    'Mystery',
-    'Sci-fi',
-    'Horror',
-    'Historical',
-    'Non-fiction',
-    'Poetry',
-    'Manga',
-    'Comics',
-];
 
 const toNumber = (value) => (value === '' ? null : Number(value));
 

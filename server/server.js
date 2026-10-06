@@ -56,10 +56,22 @@ function requireAuth(req, res, next) {
     next();
 }
 
-
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
 const TRANSLATED_DESCRIPTION = 'COALESCE(t.description, w.description)';
 const JOIN_TRANSLATION = 'LEFT JOIN work_translations t ON t.work_id = w.id AND t.language';
+const GENRES = [
+    'Fantasy', 'Romance', 'Dark Romance', 'Contemporary', 'Classics', 'Mystery', 'Sci-fi', 'Horror', 'Historical', 'Non-fiction', 'Poetry', 'Manga', 'Comics',
+];
+
+const WORK_GENRES = `
+    WITH work_genre AS (
+        SELECT DISTINCT ON (work_id) work_id, genre
+        FROM user_books
+        WHERE genre IS NOT NULL
+        GROUP BY work_id, genre
+        ORDER BY work_id, COUNT(*) DESC, genre
+    )
+`;
 
 app.get('/api/books', async (req, res) => {
     const books = await query(`
@@ -301,8 +313,8 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     }
 
     const badRating = typeof rating !== 'number' || !Number.isInteger(rating * 2) || rating < 0 || rating > 5;
-    if (rating !== undefined && badRating) {
-        return res.status(400).json({ error: msg(req, 'ratingRange') });
+    if (genre !== undefined && genre !== null && !GENRES.includes(genre)) {
+        return res.status(400).json({ error: msg(req, 'invalidGenre') });
     }
 
     const newTotal = keepOrSet(totalPages, userBook.totalPages);
@@ -631,6 +643,45 @@ app.get('/api/tags/followed', requireAuth, async (req, res) => {
         ORDER BY tf.created_at DESC, tg.name
     `, [req.session.user.id]);
     res.json(tags);
+});
+
+app.get('/api/genres', requireAuth, async (req, res) => {
+    const counts = await query(`
+        ${WORK_GENRES}
+        SELECT genre, COUNT(*) AS book_count
+        FROM work_genre
+        GROUP BY genre
+    `);
+
+    const genres = GENRES.map((name) => {
+        const found = counts.find((row) => row.genre === name);
+        return { name, slug: slugify(name), bookCount: found ? found.bookCount : 0 };
+    });
+    res.json(genres);
+});
+
+app.get('/api/genres/:slug', requireAuth, async (req, res) => {
+    const genre = GENRES.find((name) => slugify(name) === slugify(req.params.slug));
+    if (!genre) {
+        return res.status(404).json({ error: msg(req, 'genreNotFound') });
+    }
+
+    const books = await query(`
+        ${WORK_GENRES}
+        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
+               COUNT(ub.id) AS readers,
+               ROUND(AVG(ub.rating) FILTER (WHERE ub.rating > 0), 1) AS average_rating
+        FROM work_genre wg
+        JOIN works w ON w.id = wg.work_id
+        JOIN user_books ub ON ub.work_id = w.id
+        ${JOIN_TRANSLATION} = $2
+        WHERE wg.genre = $1
+        GROUP BY w.id, t.title
+        ORDER BY readers DESC, title
+        LIMIT 60
+    `, [genre, languageOf(req)]);
+
+    res.json({ genre, slug: slugify(genre), books });
 });
 
 app.get('/api/tagged/:slug', requireAuth, async (req, res) => {
