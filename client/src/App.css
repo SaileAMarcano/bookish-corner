@@ -4881,7 +4881,7 @@ a.post-tag:hover,
   grid-template-columns: 1fr;
 }
 
-.genre-grid {
+.genres-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 14px;
@@ -4897,7 +4897,7 @@ a.post-tag:hover,
 }
 
 .genre-card:hover {
-  outline: 2px solid var(--rose)
+  outline: 2px solid var(--rose);
 }
 
 .genre-card-name {

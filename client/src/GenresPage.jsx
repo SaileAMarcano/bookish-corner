@@ -37,7 +37,7 @@ function GenresPage() {
                         </Link>
                     ))}
                 </div>
-            )};
+            )}
         </main>
     );
 }

@@ -313,6 +313,9 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     }
 
     const badRating = typeof rating !== 'number' || !Number.isInteger(rating * 2) || rating < 0 || rating > 5;
+    if (rating !== undefined && badRating) {
+        return res.status(400).json({ error: msg(req, 'ratingRange') });
+    }
     if (genre !== undefined && genre !== null && !GENRES.includes(genre)) {
         return res.status(400).json({ error: msg(req, 'invalidGenre') });
     }

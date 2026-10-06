@@ -43,7 +43,7 @@ const es = {
         following: 'Siguiendo',
         about: 'Sobre mí',
         tags: 'Etiquetas',
-        genres: 'Generos',
+        genres: 'Géneros',
     },
     public: {
         home: 'Inicio',
