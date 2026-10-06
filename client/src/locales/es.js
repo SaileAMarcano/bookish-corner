@@ -19,6 +19,8 @@ const es = {
     },
     app: {
         opening: 'Abriendo Bookish Corner...',
+        darkMode: 'Modo oscuro',
+        lightMode: 'Modo claro',
         searchPlaceholder: 'Busca por título o autor...',
         searchLabel: 'Buscar libros',
         search: 'Buscar',

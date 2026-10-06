@@ -22,11 +22,39 @@
   --star-fill: #FCE7A2;
   --star-line: #AD8B74;
   --rose-soft: #F2DEDB;
+  --glass: rgba(248, 244, 232, 0.88);
   --content-max: 1500px;
   --app-width: 1480px;
   --side-width: 300px;
   --side-gap: 48px;
 
+}
+
+/* Dark mode: the same names, night colors. App.jsx puts data-theme="dark" on <html>. */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1D1916;
+  --surface: #28231E;
+  --surface-2: #3A332B;
+  --ink: #F1E8D6;
+  --text-2: #B5A88C;
+  --rose: #C48C9B;
+  --rose-deep: #B27A8A;
+  --rose-ink: #F0BFCB;
+  --rose-soft: #47303A;
+  --sage: #8E9B82;
+  --lavender: #A49EBB;
+  --clay: #E0A585;
+  --clay-soft: #4A3328;
+  --amber: #E6C987;
+  --amber-soft: #453923;
+  --sage-text: #B8C6A9;
+  --sage-soft: #323A2C;
+  --error: #F0A090;
+  --error-soft: #4D2A24;
+  --star-fill: #E9C96B;
+  --star-line: #C9A98F;
+  --glass: rgba(40, 35, 30, 0.88);
 }
 
 * {
@@ -910,7 +938,7 @@ html {
   justify-content: center;
   border: none;
   border-radius: 50%;
-  background: rgba(248, 244, 232, 0.88);
+  background: var(--glass);
   color: var(--rose-deep);
   cursor: pointer;
   padding: 0;
@@ -4960,4 +4988,18 @@ a.post-tag:hover,
 .genre-book-meta {
   font-size: 12px;
   color: var(--text-2);
+}
+
+/* ---------- Dark mode (Session 21) ---------- */
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+:root[data-theme="dark"] .sidebar-illustration {
+  opacity: 0.45;
 }

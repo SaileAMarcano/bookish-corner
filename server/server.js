@@ -975,7 +975,7 @@ app.post('/api/login', async (req, res) => {
     }
 
     const [user] = await query(
-        `SELECT id, username, email, password_hash, avatar_url, display_name, reading_goal, reader_type, language
+        `SELECT id, username, email, password_hash, avatar_url, display_name, reading_goal, reader_type, language, theme
          FROM users WHERE email = $1`,
         [email]
     );
@@ -1005,6 +1005,7 @@ app.post('/api/login', async (req, res) => {
         readingGoal: user.readingGoal,
         readerType: user.readerType,
         language: user.language,
+        theme: user.theme,
     });
 });
 
@@ -1014,7 +1015,7 @@ app.get('/api/me', async (req, res) => {
     }
 
     const [user] = await query(
-        `SELECT id, username, email, avatar_url, reading_goal, reader_type, language,
+        `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
     COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
         [req.session.user.id]
@@ -1036,6 +1037,20 @@ app.patch('/api/me/language', requireAuth, async (req, res) => {
 
     await query('UPDATE users SET language = $1 WHERE id = $2', [language, req.session.user.id]);
     res.json({ language });
+});
+
+const THEMES = ['light', 'dark'];
+
+// Light or dark mode, saved in the profile like the language.
+app.patch('/api/me/theme', requireAuth, async (req, res) => {
+    const { theme } = req.body;
+
+    if (!THEMES.includes(theme)) {
+        return res.status(400).json({ error: msg(req, 'themeInvalid') });
+    }
+
+    await query('UPDATE users SET theme = $1 WHERE id = $2', [theme, req.session.user.id]);
+    res.json({ theme });
 });
 
 app.get('/api/profile', requireAuth, async (req, res) => {

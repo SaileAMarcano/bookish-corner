@@ -17,6 +17,7 @@ import GenresPage from './GenresPage';
 import GenrePage from './GenrePage';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
+import Icon from './Icon';
 import BookModal from './BookModal';
 import Notice from './Notice';
 import Welcome from './Welcome';
@@ -32,6 +33,13 @@ function applyUserLanguage(user) {
   }
 }
 
+// The theme saved in her profile; if she never chose one, the one of her device. Public pages stay light.
+function themeOf(user) {
+  if (!user) return 'light';
+  if (user.theme) return user.theme;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
 function App() {
   const { t } = useTranslation();
   const [books, setBooks] = useState([])
@@ -43,6 +51,12 @@ function App() {
   const [userError, setUserError] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const navigate = useNavigate();
+
+  const theme = themeOf(currentUser);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+  }, [theme]);
 
   // The search lives in the URL (?q=) of the page you are on, so it never sends you to Home.
   const [searchParams, setSearchParams] = useSearchParams();
@@ -171,6 +185,13 @@ function App() {
       .catch((error) => setToast(error.message));
   };
 
+  const handleThemeToggle = () => {
+    const next = theme === 'dark' ? 'light' : 'dark';
+    setCurrentUser((user) => ({ ...user, theme: next }));
+    apiFetch('/api/me/theme', { method: 'PATCH', body: { theme: next } })
+      .catch((error) => setToast(error.message));
+  };
+
   const handleSearch = (term) => {
     // Keeps the rest of the URL (for example ?tab=favorites) and only adds q.
     setSearchParams((params) => {
@@ -249,6 +270,10 @@ function App() {
             {showUserMenu && (
               <div className="header-menu">
                 <LanguageSwitcher onChange={handleLanguageChange} />
+                <button className="ghost-button theme-toggle" onClick={handleThemeToggle}>
+                  <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={14} />
+                  {theme === 'dark' ? t('app.lightMode') : t('app.darkMode')}
+                </button>
                 <Link
                   to="/profile/edit"
                   className="ghost-button"
