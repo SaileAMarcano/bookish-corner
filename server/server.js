@@ -968,6 +968,84 @@ app.delete('/api/post-comments/:id', requireAuth, async (req, res) => {
     res.json({ message: 'Comment deleted' });
 });
 
+async function userFromUrl(req) {
+    const [user] = await query('SELECT id FROM users WHERE username = $1', [req.params.username]);
+    return user;
+}
+
+async function userFollowState(req, userId) {
+    const [state] = await query(`
+        SELECT (SELECT COUNT(*) FROM follows WHERE following_id = $1) AS follower_count,
+               (SELECT COUNT(*) FROM follows WHERE follower_id = $1) AS following_count,
+               EXISTS (SELECT 1 FROM follows WHERE following_id = $1 AND follower_id = $2) AS is_following
+        `, [userId, req.session.user.id]);
+    return state;
+}
+
+app.post('/api/users/:username/follow', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+    if (user.id === req.session.user.id) {
+        return res.status(400).json({ error: msg(req, 'cannotFollowSelf') });
+    }
+
+    await query(
+        'INSERT INTO follows (follower_id, following_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [req.session.user.id, user.id]
+    );
+    res.json(await userFollowState(req, user.id));
+});
+
+app.delete('/api/users/:username/follow', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+
+    await query(
+        'DELETE FROM follows WHERE follower_id = $1 AND following_id = $2',
+        [req.session.user.id, user.id]
+    );
+    res.json(await userFollowState(req, user.id));
+});
+
+
+app.get('/api/users/:username/followers', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+
+    const people = await query(`
+        SELECT u.id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               EXISTS (SELECT 1 FROM follows mine WHERE mine.follower_id = $2 AND mine.following_id = u.id) AS is_following
+        FROM follows f
+        JOIN users u ON u.id = f.follower_id
+        WHERE f.following_id = $1
+        ORDER BY f.created_at DESC
+    `, [user.id, req.session.user.id]);
+    res.json(people);
+});
+
+app.get('/api/users/:username/following', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+
+    const people = await query(`
+        SELECT u.id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               EXISTS (SELECT 1 FROM follows mine WHERE mine.follower_id = $2 AND mine.following_id = u.id) AS is_following
+        FROM follows f
+        JOIN users u ON u.id = f.following_id
+        WHERE f.follower_id = $1
+        ORDER BY f.created_at DESC
+    `, [user.id, req.session.user.id]);
+    res.json(people);
+});
+
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
         return 'passwordLength';
