@@ -46,6 +46,7 @@ const MESSAGES = {
         tagNotFound: 'Nobody has used this tag yet',
         genreNotFound: 'This genre does not exist',
         invalidGenre: 'Choose a genre from the list',
+        invalidStatus: 'Choose a reading status from the list',
         serverError: 'Something went wrong on our side. Please try again.',
     },
     es: {
@@ -93,6 +94,7 @@ const MESSAGES = {
         tagNotFound: 'Nadie ha usado esta etiqueta todavía',
         genreNotFound: 'Este género no existe',
         invalidGenre: 'Elige un género de la lista',
+        invalidStatus: 'Elige un estado de lectura de la lista',
         serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
     },
 };

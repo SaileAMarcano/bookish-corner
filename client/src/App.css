@@ -464,6 +464,16 @@ body {
   color: var(--sage-text);
 }
 
+.status-paused {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.status-dnf {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
 .book-review {
   font-size: 12px;
   line-height: 1.6;

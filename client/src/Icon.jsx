@@ -100,6 +100,7 @@ const ICONS = {
     ),
 
     close: <path d="M6 6l12 12M18 6L6 18" />,
+    pause: <path d="M9 5.5v13M15 5.5v13" />,
 
     tag: (
         <>

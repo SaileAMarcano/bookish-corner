@@ -203,6 +203,8 @@ const es = {
     status: {
         'want-to-read': 'Quiero leerlo',
         reading: 'Leyendo',
+        paused: 'Pausado',
+        dnf: 'Abandonado',
         finished: 'Terminado',
     },
     genres: {

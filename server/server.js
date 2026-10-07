@@ -63,6 +63,8 @@ const GENRES = [
     'Fantasy', 'Romance', 'Dark Romance', 'Contemporary', 'Classics', 'Mystery', 'Sci-fi', 'Horror', 'Historical', 'Non-fiction', 'Poetry', 'Manga', 'Comics',
 ];
 
+const STATUSES = ['want-to-read', 'reading', 'paused', 'dnf', 'finished'];
+
 const WORK_GENRES = `
     WITH work_genre AS (
         SELECT DISTINCT ON (work_id) work_id, genre
@@ -319,6 +321,9 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     if (genre !== undefined && genre !== null && !GENRES.includes(genre)) {
         return res.status(400).json({ error: msg(req, 'invalidGenre') });
     }
+    if (status !== undefined && !STATUSES.includes(status)) {
+        return res.status(400).json({ error: msg(req, 'invalidStatus') });
+    }
 
     const newTotal = keepOrSet(totalPages, userBook.totalPages);
     const newPage = keepOrSet(currentPage, userBook.currentPage);
@@ -332,7 +337,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     }
 
     const statusChanged = status !== undefined && status !== userBook.status;
-    const startedNow = statusChanged && status === 'reading';
+    const startedNow = statusChanged && status === 'reading' && (userBook.status === 'want-to-read' || !userBook.startedAt);
     const finishedNow = statusChanged && status === 'finished';
     const readNow =
         (progress !== undefined && Number(progress) !== userBook.progress) ||

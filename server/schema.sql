@@ -61,7 +61,7 @@ CREATE TABLE user_books (
     work_id         INTEGER NOT NULL REFERENCES works (id) ON DELETE RESTRICT,
     edition_id      INTEGER REFERENCES editions (id) ON DELETE SET NULL,
     status          TEXT NOT NULL DEFAULT 'reading'
-                    CHECK (status IN ('want-to-read', 'reading', 'finished')),
+                        CHECK (status IN ('want-to-read', 'reading', 'paused', 'dnf', 'finished')),
     progress        SMALLINT NOT NULL DEFAULT 0 CHECK (progress BETWEEN 0 AND 100),
     current_page    INTEGER CHECK (current_page >= 0),
     total_pages     INTEGER CHECK (total_pages > 0),

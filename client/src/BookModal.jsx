@@ -7,11 +7,13 @@ import Notice from './Notice';
 import Icon from './Icon';
 import StarRating from './StarRating';
 
-const STATUSES = ['want-to-read', 'reading', 'finished'];
+const STATUSES = ['want-to-read', 'reading', 'paused', 'dnf', 'finished'];
 
 const STATUS_ICONS = {
     'want-to-read': 'reading',
     'reading': 'library',
+    'paused': 'pause',
+    'dnf': 'close',
     'finished': 'check',
 }
 
