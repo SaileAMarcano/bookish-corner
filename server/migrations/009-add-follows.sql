@@ -8,4 +8,4 @@ CREATE TABLE IF NOT EXISTS follows (
 
 CREATE INDEX IF NOT EXISTS follows_following_idx ON follows (following_id);
 
-ALTER TABLE follows ENABLE ROW LEVEL SECURITY
+ALTER TABLE follows ENABLE ROW LEVEL SECURITY;

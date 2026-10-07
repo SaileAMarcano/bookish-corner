@@ -416,8 +416,8 @@ app.delete('/api/user-books/:id', requireAuth, async (req, res) => {
     res.json({ message: 'Removed from library' });
 });
 
-app.get('/api/user-books', requireAuth, async (req, res) => {
-    const userBooks = await query(`
+async function findUserBooks(req, ownerId) {
+    return query(`
         SELECT ub.id, ub.status, ub.review, ub.is_favorite, ub.genre, ub.rating,
                ub.current_page, ub.total_pages, ub.current_chapter,
                ub.started_at, ub.finished_at, ub.last_read_at, ub.created_at,
@@ -431,15 +431,17 @@ app.get('/api/user-books', requireAuth, async (req, res) => {
                (SELECT COUNT(*) FROM likes WHERE likes.user_book_id = ub.id) AS like_count,
                (SELECT COUNT(*) FROM comments WHERE comments.user_book_id = ub.id) AS comment_count,
                EXISTS (
-                   SELECT 1 FROM likes WHERE likes.user_book_id = ub.id AND likes.user_id = $1
+                    SELECT 1 FROM likes WHERE likes.user_book_id = ub.id AND likes.user_id = $3
                ) AS has_liked
         FROM user_books ub
         JOIN works w ON w.id = ub.work_id
         ${JOIN_TRANSLATION} = $2
         WHERE ub.user_id = $1
-    `, [req.session.user.id, languageOf(req)]);
+            `, [ownerId, languageOf(req), req.session.user.id]);
+}
 
-    res.json(userBooks);
+app.get('/api/user-books', requireAuth, async (req, res) => {
+    res.json(await findUserBooks(req, req.session.user.id));
 });
 
 app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
@@ -1044,6 +1046,44 @@ app.get('/api/users/:username/following', requireAuth, async (req, res) => {
         ORDER BY f.created_at DESC
     `, [user.id, req.session.user.id]);
     res.json(people);
+});
+
+app.get('/api/users/:username', requireAuth, async (req, res) => {
+    const [user] = await query(`
+        SELECT id, username, COALESCE(display_name, username) AS display_name, bio, avatar_url,
+               about_me, favorite_quote, favorite_things, location, instagram_url, tiktok_url, reading_goal, 
+               (SELECT COUNT(*) FROM user_books
+               WHERE user_books.user_id = users.id AND user_books.status = 'finished') AS books_read,
+               (SELECT COUNT(*) FROM user_books
+               WHERE user_books.user_id = users.id AND user_books.review IS NOT NULL) AS reviews_count,
+               (SELECT COUNT(*) FROM user_books
+                WHERE user_books.user_id = users.id AND user_books.status = 'reading') AS currently_reading
+        FROM users
+        WHERE username = $1
+    `, [req.params.username]);
+
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+
+    const follow = await userFollowState(req, user.id);
+    res.json({ ...user, ...follow, isMe: user.id === req.session.user.id });
+});
+
+app.get('/api/users/:username/posts', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+    res.json(await findPosts(req, 'p.user_id = $1', user.id));
+});
+
+app.get('/api/users/:username/books', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+    res.json(await findUserBooks(req, user.id));
 });
 
 const passwordProblem = (password) => {
