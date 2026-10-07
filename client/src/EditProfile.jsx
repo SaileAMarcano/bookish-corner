@@ -262,6 +262,7 @@ function EditProfile({ onSaved }) {
                                         value={instagramUrl}
                                         onChange={(e) => setInstagramUrl(e.target.value)}
                                         placeholder="https://instagram.com/your-user"
+                                        maxLength={200}
                                     />
                                 </div>
 
@@ -273,6 +274,7 @@ function EditProfile({ onSaved }) {
                                         value={tiktokUrl}
                                         onChange={(e) => setTiktokUrl(e.target.value)}
                                         placeholder="https://tiktok.com/@your-user"
+                                        maxLength={200}
                                     />
                                 </div>
                             </div>

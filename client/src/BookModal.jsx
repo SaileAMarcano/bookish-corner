@@ -257,6 +257,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                     value={review}
                                     onChange={(e) => setReview(e.target.value)}
                                     placeholder={t('modal.reviewPlaceholder')}
+                                    maxLength={5000}
                                 />
 
                                 <div className="review-controls">
@@ -351,6 +352,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                 onChange={(e) => setCommentText(e.target.value)}
                                 placeholder={t('modal.writeComment')}
                                 aria-label={t('modal.writeComment')}
+                                maxLength={1000}
                             />
                             <button type="submit" className="pill comment-send">{t('modal.comment')}</button>
                         </form>

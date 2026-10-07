@@ -85,6 +85,7 @@ function AuthPage({ mode, onLogin }) {
                                     type="text"
                                     placeholder={t('auth.usernamePlaceholder')}
                                     autoComplete="username"
+                                    maxLength={30}
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                 />

@@ -9,8 +9,11 @@ const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
 const multer = require('multer');
 const path = require('path');
+const helmet = require('helmet');
+const { rateLimit } = require('express-rate-limit');
 const app = express();
-app.use(express.json());
+app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(express.json({ limit: '100kb' }));
 app.use(cors({
     origin: 'http://localhost:5173',
     credentials: true,
@@ -47,6 +50,24 @@ const upload = multer({
 });
 
 app.use('/uploads', express.static('uploads'));
+
+const loginLimiter = rateLimit({
+    windowMs: 30 * 60 * 1000,
+    limit: 3,
+    skipSuccessfulRequests: true,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: (req, res) => res.status(429).json({ error: msg(req, 'tooManyAttempts') }),
+});
+
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    limit: 300,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: (req, res) => res.status(429).json({ error: msg(req, 'tooManyRequests') }),
+});
+app.use('/api', apiLimiter);
 
 const PORT = 3000;
 function requireAuth(req, res, next) {
@@ -294,6 +315,8 @@ app.delete('/api/user-books/:id/like', requireAuth, async (req, res) => {
 
 const keepOrSet = (value, current) => (value === undefined ? current : value);
 
+const REVIEW_MAX_LENGTH = 5000;
+
 app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating } = req.body;
@@ -323,6 +346,9 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     }
     if (status !== undefined && !STATUSES.includes(status)) {
         return res.status(400).json({ error: msg(req, 'invalidStatus') });
+    }
+    if (typeof review === 'string' && review.length > REVIEW_MAX_LENGTH) {
+        return res.status(400).json({ error: msg(req, 'reviewTooLong') });
     }
 
     const newTotal = keepOrSet(totalPages, userBook.totalPages);
@@ -413,6 +439,9 @@ app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
 
     if (!text || text.trim() === '') {
         return res.status(400).json({ error: msg(req, 'commentEmpty') });
+    }
+    if (text.length > COMMENT_MAX_LENGTH) {
+        return res.status(400).json({ error: msg(req, 'commentTooLong') });
     }
 
     try {
@@ -943,12 +972,17 @@ const passwordProblem = (password) => {
     return null;
 }
 
-app.post('/api/register', async (req, res) => {
+const USERNAME_MAX_LENGTH = 30;
+
+app.post('/api/register', authLimiter, async (req, res) => {
     const { username, email, password } = req.body;
     const language = LANGUAGES.includes(req.body.language) ? req.body.language : 'en';
 
     if (!username || !email || !password) {
         return res.status(400).json({ error: msg(req, 'registerFieldsRequired') });
+    }
+    if (username.length > USERNAME_MAX_LENGTH) {
+        return res.status(400).json({ error: msg(req, 'usernameTooLong') });
     }
 
     const problem = passwordProblem(password);
@@ -972,7 +1006,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', loginLimiter, async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -1046,7 +1080,6 @@ app.patch('/api/me/language', requireAuth, async (req, res) => {
 
 const THEMES = ['light', 'dark'];
 
-// Light or dark mode, saved in the profile like the language.
 app.patch('/api/me/theme', requireAuth, async (req, res) => {
     const { theme } = req.body;
 
@@ -1079,7 +1112,11 @@ app.get('/api/profile', requireAuth, async (req, res) => {
 const READER_TYPES = ['first-time', 'casual', 'avid'];
 
 app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res) => {
-    const { bio, instagramUrl, tiktokUrl, location, readerType } = req.body;
+    const { readerType } = req.body;
+    const bio = req.body.bio?.slice(0, 160);
+    const location = req.body.location?.slice(0, 60);
+    const instagramUrl = req.body.instagramUrl?.slice(0, 200);
+    const tiktokUrl = req.body.tiktokUrl?.slice(0, 200);
     if (readerType !== undefined && !READER_TYPES.includes(readerType)) {
         return res.status(400).json({ error: msg(req, 'readerTypeInvalid') });
     }
@@ -1135,6 +1172,12 @@ app.post('/api/logout', (req, res) => {
 app.use((error, req, res, next) => {
     if (error.code === 'LIMIT_FILE_SIZE') {
         return res.status(400).json({ error: msg(req, 'photoSize') });
+    }
+    if (error.type === 'entity.too.large') {
+        return res.status(413).json({ error: msg(req, 'requestTooLarge') });
+    }
+    if (error.type === 'entity.parse.failed') {
+        return res.status(400).json({ error: msg(req, 'invalidRequest') });
     }
     if (error.status === 400) {
         return res.status(400).json({ error: error.message });
