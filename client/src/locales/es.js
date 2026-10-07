@@ -337,6 +337,10 @@ const es = {
         tagSuggestions: 'Sugerencias de etiquetas',
         tagUses_one: '{{count}} uso',
         tagUses_other: '{{count}} usos',
+        spoiler: 'Spoiler',
+        spoilerWarning: 'Esta publicación tiene spoilers',
+        spoilerReveal: 'Clic para ver',
+        spoilerHide: 'Ocultar spoiler',
     },
     tagged: {
         kicker: 'Etiqueta',

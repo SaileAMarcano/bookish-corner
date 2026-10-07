@@ -337,6 +337,10 @@ const en = {
         tagSuggestions: 'Tag suggestions',
         tagUses_one: '{{count}} use',
         tagUses_other: '{{count}} uses',
+        spoiler: 'Spoiler',
+        spoilerWarning: 'This post has spoilers',
+        spoilerReveal: 'Click to show',
+        spoilerHide: 'Hide spoiler',
     },
     tagged: {
         kicker: 'Tag',

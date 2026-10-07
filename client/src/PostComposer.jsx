@@ -16,6 +16,7 @@ function PostComposer({ books, onCreated }) {
     const [imagePreview, setImagePreview] = useState('');
     const [chosenBooks, setChosenBooks] = useState([]);
     const [tags, setTags] = useState([]);
+    const [isSpoiler, setIsSpoiler] = useState(false);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [filter, setFilter] = useState('');
     const [error, setError] = useState('');
@@ -69,6 +70,7 @@ function PostComposer({ books, onCreated }) {
         setImagePreview('');
         setChosenBooks([]);
         setTags([]);
+        setIsSpoiler(false);
         setPickerOpen(false);
         setFilter('');
     };
@@ -81,6 +83,7 @@ function PostComposer({ books, onCreated }) {
         formData.append('text', text);
         formData.append('bookIds', chosenIds.join(','));
         formData.append('tags', tags.join(','));
+        formData.append('isSpoiler', isSpoiler);
         if (imageFile) {
             formData.append('image', imageFile);
         }
@@ -189,6 +192,16 @@ function PostComposer({ books, onCreated }) {
                 >
                     <Icon name="library" />
                     {t('posts.book')} ({chosenBooks.length}/{BOOKS_MAX})
+                </button>
+
+                <button
+                    type="button"
+                    className={`post-tool ${isSpoiler ? 'active' : ''}`}
+                    onClick={() => setIsSpoiler(!isSpoiler)}
+                    aria-pressed={isSpoiler}
+                >
+                    <Icon name="eyeOff" />
+                    {t('posts.spoiler')}
                 </button>
 
                 <button type="submit" className="post-composer-send" disabled={!canSend}>

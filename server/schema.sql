@@ -100,6 +100,7 @@ CREATE TABLE posts (
     user_id    INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     text       TEXT CHECK (length(text) <= 2000),
     image_url  TEXT,
+    is_spoiler BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

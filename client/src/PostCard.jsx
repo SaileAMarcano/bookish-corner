@@ -13,8 +13,11 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
     const [error, setError] = useState('');
     const [showComments, setShowComments] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [showSpoiler, setShowSpoiler] = useState(false);
 
     const isOwner = post.userId === currentUserId;
+    const hidesContent = post.isSpoiler && (post.text || post.imageUrl);
+    const isHidden = hidesContent && !showSpoiler;
 
     const handleLike = () => {
         setError('');
@@ -76,9 +79,28 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
                 </div>
             )}
 
-            {post.text && <p className="post-text">{post.text}</p>}
+            {hidesContent && showSpoiler && (
+                <button type="button" className="post-spoiler-hide" onClick={() => setShowSpoiler(false)}>
+                    <Icon name="eyeOff" size={14} />
+                    {t('posts.spoilerHide')}
+                </button>
+            )}
 
-            {post.imageUrl && <img className="post-image" src={post.imageUrl} alt="" />}
+            <div className={`post-spoiler ${isHidden ? 'hidden' : ''}`}>
+                <div className="post-spoiler-content" inert={isHidden}>
+                    {post.text && <p className="post-text">{post.text}</p>}
+
+                    {post.imageUrl && <img className="post-image" src={post.imageUrl} alt="" />}
+                </div>
+
+                {isHidden && (
+                    <button type="button" className="post-spoiler-cover" onClick={() => setShowSpoiler(true)}>
+                        <Icon name="eye" />
+                        <span className="post-spoiler-title">{t('posts.spoilerWarning')}</span>
+                        <span className="post-spoiler-hint">{t('posts.spoilerReveal')}</span>
+                    </button>
+                )}
+            </div>
 
             {post.books.length > 0 && (
                 <div className="post-books">

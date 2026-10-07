@@ -5000,7 +5000,6 @@ a.post-tag:hover,
   color: var(--text-2);
 }
 
-/* ---------- Dark mode (Session 21) ---------- */
 
 .theme-toggle {
   display: flex;
@@ -5012,4 +5011,68 @@ a.post-tag:hover,
 
 :root[data-theme="dark"] .sidebar-illustration {
   opacity: 0.45;
+}
+
+.post-spoiler {
+  position: relative;
+}
+
+.post-spoiler.hidden {
+  min-height: 110px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border-radius: 16px;
+}
+
+.post-spoiler.hidden .post-spoiler-content {
+  filter: blur(10px);
+  user-select: none;
+}
+
+.post-spoiler-cover {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  border: 1px dashed var(--rose);
+  border-radius: 16px;
+  background: var(--glass);
+  color: var(--rose-ink);
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.post-spoiler-cover:hover {
+  background: var(--rose-soft);
+}
+
+.post-spoiler-title {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.post-spoiler-hint {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.post-spoiler-hide {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  margin-bottom: 10px;
+  padding: 0 12px;
+  border: none;
+  border-radius: 999px;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
 }

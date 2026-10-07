@@ -51,13 +51,22 @@ const upload = multer({
 
 app.use('/uploads', express.static('uploads'));
 
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 10,
+    skipSuccessfulRequests: true,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: (req, res) => res.status(429).json({ error: msg(req, 'tooManyAttempts') }),
+});
+
 const loginLimiter = rateLimit({
     windowMs: 30 * 60 * 1000,
     limit: 3,
     skipSuccessfulRequests: true,
     standardHeaders: 'draft-8',
     legacyHeaders: false,
-    handler: (req, res) => res.status(429).json({ error: msg(req, 'tooManyAttempts') }),
+    handler: (req, res) => res.status(429).json({ error: msg(req, 'tooManyLoginAttempts') }),
 });
 
 const apiLimiter = rateLimit({
@@ -534,7 +543,7 @@ async function findOrCreateTags(client, tags) {
 
 async function findPosts(req, condition, value) {
     return query(`
-        SELECT p.id, p.text, p.image_url, p.created_at,
+        SELECT p.id, p.text, p.image_url, p.is_spoiler, p.created_at,
                u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
                (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
                (SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id) AS comment_count,
@@ -569,6 +578,7 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
     const text = req.body.text?.trim() || null;
     const bookIds = parseBookIds(req.body.bookIds);
     const tags = parseTags(req.body.tags);
+    const isSpoiler = req.body.isSpoiler === 'true';
 
     if (!text && bookIds.length === 0 && !req.file) {
         return res.status(400).json({ error: msg(req, 'postEmpty') });
@@ -595,8 +605,8 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
         await client.query('BEGIN');
 
         const result = await client.query(
-            'INSERT INTO posts (user_id, text, image_url) VALUES ($1, $2, $3) RETURNING id',
-            [req.session.user.id, text, imageUrl]
+            'INSERT INTO posts (user_id, text, image_url, is_spoiler) VALUES ($1, $2, $3, $4) RETURNING id',
+            [req.session.user.id, text, imageUrl, isSpoiler]
         );
         postId = result.rows[0].id;
 
