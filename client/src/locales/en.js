@@ -345,6 +345,11 @@ const en = {
         spoilerReveal: 'Click to show',
         spoilerHide: 'Hide spoiler',
     },
+    follows: {
+        loading: 'Loading...',
+        noFollowers: 'Nobody follows you yet. Post something or comment on a tag to get noticed!',
+        noFollowing: 'You are not following anyone yet. Use the search to find readers.',
+    },
     userPage: {
         follow: 'Follow',
         followingButton: 'Following',

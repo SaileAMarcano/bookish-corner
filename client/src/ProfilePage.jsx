@@ -9,6 +9,7 @@ import Notice from './Notice';
 import BookCover from './BookCover';
 import PostCard from './PostCard';
 import PostComposer from './PostComposer';
+import FollowList from './FollowList';
 
 const TABS = [
     { key: 'library' },
@@ -299,6 +300,11 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                 </div>
             );
         }
+
+        if (activeTab === 'following') {
+            return <FollowList username={profile.username} />;
+        }
+
         return <div className="card profile-empty">{t('profile.comingSoon')}</div>
     }
 

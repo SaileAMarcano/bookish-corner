@@ -5144,3 +5144,75 @@ a.comment-author:hover {
   color: var(--rose-deep);
   text-decoration: underline;
 }
+
+.follow-layout {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.follow-box {
+  padding: 22px 24px;
+}
+
+.follow-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.follow-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.follow-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.follow-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--surface-2);
+}
+
+.follow-row:first-child {
+  border-top: none;
+}
+
+.follow-name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.follow-name:hover .search-title {
+  color: var(--rose-deep);
+  text-decoration: underline;
+}
+
+.follow-button {
+  min-height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+@media (max-width: 860px) {
+  .follow-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
