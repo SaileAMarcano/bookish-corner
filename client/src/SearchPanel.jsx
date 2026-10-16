@@ -1,16 +1,17 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiFetch } from './api';
+import { getAvatarSrc } from './utils';
 
-// Search results from the top bar. App shows this panel on top of whatever page
-// you are on (Home, profile, Currently Reading...), so searching never changes the page.
+
 function SearchPanel({ q, books, onAdded, onError, onClose }) {
     const { t, i18n } = useTranslation();
     const [results, setResults] = useState([]);
+    const [people, setPeople] = useState([]);
     const [isSearching, setIsSearching] = useState(true);
     const [searchError, setSearchError] = useState('');
 
-    // App gives this panel key={q}: a new search starts a fresh panel (state back to "Searching...").
     useEffect(() => {
         let ignore = false;
 
@@ -36,8 +37,23 @@ function SearchPanel({ q, books, onAdded, onError, onClose }) {
         };
     }, [q, i18n.language]);
 
+    useEffect(() => {
+        let ignore = false;
+
+        apiFetch(`/api/users?q=${encodeURIComponent(q)}`)
+            .then((data) => {
+                if (!ignore) setPeople(data);
+            })
+            .catch(() => {
+                if (!ignore) setPeople([]);
+            });
+        return () => {
+            ignore = true;
+        };
+    }, [q]);
+
     const handleAdd = (book) => {
-        // Books from our catalog already have an id; the rest come from Open Library.
+
         const request = book.bookId
             ? apiFetch('/api/user-books', { method: 'POST', body: { bookId: book.bookId } })
             : apiFetch('/api/user-books/from-search', {
@@ -67,6 +83,23 @@ function SearchPanel({ q, books, onAdded, onError, onClose }) {
                     {t('home.clear')}
                 </button>
             </div>
+
+            {people.length > 0 && (
+                <>
+                    <div className="search-section">{t('home.peopleTitle')}</div>
+                    {people.map((person) => (
+                        <Link key={person.id} to={`/u/${person.username}`} className="search-result search-person">
+                            <img className="search-avatar" src={getAvatarSrc(person.avatarUrl)} alt="" />
+                            <div className="search-info">
+                                <div className="search-title">{person.displayName}</div>
+                                <div className="search-author">@{person.username}</div>
+                            </div>
+                            {person.isFollowing && <span className="search-added">{t('home.followingBadge')}</span>}
+                        </Link>
+                    ))}
+                    <div className="search-section">{t('home.booksTitle')}</div>
+                </>
+            )}
 
             {isSearching && <div className="search-empty">{t('home.searching')}</div>}
             {!isSearching && searchError && <div className="search-empty">{searchError}</div>}

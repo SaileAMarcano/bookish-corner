@@ -5102,3 +5102,32 @@ a.post-tag:hover,
     border-left: none;
   }
 }
+
+.search-section {
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--rose-deep);
+}
+
+.search-person {
+  padding: 10px 8px;
+  border-radius: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.search-person:hover {
+  background: var(--rose-soft);
+}
+
+.search-avatar {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--clay-soft);
+}

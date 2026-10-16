@@ -1048,6 +1048,27 @@ app.get('/api/users/:username/following', requireAuth, async (req, res) => {
     res.json(people);
 });
 
+const USER_SEARCH_LIMIT = 6;
+
+app.get('/api/users', requireAuth, async (req, res) => {
+    const term = escapeLike(plainSearch(String(req.query.q ?? '').trim()));
+    if (term === '') {
+        return res.json([]);
+    }
+
+    const users = await query(`
+        SELECT u.id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+                EXISTS (SELECT 1 FROM follows f WHERE f.follower_id = $3 AND f.following_id = u.id) AS is_following
+        FROM users u
+        WHERE u.id <> $3
+            AND (${plainText('u.username')} LIKE $1 OR ${plainText("COALESCE(u.display_name, '')")} LIKE $1)
+        ORDER BY ${plainText('u.username')} LIKE $2 DESC, u.username
+        LIMIT ${USER_SEARCH_LIMIT}
+        `, [`%${term}%`, `${term}%`, req.session.user.id]);
+
+    res.json(users);
+});
+
 app.get('/api/users/:username', requireAuth, async (req, res) => {
     const [user] = await query(`
         SELECT id, username, COALESCE(display_name, username) AS display_name, bio, avatar_url,
