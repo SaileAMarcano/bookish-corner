@@ -16,6 +16,7 @@ import TagsPage from './TagsPage';
 import GenresPage from './GenresPage';
 import GenrePage from './GenrePage';
 import UserPage from './UserPage';
+import BookPage from './BookPage';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
@@ -335,6 +336,7 @@ function App() {
           <Route path="/genres" element={<GenresPage />} />
           <Route path="/genre/:slug" element={<GenrePage />} />
           <Route path="/u/:username" element={<UserPage currentUser={currentUser} />} />
+          <Route path="/book/:id" element={<BookPage onLibraryChange={loadUserBooks} />} />
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

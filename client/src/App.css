@@ -5216,3 +5216,167 @@ a.comment-author:hover {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.book-page {
+  gap: 18px;
+}
+
+.book-hero {
+  display: flex;
+  gap: 32px;
+  padding: 30px 34px;
+}
+
+.book-hero-cover {
+  flex-shrink: 0;
+  width: 180px;
+  aspect-ratio: 2 / 3;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 10px 24px rgba(58, 54, 42, 0.18);
+}
+
+.book-hero-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.book-hero-genre {
+  padding: 4px 12px;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.book-hero-title {
+  margin: 0;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.book-hero-author,
+.book-hero-readers {
+  margin: 0;
+  font-size: 15px;
+  color: var(--text-2);
+}
+
+.book-hero-rating {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.book-hero-actions,
+.book-hero-mine {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.book-hero-link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--rose-deep);
+  text-decoration: none;
+}
+
+.book-section {
+  padding: 24px 30px;
+}
+
+.book-section-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 0 0 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.book-synopsis {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+.book-review-item {
+  display: flex;
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid var(--surface-2);
+}
+
+.book-review-item:first-of-type {
+  border-top: none;
+}
+
+.book-review-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.book-review-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.book-review-text {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-line;
+}
+
+.book-review-foot {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.book-review-count {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+@media (max-width: 860px) {
+  .book-hero {
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 20px;
+    text-align: center;
+  }
+
+  .book-hero-info {
+    align-items: center;
+  }
+
+  .book-hero-cover {
+    width: 150px;
+  }
+
+  .book-section {
+    padding: 20px;
+  }
+}
