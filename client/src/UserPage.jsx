@@ -84,7 +84,7 @@ function UserPage({ currentUser }) {
 
     const name = profile.displayName;
 
-    const stas = [
+    const stats = [
         { number: profile.booksRead, label: t('profile.statBooksRead') },
         { number: profile.reviewsCount, label: t('profile.statReviews') },
         { number: profile.currentlyReading, label: t('profile.statReading') },
@@ -111,6 +111,9 @@ function UserPage({ currentUser }) {
             return renderBooks(books, t('userPage.emptyLibrary', { name }));
         }
         if (activeTab === 'reviews') {
+            return renderBooks(books.filter((book) => book.review), t('userPage.emptyReviews', { name }));
+        }
+        if (activeTab === 'favorites') {
             return renderBooks(books.filter((book) => book.isFavorite), t('userPage.emptyFavorites', { name }));
         }
 
@@ -126,7 +129,7 @@ function UserPage({ currentUser }) {
     };
 
     return (
-        <main classsName="page profile-view">
+        <main className="page profile-view">
             <div className="profile-banner">
                 <img className="profile-banner-image" src="/default-banner.png" alt="" />
             </div>
