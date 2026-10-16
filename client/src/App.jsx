@@ -15,6 +15,7 @@ import TaggedPage from './TaggedPage';
 import TagsPage from './TagsPage';
 import GenresPage from './GenresPage';
 import GenrePage from './GenrePage';
+import UserPage from './UserPage';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
@@ -26,14 +27,12 @@ import SearchBox from './SearchBox';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 
-// A logged-in user's saved language wins over the one chosen on this browser.
 function applyUserLanguage(user) {
   if (user.language && user.language !== i18n.language) {
     i18n.changeLanguage(user.language);
   }
 }
 
-// The theme saved in her profile; if she never chose one, the one of her device. Public pages stay light.
 function themeOf(user) {
   if (!user) return 'light';
   if (user.theme) return user.theme;
@@ -58,7 +57,6 @@ function App() {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
-  // The search lives in the URL (?q=) of the page you are on, so it never sends you to Home.
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') || '';
 
@@ -178,7 +176,6 @@ function App() {
     navigate('/');
   };
 
-  // The switcher already changed the language on screen; here it is saved in the profile.
   const handleLanguageChange = (language) => {
     setCurrentUser((user) => ({ ...user, language }));
     apiFetch('/api/me/language', { method: 'PATCH', body: { language } })
@@ -193,7 +190,6 @@ function App() {
   };
 
   const handleSearch = (term) => {
-    // Keeps the rest of the URL (for example ?tab=favorites) and only adds q.
     setSearchParams((params) => {
       params.set('q', term);
       return params;
@@ -338,6 +334,7 @@ function App() {
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/genres" element={<GenresPage />} />
           <Route path="/genre/:slug" element={<GenrePage />} />
+          <Route path="/u/:username" element={<UserPage currentUser={currentUser} />} />
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

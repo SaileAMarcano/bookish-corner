@@ -342,6 +342,22 @@ const es = {
         spoilerReveal: 'Clic para ver',
         spoilerHide: 'Ocultar spoiler',
     },
+    userPage: {
+        follow: 'Seguir',
+        followingButton: 'Siguiendo',
+        followers: 'Seguidores',
+        followingCount: 'Seguidos',
+        tabs: {
+            posts: 'Publicaciones',
+            library: 'Biblioteca',
+            reviews: 'Reseñas',
+            favorites: 'Favoritos',
+        },
+        emptyPosts: '{{name}} todavía no ha publicado nada.',
+        emptyLibrary: '{{name}} todavía no ha añadido libros.',
+        emptyReviews: '{{name}} todavía no ha escrito reseñas.',
+        emptyFavorites: '{{name}} todavía no ha elegido favoritos.',
+    },
     tagged: {
         kicker: 'Etiqueta',
         loading: 'Cargando...',

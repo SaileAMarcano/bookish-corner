@@ -342,6 +342,22 @@ const en = {
         spoilerReveal: 'Click to show',
         spoilerHide: 'Hide spoiler',
     },
+    userPage: {
+        follow: 'Follow',
+        followingButton: 'Following',
+        followers: 'Followers',
+        followingCount: 'Following',
+        tabs: {
+            posts: 'Posts',
+            library: 'Library',
+            reviews: 'Reviews',
+            favorites: 'Favorites',
+        },
+        emptyPosts: '{{name}} has not posted anything yet.',
+        emptyLibrary: '{{name}} has not added any books yet.',
+        emptyReviews: '{{name}} has not written any reviews yet.',
+        emptyFavorites: '{{name}} has not chosen any favorites yet.',
+    },
     tagged: {
         kicker: 'Tag',
         loading: 'Loading...',

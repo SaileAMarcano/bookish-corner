@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next';
 import BookModal from './BookModal';
 
-function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
+function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
     const { t } = useTranslation();
     const [showDetail, setShowDetail] = useState(false)
     const [coverFailed, setCoverFailed] = useState(false)
@@ -12,18 +12,20 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
     return (
         <>
             <div className="card book-card">
-                <button
-                    className={`cover-heart ${book.isFavorite ? 'is-favorite' : ''}`}
-                    onClick={() => onToggleFavorite(book.id, book.isFavorite)}
-                    aria-label={book.isFavorite ? t('book.removeFavorite') : t('book.addFavorite')}
-                >
-                    <svg width="16" height="16" viewBox="0 0 24 24"
-                        fill={book.isFavorite ? 'currentColor' : 'none'}
-                        stroke="currentColor" strokeWidth="2"
-                        strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
-                    </svg>
-                </button>
+                {!readOnly && (
+                    <button
+                        className={`cover-heart ${book.isFavorite ? 'is-favorite' : ''}`}
+                        onClick={() => onToggleFavorite(book.id, book.isFavorite)}
+                        aria-label={book.isFavorite ? t('book.removeFavorite') : t('book.addFavorite')}
+                    >
+                        <svg width="16" height="16" viewBox="0 0 24 24"
+                            fill={book.isFavorite ? 'currentColor' : 'none'}
+                            stroke="currentColor" strokeWidth="2"
+                            strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
+                        </svg>
+                    </button>
+                )}
 
                 {hasRealCover ? (
                     <img className="book-cover book-cover-image" src={book.coverImage} alt={book.title} onError={() => setCoverFailed(true)} />
@@ -54,9 +56,11 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite }) {
                     <p className="book-review">{book.review}</p>
                 )}
 
-                <button className="read-more" onClick={() => setShowDetail(true)}>
-                    {t('book.readMore')}
-                </button>
+                {!readOnly && (
+                    <button className="read-more" onClick={() => setShowDetail(true)}>
+                        {t('book.readMore')}
+                    </button>
+                )}
 
                 <div className="book-footer">
                     <button

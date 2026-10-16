@@ -5076,3 +5076,29 @@ a.post-tag:hover,
   font-weight: 600;
   cursor: pointer;
 }
+
+.profile-follow {
+  position: absolute;
+  top: 30px;
+  right: 34px;
+}
+
+@media (max-width: 860px) {
+  .profile-follow {
+    position: static;
+  }
+
+  .user-stats {
+    flex-wrap: wrap;
+    row-gap: 12px;
+  }
+
+  .user-stats .profile-stat,
+  .user-stats .profile-stat:first-child {
+    padding: 0 12px;
+  }
+
+  .user-stats .profile-stat+.profile-stat {
+    border-left: none;
+  }
+}
