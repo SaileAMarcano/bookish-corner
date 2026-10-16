@@ -131,6 +131,49 @@ app.get('/api/books/recent', requireAuth, async (req, res) => {
     res.json(books);
 });
 
+app.get('/api/books/:id', requireAuth, async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+
+    const [book] = await query(`
+        ${WORK_GENRES}
+        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, ${TRANSLATED_DESCRIPTION} AS description,
+               w.cover_image, w.first_published_year AS year, wg.genre,
+               (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id) AS readers,
+               (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id AND ub.status = 'want-to-read') AS want_count,
+               (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id AND ub.rating > 0) AS rating_count,
+               (SELECT ROUND(AVG(ub.rating), 1) FROM user_books ub WHERE ub.work_id = w.id AND ub.rating > 0) AS average_rating,
+               mine.id AS my_user_book_id, mine.status AS my_status
+        FROM works w
+        ${JOIN_TRANSLATION} = $2
+        LEFT JOIN work_genre wg ON wg.work_id = w.id
+        LEFT JOIN user_books mine ON mine.work_id = w.id AND mine.user_id = $3
+        WHERE w.id = $1
+    `, [id, languageOf(req), req.session.user.id]);
+
+    if (!book) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+
+    const reviews = await query(`
+        SELECT ub.id, ub.review, ub.rating, ub.status, ub.created_at,
+               u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id) AS like_count,
+               (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id) AS comment_count,
+               EXISTS (SELECT 1 FROM likes l WHERE l.user_book_id = ub.id AND l.user_id = $2) AS has_liked,
+               ub.user_id = $2 AS is_mine
+        FROM user_books ub
+        JOIN users u ON u.id = ub.user_id
+        WHERE ub.work_id = $1 AND ub.review IS NOT NULL
+        ORDER BY like_count DESC, ub.created_at DESC
+        LIMIT 50
+    `, [id, req.session.user.id]);
+
+    res.json({ ...book, reviews });
+});
+
 const SEARCH_LIMIT = 10;
 
 const plainText = (sql) => `translate(lower(${sql}), 'áàäâãéèëêíìïîóòöôõúùüûñç', 'aaaaaeeeeiiiiooooouuuunc')`;
@@ -228,16 +271,17 @@ app.get('/api/search-books', async (req, res) => {
 
 app.post('/api/user-books', requireAuth, async (req, res) => {
     const { bookId } = req.body;
+    const status = req.body.status === 'want-to-read' ? 'want-to-read' : 'reading';
     if (!bookId) {
         return res.status(400).json({ error: msg(req, 'bookIdRequired') });
     }
 
     try {
         const [entry] = await query(`
-            INSERT INTO user_books (user_id, work_id, started_at, last_read_at)
-            VALUES ($1, $2, now(), now())
-            RETURNING id, user_id, work_id AS book_id
-        `, [req.session.user.id, bookId]);
+            INSERT INTO user_books (user_id, work_id, status, started_at, last_read_at)
+            VALUES ($1, $2, $3, CASE WHEN $3 = 'reading' THEN now() END, now())
+            RETURNING id, user_id, work_id AS book_id, status
+        `, [req.session.user.id, bookId, status]);
         res.status(201).json(entry);
     } catch (error) {
         if (error.code === '23505') {
