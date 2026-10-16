@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import { pagePercent, pageSummary, getAvatarSrc, genreLabel, GENRES } from './utils';
@@ -323,7 +324,7 @@ function BookModal({ book, onClose, onUpdate }) {
                                         <img className="comment-avatar" src={getAvatarSrc(comment.avatarUrl)} alt="" />
                                         <div className="comment-body">
                                             <div className="comment-head">
-                                                <span className="comment-author">{comment.username}</span>
+                                                <Link to={`/u/${comment.username}`} className="comment-author">{comment.username}</Link>
                                                 <span className="comment-date">
                                                     · {new Date(comment.createdAt).toLocaleDateString(i18n.language, {
                                                         month: 'short',

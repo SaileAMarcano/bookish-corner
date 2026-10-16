@@ -5131,3 +5131,16 @@ a.post-tag:hover,
   object-fit: cover;
   background: var(--clay-soft);
 }
+
+a.post-author,
+a.post-comment-author,
+a.comment-author {
+  text-decoration: none;
+}
+
+a.post-author:hover,
+a.post-comment-author:hover,
+a.comment-author:hover {
+  color: var(--rose-deep);
+  text-decoration: underline;
+}

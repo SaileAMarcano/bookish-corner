@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import Notice from './Notice';
@@ -77,7 +78,7 @@ function PostComments({ post, currentUserId, onCountChange }) {
 
                     <div className="post-comment-body">
                         <div className="post-comment-head">
-                            <span className="post-comment-author">{comment.displayName}</span>
+                            <Link to={`/u/${comment.username}`} className='post-comment-author'>{comment.displayName}</Link>
                             <span className="post-comment-date">{timeAgo(comment.createdAt)}</span>
                         </div>
                         <p className="post-comment-text">{comment.text}</p>

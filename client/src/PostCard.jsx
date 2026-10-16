@@ -48,7 +48,7 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
             <header className="post-head">
                 <img className="post-avatar" src={getAvatarSrc(post.avatarUrl)} alt="" />
                 <div>
-                    <div className="post-author">{post.displayName}</div>
+                    <Link to={`/u/${post.username}`} className="post-author">{post.displayName}</Link>
                     <div className="post-date">{timeAgo(post.createdAt)}</div>
                 </div>
 
