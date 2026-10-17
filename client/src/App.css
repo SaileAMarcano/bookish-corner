@@ -5328,6 +5328,7 @@ a.comment-author:hover {
 }
 
 .book-review-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 6px;

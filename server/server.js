@@ -506,7 +506,8 @@ app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
         );
 
         const [newComment] = await query(`
-            SELECT comments.id, comments.text, comments.created_at, users.username, users.avatar_url
+            SELECT comments.id, comments.text, comments.created_at, users.username, 
+                COALESCE(users.display_name, users.username) AS display_name, users.avatar_url
             FROM comments
             JOIN users ON comments.user_id = users.id
             WHERE comments.id = $1
@@ -523,7 +524,8 @@ app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
 
 app.get('/api/user-books/:id/comments', async (req, res) => {
     const comments = await query(`
-        SELECT comments.id, comments.text, comments.created_at, users.username, users.avatar_url
+        SELECT comments.id, comments.text, comments.created_at, users.username, 
+            COALESCE(users.display_name, users.username) AS display_name, users.avatar_url
         FROM comments
         JOIN users ON comments.user_id = users.id
         WHERE comments.user_book_id = $1

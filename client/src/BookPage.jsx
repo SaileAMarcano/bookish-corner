@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import BookModal from './BookModal';
+import ReviewComments from './ReviewComments';
 import Icon from './Icon';
 import StarRating from './StarRating';
 import Notice from './Notice';
@@ -16,6 +17,7 @@ function BookPage({ books, onLibraryChange }) {
     const [error, setError] = useState('');
     const [actionError, setActionError] = useState('');
     const [showReading, setShowReading] = useState(false);
+    const [openComments, setOpenComments] = useState(null);
 
     const loadBook = () =>
         apiFetch(`/api/books/${encodeURIComponent(id)}`)
@@ -57,6 +59,13 @@ function BookPage({ books, onLibraryChange }) {
     const handleReadingChange = () => {
         onLibraryChange();
         loadBook();
+    };
+
+    const handleCommentCount = (reviewId, count) => {
+        setBook((current) => ({
+            ...current,
+            reviews: current.reviews.map((item) => (item.id === reviewId ? { ...item, commentCount: count } : item)),
+        }));
     };
 
     const handleLike = (review) => {
@@ -184,8 +193,23 @@ function BookPage({ books, onLibraryChange }) {
                                         {t('posts.like')} ({review.likeCount})
                                     </button>
                                 )}
-                                <span className="book-review-count">{t('book.comments', { count: review.commentCount })}</span>
+                                <button
+                                    type="button"
+                                    className={`post-action ${openComments === review.id ? 'open' : ''}`}
+                                    onClick={() => setOpenComments(openComments === review.id ? null : review.id)}
+                                    aria-expanded={openComments === review.id}
+                                >
+                                    <Icon name="comment" />
+                                    {t('book.comments', { count: review.commentCount })}
+                                </button>
                             </div>
+
+                            {openComments === review.id && (
+                                <ReviewComments
+                                    reviewId={review.id}
+                                    onCountChange={(count) => handleCommentCount(review.id, count)}
+                                />
+                            )}
                         </div>
                     </article>
                 ))}
