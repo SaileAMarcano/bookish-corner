@@ -66,7 +66,7 @@ function GenrePage() {
             ) : (
                 <div className="genre-books">
                     {data.books.map((book) => (
-                        <div key={book.id} className="card genre-book">
+                        <Link key={book.id} to={`/book/${book.id}`} className="card genre-book book-link">
                             <BookCover src={book.coverImage} className="genre-book-cover" />
                             <div className="display genre-book-title">{book.title}</div>
                             <div className="genre-book-author">{book.author}</div>
@@ -74,7 +74,7 @@ function GenrePage() {
                                 {t('genrePage.readers', { count: book.readers })}
                                 {book.averageRating !== null && ` · ★ ${book.averageRating}`}
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             )}

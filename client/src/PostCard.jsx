@@ -105,32 +105,35 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
             {post.books.length > 0 && (
                 <div className="post-books">
                     {post.books.map((book) => (
-                        <div key={book.id} className="post-book">
+                        <Link key={book.id} to={`/book/${book.id}`} className="post-book book-link">
                             <BookCover src={book.coverImage} className="post-book-cover" />
                             <div className="post-book-info">
                                 <div className="display post-book-title">{book.title}</div>
                                 <div className="post-book-author">{book.author}</div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            )}
-
-            {error && <Notice message={error} />}
-
-            {post.tags.length > 0 && (
-                <div className="post-tags">
-                    {post.tags.map((tag) => (
-                        <Link
-                            key={tag.slug}
-                            to={`/tagged/${tag.slug}`}
-                            className={`pill post-tag ${tag.slug === activeTag ? 'active' : ''}`}
-                        >
-                            #{tag.name}
                         </Link>
                     ))}
                 </div>
-            )}
+            )
+            }
+
+            {error && <Notice message={error} />}
+
+            {
+                post.tags.length > 0 && (
+                    <div className="post-tags">
+                        {post.tags.map((tag) => (
+                            <Link
+                                key={tag.slug}
+                                to={`/tagged/${tag.slug}`}
+                                className={`pill post-tag ${tag.slug === activeTag ? 'active' : ''}`}
+                            >
+                                #{tag.name}
+                            </Link>
+                        ))}
+                    </div>
+                )
+            }
 
             <footer className="post-actions">
                 <button
@@ -164,14 +167,16 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
                 </button>
             </footer>
 
-            {showComments && (
-                <PostComments
-                    post={post}
-                    currentUserId={currentUserId}
-                    onCountChange={(count) => onChange(post.id, { commentCount: count })}
-                />
-            )}
-        </article>
+            {
+                showComments && (
+                    <PostComments
+                        post={post}
+                        currentUserId={currentUserId}
+                        onCountChange={(count) => onChange(post.id, { commentCount: count })}
+                    />
+                )
+            }
+        </article >
     );
 }
 

@@ -116,7 +116,13 @@ function SearchPanel({ q, books, onAdded, onError, onClose }) {
                     )}
 
                     <div className="search-info">
-                        <div className="search-title">{book.title}</div>
+                        <div className="search-title">
+                            {book.bookId ? (
+                                <Link to={`/book/${book.bookId}`} className="book-title-link">{book.title}</Link>
+                            ) : (
+                                book.title
+                            )}
+                        </div>
                         <div className="search-author">
                             {book.author}{book.year ? ` · ${book.year}` : ''}
                         </div>

@@ -5412,3 +5412,20 @@ a.comment-author:hover {
   font-size: 13px;
   color: var(--text-2);
 }
+
+.book-link {
+  color: inherit;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+}
+
+.book-link:hover {
+  transform: translateY(-2px);
+}
+
+.book-link:hover .post-book-title,
+.book-link:hover .genre-book-title,
+.book-link:hover .tagged-book-title {
+  color: var(--rose-deep);
+  text-decoration: underline;
+}

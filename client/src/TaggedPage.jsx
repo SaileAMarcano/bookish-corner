@@ -131,7 +131,7 @@ function TaggedPage({ currentUser }) {
                     <div className="card tagged-box tagged-books">
                         <h2 className="display tagged-box-title">{t('tagged.books')}</h2>
                         {data.books.map((book) => (
-                            <div key={book.id} className="tagged-book">
+                            <Link key={book.id} to={`/book/${book.id}`} className="tagged-book book-link">
                                 <BookCover src={book.coverImage} className="tagged-book-cover" />
                                 <div>
                                     <div className="display tagged-book-title">{book.title}</div>
@@ -139,7 +139,7 @@ function TaggedPage({ currentUser }) {
                                         {book.author} · {t('tagged.mentions', { count: book.mentions })}
                                     </div>
                                 </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 )}

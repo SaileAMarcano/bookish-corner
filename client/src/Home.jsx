@@ -56,7 +56,9 @@ function RecentCard({ book, onAdd }) {
         <div className="card recent-card">
             <BookCover src={book.coverImage} className="recent-cover" />
 
-            <div className="display recent-title">{book.title}</div>
+            <div className="display recent-title">
+                <Link to={`/book/${book.id}`} className="book-title-link">{book.title}</Link>
+            </div>
             <div className="recent-author">{book.author}</div>
 
             {book.inLibrary ? (
