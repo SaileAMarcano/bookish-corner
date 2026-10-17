@@ -5380,3 +5380,35 @@ a.comment-author:hover {
     padding: 20px;
   }
 }
+
+.book-cover-link {
+  display: block;
+  border-radius: 14px;
+  transition: transform 0.2s ease;
+}
+
+.book-cover-link:hover {
+  transform: translateY(-3px);
+}
+
+.book-title-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.book-title-link:hover {
+  color: var(--rose-deep);
+  text-decoration: underline;
+}
+
+.update-reading,
+.update-reading-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.book-hero-progress {
+  font-size: 13px;
+  color: var(--text-2);
+}

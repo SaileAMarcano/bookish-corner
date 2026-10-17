@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import BookModal from './BookModal';
+import Icon from './Icon';
 
 function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
     const { t } = useTranslation();
@@ -27,18 +29,22 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
                     </button>
                 )}
 
-                {hasRealCover ? (
-                    <img className="book-cover book-cover-image" src={book.coverImage} alt={book.title} onError={() => setCoverFailed(true)} />
-                ) : (
-                    <div className="book-cover">
-                        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--surface)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M2 5c2-1 5-1.5 8-.5v14c-3-1-6-.5-8 .5V5z"></path>
-                            <path d="M22 5c-2-1-5-1.5-8-.5v14c3-1 6-.5 8 .5V5z"></path>
-                        </svg>
-                    </div>
-                )}
+                <Link to={`/book/${book.bookId}`} className="book-cover-link" aria-label={book.title}>
+                    {hasRealCover ? (
+                        <img className="book-cover book-cover-image" src={book.coverImage} alt={book.title} onError={() => setCoverFailed(true)} />
+                    ) : (
+                        <div className="book-cover">
+                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--surface)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M2 5c2-1 5-1.5 8-.5v14c-3-1-6-.5-8 .5V5z"></path>
+                                <path d="M22 5c-2-1-5-1.5-8-.5v14c3-1 6-.5 8 .5V5z"></path>
+                            </svg>
+                        </div>
+                    )}
+                </Link>
 
-                <h2 className="display book-title">{book.title}</h2>
+                <h2 className="display book-title">
+                    <Link to={`/book/${book.bookId}`} className="book-title-link">{book.title}</Link>
+                </h2>
                 <p className="book-author">{book.author}</p>
 
                 <div className="book-meta">
@@ -57,8 +63,9 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
                 )}
 
                 {!readOnly && (
-                    <button className="read-more" onClick={() => setShowDetail(true)}>
-                        {t('book.readMore')}
+                    <button className="read-more update-reading" onClick={() => setShowDetail(true)}>
+                        <Icon name="pencil" size={14} />
+                        {t('book.updateReading')}
                     </button>
                 )}
 

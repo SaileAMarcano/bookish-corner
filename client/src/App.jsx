@@ -336,7 +336,7 @@ function App() {
           <Route path="/genres" element={<GenresPage />} />
           <Route path="/genre/:slug" element={<GenrePage />} />
           <Route path="/u/:username" element={<UserPage currentUser={currentUser} />} />
-          <Route path="/book/:id" element={<BookPage onLibraryChange={loadUserBooks} />} />
+          <Route path="/book/:id" element={<BookPage books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

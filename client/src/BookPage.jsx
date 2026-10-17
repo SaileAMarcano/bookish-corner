@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
+import BookModal from './BookModal';
+import Icon from './Icon';
 import StarRating from './StarRating';
 import Notice from './Notice';
 import { apiFetch } from './api';
-import { getAvatarSrc, genreLabel, slugify, timeAgo } from './utils';
+import { getAvatarSrc, genreLabel, pageSummary, slugify, timeAgo } from './utils';
 
-function BookPage({ onLibraryChange }) {
+function BookPage({ books, onLibraryChange }) {
     const { id } = useParams();
     const { t, i18n } = useTranslation();
     const [book, setBook] = useState(null);
     const [error, setError] = useState('');
     const [actionError, setActionError] = useState('');
+    const [showReading, setShowReading] = useState(false);
 
     const loadBook = () =>
         apiFetch(`/api/books/${encodeURIComponent(id)}`)
@@ -51,6 +54,11 @@ function BookPage({ onLibraryChange }) {
             .catch((err) => setActionError(err.message));
     };
 
+    const handleReadingChange = () => {
+        onLibraryChange();
+        loadBook();
+    };
+
     const handleLike = (review) => {
         setActionError('');
         apiFetch(`/api/user-books/${review.id}/like`, { method: review.hasLiked ? 'DELETE' : 'POST' })
@@ -73,6 +81,8 @@ function BookPage({ onLibraryChange }) {
             </main>
         );
     }
+
+    const myBook = books.find((item) => item.bookId === book.id);
 
     return (
         <main className="page book-page">
@@ -105,12 +115,18 @@ function BookPage({ onLibraryChange }) {
                         {t('bookPage.readers', { count: book.readers })} · {t('bookPage.wantCount', { count: book.wantCount })}
                     </p>
 
-                    {book.myStatus ? (
+                    {myBook ? (
                         <div className="book-hero-mine">
-                            <span className={`pill book-status status-${book.myStatus}`}>
-                                {t('bookPage.inYourLibrary', { status: t(`status.${book.myStatus}`) })}
+                            <span className={`pill book-status status-${myBook.status}`}>
+                                {t('bookPage.inYourLibrary', { status: t(`status.${myBook.status}`) })}
                             </span>
-                            <Link to="/profile?tab=library" className="book-hero-link">{t('bookPage.openLibrary')}</Link>
+                            {myBook.status !== 'want-to-read' && (
+                                <span className="book-hero-progress">{myBook.progress}% · {pageSummary(myBook)}</span>
+                            )}
+                            <button type="button" className="tag-follow update-reading-button" onClick={() => setShowReading(true)}>
+                                <Icon name="pencil" size={14} />
+                                {t('book.updateReading')}
+                            </button>
                         </div>
                     ) : (
                         <div className="book-hero-actions">
@@ -174,6 +190,10 @@ function BookPage({ onLibraryChange }) {
                     </article>
                 ))}
             </section>
+
+            {showReading && myBook && (
+                <BookModal book={myBook} onClose={() => setShowReading(false)} onUpdate={handleReadingChange} />
+            )}
         </main>
     );
 }
