@@ -368,6 +368,20 @@ const en = {
         loading: 'Loading...',
         noFollowers: 'Nobody follows you yet. Post something or comment on a tag to get noticed!',
         noFollowing: 'You are not following anyone yet. Use the search to find readers.',
+        noFollowersOf: 'Nobody follows {{name}} yet.',
+        noFollowingOf: '{{name}} is not following anyone yet.',
+    },
+    profileTabs: {
+        posts: 'Posts',
+        reviews: 'Reviews',
+        lists: 'Lists',
+        library: 'Books',
+        favorites: 'Favorites',
+    },
+    profileBooks: {
+        filterLabel: 'Filter books by status',
+        all: 'All',
+        noneWithStatus: 'No books with this status.',
     },
     profileHeader: {
         joined: 'Joined {{date}}',

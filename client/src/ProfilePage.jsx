@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import BookItem from './BookItem';
 import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next';
-import Icon from './Icon';
 import { apiFetch } from './api';
 import { genreLabel } from './utils';
 import Notice from './Notice';
@@ -11,15 +10,8 @@ import PostCard from './PostCard';
 import PostComposer from './PostComposer';
 import FollowList from './FollowList';
 import ProfileHeader from './ProfileHeader';
-
-const TABS = [
-    { key: 'library' },
-    { key: 'reviews' },
-    { key: 'favorites' },
-    { key: 'about' },
-    { key: 'posts' },
-    { key: 'following' },
-];
+import ProfileTabs from './ProfileTabs';
+import ProfileBooks from './ProfileBooks';
 
 const THING_ICONS = [
     <path d="M5 8h11v5.5a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5zM16 9.5h1.5a2.5 2.5 0 0 1 0 5H16" />,
@@ -61,7 +53,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     const [profile, setProfile] = useState(null);
     const [profileError, setProfileError] = useState('');
     const [searchParams, setSearchParams] = useSearchParams();
-    const activeTab = searchParams.get('tab') || 'library';
+    const activeTab = searchParams.get('tab') || 'posts';
     const [posts, setPosts] = useState(null);
     const [postsError, setPostsError] = useState('');
 
@@ -133,9 +125,14 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
 
     const renderTabContent = () => {
         if (activeTab === 'library') {
-            return renderBookGrid(
-                books,
-                t('profile.emptyLibrary')
+            return (
+                <ProfileBooks
+                    books={books}
+                    emptyText={t('profile.emptyLibrary')}
+                    renderBook={(book) => (
+                        <BookItem key={book.id} book={book} onLike={onLike} onUpdate={onUpdate} onToggleFavorite={onToggleFavorite} />
+                    )}
+                />
             );
         }
 
@@ -311,7 +308,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
 
     return (
         <main className="page profile-view">
-            <ProfileHeader profile={profile}>
+            <ProfileHeader profile={profile} onShowFollows={() => setSearchParams({ tab: 'following' })}>
                 <Link to="/profile/edit" className="profile-edit">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2"
@@ -323,18 +320,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                 </Link>
             </ProfileHeader>
 
-            <div className="card profile-tabs">
-                {TABS.map((tab) => (
-                    <button
-                        key={tab.key}
-                        className={`profile-tab ${activeTab === tab.key ? 'active' : ''}`}
-                        onClick={() => setSearchParams({ tab: tab.key })}
-                    >
-                        <Icon name={tab.key} />
-                        {t(`profile.tabs.${tab.key}`)}
-                    </button>
-                ))}
-            </div>
+            <ProfileTabs activeTab={activeTab} onChange={(tab) => setSearchParams({ tab })} />
 
             {renderTabContent()}
         </main >

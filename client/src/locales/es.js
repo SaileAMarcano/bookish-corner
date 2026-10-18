@@ -368,6 +368,20 @@ const es = {
         loading: 'Cargando...',
         noFollowers: 'Todavía nadie te sigue. ¡Publica algo o comenta en una etiqueta para que te encuentren!',
         noFollowing: 'Todavía no sigues a nadie. Usa el buscador para encontrar lectores.',
+        noFollowersOf: 'Todavía nadie sigue a {{name}}.',
+        noFollowingOf: '{{name}} todavía no sigue a nadie.',
+    },
+    profileTabs: {
+        posts: 'Publicaciones',
+        reviews: 'Reseñas',
+        lists: 'Listas',
+        library: 'Libros',
+        favorites: 'Favoritos',
+    },
+    profileBooks: {
+        filterLabel: 'Filtrar libros por estado',
+        all: 'Todos',
+        noneWithStatus: 'No hay libros con este estado.',
     },
     profileHeader: {
         joined: 'Se unió en {{date}}',

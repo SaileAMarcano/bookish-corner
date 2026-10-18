@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import Icon from './Icon';
 import BookItem from './BookItem';
 import PostCard from './PostCard';
 import Notice from './Notice';
 import ProfileHeader from './ProfileHeader';
+import ProfileTabs, { PROFILE_TABS } from './ProfileTabs';
+import ProfileBooks from './ProfileBooks';
+import FollowList from './FollowList';
 import { apiFetch } from './api';
 
-const TABS = ['posts', 'library', 'reviews', 'favorites'];
+const TABS = [...PROFILE_TABS, 'following'];
 
 function UserPage({ currentUser }) {
     const { username } = useParams();
@@ -101,7 +103,19 @@ function UserPage({ currentUser }) {
 
     const renderTabContent = () => {
         if (activeTab === 'library') {
-            return renderBooks(books, t('userPage.emptyLibrary', { name }));
+            return (
+                <ProfileBooks
+                    books={books}
+                    emptyText={t('userPage.emptyLibrary', { name })}
+                    renderBook={(book) => <BookItem key={book.id} book={book} onLike={handleLike} readOnly />}
+                />
+            );
+        }
+        if (activeTab === 'lists') {
+            return <div className="card profile-empty">{t('profile.comingSoon')}</div>;
+        }
+        if (activeTab === 'following') {
+            return <FollowList username={profile.username} name={name} />;
         }
         if (activeTab === 'reviews') {
             return renderBooks(books.filter((book) => book.review), t('userPage.emptyReviews', { name }));
@@ -123,7 +137,7 @@ function UserPage({ currentUser }) {
 
     return (
         <main className="page profile-view">
-            <ProfileHeader profile={profile}>
+            <ProfileHeader profile={profile} onShowFollows={() => setSearchParams({ tab: 'following' })}>
                 <button type="button" className={`tag-follow profile-follow ${profile.isFollowing ? 'following' : ''}`} onClick={handleFollow} aria-pressed={profile.isFollowing}>
                     {profile.isFollowing ? t('userPage.followingButton') : t('userPage.follow')}
                 </button>
@@ -131,15 +145,7 @@ function UserPage({ currentUser }) {
 
             {actionError && <Notice message={actionError} />}
 
-            <div className="card profile-tabs">
-                {TABS.map((tab) => (
-                    <button key={tab} className={`profile-tab ${activeTab === tab ? 'active' : ''}`} onClick={() => setSearchParams({ tab })}>
-
-                        <Icon name={tab} />
-                        {t(`userPage.tabs.${tab}`)}
-                    </button>
-                ))}
-            </div>
+            <ProfileTabs activeTab={activeTab} onChange={(tab) => setSearchParams({ tab })} />
 
             {renderTabContent()}
         </main>

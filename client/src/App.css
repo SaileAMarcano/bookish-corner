@@ -5583,3 +5583,71 @@ a.comment-author:hover {
     border-left: none;
   }
 }
+
+.profile-header-stat-button {
+  border: none;
+  background: none;
+  font-family: 'Inter', sans-serif;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+.profile-header-stat-button span {
+  display: block;
+}
+
+.profile-header-stat-button:hover .profile-stat-label {
+  color: var(--rose-deep);
+  text-decoration: underline;
+}
+
+.book-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.book-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--text-2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.book-filter-chip:hover {
+  border-color: var(--surface-2);
+}
+
+.book-filter-chip.active {
+  border-color: var(--rose);
+}
+
+.book-filter-count {
+  font-weight: 500;
+  opacity: 0.75;
+}
+
+@media (max-width: 860px) {
+  .book-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .book-filter::-webkit-scrollbar {
+    display: none;
+  }
+
+  .book-filter-chip {
+    flex-shrink: 0;
+  }
+}

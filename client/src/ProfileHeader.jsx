@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import { getAvatarSrc, parseDbDate } from './utils';
 
-function ProfileHeader({ profile, children }) {
+function ProfileHeader({ profile, onShowFollows, children }) {
     const { t, i18n } = useTranslation();
 
     const joined = parseDbDate(profile.createdAt).toLocaleDateString(i18n.language, {
@@ -14,8 +14,8 @@ function ProfileHeader({ profile, children }) {
         { number: profile.booksRead, label: t('profile.statBooksRead') },
         { number: profile.reviewsCount, label: t('profile.statReviews') },
         { number: profile.currentlyReading, label: t('profile.statReading') },
-        { number: profile.followerCount, label: t('userPage.followers') },
-        { number: profile.followingCount, label: t('userPage.followingCount') },
+        { number: profile.followerCount, label: t('userPage.followers'), opensFollows: true },
+        { number: profile.followingCount, label: t('userPage.followingCount'), opensFollows: true },
     ];
 
     return (
@@ -65,12 +65,19 @@ function ProfileHeader({ profile, children }) {
                 </div>
 
                 <div className="profile-header-stats">
-                    {stats.map((stat) => (
-                        <div key={stat.label} className="profile-header-stat">
-                            <div className="profile-stat-number">{stat.number}</div>
-                            <div className="profile-stat-label">{stat.label}</div>
-                        </div>
-                    ))}
+                    {stats.map((stat) =>
+                        stat.opensFollows ? (
+                            <button key={stat.label} type="button" className="profile-header-stat profile-header-stat-button" onClick={onShowFollows}>
+                                <span className="profile-stat-number">{stat.number}</span>
+                                <span className="profile-stat-label">{stat.label}</span>
+                            </button>
+                        ) : (
+                            <div key={stat.label} className="profile-header-stat">
+                                <div className="profile-stat-number">{stat.number}</div>
+                                <div className="profile-stat-label">{stat.label}</div>
+                            </div>
+                        )
+                    )}
                 </div>
             </div>
         </section>

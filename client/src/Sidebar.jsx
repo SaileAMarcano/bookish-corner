@@ -20,7 +20,7 @@ function isActive(item, location) {
     if (location.pathname !== path) return false;
     if (!query) return true;
 
-    const tab = new URLSearchParams(location.search).get('tab') || 'library';
+    const tab = new URLSearchParams(location.search).get('tab') || 'posts';
     return query === `tab=${tab}`;
 }
 

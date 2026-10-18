@@ -5,7 +5,7 @@ import Notice from './Notice';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 
-function FollowList({ username }) {
+function FollowList({ username, name }) {
     const { t } = useTranslation();
     const [lists, setLists] = useState(null);
     const [error, setError] = useState('');
@@ -82,8 +82,8 @@ function FollowList({ username }) {
             {actionError && <Notice message={actionError} />}
 
             <div className="follow-layout">
-                {renderList(t('userPage.followers'), lists.followers, t('follows.noFollowers'))}
-                {renderList(t('userPage.followingCount'), lists.following, t('follows.noFollowing'))}
+                {renderList(t('userPage.followers'), lists.followers, name ? t('follows.noFollowersOf', { name }) : t('follows.noFollowers'))}
+                {renderList(t('userPage.followingCount'), lists.following, name ? t('follows.noFollowingOf', { name }) : t('follows.noFollowing'))}
             </div>
 
         </>
