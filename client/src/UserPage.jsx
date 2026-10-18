@@ -5,8 +5,8 @@ import Icon from './Icon';
 import BookItem from './BookItem';
 import PostCard from './PostCard';
 import Notice from './Notice';
+import ProfileHeader from './ProfileHeader';
 import { apiFetch } from './api';
-import { getAvatarSrc } from './utils';
 
 const TABS = ['posts', 'library', 'reviews', 'favorites'];
 
@@ -84,13 +84,6 @@ function UserPage({ currentUser }) {
 
     const name = profile.displayName;
 
-    const stats = [
-        { number: profile.booksRead, label: t('profile.statBooksRead') },
-        { number: profile.reviewsCount, label: t('profile.statReviews') },
-        { number: profile.currentlyReading, label: t('profile.statReading') },
-        { number: profile.followerCount, label: t('userPage.followers') },
-        { number: profile.followingCount, label: t('userPage.followingCount') },
-    ];
 
     const renderBooks = (list, emptyText) => {
         if (list.length === 0) {
@@ -130,35 +123,11 @@ function UserPage({ currentUser }) {
 
     return (
         <main className="page profile-view">
-            <div className="profile-banner">
-                <img className="profile-banner-image" src="/default-banner.png" alt="" />
-            </div>
-
-            <div className="card profile-view-card">
-                <div className="profile-view-avatar">
-                    <img src={getAvatarSrc(profile.avatarUrl)} alt="" />
-                </div>
-
-                <div className="profile-info">
-                    <h1 className="display profile-name">{name}</h1>
-                    <div className="profile-username">@{profile.username}</div>
-
-                    {profile.bio && <p className="profile-bio">{profile.bio}</p>}
-
-                    <div className="profile-stats user-stats">
-                        {stats.map((stat) => (
-                            <div key={stat.label} className="profile-stat">
-                                <div className="profile-stat-number">{stat.number}</div>
-                                <div className="profile-stat-label">{stat.label}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
+            <ProfileHeader profile={profile}>
                 <button type="button" className={`tag-follow profile-follow ${profile.isFollowing ? 'following' : ''}`} onClick={handleFollow} aria-pressed={profile.isFollowing}>
                     {profile.isFollowing ? t('userPage.followingButton') : t('userPage.follow')}
                 </button>
-            </div>
+            </ProfileHeader>
 
             {actionError && <Notice message={actionError} />}
 

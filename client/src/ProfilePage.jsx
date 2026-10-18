@@ -4,12 +4,13 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import { apiFetch } from './api';
-import { getAvatarSrc, genreLabel } from './utils';
+import { genreLabel } from './utils';
 import Notice from './Notice';
 import BookCover from './BookCover';
 import PostCard from './PostCard';
 import PostComposer from './PostComposer';
 import FollowList from './FollowList';
+import ProfileHeader from './ProfileHeader';
 
 const TABS = [
     { key: 'library' },
@@ -308,41 +309,9 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         return <div className="card profile-empty">{t('profile.comingSoon')}</div>
     }
 
-    const avatarSrc = getAvatarSrc(profile.avatarUrl);
-
     return (
         <main className="page profile-view">
-            <div className="profile-banner">
-                <img className="profile-banner-image" src="/default-banner.png" alt="" />
-            </div>
-
-            <div className="card profile-view-card">
-                <div className="profile-view-avatar">
-                    <img src={avatarSrc} alt="" />
-                </div>
-
-                <div className="profile-info">
-                    <h1 className="display profile-name">{profile.displayName}</h1>
-                    <div className="profile-username">@{profile.username}</div>
-
-                    {profile.bio && <p className="profile-bio">{profile.bio}</p>}
-
-                    <div className="profile-stats">
-                        <div className="profile-stat">
-                            <div className="profile-stat-number">{profile.booksRead}</div>
-                            <div className="profile-stat-label">{t('profile.statBooksRead')}</div>
-                        </div>
-                        <div className="profile-stat">
-                            <div className="profile-stat-number">{profile.reviewsCount}</div>
-                            <div className="profile-stat-label">{t('profile.statReviews')}</div>
-                        </div>
-                        <div className="profile-stat">
-                            <div className="profile-stat-number">{profile.currentlyReading}</div>
-                            <div className="profile-stat-label">{t('profile.statReading')}</div>
-                        </div>
-                    </div>
-                </div>
-
+            <ProfileHeader profile={profile}>
                 <Link to="/profile/edit" className="profile-edit">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2"
@@ -352,7 +321,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     </svg>
                     {t('profile.editProfile')}
                 </Link>
-            </div>
+            </ProfileHeader>
 
             <div className="card profile-tabs">
                 {TABS.map((tab) => (
@@ -368,7 +337,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
             </div>
 
             {renderTabContent()}
-        </main>
+        </main >
     );
 }
 

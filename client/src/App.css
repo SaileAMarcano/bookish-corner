@@ -5430,3 +5430,156 @@ a.comment-author:hover {
   color: var(--rose-deep);
   text-decoration: underline;
 }
+
+.profile-header {
+  overflow: hidden;
+}
+
+.profile-header-banner {
+  display: block;
+  width: 100%;
+  height: 240px;
+  object-fit: cover;
+}
+
+.profile-header-body {
+  padding: 0 34px 28px;
+}
+
+.profile-header-top {
+  display: flex;
+  align-items: flex-end;
+  gap: 22px;
+  margin-top: -70px;
+}
+
+.profile-header-avatar {
+  width: 140px;
+  height: 140px;
+  flex-shrink: 0;
+  border: 5px solid var(--surface);
+  border-radius: 50%;
+  background: var(--clay-soft);
+  overflow: hidden;
+}
+
+.profile-header-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-header-names {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 8px;
+}
+
+.profile-header-actions {
+  display: flex;
+  gap: 10px;
+  padding-bottom: 10px;
+}
+
+.profile-header-actions .profile-edit,
+.profile-header-actions .profile-follow {
+  position: static;
+}
+
+.profile-header .profile-bio {
+  margin: 16px 0 0;
+}
+
+.profile-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin-top: 12px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.profile-meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.profile-meta-link {
+  color: var(--rose-ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.profile-meta-link:hover {
+  text-decoration: underline;
+}
+
+.profile-header-stats {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  margin-top: 20px;
+  padding: 16px 0;
+  border-radius: 16px;
+  background: var(--bg);
+}
+
+.profile-header-stat {
+  padding: 0 20px;
+}
+
+.profile-header-stat+.profile-header-stat {
+  border-left: 1px solid var(--surface-2);
+}
+
+@media (max-width: 860px) {
+  .profile-header-banner {
+    height: 150px;
+  }
+
+  .profile-header-body {
+    padding: 0 18px 22px;
+  }
+
+  .profile-header-top {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    margin-top: -56px;
+    text-align: center;
+  }
+
+  .profile-header-avatar {
+    width: 110px;
+    height: 110px;
+  }
+
+  .profile-header-names,
+  .profile-header-actions {
+    padding-bottom: 0;
+  }
+
+  .profile-header .profile-bio {
+    margin: 14px auto 0;
+    text-align: center;
+  }
+
+  .profile-meta {
+    justify-content: center;
+  }
+
+  .profile-header-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: 14px;
+    text-align: center;
+  }
+
+  .profile-header-stat {
+    padding: 0 8px;
+  }
+
+  .profile-header-stat+.profile-header-stat {
+    border-left: none;
+  }
+}

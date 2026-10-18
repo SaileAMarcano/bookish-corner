@@ -369,6 +369,9 @@ const es = {
         noFollowers: 'Todavía nadie te sigue. ¡Publica algo o comenta en una etiqueta para que te encuentren!',
         noFollowing: 'Todavía no sigues a nadie. Usa el buscador para encontrar lectores.',
     },
+    profileHeader: {
+        joined: 'Se unió en {{date}}',
+    },
     userPage: {
         follow: 'Seguir',
         followingButton: 'Siguiendo',
