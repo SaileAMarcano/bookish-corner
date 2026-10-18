@@ -11,7 +11,6 @@ const NAV_ITEMS = [
     { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
     { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },
     { to: '/profile?tab=following', label: 'nav.following', icon: 'following' },
-    { to: '/profile?tab=about', label: 'nav.about', icon: 'about' },
 ];
 
 function isActive(item, location) {

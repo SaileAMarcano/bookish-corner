@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 
-export const PROFILE_TABS = ['posts', 'reviews', 'lists', 'library', 'favorites'];
+export const PROFILE_TABS = ['posts', 'reviews', 'lists', 'library', 'favorites', 'about'];
 
 function ProfileTabs({ activeTab, onChange }) {
     const { t } = useTranslation();

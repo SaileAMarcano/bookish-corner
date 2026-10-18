@@ -8,6 +8,7 @@ import ProfileHeader from './ProfileHeader';
 import ProfileTabs, { PROFILE_TABS } from './ProfileTabs';
 import ProfileBooks from './ProfileBooks';
 import FollowList from './FollowList';
+import ProfileAbout from './ProfileAbout';
 import { apiFetch } from './api';
 
 const TABS = [...PROFILE_TABS, 'following'];
@@ -113,6 +114,9 @@ function UserPage({ currentUser }) {
         }
         if (activeTab === 'lists') {
             return <div className="card profile-empty">{t('profile.comingSoon')}</div>;
+        }
+        if (activeTab === 'about') {
+            return <ProfileAbout profile={profile} />;
         }
         if (activeTab === 'following') {
             return <FollowList username={profile.username} name={name} />;

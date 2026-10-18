@@ -12,13 +12,8 @@ import FollowList from './FollowList';
 import ProfileHeader from './ProfileHeader';
 import ProfileTabs from './ProfileTabs';
 import ProfileBooks from './ProfileBooks';
+import ProfileAbout from './ProfileAbout';
 
-const THING_ICONS = [
-    <path d="M5 8h11v5.5a5 5 0 0 1-5 5H10a5 5 0 0 1-5-5zM16 9.5h1.5a2.5 2.5 0 0 1 0 5H16" />,
-    <path d="M6 4h8l4 4v12H6z M14 4v4h4" />,
-    <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />,
-    <path d="M12 3l2 6.6L20 12l-6 2.4L12 21l-2-6.6L4 12l6-2.4z" />,
-];
 
 function FavoriteCard({ book, onToggleFavorite }) {
     const { t } = useTranslation();
@@ -200,75 +195,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
         }
 
         if (activeTab === 'about') {
-            const things = (profile.favoriteThings || '')
-                .split('\n')
-                .map((thing) => thing.trim())
-                .filter((thing) => thing !== '');
-
-            const currentBook = books.find((book) => book.status === 'reading');
-
-            return (
-                <div className="profile-columns">
-                    <div className="card profile-about">
-                        <h2 className="display profile-about-title">{t('profile.aboutTitle', { name: profile.displayName })}</h2>
-                        {profile.bio && <p className="profile-about-lead">{profile.bio}</p>}
-
-                        {profile.aboutMe ? (
-                            <p className="profile-about-text">{profile.aboutMe}</p>
-                        ) : (
-                            <p className="profile-about-text profile-about-empty">
-                                {t('profile.aboutEmpty')}
-                            </p>
-                        )}
-
-                        {profile.favoriteQuote && (
-                            <div className="profile-quote">
-                                <div className="profile-quote-label">{t('profile.favoriteQuote')}</div>
-                                <p className="profile-quote-text">{profile.favoriteQuote}</p>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="card profile-things">
-                        <h3 className="display profile-side-title">{t('profile.favoriteThings')}</h3>
-
-                        {things.length === 0 ? (
-                            <p className="profile-about-empty">{t('profile.nothingAdded')}</p>
-                        ) : (
-                            <ul className="profile-things-list">
-                                {things.map((thing, index) => (
-                                    <li key={index}>
-                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
-                                            stroke="currentColor" strokeWidth="1.6"
-                                            strokeLinecap="round" strokeLinejoin="round">
-                                            {THING_ICONS[index % THING_ICONS.length]}
-                                        </svg>
-                                        {thing}
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-
-                        {currentBook && (
-                            <div className="profile-now">
-                                <div className="profile-now-label">{t('profile.currentlyReading')}</div>
-                                <div className="profile-now-title">{currentBook.title}</div>
-                                <div className="profile-now-author">{currentBook.author}</div>
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="card profile-side">
-                        <img className="profile-side-cover" src="/bookish-shelf.jpg" alt="" />
-                        <h3 className="display profile-side-title">{t('profile.bookishAtHeart')}</h3>
-                        <div className="profile-side-line">{t('profile.booksRead', { count: profile.booksRead })}</div>
-                        <div className="profile-side-line">{t('profile.reviewsShared', { count: profile.reviewsCount })}</div>
-                        <div className="profile-side-line">
-                            {t('profile.nightstand', { count: profile.currentlyReading })}
-                        </div>
-                    </div>
-                </div>
-            );
+            return <ProfileAbout profile={profile} isMe />;
         }
 
         if (activeTab === 'posts') {

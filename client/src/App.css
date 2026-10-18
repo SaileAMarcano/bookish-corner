@@ -5651,3 +5651,16 @@ a.comment-author:hover {
     flex-shrink: 0;
   }
 }
+
+.profile-about-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: stretch;
+}
+
+@media (max-width: 860px) {
+  .profile-about-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

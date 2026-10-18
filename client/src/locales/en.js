@@ -377,11 +377,15 @@ const en = {
         lists: 'Lists',
         library: 'Books',
         favorites: 'Favorites',
+        about: 'About me',
     },
     profileBooks: {
         filterLabel: 'Filter books by status',
         all: 'All',
         noneWithStatus: 'No books with this status.',
+    },
+    profileAbout: {
+        emptyOther: '{{name}} has not written anything here yet.',
     },
     profileHeader: {
         joined: 'Joined {{date}}',

@@ -377,11 +377,15 @@ const es = {
         lists: 'Listas',
         library: 'Libros',
         favorites: 'Favoritos',
+        about: 'Sobre mí',
     },
     profileBooks: {
         filterLabel: 'Filtrar libros por estado',
         all: 'Todos',
         noneWithStatus: 'No hay libros con este estado.',
+    },
+    profileAbout: {
+        emptyOther: '{{name}} todavía no ha escrito nada aquí.',
     },
     profileHeader: {
         joined: 'Se unió en {{date}}',
