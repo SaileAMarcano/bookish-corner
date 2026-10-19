@@ -1180,6 +1180,53 @@ app.get('/api/users/:username/books', requireAuth, async (req, res) => {
     res.json(await findUserBooks(req, user.id));
 });
 
+const SIMILAR_LIMIT = 3;
+
+app.get('/api/users/:username/similar', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+
+    const readers = await query(`
+        WITH owner_books AS (
+            SELECT DISTINCT work_id FROM user_books WHERE user_id = $1
+        ),
+        all_tags AS (
+            SELECT p.user_id, pt.tag_id FROM post_tags pt JOIN posts p ON p.id = pt.post_id
+            UNION
+            SELECT user_id, tag_id FROM tag_follows
+        ),
+        owner_tags AS (
+            SELECT tag_id FROM all_tags WHERE user_id = $1
+        ),
+        matches AS (
+            SELECT ub.user_id, COUNT(DISTINCT ub.work_id) AS shared_books, 0 AS shared_tags
+            FROM user_books ub
+            JOIN owner_books ob ON ob.work_id = ub.work_id
+            GROUP BY ub.user_id
+            UNION ALL
+            SELECT at.user_id, 0, COUNT(DISTINCT at.tag_id)
+            FROM all_tags at
+            JOIN owner_tags ot ON ot.tag_id = at.tag_id
+            GROUP BY at.user_id
+        )
+        SELECT u.id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               SUM(m.shared_books) AS shared_books,
+               SUM(m.shared_tags) AS shared_tags
+        FROM matches m
+        JOIN users u ON u.id = m.user_id
+        WHERE u.id <> $1
+          AND u.id <> $2
+          AND NOT EXISTS (SELECT 1 FROM follows f WHERE f.follower_id = $2 AND f.following_id = u.id)
+        GROUP BY u.id
+        ORDER BY SUM(m.shared_books) + SUM(m.shared_tags) DESC, u.username
+        LIMIT $3
+    `, [user.id, req.session.user.id, SIMILAR_LIMIT]);
+
+    res.json(readers);
+})
+
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
         return 'passwordLength';
