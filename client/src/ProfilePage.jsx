@@ -13,6 +13,7 @@ import ProfileHeader from './ProfileHeader';
 import ProfileTabs from './ProfileTabs';
 import ProfileBooks from './ProfileBooks';
 import ProfileAbout from './ProfileAbout';
+import ProfileSide from './ProfileSide';
 
 
 function FavoriteCard({ book, onToggleFavorite }) {
@@ -247,9 +248,15 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                 </Link>
             </ProfileHeader>
 
-            <ProfileTabs activeTab={activeTab} onChange={(tab) => setSearchParams({ tab })} />
+            <div className="profile-layout">
+                <div className="profile-main">
+                    <ProfileTabs activeTab={activeTab} onChange={(tab) => setSearchParams({ tab })} />
 
-            {renderTabContent()}
+                    {renderTabContent()}
+                </div>
+
+                <ProfileSide books={books} readingGoal={profile.readingGoal} isMe />
+            </div>
         </main >
     );
 }

@@ -387,6 +387,14 @@ const en = {
     profileAbout: {
         emptyOther: '{{name}} has not written anything here yet.',
     },
+    profileSide: {
+        readingNow: 'Currently reading',
+        nothingReading: 'Nothing on the nightstand right now.',
+        challenge: 'Reading challenge {{year}}',
+        goalCount: '{{count}} of {{goal}}',
+        booksFinished: 'books finished',
+        noGoal: 'No reading goal yet.',
+    },
     profileHeader: {
         joined: 'Joined {{date}}',
     },

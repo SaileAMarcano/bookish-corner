@@ -593,6 +593,7 @@ async function findPosts(req, condition, value) {
     return query(`
         SELECT p.id, p.text, p.image_url, p.is_spoiler, p.created_at,
                u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               COALESCE(u.pinned_post_id = p.id, false) AS is_pinned,
                (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
                (SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id) AS comment_count,
                EXISTS (SELECT 1 FROM post_likes pl WHERE pl.post_id = p.id AND pl.user_id = $2) AS has_liked,
@@ -935,6 +936,32 @@ app.delete('/api/posts/:id', requireAuth, async (req, res) => {
     }
     res.json({ message: 'Post deleted' });
 });
+
+app.post('/api/posts/:id/pin', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+    if (post.userId !== req.session.user.id) {
+        return res.status(403).json({ error: msg(req, 'cannotPinPost') });
+    }
+
+    await query('UPDATE users SET pinned_post_id = $1 WHERE id = $2', [post.id, req.session.user.id]);
+    res.json({ isPinned: true });
+});
+
+app.delete('/api/posts/:id/pin', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    await query(
+        'UPDATE users SET pinned_post_id = NULL WHERE id = $1 AND pinned_post_id = $2',
+        [req.session.user.id, post.id]
+    );
+    res.json({ isPinned: false });
+})
 
 const COMMENT_MAX_LENGTH = 1000;
 

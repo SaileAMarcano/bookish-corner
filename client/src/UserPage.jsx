@@ -9,6 +9,7 @@ import ProfileTabs, { PROFILE_TABS } from './ProfileTabs';
 import ProfileBooks from './ProfileBooks';
 import FollowList from './FollowList';
 import ProfileAbout from './ProfileAbout';
+import ProfileSide from './ProfileSide';
 import { apiFetch } from './api';
 
 const TABS = [...PROFILE_TABS, 'following'];
@@ -148,10 +149,15 @@ function UserPage({ currentUser }) {
             </ProfileHeader>
 
             {actionError && <Notice message={actionError} />}
+            <div className="profile-layout">
+                <div className="profile-main">
+                    <ProfileTabs activeTab={activeTab} onChange={(tab) => setSearchParams({ tab })} />
 
-            <ProfileTabs activeTab={activeTab} onChange={(tab) => setSearchParams({ tab })} />
+                    {renderTabContent()}
+                </div>
 
-            {renderTabContent()}
+                <ProfileSide books={books} readingGoal={profile.readingGoal} />
+            </div>
         </main>
     );
 }

@@ -30,7 +30,6 @@
 
 }
 
-/* Dark mode: the same names, night colors. App.jsx puts data-theme="dark" on <html>. */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --bg: #1D1916;
@@ -1418,9 +1417,8 @@ html {
 
 .sidebar-illustration {
   display: block;
-  margin-top: auto;
-  margin-left: -18px;
-  width: calc(100% + 36px);
+  margin: auto auto 16px;
+  width: 90%;
   min-height: 0;
   object-fit: contain;
   object-position: bottom;
@@ -5009,10 +5007,6 @@ a.post-tag:hover,
   white-space: nowrap;
 }
 
-:root[data-theme="dark"] .sidebar-illustration {
-  opacity: 0.45;
-}
-
 .post-spoiler {
   position: relative;
 }
@@ -5661,6 +5655,155 @@ a.comment-author:hover {
 
 @media (max-width: 860px) {
   .profile-about-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 18px;
+  align-items: start;
+}
+
+.profile-main {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+
+.profile-main .grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.profile-main .post-list {
+  max-width: none;
+}
+
+.profile-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.profile-side-card {
+  padding: 22px 22px 24px;
+}
+
+.side-book {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.side-book+.side-book {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--surface-2);
+}
+
+.side-book-cover {
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.side-book-cover:hover {
+  transform: translateY(-2px);
+}
+
+.side-book-image {
+  display: block;
+  width: 64px;
+  height: 96px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.side-book-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.side-book-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.side-book-title:hover {
+  color: var(--rose-deep);
+}
+
+.side-book-author,
+.side-book-pages {
+  margin-top: 2px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.profile-side-card .progress-track {
+  background: var(--bg);
+}
+
+.challenge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.challenge-ring {
+  flex-shrink: 0;
+}
+
+.challenge-ring-track,
+.challenge-ring-fill {
+  fill: none;
+  stroke-width: 8;
+}
+
+.challenge-ring-track {
+  stroke: var(--bg);
+}
+
+.challenge-ring-fill {
+  stroke: var(--rose);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s ease;
+}
+
+.challenge-ring-text {
+  fill: var(--rose-deep);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.challenge-count {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+@media (max-width: 1200px) {
+  .profile-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-aside {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 860px) {
+  .profile-main .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-aside {
     grid-template-columns: minmax(0, 1fr);
   }
 }
