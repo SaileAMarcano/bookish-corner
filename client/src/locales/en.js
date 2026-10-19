@@ -398,6 +398,14 @@ const en = {
         booksFinished: 'books finished',
         noGoal: 'No reading goal yet.',
     },
+    similar: {
+        title: 'Similar readers',
+        empty: 'No similar readers yet.',
+        books_one: '{{count}} book in common',
+        books_other: '{{count}} books in common',
+        tags_one: '{{count}} tag',
+        tags_other: '{{count}} tags',
+    },
     profileHeader: {
         joined: 'Joined {{date}}',
     },

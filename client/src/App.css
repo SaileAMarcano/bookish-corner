@@ -5856,3 +5856,45 @@ a.comment-author:hover {
 .post-pin+.post-delete {
   margin-left: 0;
 }
+
+.similar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.similar-row+.similar-row {
+  margin-top: 14px;
+}
+
+.similar-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.similar-name {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.similar-name:hover {
+  color: var(--rose-deep);
+  text-decoration: underline;
+}
+
+.similar-shared {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.similar-follow {
+  flex-shrink: 0;
+  min-height: 34px;
+  padding: 0 14px;
+  font-size: 12px;
+}

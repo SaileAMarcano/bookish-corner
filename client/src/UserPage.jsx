@@ -157,7 +157,7 @@ function UserPage({ currentUser }) {
                     {renderTabContent()}
                 </div>
 
-                <ProfileSide books={books} readingGoal={profile.readingGoal} />
+                <ProfileSide books={books} readingGoal={profile.readingGoal} username={profile.username} />
             </div>
         </main>
     );

@@ -266,7 +266,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     {renderTabContent()}
                 </div>
 
-                <ProfileSide books={books} readingGoal={profile.readingGoal} isMe />
+                <ProfileSide books={books} readingGoal={profile.readingGoal} username={profile.username} isMe />
             </div>
         </main >
     );

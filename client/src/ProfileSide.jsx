@@ -1,12 +1,13 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
+import SimilarReaders from './SimilarReaders';
 import { pagePercent, sortByLastRead } from './utils';
 
 const RING_RADIUS = 34;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 
-function ProfileSide({ books, readingGoal, isMe }) {
+function ProfileSide({ books, readingGoal, isMe, username }) {
     const { t } = useTranslation();
 
     const reading = sortByLastRead(books.filter((book) => book.status === 'reading')).slice(0, 2);
@@ -88,6 +89,8 @@ function ProfileSide({ books, readingGoal, isMe }) {
                     <p className="profile-about-empty">{t('profileSide.noGoal')}</p>
                 )}
             </section>
+
+            <SimilarReaders username={username} />
         </aside>
     );
 }
