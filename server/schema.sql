@@ -171,6 +171,15 @@ CREATE TABLE follows (
     CHECK (follower_id <> following_id)
 );
 
+CREATE TABLE user_milestones (
+    user_id       INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    milestone_key TEXT NOT NULL CHECK (length(milestone_key) <= 40),
+    achieved_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
+    seen_at       TIMESTAMPTZ,
+    claimed_at    TIMESTAMPTZ,
+    PRIMARY KEY (user_id, milestone_key)
+);
+
 CREATE INDEX ON editions (work_id);
 CREATE INDEX ON user_books (work_id);
 CREATE INDEX ON likes (user_book_id);
@@ -194,6 +203,7 @@ ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE work_translations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_milestones ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_books ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE post_comments ENABLE ROW LEVEL SECURITY;

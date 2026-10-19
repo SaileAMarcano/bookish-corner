@@ -3,6 +3,7 @@ const { query, pool } = require('./database');
 const { descriptionFrom } = require('./openLibrary');
 const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage } = require('./storage');
 const { LANGUAGES, languageOf, msg } = require('./messages');
+const { syncMilestones } = require('./milestones');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
@@ -1225,7 +1226,26 @@ app.get('/api/users/:username/similar', requireAuth, async (req, res) => {
     `, [user.id, req.session.user.id, SIMILAR_LIMIT]);
 
     res.json(readers);
-})
+});
+
+app.get('/api/users/:username/milestones', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
+    }
+
+    const milestones = await syncMilestones(user.id);
+
+    if (user.id === req.session.user.id) {
+        return res.json(milestones);
+    }
+
+    res.json(
+        milestones
+            .filter((milestone) => milestone.achieved)
+            .map(({ key, achievedAt, claimed }) => ({ key, achieved: true, achievedAt, claimed }))
+    );
+});
 
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
