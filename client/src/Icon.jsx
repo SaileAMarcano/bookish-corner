@@ -127,6 +127,13 @@ const ICONS = {
         </>
     ),
 
+    pin: (
+        <>
+            <path d="M9 4h6l-1 5 3 3H7l3-3z" />
+            <path d="M12 12v8" />
+        </>
+    ),
+
     lists: <path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01" />,
 
     mapPin: (

@@ -11,6 +11,7 @@ import FollowList from './FollowList';
 import ProfileAbout from './ProfileAbout';
 import ProfileSide from './ProfileSide';
 import { apiFetch } from './api';
+import { pinnedFirst } from './utils';
 
 const TABS = [...PROFILE_TABS, 'following'];
 
@@ -133,8 +134,8 @@ function UserPage({ currentUser }) {
             <div className="post-list">
                 {posts.length === 0 && <div className="card profile-empty"> {t('userPage.emptyPosts', { name })}</div>}
 
-                {posts.map((post) => (
-                    <PostCard key={post.id} post={post} currentUserId={currentUser.id} onChange={handlePostChange} onDeleted={() => { }} />
+                {pinnedFirst(posts).map((post) => (
+                    <PostCard key={post.id} post={post} currentUserId={currentUser.id} onChange={handlePostChange} onDeleted={() => { }} showPinned />
                 ))}
             </div>
         );

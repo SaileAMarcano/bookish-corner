@@ -345,6 +345,9 @@ const es = {
         spoilerWarning: 'Esta publicación tiene spoilers',
         spoilerReveal: 'Clic para ver',
         spoilerHide: 'Ocultar spoiler',
+        pinned: 'Fijado',
+        pin: 'Fijar en mi perfil',
+        unpin: 'Quitar de mi perfil',
     },
     bookPage: {
         loading: 'Cargando libro...',

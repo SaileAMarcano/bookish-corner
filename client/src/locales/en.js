@@ -345,6 +345,9 @@ const en = {
         spoilerWarning: 'This post has spoilers',
         spoilerReveal: 'Click to show',
         spoilerHide: 'Hide spoiler',
+        pinned: 'Pinned',
+        pin: 'Pin to my profile',
+        unpin: 'Unpin from my profile',
     },
     bookPage: {
         loading: 'Loading book...',

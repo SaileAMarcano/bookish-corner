@@ -96,3 +96,7 @@ export function slugify(text) {
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
 }
+
+export function pinnedFirst(posts) {
+    return [...posts].sort((a, b) => Number(b.isPinned) - Number(a.isPinned));
+}

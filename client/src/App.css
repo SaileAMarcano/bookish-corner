@@ -5819,3 +5819,40 @@ a.comment-author:hover {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.post-pinned {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.post-pin {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.post-pin:hover,
+.post-pin.active {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.post-pin+.post-delete {
+  margin-left: 0;
+}

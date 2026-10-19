@@ -3,7 +3,7 @@ import BookItem from './BookItem';
 import { Link, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next';
 import { apiFetch } from './api';
-import { genreLabel } from './utils';
+import { genreLabel, pinnedFirst } from './utils';
 import Notice from './Notice';
 import BookCover from './BookCover';
 import PostCard from './PostCard';
@@ -83,6 +83,15 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
 
     const handlePostCreated = (post) => {
         setPosts((current) => [post, ...(current || [])]);
+    };
+
+    const handlePinChange = (postId, isPinned) => {
+        setPosts((current) =>
+            current.map((post) => {
+                if (post.id === postId) return { ...post, isPinned };
+                return isPinned ? { ...post, isPinned: false } : post;
+            })
+        );
     };
 
     const handlePostDeleted = (postId) => {
@@ -214,13 +223,15 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                         <div className="card profile-empty">{t('posts.empty')}</div>
                     )}
 
-                    {posts && posts.map((post) => (
+                    {posts && pinnedFirst(posts).map((post) => (
                         <PostCard
                             key={post.id}
                             post={post}
                             currentUserId={profile.id}
                             onChange={handlePostChange}
                             onDeleted={handlePostDeleted}
+                            onPinChange={handlePinChange}
+                            showPinned
                         />
                     ))}
                 </div>

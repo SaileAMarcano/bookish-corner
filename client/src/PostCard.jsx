@@ -8,7 +8,7 @@ import PostComments from './PostComments';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
-function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
+function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPinned, onPinChange }) {
     const { t } = useTranslation();
     const [error, setError] = useState('');
     const [showComments, setShowComments] = useState(false);
@@ -33,6 +33,13 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
             .catch((err) => setError(err.message));
     };
 
+    const handlePin = () => {
+        setError('');
+        apiFetch(`/api/posts/${post.id}/pin`, { method: post.isPinned ? 'DELETE' : 'POST' })
+            .then((state) => onPinChange(post.id, state.isPinned))
+            .catch((err) => setError(err.message));
+    };
+
     const handleDelete = () => {
         setError('');
         apiFetch(`/api/posts/${post.id}`, { method: 'DELETE' })
@@ -45,12 +52,31 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag }) {
 
     return (
         <article className="card post-card">
+            {showPinned && post.isPinned && (
+                <div className="post-pinned">
+                    <Icon name="pin" size={14} />
+                    {t('posts.pinned')}
+                </div>
+            )}
             <header className="post-head">
                 <img className="post-avatar" src={getAvatarSrc(post.avatarUrl)} alt="" />
                 <div>
                     <Link to={`/u/${post.username}`} className="post-author">{post.displayName}</Link>
                     <div className="post-date">{timeAgo(post.createdAt)}</div>
                 </div>
+
+                {isOwner && onPinChange && (
+                    <button
+                        type="button"
+                        className={`post-pin ${post.isPinned ? 'active' : ''}`}
+                        onClick={handlePin}
+                        aria-pressed={post.isPinned}
+                        aria-label={post.isPinned ? t('posts.unpin') : t('posts.pin')}
+                        title={post.isPinned ? t('posts.unpin') : t('posts.pin')}
+                    >
+                        <Icon name="pin" />
+                    </button>
+                )}
 
                 {isOwner && (
                     <button
