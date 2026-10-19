@@ -5432,8 +5432,20 @@ a.comment-author:hover {
 .profile-header-banner {
   display: block;
   width: 100%;
-  height: 240px;
+  height: 300px;
   object-fit: cover;
+}
+
+.profile-header-banner.banner-dark {
+  display: none;
+}
+
+:root[data-theme="dark"] .profile-header-banner.banner-light {
+  display: none;
+}
+
+:root[data-theme="dark"] .profile-header-banner.banner-dark {
+  display: block;
 }
 
 .profile-header-body {

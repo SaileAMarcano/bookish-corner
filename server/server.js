@@ -961,7 +961,7 @@ app.delete('/api/posts/:id/pin', requireAuth, async (req, res) => {
         [req.session.user.id, post.id]
     );
     res.json({ isPinned: false });
-})
+});
 
 const COMMENT_MAX_LENGTH = 1000;
 
