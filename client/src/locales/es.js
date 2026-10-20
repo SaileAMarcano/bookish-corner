@@ -438,6 +438,8 @@ const es = {
         betaText: 'Gracias por estar aquí desde el principio.',
         seeAll: 'Ver mis logros',
         close: 'Cerrar',
+        manyTitle: '¡Conseguiste {{count}} logros!',
+        manyText: 'Míralos en tu página de logros.',
     },
     profileHeader: {
         joined: 'Se unió en {{date}}',

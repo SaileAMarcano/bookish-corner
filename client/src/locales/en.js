@@ -438,6 +438,8 @@ const en = {
         betaText: 'Thank you for being here from the very beginning.',
         seeAll: 'See my achievements',
         close: 'Close',
+        manyTitle: 'You earned {{count}} achievements!',
+        manyText: 'See them all on your achievements page.',
     },
     profileHeader: {
         joined: 'Joined {{date}}',

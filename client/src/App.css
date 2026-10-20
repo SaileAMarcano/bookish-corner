@@ -6273,3 +6273,103 @@ a.comment-author:hover {
     padding: 0 14px;
   }
 }
+
+.milestone-note {
+  position: fixed;
+  top: 88px;
+  right: 28px;
+  z-index: 150;
+  width: min(330px, 100% - 48px);
+  animation: note-in 0.5s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.milestone-note.leaving {
+  animation: note-out 0.4s ease-in both;
+}
+
+.milestone-note-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 84px;
+  padding: 12px 20px 16px 38px;
+  background: url('/celebrations/toast-paper.webp') center / 100% 100% no-repeat;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+:root[data-theme="dark"] .milestone-note-link {
+  background-image: url('/celebrations/toast-paper-dark.webp');
+}
+
+.milestone-note-badge {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+}
+
+.milestone-note-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.milestone-note-title {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.milestone-note-text {
+  font-size: 13px;
+  line-height: 1.35;
+  color: var(--text-2);
+}
+
+.milestone-note-vine {
+  position: absolute;
+  left: -20px;
+  top: -20px;
+  width: calc(100% + 40px);
+  height: calc(100% + 42px);
+  pointer-events: none;
+  filter: drop-shadow(0 2px 1.5px rgb(58 54 42 / 45%)) drop-shadow(0 5px 8px rgb(58 54 42 / 25%));
+}
+
+:root[data-theme="dark"] .milestone-note-vine {
+  filter: drop-shadow(0 2px 1.5px rgb(0 0 0 / 70%)) drop-shadow(0 5px 8px rgb(0 0 0 / 45%));
+}
+
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateX(60px);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes note-out {
+  to {
+    opacity: 0;
+    transform: translateX(calc(100% + 40px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .milestone-note,
+  .milestone-note.leaving {
+    animation: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .milestone-note {
+    top: 76px;
+    right: 24px;
+  }
+}
