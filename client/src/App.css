@@ -6498,6 +6498,14 @@ a.comment-author:hover {
   }
 }
 
+.profile-main .profile-tabs {
+  gap: 4px;
+  padding: 0;
+  border-bottom: 1px solid var(--surface-2);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
 .profile-main .profile-tab {
   flex-shrink: 0;
   padding: 14px 18px;
@@ -6566,4 +6574,90 @@ a.comment-author:hover {
   .post-card.post-card-pinned {
     padding: 28px 18% 24px 40px;
   }
+}
+
+.challenge-ring-fill {
+  stroke: var(--sage);
+}
+
+.challenge-ring-number {
+  fill: var(--ink);
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.challenge-ring-text {
+  fill: var(--text-2);
+  font-family: 'Inter', sans-serif;
+  font-size: 8px;
+  font-weight: 500;
+}
+
+.challenge-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.challenge-count {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.challenge .progress-track {
+  max-width: none;
+}
+
+.challenge .progress-fill {
+  background: var(--sage);
+}
+
+.profile-side-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.profile-side-head .profile-side-title {
+  margin: 0;
+}
+
+.profile-side-more {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--ink);
+}
+
+.profile-side-more:hover {
+  background: var(--rose-soft);
+}
+
+.side-favorites {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.side-favorite {
+  display: block;
+  transition: transform 0.15s;
+}
+
+.side-favorite:hover {
+  transform: translateY(-2px);
+}
+
+.side-favorite-image {
+  display: block;
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 2px 6px rgb(58 54 42 / 18%);
 }

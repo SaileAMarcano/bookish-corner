@@ -159,6 +159,8 @@ const ICONS = {
         </>
     ),
 
+    chevronRight: <path d="M9 5l7 7-7 7" />,
+
 };
 
 function Icon({ name, size = 17 }) {
