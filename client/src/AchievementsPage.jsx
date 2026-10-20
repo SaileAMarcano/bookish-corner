@@ -2,16 +2,16 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
-import MilestoneSeal from './MilestoneSeal';
+import MilestoneSeal, { ProfileBadge } from './MilestoneSeal';
 import { apiFetch } from './api';
 import { getAvatarSrc, parseDbDate } from './utils';
 
-function MilestoneCard({ milestone }) {
+function MilestoneCard({ milestone, onChooseBadge }) {
     const { t, i18n } = useTranslation();
     const locked = !milestone.achieved;
 
     return (
-        <article className={`achievement ${locked ? 'achievement-locked' : ''}`}>
+        <article className={`achievement ${locked ? 'achievement-locked' : ''} ${milestone.claimed ? 'achievement-claimed' : ''}`}>
             <MilestoneSeal milestoneKey={milestone.key} locked={locked} />
 
             <div className="achievement-info">
@@ -28,6 +28,11 @@ function MilestoneCard({ milestone }) {
                             }),
                         })}
                     </p>
+                )}
+
+                {milestone.achieved && (
+                    <button type="button" className="achievement-badge-button" onClick={() => onChooseBadge(milestone.claimed ? null : milestone.key)}
+                        aria-pressed={milestone.claimed}>{milestone.claimed ? t('milestones.removeBadge') : t('milestones.useBadge')}</button>
                 )}
 
                 {locked && milestone.goal && (
@@ -53,6 +58,7 @@ function AchievementsPage({ currentUser }) {
     const { t } = useTranslation();
     const [milestones, setMilestones] = useState(null);
     const [error, setError] = useState('');
+    const [badgeError, setBadgeError] = useState('');
 
     useEffect(() => {
         let ignore = false;
@@ -69,6 +75,17 @@ function AchievementsPage({ currentUser }) {
             ignore = true;
         };
     }, [currentUser.username]);
+
+    const handleChooseBadge = (key) => {
+        setBadgeError('');
+        apiFetch('/api/milestones/badge', { method: 'PUT', body: { key } })
+            .then(() =>
+                setMilestones((current) =>
+                    current.map((milestone) => ({ ...milestone, claimed: milestone.key === key }))
+                )
+            )
+            .catch((err) => setBadgeError(err.message));
+    };
 
     if (error) {
         return (
@@ -88,6 +105,7 @@ function AchievementsPage({ currentUser }) {
 
     const earned = milestones.filter((milestone) => milestone.achieved);
     const inProgress = milestones.filter((milestone) => !milestone.achieved);
+    const badge = milestones.find((milestone) => milestone.claimed);
 
     return (
         <main className="page achievements-page">
@@ -97,7 +115,10 @@ function AchievementsPage({ currentUser }) {
                 <img className="achievements-avatar" src={getAvatarSrc(currentUser.avatarUrl)} alt="" />
 
                 <div className="achievements-summary-text">
-                    <div className="display achievements-name">{currentUser.displayName}</div>
+                    <div className="profile-name-row">
+                        <div className="display achievements-name">{currentUser.displayName}</div>
+                        {badge && <ProfileBadge milestoneKey={badge.key} />}
+                    </div>
                     <div className="achievements-count">
                         {t('milestones.count', { count: earned.length, total: milestones.length })}
                     </div>
@@ -123,9 +144,11 @@ function AchievementsPage({ currentUser }) {
             {inProgress.length > 0 && (
                 <>
                     <h2 className="display achievements-section-title">{t('milestones.inProgress')}</h2>
+                    <p className="achievements-hint">{t('milestones.badgeHint')}</p>
+                    {badgeError && <Notice message={badgeError} />}
                     <div className="achievements-grid">
                         {inProgress.map((milestone) => (
-                            <MilestoneCard key={milestone.key} milestone={milestone} />
+                            <MilestoneCard key={milestone.key} milestone={milestone} onChooseBadge={handleChooseBadge} />
                         ))}
                     </div>
                 </>

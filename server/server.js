@@ -1152,7 +1152,9 @@ app.get('/api/users/:username', requireAuth, async (req, res) => {
                (SELECT COUNT(*) FROM user_books
                WHERE user_books.user_id = users.id AND user_books.review IS NOT NULL) AS reviews_count,
                (SELECT COUNT(*) FROM user_books
-                WHERE user_books.user_id = users.id AND user_books.status = 'reading') AS currently_reading
+                WHERE user_books.user_id = users.id AND user_books.status = 'reading') AS currently_reading,
+                                                                                            (SELECT milestone_key FROM user_milestones
+                                                                                            WHERE user_milestones.user_id = users.id AND claimed_at IS NOT NULL LIMIT 1) AS badge
         FROM users
         WHERE username = $1
     `, [req.params.username]);
@@ -1258,6 +1260,29 @@ app.post('/api/milestones/seen', requireAuth, async (req, res) => {
         );
     }
     res.json({ ok: true });
+});
+
+app.put('/api/milestones/badge', requireAuth, async (req, res) => {
+    const key = req.body.key ?? null;
+
+    if (key !== null) {
+        const [reached] = await query(
+            'SELECT 1 FROM user_milestones WHERE user_id = $1 AND milestone_key = $2',
+            [req.session.user.id, String(key)]
+        );
+        if (!reached) {
+            return res.status(400).json({ error: msg(req, 'milestoneNotReached') });
+        }
+    }
+
+    await query(
+        `UPDATE user_milestones
+        SET claimed_at = CASE WHEN milestone_key = $2 THEN now() ELSE NULL END
+        WHERE user_id = $1`,
+        [req.session.user.id, key]
+    );
+
+    res.json({ badge: key });
 });
 
 const passwordProblem = (password) => {
@@ -1403,7 +1428,9 @@ app.get('/api/profile', requireAuth, async (req, res) => {
     (SELECT COUNT(*) FROM user_books
                    WHERE user_books.user_id = users.id AND user_books.review IS NOT NULL) AS reviews_count,
     (SELECT COUNT(*) FROM user_books
-                   WHERE user_books.user_id = users.id AND user_books.status = 'reading') AS currently_reading
+                   WHERE user_books.user_id = users.id AND user_books.status = 'reading') AS currently_reading,
+                                                                                                (SELECT milestone_key FROM user_milestones
+                                                                                                WHERE user_milestones.user_id = users.id AND claimed_at IS NOT NULL LIMIT 1) AS badge
         FROM users
         WHERE users.id = $1
     `, [req.session.user.id]);

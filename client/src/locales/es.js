@@ -416,6 +416,9 @@ const es = {
         earnedOn: 'Conseguido el {{date}}',
         progress: '{{progress}} de {{goal}}',
         setGoal: 'Ponte una meta de lectura para empezar este',
+        badgeHint: 'Elige uno para mostrarlo junto a tu nombre en tu perfil.',
+        useBadge: 'Mostrar en mi perfil',
+        removeBadge: 'Quitar de mi perfil',
         items: {
             'beta-tester': { name: 'Beta Tester', rule: 'Únete a Bookish Corner durante la beta.' },
             'a-new-reader': { name: 'Nueva lectora', rule: 'Añade tu primer libro a tu biblioteca.' },

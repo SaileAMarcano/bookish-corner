@@ -6373,3 +6373,57 @@ a.comment-author:hover {
     right: 24px;
   }
 }
+
+.profile-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.profile-badge {
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  filter: drop-shadow(0 2px 3px rgba(58 54 42 / 22%));
+}
+
+.achievements-hint {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.achievement-claimed {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 1px var(--rose);
+}
+
+.achievement-badge-button {
+  margin-top: 8px;
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--rose);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rose-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.achievement-badge-button:hover {
+  background: var(--rose-soft);
+}
+
+.achievement-badge-button[aria-pressed="true"] {
+  background: var(--rose);
+  color: var(--surface);
+}
+
+@media (max-width: 860px) {
+  .profile-header .profile-name-row {
+    justify-content: center;
+  }
+}

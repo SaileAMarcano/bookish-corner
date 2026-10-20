@@ -21,4 +21,11 @@ function MilestoneSeal({ milestoneKey, locked, size = 84 }) {
     );
 }
 
+export function ProfileBadge({ milestoneKey }) {
+    const { t } = useTranslation();
+    const name = t(`milestones.items.${milestoneKey}.name`);
+
+    return <img className="profile-badge" src={`/badges/${milestoneKey}.webp`} alt={name} title={name} />;
+}
+
 export default MilestoneSeal
