@@ -149,6 +149,7 @@ const ICONS = {
             <path d="M4 10h16M8.5 3v4M15.5 3v4" />
         </>
     ),
+
 };
 
 function Icon({ name, size = 17 }) {

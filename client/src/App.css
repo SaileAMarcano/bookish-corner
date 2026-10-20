@@ -5898,3 +5898,166 @@ a.comment-author:hover {
   padding: 0 14px;
   font-size: 12px;
 }
+
+.achievements-title {
+  margin: 4px 0 22px;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.achievements-summary {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 22px 26px;
+  margin-bottom: 34px;
+}
+
+.achievements-avatar {
+  flex-shrink: 0;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--surface);
+  box-shadow: 0 0 0 1px var(--surface-2);
+}
+
+.achievements-summary-text {
+  flex-grow: 1;
+}
+
+.achievements-name {
+  font-size: 1.6rem;
+}
+
+.achievements-count {
+  margin-top: 2px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.achievements-summary .progress-track,
+.achievement .progress-track {
+  max-width: 320px;
+  background: var(--surface-2);
+}
+
+.achievements-section-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 0 16px;
+  font-size: 1.45rem;
+  font-weight: 500;
+}
+
+.achievements-section-title::after {
+  content: "";
+  flex-grow: 1;
+  height: 1px;
+  background: var(--surface-2);
+}
+
+.achievements-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 14px;
+  margin-bottom: 36px;
+}
+
+.achievement {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--surface-2);
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.achievement-info {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+.achievement-name {
+  margin: 0;
+  font-size: 1.12rem;
+  font-weight: 500;
+}
+
+.achievement-locked .achievement-name {
+  color: var(--text-2);
+}
+
+.achievement-rule {
+  margin: 4px 0 0;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-2);
+}
+
+.achievement-date {
+  margin: 6px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--sage-text);
+}
+
+.achievement-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--rose-ink);
+}
+
+.profile-achievements {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 20px;
+  border: 1px solid var(--rose);
+  border-radius: 999px;
+  color: var(--rose-ink);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.profile-achievements:hover {
+  background: var(--rose-soft);
+}
+
+.seal {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.seal-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 3px 4px rgb(58 54 42 / 18%));
+}
+
+.seal-locked .seal-image {
+  filter: grayscale(1) sepia(0.2) opacity(0.6);
+}
+
+.seal-lock {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--text-2);
+  color: var(--surface);
+}

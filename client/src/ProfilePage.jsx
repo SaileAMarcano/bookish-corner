@@ -14,6 +14,7 @@ import ProfileTabs from './ProfileTabs';
 import ProfileBooks from './ProfileBooks';
 import ProfileAbout from './ProfileAbout';
 import ProfileSide from './ProfileSide';
+import Icon from './Icon';
 
 
 function FavoriteCard({ book, onToggleFavorite }) {
@@ -248,6 +249,10 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     return (
         <main className="page profile-view">
             <ProfileHeader profile={profile} onShowFollows={() => setSearchParams({ tab: 'following' })}>
+                <Link to="/achievements" className="profile-achievements">
+                    <Icon name="sparkle" size={14} />
+                    {t('milestones.title')}
+                </Link>
                 <Link to="/profile/edit" className="profile-edit">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" strokeWidth="2"

@@ -17,6 +17,7 @@ import GenresPage from './GenresPage';
 import GenrePage from './GenrePage';
 import UserPage from './UserPage';
 import BookPage from './BookPage';
+import AchievementsPage from './AchievementsPage';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
@@ -331,6 +332,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
+          <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/genres" element={<GenresPage />} />
