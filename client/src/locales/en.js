@@ -446,6 +446,8 @@ const en = {
     },
     profileHeader: {
         joined: 'Joined {{date}}',
+        share: 'Share',
+        copied: 'Link copied'
     },
     userPage: {
         follow: 'Follow',

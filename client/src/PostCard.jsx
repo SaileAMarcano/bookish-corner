@@ -51,7 +51,14 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
     };
 
     return (
-        <article className="card post-card">
+        <article className={`card post-card ${showPinned && post.isPinned ? 'post-card-pinned' : ''}`}>
+            {showPinned && post.isPinned && (
+                <div className="pinned-sheet" aria-hidden="true">
+                    <div className="pinned-sheet-top"></div>
+                    <div className="pinned-sheet-middle"></div>
+                    <div className="pinned-sheet-bottom"></div>
+                </div>
+            )}
             {showPinned && post.isPinned && (
                 <div className="post-pinned">
                     <Icon name="pin" size={14} />

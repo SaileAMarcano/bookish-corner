@@ -1250,7 +1250,7 @@ app.get('/api/users/:username/milestones', requireAuth, async (req, res) => {
 });
 
 app.post('/api/milestones/seen', requireAuth, async (req, res) => {
-    const keys = Array.isArray(req.body.keys) ? req.body.keys.filter((key) => typeofkey === 'string') : [];
+    const keys = Array.isArray(req.body.keys) ? req.body.keys.filter((key) => typeof key === 'string') : [];
 
     if (keys.length > 0) {
         await query(

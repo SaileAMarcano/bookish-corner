@@ -446,6 +446,8 @@ const es = {
     },
     profileHeader: {
         joined: 'Se unió en {{date}}',
+        share: 'Compartir',
+        copied: 'Enlace copiado',
     },
     userPage: {
         follow: 'Seguir',

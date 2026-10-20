@@ -136,7 +136,7 @@ function AchievementsPage({ currentUser }) {
             ) : (
                 <div className="achievements-grid">
                     {earned.map((milestone) => (
-                        <MilestoneCard key={milestone.key} milestone={milestone} />
+                        <MilestoneCard key={milestone.key} milestone={milestone} onChooseBadge={handleChooseBadge} />
                     ))}
                 </div>
             )}
@@ -148,7 +148,7 @@ function AchievementsPage({ currentUser }) {
                     {badgeError && <Notice message={badgeError} />}
                     <div className="achievements-grid">
                         {inProgress.map((milestone) => (
-                            <MilestoneCard key={milestone.key} milestone={milestone} onChooseBadge={handleChooseBadge} />
+                            <MilestoneCard key={milestone.key} milestone={milestone} />
                         ))}
                     </div>
                 </>
