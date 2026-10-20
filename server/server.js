@@ -1247,6 +1247,19 @@ app.get('/api/users/:username/milestones', requireAuth, async (req, res) => {
     );
 });
 
+app.post('/api/milestones/seen', requireAuth, async (req, res) => {
+    const keys = Array.isArray(req.body.keys) ? req.body.keys.filter((key) => typeofkey === 'string') : [];
+
+    if (keys.length > 0) {
+        await query(
+            `UPDATE user_milestones SET seen_at = now()
+             WHERE user_id = $1 AND milestone_key = ANY($2::text[]) AND seen_at IS NULL`,
+            [req.session.user.id, keys]
+        );
+    }
+    res.json({ ok: true });
+});
+
 const passwordProblem = (password) => {
     if (typeof password !== 'string' || password.length < 8) {
         return 'passwordLength';

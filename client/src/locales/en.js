@@ -433,6 +433,12 @@ const en = {
             'goal-reached': { name: 'Goal Reached', rule: 'Complete your reading challenge this year.' },
         },
     },
+    celebration: {
+        unlocked: 'Badge unlocked!',
+        betaText: 'Thank you for being here from the very beginning.',
+        seeAll: 'See my achievements',
+        close: 'Close',
+    },
     profileHeader: {
         joined: 'Joined {{date}}',
     },

@@ -433,6 +433,12 @@ const es = {
             'goal-reached': { name: 'Meta cumplida', rule: 'Cumple tu reto de lectura de este año.' },
         },
     },
+    celebration: {
+        unlocked: '¡Insignia desbloqueada!',
+        betaText: 'Gracias por estar aquí desde el principio.',
+        seeAll: 'Ver mis logros',
+        close: 'Cerrar',
+    },
     profileHeader: {
         joined: 'Se unió en {{date}}',
     },

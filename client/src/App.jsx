@@ -18,6 +18,7 @@ import GenrePage from './GenrePage';
 import UserPage from './UserPage';
 import BookPage from './BookPage';
 import AchievementsPage from './AchievementsPage';
+import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
@@ -348,6 +349,8 @@ function App() {
           {toast}
         </div>
       )}
+
+      <MilestoneCelebration currentUser={currentUser} books={books} />
     </div>
   )
 }
