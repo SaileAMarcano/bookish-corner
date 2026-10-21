@@ -74,6 +74,8 @@ CREATE TABLE user_books (
     started_at      TIMESTAMPTZ,
     finished_at     TIMESTAMPTZ,
     last_read_at    TIMESTAMPTZ,
+    progress_note   TEXT CHECK (length(progress_note) <= 280),
+    progress_note_at TIMESTAMPTZ,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (user_id, work_id),
     CHECK (current_page <= total_pages)

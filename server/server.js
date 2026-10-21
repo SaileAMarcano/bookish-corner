@@ -370,10 +370,11 @@ app.delete('/api/user-books/:id/like', requireAuth, async (req, res) => {
 const keepOrSet = (value, current) => (value === undefined ? current : value);
 
 const REVIEW_MAX_LENGTH = 5000;
+const PROGRESS_NOTE_MAX_LENGTH = 280;
 
 app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
-    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating } = req.body;
+    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, progressNote } = req.body;
 
     const [userBook] = await query('SELECT * FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
@@ -404,6 +405,12 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     if (typeof review === 'string' && review.length > REVIEW_MAX_LENGTH) {
         return res.status(400).json({ error: msg(req, 'reviewTooLong') });
     }
+    if (progressNote !== undefined && progressNote !== null && typeof progressNote !== 'string') {
+        return res.status(400).json({ error: msg(req, 'progressNoteTooLong') });
+    }
+    if (typeof progressNote === 'string' && progressNote.trim().length > PROGRESS_NOTE_MAX_LENGTH) {
+        return res.status(400).json({ error: msg(req, 'progressNoteTooLong') });
+    }
 
     const newTotal = keepOrSet(totalPages, userBook.totalPages);
     const newPage = keepOrSet(currentPage, userBook.currentPage);
@@ -411,6 +418,8 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const newGenre = keepOrSet(genre, userBook.genre);
     const cleanReview = typeof review === 'string' ? review.trim() || null : review;
     const newReview = keepOrSet(cleanReview, userBook.review);
+    const noteGiven = progressNote !== undefined;
+    const cleanNote = typeof progressNote === 'string' ? progressNote.trim() || null : null;
 
     if (newTotal && newPage > newTotal) {
         return res.status(400).json({ error: msg(req, 'pageOverTotal') });
@@ -437,10 +446,13 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
             rating = COALESCE($9, rating),
             started_at = CASE WHEN $10 THEN now() ELSE started_at END,
             finished_at = CASE WHEN $11 THEN now() ELSE finished_at END,
-            last_read_at = CASE WHEN $12 THEN now() ELSE last_read_at END
+            last_read_at = CASE WHEN $12 THEN now() ELSE last_read_at END,
+            progress_note = CASE WHEN $14 THEN $15 ELSE progress_note END,
+            progress_note_at = CASE WHEN $14 THEN (CASE WHEN $15::text IS NULL THEN NULL ELSE now() END)
+                                    ELSE progress_note_at END
         WHERE id = $13
         RETURNING *
-    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id]);
+    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote]);
 
     res.json(updated);
 });
@@ -466,6 +478,7 @@ async function findUserBooks(req, ownerId) {
         SELECT ub.id, ub.status, ub.review, ub.is_favorite, ub.genre, ub.rating,
                ub.current_page, ub.total_pages, ub.current_chapter,
                ub.started_at, ub.finished_at, ub.last_read_at, ub.created_at,
+               ub.progress_note, ub.progress_note_at,
                CASE WHEN ub.status = 'finished' THEN 100
                     WHEN ub.total_pages > 0
                     THEN LEAST(100, ROUND(COALESCE(ub.current_page, 0) * 100.0 / ub.total_pages))
