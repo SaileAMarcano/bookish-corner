@@ -431,6 +431,18 @@ const es = {
         manyTitle: '¡Conseguiste {{count}} logros!',
         manyText: 'Míralos en tu página de logros.',
     },
+    library: {
+        counters: {
+            finished: 'Leídos',
+            reading: 'Leyendo',
+            'want-to-read': 'Quiero leer',
+            paused: 'Pausados',
+            dnf: 'Abandonados',
+        },
+        pages: '{{current}} de {{total}} páginas',
+        noPages: 'Sin número de páginas',
+        edit: 'Editar {{title}}',
+    },
     profileHeader: {
         joined: 'Se unió en {{date}}',
         share: 'Compartir',

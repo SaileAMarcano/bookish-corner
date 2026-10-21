@@ -11,6 +11,7 @@ import AboutPage from './AboutPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import ReadingPage from './ReadingPage';
+import LibraryPage from './LibraryPage';
 import TaggedPage from './TaggedPage';
 import TagsPage from './TagsPage';
 import GenresPage from './GenresPage';
@@ -341,6 +342,7 @@ function App() {
           <Route path="/u/:username" element={<UserPage currentUser={currentUser} />} />
           <Route path="/book/:id" element={<BookPage books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
+          <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

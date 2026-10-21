@@ -9,7 +9,7 @@ import Notice from './Notice';
 import BookCover from './BookCover';
 
 const QUICK_LINKS = [
-    { to: '/profile?tab=library', label: 'nav.library', icon: 'library' },
+    { to: '/library', label: 'nav.library', icon: 'library' },
     { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },
     { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
     { to: '/profile?tab=following', label: 'nav.following', icon: 'following' },

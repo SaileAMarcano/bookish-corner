@@ -431,6 +431,18 @@ const en = {
         manyTitle: 'You earned {{count}} achievements!',
         manyText: 'See them all on your achievements page.',
     },
+    library: {
+        counters: {
+            finished: 'Read',
+            reading: 'Reading',
+            'want-to-read': 'Want to read',
+            paused: 'Paused',
+            dnf: 'DNF',
+        },
+        pages: '{{current}} of {{total}} pages',
+        noPages: 'No page count yet',
+        edit: 'Edit {{title}}',
+    },
     profileHeader: {
         joined: 'Joined {{date}}',
         share: 'Share',
