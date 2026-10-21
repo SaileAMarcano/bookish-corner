@@ -442,6 +442,15 @@ const es = {
         pages: '{{current}} de {{total}} páginas',
         noPages: 'Sin número de páginas',
         edit: 'Editar {{title}}',
+        search: 'Busca en tu biblioteca…',
+        sortBy: 'Ordenar por',
+        sort: {
+            recent: 'Más recientes',
+            title: 'Título',
+            author: 'Autor',
+            rating: 'Calificación',
+        },
+        noMatches: 'Ningún libro coincide con tu búsqueda.',
     },
     profileHeader: {
         joined: 'Se unió en {{date}}',

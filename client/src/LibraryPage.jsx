@@ -8,12 +8,24 @@ import Icon from './Icon';
 import { nightstandMessage } from './utils';
 
 const STATUS_COUNTERS = ['finished', 'reading', 'want-to-read', 'paused', 'dnf'];
+const SORTS = ['recent', 'title', 'author', 'rating'];
 
 function byRecent(a, b) {
     const dateA = a.lastReadAt || a.createdAt;
     const dateB = b.lastReadAt || b.createdAt;
     return new Date(dateB) - new Date(dateA);
 }
+
+function simplify(text) {
+    return (text || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+
+const SORTERS = {
+    recent: byRecent,
+    title: (a, b) => a.title.localeCompare(b.title),
+    author: (a, b) => (a.author || '').localeCompare(b.author || ''),
+    rating: (a, b) => b.rating - a.rating || byRecent(a, b),
+};
 
 function LibraryRow({ book, onEdit }) {
     const { t } = useTranslation();
@@ -63,9 +75,16 @@ function LibraryRow({ book, onEdit }) {
 function LibraryPage({ books, onUpdate, booksStatus }) {
     const { t } = useTranslation();
     const [selectedId, setSelectedId] = useState(null);
+    const [status, setStatus] = useState('all');
+    const [search, setSearch] = useState('');
+    const [sortBy, setSortBy] = useState('recent');
     const selectedBook = books.find((book) => book.id === selectedId);
 
-    const sorted = [...books].sort(byRecent);
+    const words = simplify(search.trim());
+    const shown = books
+        .filter((book) => status === 'all' || book.status === status)
+        .filter((book) => !words || simplify(`${book.title} ${book.author}`).includes(words))
+        .sort(SORTERS[sortBy]);
     const emptyMessage = nightstandMessage(booksStatus, books);
 
     return (
@@ -81,11 +100,48 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
                 ))}
             </div>
 
+            <div className="library-tools">
+                <div className="book-filter" role="group" aria-label={t('profileBooks.filterLabel')}>
+                    {['all', ...STATUS_COUNTERS].map((key) => (
+                        <button
+                            key={key}
+                            type="button"
+                            className={`book-filter-chip ${status === key ? 'active' : ''}`}
+                            onClick={() => setStatus(key)}
+                            aria-pressed={status === key}
+                        >
+                            {key === 'all' ? t('profileBooks.all') : t(`library.counters.${key}`)}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="library-search-sort">
+                    <label className="library-search">
+                        <Icon name="search" size={16} />
+                        <input
+                            type="search"
+                            value={search}
+                            onChange={(event) => setSearch(event.target.value)}
+                            placeholder={t('library.search')}
+                            aria-label={t('library.search')}
+                        />
+                    </label>
+
+                    <select className="library-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label={t('library.sortBy')}>
+                        {SORTS.map((key) => (
+                            <option key={key} value={key}>{t(`library.sort.${key}`)}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+
             {books.length === 0 ? (
                 emptyMessage && <div className="card home-empty">{emptyMessage}</div>
+            ) : shown.length === 0 ? (
+                <div className="card profile-empty">{t('library.noMatches')}</div>
             ) : (
                 <div className="library-list">
-                    {sorted.map((book) => (
+                    {shown.map((book) => (
                         <LibraryRow key={book.id} book={book} onEdit={() => setSelectedId(book.id)} />
                     ))}
                 </div>
