@@ -5,7 +5,8 @@ import BookCover from './BookCover';
 import BookModal from './BookModal';
 import StarRating from './StarRating';
 import Icon from './Icon';
-import { nightstandMessage } from './utils';
+import ProgressPanel from './ProgressPanel';
+import { nightstandMessage, sortByLastRead } from './utils';
 
 const STATUS_COUNTERS = ['finished', 'reading', 'want-to-read', 'paused', 'dnf'];
 const SORTS = ['recent', 'title', 'author', 'rating'];
@@ -27,13 +28,13 @@ const SORTERS = {
     rating: (a, b) => b.rating - a.rating || byRecent(a, b),
 };
 
-function LibraryRow({ book, onEdit }) {
+function LibraryRow({ book, isSelected, onEdit, onChoose }) {
     const { t } = useTranslation();
     const percent = book.totalPages ? Math.round(((book.currentPage || 0) * 100) / book.totalPages) : null;
     const shownPercent = book.status === 'finished' ? 100 : percent;
 
     return (
-        <article className="library-row">
+        <article className={`library-row ${isSelected ? 'selected' : ''}`}>
             <Link to={`/book/${book.bookId}`} className="library-cover-link">
                 <BookCover src={book.coverImage} className="library-cover" />
             </Link>
@@ -63,6 +64,12 @@ function LibraryRow({ book, onEdit }) {
                         <span className="library-pages">{t('library.noPages')}</span>
                     )}
                 </div>
+
+                {book.status !== 'finished' && !isSelected && (
+                    <button type="button" className="library-choose" onClick={onChoose}>
+                        {t('library.updateThis')}
+                    </button>
+                )}
             </div>
 
             <button type="button" className="library-more" onClick={onEdit} aria-label={t('library.edit', { title: book.title })}>
@@ -78,7 +85,21 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('recent');
+    const [panelId, setPanelId] = useState(null);
     const selectedBook = books.find((book) => book.id === selectedId);
+
+    // The panel shows the book she chose, or else the one she read most recently.
+    const panelBook =
+        books.find((book) => book.id === panelId) ||
+        sortByLastRead(books.filter((book) => book.status === 'reading'))[0];
+
+    const choose = (book) => {
+        setPanelId(book.id);
+        // On small screens the panel is below the list: bring it into view.
+        if (window.matchMedia('(max-width: 1100px)').matches) {
+            document.querySelector('.library-side')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
 
     const words = simplify(search.trim());
     const shown = books
@@ -89,63 +110,81 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
 
     return (
         <main className="page library-page">
-            <h1 className="display library-heading">{t('nav.library')}</h1>
+            <div className="library-layout">
+                <div className="library-main">
+                    <h1 className="display library-heading">{t('nav.library')}</h1>
 
-            <div className="library-counters">
-                {STATUS_COUNTERS.map((status) => (
-                    <div key={status} className="library-counter">
-                        <div className="library-counter-number">{books.filter((book) => book.status === status).length}</div>
-                        <div className="library-counter-label">{t(`library.counters.${status}`)}</div>
-                    </div>
-                ))}
-            </div>
-
-            <div className="library-tools">
-                <div className="book-filter" role="group" aria-label={t('profileBooks.filterLabel')}>
-                    {['all', ...STATUS_COUNTERS].map((key) => (
-                        <button
-                            key={key}
-                            type="button"
-                            className={`book-filter-chip ${status === key ? 'active' : ''}`}
-                            onClick={() => setStatus(key)}
-                            aria-pressed={status === key}
-                        >
-                            {key === 'all' ? t('profileBooks.all') : t(`library.counters.${key}`)}
-                        </button>
-                    ))}
-                </div>
-
-                <div className="library-search-sort">
-                    <label className="library-search">
-                        <Icon name="search" size={16} />
-                        <input
-                            type="search"
-                            value={search}
-                            onChange={(event) => setSearch(event.target.value)}
-                            placeholder={t('library.search')}
-                            aria-label={t('library.search')}
-                        />
-                    </label>
-
-                    <select className="library-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label={t('library.sortBy')}>
-                        {SORTS.map((key) => (
-                            <option key={key} value={key}>{t(`library.sort.${key}`)}</option>
+                    <div className="library-counters">
+                        {STATUS_COUNTERS.map((status) => (
+                            <div key={status} className="library-counter">
+                                <div className="library-counter-number">{books.filter((book) => book.status === status).length}</div>
+                                <div className="library-counter-label">{t(`library.counters.${status}`)}</div>
+                            </div>
                         ))}
-                    </select>
-                </div>
-            </div>
+                    </div>
 
-            {books.length === 0 ? (
-                emptyMessage && <div className="card home-empty">{emptyMessage}</div>
-            ) : shown.length === 0 ? (
-                <div className="card profile-empty">{t('library.noMatches')}</div>
-            ) : (
-                <div className="library-list">
-                    {shown.map((book) => (
-                        <LibraryRow key={book.id} book={book} onEdit={() => setSelectedId(book.id)} />
-                    ))}
+                    <div className="library-tools">
+                        <div className="book-filter" role="group" aria-label={t('profileBooks.filterLabel')}>
+                            {['all', ...STATUS_COUNTERS].map((key) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    className={`book-filter-chip ${status === key ? 'active' : ''}`}
+                                    onClick={() => setStatus(key)}
+                                    aria-pressed={status === key}
+                                >
+                                    {key === 'all' ? t('profileBooks.all') : t(`library.counters.${key}`)}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="library-search-sort">
+                            <label className="library-search">
+                                <Icon name="search" size={16} />
+                                <input
+                                    type="search"
+                                    value={search}
+                                    onChange={(event) => setSearch(event.target.value)}
+                                    placeholder={t('library.search')}
+                                    aria-label={t('library.search')}
+                                />
+                            </label>
+
+                            <select className="library-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label={t('library.sortBy')}>
+                                {SORTS.map((key) => (
+                                    <option key={key} value={key}>{t(`library.sort.${key}`)}</option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                    {books.length === 0 ? (
+                        emptyMessage && <div className="card home-empty">{emptyMessage}</div>
+                    ) : shown.length === 0 ? (
+                        <div className="card profile-empty">{t('library.noMatches')}</div>
+                    ) : (
+                        <div className="library-list">
+                            {shown.map((book) => (
+                                <LibraryRow
+                                    key={book.id}
+                                    book={book}
+                                    isSelected={panelBook?.id === book.id}
+                                    onEdit={() => setSelectedId(book.id)}
+                                    onChoose={() => choose(book)}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </div>
-            )}
+
+                <aside className="library-side">
+                    {panelBook ? (
+                        <ProgressPanel key={panelBook.id} book={panelBook} onSaved={onUpdate} />
+                    ) : (
+                        <div className="progress-panel progress-panel-empty">{t('library.panelEmpty')}</div>
+                    )}
+                </aside>
+            </div>
 
             {selectedBook && (
                 <BookModal book={selectedBook} onClose={() => setSelectedId(null)} onUpdate={onUpdate} />

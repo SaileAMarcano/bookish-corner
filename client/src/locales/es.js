@@ -451,6 +451,12 @@ const es = {
             rating: 'Calificación',
         },
         noMatches: 'Ningún libro coincide con tu búsqueda.',
+        panelTitle: 'Actualizar progreso',
+        noteLabel: 'Nota (opcional)',
+        notePlaceholder: '¿Cómo va? ¿Algún pensamiento?',
+        saved: 'Guardado ✓',
+        updateThis: 'Actualizar progreso',
+        panelEmpty: 'Elige un libro de la lista para actualizar tu progreso.',
     },
     profileHeader: {
         joined: 'Se unió en {{date}}',

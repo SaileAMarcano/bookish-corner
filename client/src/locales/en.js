@@ -451,6 +451,12 @@ const en = {
             rating: 'Rating',
         },
         noMatches: 'No books match your search.',
+        panelTitle: 'Update progress',
+        noteLabel: 'Note (optional)',
+        notePlaceholder: 'How is it going? Any thoughts?',
+        saved: 'Saved ✓',
+        updateThis: 'Update progress',
+        panelEmpty: 'Choose a book from the list to update your progress.',
     },
     profileHeader: {
         joined: 'Joined {{date}}',
