@@ -7,13 +7,10 @@ import { apiFetch } from './api';
 import BookModal from './BookModal';
 import Notice from './Notice';
 import BookCover from './BookCover';
+import PostComposer from './PostComposer';
+import PostCard from './PostCard';
 
-const QUICK_LINKS = [
-    { to: '/library', label: 'nav.library', icon: 'library' },
-    { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },
-    { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
-    { to: '/profile?tab=following', label: 'nav.following', icon: 'following' },
-]
+const FEED_TABS = ['for-you', 'following', 'recent'];
 
 function ContinueReading({ book, onOpen }) {
     const { t } = useTranslation();
@@ -49,45 +46,43 @@ function ContinueReading({ book, onOpen }) {
     );
 }
 
-function RecentCard({ book, onAdd }) {
-    const { t } = useTranslation();
-
-    return (
-        <div className="card recent-card">
-            <BookCover src={book.coverImage} className="recent-cover" />
-
-            <div className="display recent-title">
-                <Link to={`/book/${book.id}`} className="book-title-link">{book.title}</Link>
-            </div>
-            <div className="recent-author">{book.author}</div>
-
-            {book.inLibrary ? (
-                <span className="recent-added">{t('home.inLibrary')}</span>
-            ) : (
-                <button className="recent-add" onClick={() => onAdd(book.id)}>{t('home.addToLibrary')}</button>
-            )}
-        </div>
-    );
-}
-
-function Home({ books, currentUser, onUpdate, onError, booksStatus }) {
-    const { t } = useTranslation();
-    const [recentBooks, setRecentBooks] = useState([]);
-    const [recentError, setRecentError] = useState('');
+function Home({ books, currentUser, onUpdate, booksStatus }) {
+    const { t, i18n } = useTranslation();
+    const [feedTab, setFeedTab] = useState('for-you');
+    const [feed, setFeed] = useState(null);
+    const [feedError, setFeedError] = useState('');
+    const [reloadCount, setReloadCount] = useState(0);
 
     useEffect(() => {
-        apiFetch('/api/books/recent')
-            .then((data) => {
-                setRecentBooks(data);
-                setRecentError('');
-            })
-            .catch((error) => setRecentError(error.message));
-    }, [books]);
+        let ignore = false;
+        setFeed(null);
+        setFeedError('');
 
-    const handleAddToLibrary = (bookId) => {
-        apiFetch('/api/user-books', { method: 'POST', body: { bookId } })
-            .then(() => onUpdate())
-            .catch((error) => onError(error.message));
+        apiFetch(`/api/feed?tab=${feedTab}`)
+            .then((data) => {
+                if (!ignore) setFeed(data.items);
+            })
+            .catch((error) => {
+                if (!ignore) setFeedError(error.message);
+            });
+
+        return () => {
+            ignore = true;
+        };
+    }, [feedTab, i18n.language, reloadCount]);
+
+    const handlePostCreated = (post) => {
+        setFeed((current) => [{ type: 'post', ...post }, ...(current || [])]);
+    };
+
+    const handlePostChange = (postId, changes) => {
+        setFeed((current) =>
+            current.map((item) => (item.type === 'post' && item.id === postId ? { ...item, ...changes } : item))
+        );
+    };
+
+    const handlePostDeleted = (postId) => {
+        setFeed((current) => current.filter((item) => !(item.type === 'post' && item.id === postId)));
     };
 
     const readingBooks = books.filter((book) => book.status === 'reading');
@@ -122,25 +117,45 @@ function Home({ books, currentUser, onUpdate, onError, booksStatus }) {
                     ) : (
                         emptyMessage && <div className="card home-empty">{emptyMessage}</div>
                     )}
+
                 </section>
-                <section className="home-section">
-                    <div className="home-section-head">
-                        <h2 className="display home-section-title">{t('home.recentlyAdded')}</h2>
-                        <span className="home-section-note">{t('home.newInCommunity')}</span>
+                <section className="post-list home-feed">
+                    <PostComposer books={books} onCreated={handlePostCreated} />
+
+                    <div className="profile-tabs home-tabs">
+                        {FEED_TABS.map((tab) => (
+                            <button
+                                key={tab}
+                                type="button"
+                                className={`profile-tab ${feedTab === tab ? 'active' : ''}`}
+                                onClick={() => setFeedTab(tab)}
+                                aria-pressed={feedTab === tab}
+                            >
+                                {t(`home.feedTabs.${tab}`)}
+                            </button>
+                        ))}
                     </div>
 
-                    {recentError && <Notice message={recentError} />}
+                    {feedError && <Notice message={feedError} onRetry={() => setReloadCount((count) => count + 1)} />}
 
-                    {!recentError && recentBooks.length === 0 && (
-                        <div className="card home-empty">{t('home.noCatalog')}</div>
+                    {!feedError && feed === null && (
+                        <div className="card profile-empty">{t('posts.loading')}</div>
                     )}
 
-                    {recentBooks.length > 0 && (
-                        <div className="recent-row">
-                            {recentBooks.map((book) => (
-                                <RecentCard key={book.id} book={book} onAdd={handleAddToLibrary} />
-                            ))}
-                        </div>
+                    {feed && feed.length === 0 && (
+                        <div className="card profile-empty">{t(`home.feedEmpty.${feedTab}`)}</div>
+                    )}
+
+                    {feed && feed.map((item) =>
+                        item.type === 'post' && (
+                            <PostCard
+                                key={`post-${item.id}`}
+                                post={item}
+                                currentUserId={currentUser.id}
+                                onChange={handlePostChange}
+                                onDeleted={handlePostDeleted}
+                            />
+                        )
                     )}
                 </section>
             </div>
@@ -181,23 +196,6 @@ function Home({ books, currentUser, onUpdate, onError, booksStatus }) {
                     <div className="home-muted">— {quote.author}</div>
                 </div>
 
-                <div className="card home-card">
-                    <h3 className="display home-card-title">{t('home.quickAccess')}</h3>
-                    <nav className="home-links">
-                        {QUICK_LINKS.map((link) => (
-                            <Link key={link.to} to={link.to} className="home-link">
-                                <Icon name={link.icon} size={17} />
-                                <span>{t(link.label)}</span>
-                                <span className="home-link-arrow">›</span>
-                            </Link>
-                        ))}
-                    </nav>
-                </div>
-
-                <div className="home-cozy">
-                    <span className="display">{t('home.cozy')}</span>
-                    <Icon name="favorites" size={16} />
-                </div>
             </aside>
             {selectedBook && (<BookModal book={selectedBook} onClose={() => setSelectedId(null)}
                 onUpdate={onUpdate}

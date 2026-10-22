@@ -7017,3 +7017,25 @@ a.comment-author:hover {
     padding: 28px 20px 34px 42px;
   }
 }
+
+.home-welcome {
+  margin: 0;
+  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
+  font-style: italic;
+  font-weight: 500;
+}
+
+.home-feed {
+  max-width: none;
+}
+
+.home-tabs {
+  padding: 0;
+  border-bottom: 1px solid var(--surface-2);
+  overflow-x: auto;
+}
+
+.home-tabs .profile-tab {
+  flex-shrink: 0;
+  padding: 14px 22px;
+}

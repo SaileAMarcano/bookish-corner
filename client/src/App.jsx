@@ -314,7 +314,6 @@ function App() {
                 books={books}
                 currentUser={currentUser}
                 onUpdate={loadUserBooks}
-                onError={setToast}
                 booksStatus={booksStatus}
               />
             }

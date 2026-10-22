@@ -193,6 +193,17 @@ const es = {
         motivation: 'La motivación de hoy',
         quickAccess: 'Acceso rápido',
         cozy: 'Solo un capítulo más...',
+        welcomeBack: 'Hola de nuevo, {{name}}',
+        feedTabs: {
+            'for-you': 'Para ti',
+            following: 'Siguiendo',
+            recent: 'Recientes',
+        },
+        feedEmpty: {
+            'for-you': 'Todavía no hay nada aquí. ¡Cuenta qué estás leyendo!',
+            following: 'Las personas que sigues aún no han compartido nada.',
+            recent: 'La comunidad está tranquila por ahora.',
+        },
     },
     reading: {
         title: 'Leyendo ahora',

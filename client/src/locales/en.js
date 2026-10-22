@@ -193,6 +193,17 @@ const en = {
         motivation: "Today's motivation",
         quickAccess: 'Quick access',
         cozy: 'Just one more chapter...',
+        welcomeBack: 'Welcome back, {{name}}',
+        feedTabs: {
+            'for-you': 'For you',
+            following: 'Following',
+            recent: 'Recent',
+        },
+        feedEmpty: {
+            'for-you': 'Nothing here yet. Share what you are reading!',
+            following: "The people you follow haven't shared anything yet.",
+            recent: 'The community is quiet for now.',
+        },
     },
     reading: {
         title: 'Currently Reading',
