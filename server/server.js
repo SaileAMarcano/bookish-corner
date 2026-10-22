@@ -711,6 +711,102 @@ app.get('/api/posts', requireAuth, async (req, res) => {
     res.json(posts);
 });
 
+const FEED_TABS = ['for-you', 'following', 'recent'];
+const FEED_PAGE_SIZE = 20;
+
+const ACTIVITY_DATE = `CASE WHEN ub.status = 'finished' THEN COALESCE(ub.finished_at, ub.created_at)
+                            ELSE COALESCE(ub.last_read_at, ub.started_at, ub.created_at) END`;
+
+const FEED_ORDER = {
+    'for-you': `(CASE WHEN i.from_followed THEN 3 ELSE 0 END
+                + CASE WHEN i.followed_tag THEN 2 ELSE 0 END
+                + LEAST(i.buzz, 10) * 0.3
+                - EXTRACT(EPOCH FROM now() - i.happened_at) / 86400 * 0.5) DESC, i.happened_at DESC`,
+    following: 'i.happened_at DESC',
+    recent: 'i.happened_at DESC',
+};
+
+async function findActivity(req, ids) {
+    return query(`
+        SELECT ub.id, ub.status, ub.rating, ub.review, ub.current_page, ub.total_pages, ub.progress_note,
+               CASE WHEN ub.status = 'finished' THEN 'finished'
+                    WHEN COALESCE(ub.current_page, 0) > 0 OR ub.progress > 0 THEN 'progress'
+                    ELSE 'started'
+               END AS kind,
+               CASE WHEN ub.total_pages > 0
+                    THEN LEAST(100, ROUND(COALESCE(ub.current_page, 0) * 100.0 / ub.total_pages))
+                    ELSE ub.progress
+               END AS progress,
+               ${ACTIVITY_DATE} AS happened_at,
+               w.id AS book_id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
+               u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id) AS like_count,
+               (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id) AS comment_count,
+               EXISTS (SELECT 1 FROM likes l WHERE l.user_book_id = ub.id AND l.user_id = $3) AS has_liked
+        FROM user_books ub
+        JOIN works w ON w.id = ub.work_id
+        ${JOIN_TRANSLATION} = $2
+        JOIN users u ON u.id = ub.user_id
+        WHERE ub.id = ANY($1)
+    `, [ids, languageOf(req), req.session.user.id]);
+}
+
+app.get('/api/feed', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    const tab = FEED_TABS.includes(req.query.tab) ? req.query.tab : 'for-you';
+    const page = Math.max(0, parseInt(req.query.page, 10) || 0);
+    const onlyFollowed = tab === 'following' ? 'WHERE i.from_followed' : '';
+
+    const items = await query(`
+        WITH items AS (
+            SELECT 'post' AS type, p.id, p.user_id, p.created_at AS happened_at,
+                   (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id)
+                     + (SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id) AS buzz,
+                   EXISTS (
+                       SELECT 1 FROM post_tags pt
+                       JOIN tag_follows tf ON tf.tag_id = pt.tag_id
+                       WHERE pt.post_id = p.id AND tf.user_id = $1
+                   ) AS followed_tag
+            FROM posts p
+            UNION ALL
+            SELECT 'activity', ub.id, ub.user_id, ${ACTIVITY_DATE},
+                   (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id)
+                     + (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id),
+                   false
+            FROM user_books ub
+            WHERE ub.status IN ('reading', 'finished')
+        ),
+        marked AS (
+            SELECT items.*,
+                   (items.user_id = $1 OR EXISTS (
+                       SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.following_id = items.user_id
+                   )) AS from_followed
+            FROM items
+        )
+        SELECT i.type, i.id
+        FROM marked i
+        ${onlyFollowed}
+        ORDER BY ${FEED_ORDER[tab]}, i.id DESC
+        LIMIT $2 OFFSET $3
+    `, [userId, FEED_PAGE_SIZE, page * FEED_PAGE_SIZE]);
+
+    const postIds = items.filter((item) => item.type === 'post').map((item) => item.id);
+    const activityIds = items.filter((item) => item.type === 'activity').map((item) => item.id);
+    const [posts, activity] = await Promise.all([
+        postIds.length > 0 ? findPosts(req, 'p.id = ANY($1)', postIds) : [],
+        activityIds.length > 0 ? findActivity(req, activityIds) : [],
+    ]);
+
+    const found = new Map();
+    posts.forEach((post) => found.set(`post-${post.id}`, { type: 'post', ...post }));
+    activity.forEach((entry) => found.set(`activity-${entry.id}`, { type: 'activity', ...entry }));
+
+    res.json({
+        items: items.map((item) => found.get(`${item.type}-${item.id}`)).filter(Boolean),
+        hasMore: items.length === FEED_PAGE_SIZE,
+    });
+});
+
 app.get('/api/tags', requireAuth, async (req, res) => {
     const slug = slugify(String(req.query.q ?? ''));
     if (slug === '') {
