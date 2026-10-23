@@ -728,7 +728,7 @@ const FEED_ORDER = {
 
 async function findActivity(req, ids) {
     return query(`
-        SELECT ub.id, ub.status, ub.rating, ub.review, ub.current_page, ub.total_pages, ub.progress_note,
+        SELECT ub.id, ub.user_id, ub.status, ub.rating, ub.review, ub.current_page, ub.total_pages, ub.progress_note,
                CASE WHEN ub.status = 'finished' THEN 'finished'
                     WHEN COALESCE(ub.current_page, 0) > 0 OR ub.progress > 0 THEN 'progress'
                     ELSE 'started'

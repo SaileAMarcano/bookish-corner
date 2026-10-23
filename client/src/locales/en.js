@@ -205,6 +205,12 @@ const en = {
             recent: 'The community is quiet for now.',
         },
     },
+    activity: {
+        finished: 'Finished a book',
+        progress: 'Updated their progress',
+        started: 'Started reading',
+        page: 'Page {{page}}',
+    },
     reading: {
         title: 'Currently Reading',
         lead: "The books you're reading right now.",

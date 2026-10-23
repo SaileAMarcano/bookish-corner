@@ -7039,3 +7039,118 @@ a.comment-author:hover {
   flex-shrink: 0;
   padding: 14px 22px;
 }
+
+.activity-kind {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.activity-kind svg {
+  color: var(--sage-text);
+}
+
+.activity-book {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.activity-cover-link {
+  display: block;
+}
+
+.activity-cover {
+  display: block;
+  width: 84px;
+  height: 126px;
+  border-radius: 6px;
+  object-fit: cover;
+  box-shadow: 0 3px 8px rgb(58 54 42 / 18%);
+}
+
+.activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.activity-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.activity-title:hover {
+  color: var(--rose-deep);
+}
+
+.activity-author,
+.activity-pages {
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.activity-info .star-rating {
+  gap: 2px;
+}
+
+.activity-info .star-fill svg {
+  fill: var(--rose);
+  stroke: var(--rose-deep);
+}
+
+.activity-info .star-empty svg {
+  stroke: var(--rose);
+}
+
+.activity-text {
+  display: -webkit-box;
+  margin: 6px 0 0;
+  overflow: hidden;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--ink);
+  line-clamp: 4;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+.activity-note {
+  padding-left: 12px;
+  border-left: 3px solid var(--rose-soft);
+  font-style: italic;
+}
+
+.activity-progress .progress-track {
+  max-width: none;
+  background: var(--surface-2);
+}
+
+.activity-progress .progress-fill {
+  background: var(--sage);
+}
+
+.activity-card button.post-action:disabled {
+  background: none;
+  color: var(--text-2);
+  cursor: default;
+}
+
+@media (max-width: 600px) {
+  .activity-book {
+    gap: 14px;
+  }
+
+  .activity-cover {
+    width: 64px;
+    height: 96px;
+  }
+}

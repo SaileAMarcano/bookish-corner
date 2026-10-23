@@ -9,6 +9,7 @@ import Notice from './Notice';
 import BookCover from './BookCover';
 import PostComposer from './PostComposer';
 import PostCard from './PostCard';
+import ActivityCard from './ActivityCard';
 
 const FEED_TABS = ['for-you', 'following', 'recent'];
 
@@ -85,6 +86,12 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
         setFeed((current) => current.filter((item) => !(item.type === 'post' && item.id === postId)));
     };
 
+    const handleActivityChange = (activityId, changes) => {
+        setFeed((current) =>
+            current.map((item) => (item.type === 'activity' && item.id === activityId ? { ...item, ...changes } : item))
+        );
+    };
+
     const readingBooks = books.filter((book) => book.status === 'reading');
     const continueBook = sortByLastRead(readingBooks)[0];
     const [selectedId, setSelectedId] = useState(null);
@@ -100,11 +107,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
     return (
         <main className="page home">
             <div className="home-main">
-                <section className="home-hero">
-                    <div className="display home-hero-welcome">{t('home.welcome', { name: currentUser.displayName })}</div>
-                    <h1 className="display home-hero-title">{t('home.heroLine1')}<br />{t('home.heroLine2')}</h1>
-                    <p className="home-hero-text">{t('home.heroText')}</p>
-                </section>
+                <h1 className="display home-welcome">{t('home.welcomeBack', { name: currentUser.displayName })}</h1>
 
                 <section className="home-section">
                     <div className="home-section-head">
@@ -117,8 +120,8 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                     ) : (
                         emptyMessage && <div className="card home-empty">{emptyMessage}</div>
                     )}
-
                 </section>
+
                 <section className="post-list home-feed">
                     <PostComposer books={books} onCreated={handlePostCreated} />
 
@@ -147,13 +150,20 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                     )}
 
                     {feed && feed.map((item) =>
-                        item.type === 'post' && (
+                        item.type === 'post' ? (
                             <PostCard
                                 key={`post-${item.id}`}
                                 post={item}
                                 currentUserId={currentUser.id}
                                 onChange={handlePostChange}
                                 onDeleted={handlePostDeleted}
+                            />
+                        ) : (
+                            <ActivityCard
+                                key={`activity-${item.id}`}
+                                activity={item}
+                                currentUserId={currentUser.id}
+                                onChange={handleActivityChange}
                             />
                         )
                     )}

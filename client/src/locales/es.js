@@ -205,6 +205,12 @@ const es = {
             recent: 'La comunidad está tranquila por ahora.',
         },
     },
+    activity: {
+        finished: 'Terminó un libro',
+        progress: 'Actualizó su progreso',
+        started: 'Empezó a leer',
+        page: 'Página {{page}}',
+    },
     reading: {
         title: 'Leyendo ahora',
         lead: 'Los libros que estás leyendo en este momento.',
