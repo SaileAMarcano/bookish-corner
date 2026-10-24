@@ -71,7 +71,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
 
         apiFetch(`/api/feed?tab=${feedTab}`)
             .then((data) => {
-                if (!ignore) return;
+                if (ignore) return;
                 setFeed(data.items);
                 setHasMore(data.hasMore);
             })
@@ -104,7 +104,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
             })
             .catch((error) => setMoreError(error.message))
             .finally(() => setIsLoadingMore(false));
-    }
+    };
 
     const handlePostCreated = (post) => {
         setFeed((current) => [{ type: 'post', ...post }, ...(current || [])]);
@@ -199,7 +199,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                     {moreError && <Notice message={moreError} onRetry={handleLoadMore} />}
 
                     {feed && hasMore && !moreError && (
-                        <button type="button" className="ghost-button home-load-more" onClick={handleLoadMore} disable={isLoadingMore}>
+                        <button type="button" className="ghost-button home-load-more" onClick={handleLoadMore} disabled={isLoadingMore}>
                             {isLoadingMore ? t('home.loadingMore') : t('home.loadMore')}
                         </button>
                     )}

@@ -209,9 +209,9 @@ const es = {
             'for-you': 'Todavía no hay nada aquí. ¡Cuenta qué estás leyendo!',
             following: 'Las personas que sigues aún no han compartido nada.',
             recent: 'La comunidad está tranquila por ahora.',
-            loadMore: 'Cargar más',
-            loadingMore: 'Cargando...',
         },
+        loadMore: 'Cargar más',
+        loadingMore: 'Cargando...',
     },
     activity: {
         finished: 'Terminó un libro',
