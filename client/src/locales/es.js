@@ -193,6 +193,12 @@ const es = {
         motivation: 'La motivación de hoy',
         quickAccess: 'Acceso rápido',
         cozy: 'Solo un capítulo más...',
+        popularTags: 'Etiquetas populares',
+        seeAllTags: 'Ver todas las etiquetas',
+        noTags: 'Todavía no hay etiquetas.',
+        readersYouFollow: 'Personas que sigues',
+        seeAllFollowing: 'Ver a todas las personas que sigues',
+        noFollowing: 'Todavía no sigues a nadie.',
         welcomeBack: 'Hola de nuevo, {{name}}',
         feedTabs: {
             'for-you': 'Para ti',

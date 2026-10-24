@@ -3,23 +3,15 @@ import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import Icon from './Icon';
 import SimilarReaders from './SimilarReaders';
+import ReadingChallenge from './ReadingChallenge';
 import { pagePercent, sortByLastRead } from './utils';
 
-const RING_RADIUS = 34;
-const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 const FAVORITES_SHOWN = 5;
 
 function ProfileSide({ books, readingGoal, isMe, username }) {
     const { t } = useTranslation();
 
     const reading = sortByLastRead(books.filter((book) => book.status === 'reading')).slice(0, 2);
-
-    const thisYear = new Date().getFullYear();
-    const finishedThisYear = books.filter(
-        (book) => book.status === 'finished' && book.finishedAt?.startsWith(String(thisYear))
-    ).length;
-    const goalPercent = readingGoal ? Math.min(100, Math.round((finishedThisYear * 100) / readingGoal)) : 0;
-
     const favorites = books.filter((book) => book.isFavorite).slice(0, FAVORITES_SHOWN);
 
     return (
@@ -61,43 +53,7 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
                 })}
             </section>
 
-            <section className="card profile-side-card">
-                <h3 className="display profile-side-title">{t('profileSide.challenge', { year: thisYear })}</h3>
-
-                {readingGoal ? (
-                    <div className="challenge">
-                        <svg className="challenge-ring" width="88" height="88" viewBox="0 0 80 80" aria-hidden="true">
-                            <circle className="challenge-ring-track" cx="40" cy="40" r={RING_RADIUS} />
-                            <circle
-                                className="challenge-ring-fill"
-                                cx="40"
-                                cy="40"
-                                r={RING_RADIUS}
-                                strokeDasharray={RING_LENGTH}
-                                strokeDashoffset={RING_LENGTH * (1 - goalPercent / 100)}
-                                transform="rotate(-90 40 40)"
-                            />
-                            <text className="challenge-ring-number" x="40" y="42" textAnchor="middle">{finishedThisYear}</text>
-                            <text className="challenge-ring-text" x="40" y="55" textAnchor="middle">
-                                {t('profileSide.ofBooks', { goal: readingGoal })}
-                            </text>
-                        </svg>
-
-                        <div className="challenge-info">
-                            <div className="challenge-count">{t('profileSide.percentDone', { percent: goalPercent })}</div>
-                            <div className="progress">
-                                <div className="progress-track">
-                                    <div className="progress-fill" style={{ width: `${goalPercent}%` }}></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                ) : isMe ? (
-                    <Link to="/profile/edit" className="home-goal-link">{t('home.setGoal')}</Link>
-                ) : (
-                    <p className="profile-about-empty">{t('profileSide.noGoal')}</p>
-                )}
-            </section>
+            <ReadingChallenge books={books} readingGoal={readingGoal} isMe={isMe} />
 
             <section className="card profile-side-card">
                 <div className="profile-side-head">

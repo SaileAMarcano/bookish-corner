@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
-import { timeAgo, quoteOfTheDay, sortByLastRead, pageSummary, nightstandMessage } from './utils';
+import { timeAgo, sortByLastRead, pageSummary, nightstandMessage } from './utils';
 import { apiFetch } from './api';
 import BookModal from './BookModal';
 import Notice from './Notice';
@@ -10,6 +10,7 @@ import BookCover from './BookCover';
 import PostComposer from './PostComposer';
 import PostCard from './PostCard';
 import ActivityCard from './ActivityCard';
+import HomeSide from './HomeSide';
 
 const FEED_TABS = ['for-you', 'following', 'recent'];
 
@@ -96,12 +97,6 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
     const continueBook = sortByLastRead(readingBooks)[0];
     const [selectedId, setSelectedId] = useState(null);
     const selectedBook = books.find((book) => book.id === selectedId);
-    const thisYear = String(new Date().getFullYear());
-    const booksThisYear = books.filter(
-        (book) => book.status === 'finished' && book.finishedAt?.startsWith(thisYear)).length;
-    const goal = currentUser.readingGoal;
-    const goalPercent = goal ? Math.min(100, Math.round((booksThisYear * 100) / goal)) : 0;
-    const quote = quoteOfTheDay();
     const emptyMessage = nightstandMessage(booksStatus, books);
 
     return (
@@ -170,43 +165,8 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                 </section>
             </div>
 
-            <aside className="home-side">
-                <div className="card home-card">
-                    <div className="home-card-head">
-                        <Icon name="reading" size={18} />
-                        <h3 className="display home-card-title">{t('home.currentGoal')}</h3>
-                    </div>
+            <HomeSide books={books} currentUser={currentUser} />
 
-                    {goal ? (
-                        <>
-                            <div className="progress">
-                                <div className="progress-track">
-                                    <div className="progress-fill" style={{ width: `${goalPercent}%` }}></div>
-                                </div>
-                                <div className="progress-label">{booksThisYear}/{goal}</div>
-                            </div>
-                            <div className="home-muted">{t('home.booksThisYear')}</div>
-                        </>
-                    ) : (
-                        <Link to="/profile/edit" className="home-goal-link">{t('home.setGoal')}</Link>
-                    )}
-
-                    <div className="home-note">
-                        <Icon name="sparkle" size={14} />
-                        {t('home.smallSteps')}
-                    </div>
-                </div>
-
-                <div className="card home-card">
-                    <div className="home-card-head">
-                        <Icon name="sparkle" size={18} />
-                        <h3 className="display home-card-title">{t('home.motivation')}</h3>
-                    </div>
-                    <p className="display home-quote">"{quote.text}"</p>
-                    <div className="home-muted">— {quote.author}</div>
-                </div>
-
-            </aside>
             {selectedBook && (<BookModal book={selectedBook} onClose={() => setSelectedId(null)}
                 onUpdate={onUpdate}
             />

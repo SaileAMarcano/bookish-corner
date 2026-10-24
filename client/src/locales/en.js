@@ -193,6 +193,12 @@ const en = {
         motivation: "Today's motivation",
         quickAccess: 'Quick access',
         cozy: 'Just one more chapter...',
+        popularTags: 'Popular tags',
+        seeAllTags: 'See all tags',
+        noTags: 'No tags yet.',
+        readersYouFollow: 'Readers you follow',
+        seeAllFollowing: 'See everyone you follow',
+        noFollowing: "You don't follow anyone yet.",
         welcomeBack: 'Welcome back, {{name}}',
         feedTabs: {
             'for-you': 'For you',

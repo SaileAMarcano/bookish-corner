@@ -7154,3 +7154,43 @@ a.comment-author:hover {
     height: 96px;
   }
 }
+
+.home-side-tags {
+  margin-bottom: 0;
+}
+
+.home-readers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.home-reader {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.home-reader:hover .search-title {
+  color: var(--rose-deep);
+}
+
+.home-reader-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.home-reader-bio {
+  overflow: hidden;
+  font-size: 13px;
+  color: var(--text-2);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}

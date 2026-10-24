@@ -1221,7 +1221,7 @@ app.get('/api/users/:username/following', requireAuth, async (req, res) => {
     }
 
     const people = await query(`
-        SELECT u.id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+        SELECT u.id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url, u.bio,
                EXISTS (SELECT 1 FROM follows mine WHERE mine.follower_id = $2 AND mine.following_id = u.id) AS is_following
         FROM follows f
         JOIN users u ON u.id = f.following_id
