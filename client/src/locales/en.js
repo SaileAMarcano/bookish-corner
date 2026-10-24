@@ -209,6 +209,8 @@ const en = {
             'for-you': 'Nothing here yet. Share what you are reading!',
             following: "The people you follow haven't shared anything yet.",
             recent: 'The community is quiet for now.',
+            loadMore: 'Load more',
+            loadingMore: 'Loading...',
         },
     },
     activity: {

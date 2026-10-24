@@ -7194,3 +7194,18 @@ a.comment-author:hover {
   white-space: nowrap;
   text-overflow: ellipsis;
 }
+
+.home-load-more {
+  align-self: center;
+  padding: 10px 28px;
+  font-size: 14px;
+}
+
+.home-load-more:hover:not(:disabled) {
+  background: var(--rose-soft);
+}
+
+.home-load-more:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

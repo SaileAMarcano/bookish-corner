@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
@@ -54,15 +54,26 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
     const [feed, setFeed] = useState(null);
     const [feedError, setFeedError] = useState('');
     const [reloadCount, setReloadCount] = useState(0);
+    const [page, setPage] = useState(0);
+    const [hasMore, setHasMore] = useState(false);
+    const [isLoadingMore, setIsLoadingMore] = useState(false);
+    const [moreError, setMoreError] = useState('');
+    const tabRef = useRef(feedTab);
 
     useEffect(() => {
         let ignore = false;
+        tabRef.current = feedTab;
         setFeed(null);
         setFeedError('');
+        setPage(0);
+        setHasMore(false);
+        setMoreError('');
 
         apiFetch(`/api/feed?tab=${feedTab}`)
             .then((data) => {
-                if (!ignore) setFeed(data.items);
+                if (!ignore) return;
+                setFeed(data.items);
+                setHasMore(data.hasMore);
             })
             .catch((error) => {
                 if (!ignore) setFeedError(error.message);
@@ -72,6 +83,28 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
             ignore = true;
         };
     }, [feedTab, i18n.language, reloadCount]);
+
+    const handleLoadMore = () => {
+        const tab = feedTab;
+        const nextPage = page + 1;
+        setIsLoadingMore(true);
+        setMoreError('');
+
+        apiFetch(`/api/feed?tab=${tab}&page=${nextPage}`)
+            .then((data) => {
+                if (tabRef.current !== tab) return;
+
+                setFeed((current) => {
+                    const shown = new Set(current.map((item) => `${item.type}-${item.id}`));
+                    const newItems = data.items.filter((item) => !shown.has(`${item.type}-${item.id}`));
+                    return [...current, ...newItems];
+                });
+                setPage(nextPage);
+                setHasMore(data.hasMore);
+            })
+            .catch((error) => setMoreError(error.message))
+            .finally(() => setIsLoadingMore(false));
+    }
 
     const handlePostCreated = (post) => {
         setFeed((current) => [{ type: 'post', ...post }, ...(current || [])]);
@@ -162,6 +195,15 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                             />
                         )
                     )}
+
+                    {moreError && <Notice message={moreError} onRetry={handleLoadMore} />}
+
+                    {feed && hasMore && !moreError && (
+                        <button type="button" className="ghost-button home-load-more" onClick={handleLoadMore} disable={isLoadingMore}>
+                            {isLoadingMore ? t('home.loadingMore') : t('home.loadMore')}
+                        </button>
+                    )}
+
                 </section>
             </div>
 
