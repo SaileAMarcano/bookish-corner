@@ -45,6 +45,10 @@ const es = {
         about: 'Sobre mí',
         tags: 'Etiquetas',
         genres: 'Géneros',
+        lists: 'Listas',
+        profile: 'Perfil',
+        settings: 'Configuración',
+        tagline: 'Buenos libros. Días más amables.',
     },
     public: {
         home: 'Inicio',

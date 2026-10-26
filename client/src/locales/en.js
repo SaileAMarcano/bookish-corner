@@ -45,6 +45,10 @@ const en = {
         about: 'About me',
         tags: 'Tags',
         genres: 'Genres',
+        lists: 'Lists',
+        profile: 'Profile',
+        settings: 'Settings',
+        tagline: 'Good books. Kinder days.',
     },
     public: {
         home: 'Home',

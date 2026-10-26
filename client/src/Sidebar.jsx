@@ -5,12 +5,14 @@ import Icon from './Icon';
 const NAV_ITEMS = [
     { to: '/', label: 'nav.home', icon: 'home' },
     { to: '/reading', label: 'nav.reading', icon: 'reading' },
+    { to: '/library', label: 'nav.library', icon: 'library' },
+    { to: '/profile?tab=lists', label: 'nav.lists', icon: 'lists', hideOnPhone: true },
     { to: '/tags', label: 'nav.tags', icon: 'tag' },
     { to: '/genres', label: 'nav.genres', icon: 'genres' },
-    { to: '/library', label: 'nav.library', icon: 'library' },
-    { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
+    { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews', hideOnPhone: true },
     { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },
     { to: '/profile?tab=following', label: 'nav.following', icon: 'following' },
+    { to: '/profile?tab=posts', label: 'nav.profile', icon: 'about' },
 ];
 
 function isActive(item, location) {
@@ -23,27 +25,35 @@ function isActive(item, location) {
     return query === `tab=${tab}`;
 }
 
-function Sidebar() {
+function Sidebar({ readingCount }) {
     const location = useLocation();
     const { t } = useTranslation();
+    const settingsActive = location.pathname === '/profile/edit';
 
     return (
         <aside className="sidebar">
-            <Link to="/" className="sidebar-logo">
-                <Icon name="library" size={30} />
-                <span className="display">Bookish<br />Corner</span>
+            <Link to="/" className="sidebar-logo" aria-label="Bookish Corner">
+                <img className="sidebar-logo-image" src="/sidebar-illustration.png" alt="" />
+                <img className="sidebar-logo-mark" src="/logo-mark.png" alt="" />
+                <span className="display sidebar-logo-name">Bookish<br />Corner</span>
+                <span className="display sidebar-tagline">{t('nav.tagline')}</span>
             </Link>
 
             <nav className="sidebar-nav">
                 {NAV_ITEMS.map((item) => (
-                    <Link key={item.to} to={item.to} className={`sidebar-link ${isActive(item, location) ? 'active' : ''}`} aria-label={t(item.label)}>
+                    <Link key={item.to} to={item.to} className={`sidebar-link ${isActive(item, location) ? 'active' : ''} ${item.hideOnPhone ? 'phone-hidden' : ''}`} aria-label={t(item.label)}>
                         <Icon name={item.icon} size={20} />
                         <span className="sidebar-label">{t(item.label)}</span>
+                        {item.to === '/reading' && readingCount > 0 && <span className="sidebar-badge">{readingCount}</span>}
                     </Link>
                 ))}
             </nav>
 
-            <img className="sidebar-illustration" src="/sidebar-illustration.png" alt="" />
+            <hr className="sidebar-divider" />
+            <Link to="/profile/edit" className={`sidebar-link sidebar-settings ${settingsActive ? 'active' : ''}`} aria-label={t('nav-settings')}>
+                <Icon name="settings" size={20} />
+                <span className="sidebar-label">{t('nav.settings')}</span>
+            </Link>
         </aside>
     );
 }

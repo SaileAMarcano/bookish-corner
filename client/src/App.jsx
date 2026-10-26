@@ -243,7 +243,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar />
+      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} />
 
       <div className="app-main">
         <header className="topbar">
