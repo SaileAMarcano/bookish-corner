@@ -50,7 +50,7 @@ function Sidebar({ readingCount }) {
             </nav>
 
             <hr className="sidebar-divider" />
-            <Link to="/profile/edit" className={`sidebar-link sidebar-settings ${settingsActive ? 'active' : ''}`} aria-label={t('nav-settings')}>
+            <Link to="/profile/edit" className={`sidebar-link sidebar-settings ${settingsActive ? 'active' : ''}`} aria-label={t('nav.settings')}>
                 <Icon name="settings" size={20} />
                 <span className="sidebar-label">{t('nav.settings')}</span>
             </Link>
