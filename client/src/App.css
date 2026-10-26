@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
   --bg: #F4EDE0;
@@ -6849,13 +6849,6 @@ a.comment-author:hover {
   .progress-panel {
     padding: 28px 20px 34px 42px;
   }
-}
-
-.home-welcome {
-  margin: 0;
-  font-size: clamp(2.2rem, 4.5vw, 3.2rem);
-  font-style: italic;
-  font-weight: 500;
 }
 
 .home-feed {

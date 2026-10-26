@@ -135,8 +135,6 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
     return (
         <main className="page home">
             <div className="home-main">
-                <h1 className="display home-welcome">{t('home.welcomeBack', { name: currentUser.displayName })}</h1>
-
                 <section className="home-section">
                     <div className="home-section-head">
                         <h2 className="display home-section-title">{t('home.continueReading')}</h2>

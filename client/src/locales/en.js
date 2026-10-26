@@ -188,7 +188,6 @@ const en = {
         readersYouFollow: 'Readers you follow',
         seeAllFollowing: 'See everyone you follow',
         noFollowing: "You don't follow anyone yet.",
-        welcomeBack: 'Welcome back, {{name}}',
         feedTabs: {
             'for-you': 'For you',
             following: 'Following',
