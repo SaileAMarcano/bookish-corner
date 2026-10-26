@@ -5,6 +5,8 @@ import BookCover from './BookCover';
 import Notice from './Notice';
 import TagInput from './TagInput';
 import { apiFetch } from './api';
+import SpotifyPlayer from './SpotifyPlayer';
+import { spotifyEmbed } from './utils';
 
 const TEXT_MAX = 2000;
 const BOOKS_MAX = 4;
@@ -20,13 +22,17 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
     );
     const [tags, setTags] = useState(post ? post.tags.map((tag) => tag.name) : []);
     const [isSpoiler, setIsSpoiler] = useState(post?.isSpoiler || false);
+    const [spotifyUrl, setSpotifyUrl] = useState(post?.spotifyUrl || '');
+    const [spotifyOpen, setSpotifyOpen] = useState(Boolean(post?.spotifyUrl));
     const [pickerOpen, setPickerOpen] = useState(false);
     const [filter, setFilter] = useState('');
     const [error, setError] = useState('');
     const [isSending, setIsSending] = useState(false);
 
-    const hasContent = text.trim() !== '' || imagePreview !== '' || chosenBooks.length > 0;
-    const canSend = hasContent && !isSending;
+    const hasMusic = spotifyEmbed(spotifyUrl) !== null;
+    const spotifyInvalid = spotifyUrl.trim() !== '' && !hasMusic;
+    const hasContent = text.trim() !== '' || imagePreview !== '' || chosenBooks.length > 0 || hasMusic;
+    const canSend = hasContent && !spotifyInvalid && !isSending;
 
     const handleImage = (e) => {
         const file = e.target.files[0];
@@ -62,6 +68,11 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
         }
     };
 
+    const toggleSpotify = () => {
+        if (spotifyOpen) setSpotifyUrl('');
+        setSpotifyOpen(!spotifyOpen);
+    };
+
     const removeBook = (bookId) => {
         setChosenBooks(chosenBooks.filter((book) => book.bookId !== bookId));
     };
@@ -74,6 +85,8 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
         setChosenBooks([]);
         setTags([]);
         setIsSpoiler(false);
+        setSpotifyUrl('');
+        setSpotifyOpen(false);
         setPickerOpen(false);
         setFilter('');
     };
@@ -87,6 +100,7 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
         formData.append('bookIds', chosenIds.join(','));
         formData.append('tags', tags.join(','));
         formData.append('isSpoiler', isSpoiler);
+        formData.append('spotifyUrl', spotifyUrl.trim());
         if (imageFile) {
             formData.append('image', imageFile);
         }
@@ -158,6 +172,22 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
             )}
 
             <TagInput tags={tags} onChange={setTags} />
+
+            {spotifyOpen && (
+                <div className="post-spotify-field">
+                    <input
+                        className="post-picker-input"
+                        type="url"
+                        value={spotifyUrl}
+                        onChange={(e) => setSpotifyUrl(e.target.value)}
+                        placeholder={t('posts.spotifyPlaceholder')}
+                        aria-label={t('posts.spotifyPlaceholder')}
+                    />
+                    {spotifyInvalid && <p className="post-spotify-hint">{t('posts.spotifyHint')}</p>}
+                    <SpotifyPlayer url={spotifyUrl} />
+                </div>
+            )}
+
             {pickerOpen && (
                 <div className="post-picker">
                     <input
@@ -206,6 +236,16 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
                 >
                     <Icon name="library" />
                     {t('posts.book')} ({chosenBooks.length}/{BOOKS_MAX})
+                </button>
+
+                <button
+                    type="button"
+                    className={`post-tool ${spotifyOpen ? 'active' : ''}`}
+                    onClick={toggleSpotify}
+                    aria-expanded={spotifyOpen}
+                >
+                    <Icon name="music" />
+                    {t('posts.spotify')}
                 </button>
 
                 <button

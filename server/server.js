@@ -605,7 +605,7 @@ async function findOrCreateTags(client, tags) {
 
 async function findPosts(req, condition, value) {
     return query(`
-        SELECT p.id, p.text, p.image_url, p.is_spoiler, p.created_at, p.edited_at,
+        SELECT p.id, p.text, p.image_url, p.is_spoiler, p.spotify_url, p.created_at, p.edited_at,
                u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
                COALESCE(u.pinned_post_id = p.id, false) AS is_pinned,
                (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
@@ -635,6 +635,17 @@ async function findPosts(req, condition, value) {
         WHERE ${condition}
         ORDER BY p.created_at DESC
     `, [value, req.session.user.id, languageOf(req)]);
+}
+
+const SPOTIFY_LINK = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(track|album|playlist)\/([A-Za-z0-9]{22})(?:[/?#].*)?$/;
+
+function cleanSpotifyUrl(value) {
+    const link = String(value ?? '').trim();
+    if (link === '') return null;
+
+    const match = link.match(SPOTIFY_LINK);
+    if (!match) return undefined;
+    return `https://open.spotify.com/${match[1]}/${match[2]}`;
 }
 
 function postProblem(text, bookIds, tags) {
@@ -668,7 +679,12 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
     const tags = parseTags(req.body.tags);
     const isSpoiler = req.body.isSpoiler === 'true';
 
-    if (!text && bookIds.length === 0 && !req.file) {
+    const spotifyUrl = cleanSpotifyUrl(req.body.spotifyUrl);
+
+    if (spotifyUrl === undefined) {
+        return res.status(400).json({ error: msg(req, 'spotifyInvalid') });
+    }
+    if (!text && bookIds.length === 0 && !req.file && !spotifyUrl) {
         return res.status(400).json({ error: msg(req, 'postEmpty') });
     }
     const problem = postProblem(text, bookIds, tags);
@@ -685,8 +701,8 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
         await client.query('BEGIN');
 
         const result = await client.query(
-            'INSERT INTO posts (user_id, text, image_url, is_spoiler) VALUES ($1, $2, $3, $4) RETURNING id',
-            [req.session.user.id, text, imageUrl, isSpoiler]
+            'INSERT INTO posts (user_id, text, image_url, is_spoiler, spotify_url) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+            [req.session.user.id, text, imageUrl, isSpoiler, spotifyUrl]
         );
         postId = result.rows[0].id;
         await savePostLinks(client, postId, bookIds, tags);
@@ -1065,7 +1081,12 @@ app.patch('/api/posts/:id', requireAuth, upload.single('image'), async (req, res
     const isSpoiler = req.body.isSpoiler === 'true';
     const keepsImage = Boolean(post.imageUrl) && req.body.removeImage !== 'true';
 
-    if (!text && bookIds.length === 0 && !req.file && !keepsImage) {
+    const spotifyUrl = cleanSpotifyUrl(req.body.spotifyUrl);
+
+    if (spotifyUrl === undefined) {
+        return res.status(400).json({ error: msg(req, 'spotifyInvalid') });
+    }
+    if (!text && bookIds.length === 0 && !req.file && !keepsImage && !spotifyUrl) {
         return res.status(400).json({ error: msg(req, 'postEmpty') });
     }
     const problem = postProblem(text, bookIds, tags);
@@ -1082,8 +1103,8 @@ app.patch('/api/posts/:id', requireAuth, upload.single('image'), async (req, res
         await client.query('BEGIN');
 
         await client.query(
-            'UPDATE posts SET text = $1, image_url = $2, is_spoiler = $3, edited_at = now() WHERE id = $4',
-            [text, imageUrl, isSpoiler, post.id]
+            'UPDATE posts SET text = $1, image_url = $2, is_spoiler = $3, spotify_url = $4, edited_at = now() WHERE id = $5',
+            [text, imageUrl, isSpoiler, spotifyUrl, post.id]
         );
         await client.query('DELETE FROM post_books WHERE post_id = $1', [post.id]);
         await client.query('DELETE FROM post_tags WHERE post_id = $1', [post.id]);

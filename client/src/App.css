@@ -7266,3 +7266,27 @@ a.comment-author:hover {
 .post-composer-cancel+.post-composer-send {
   margin-left: 0;
 }
+
+.spotify-player {
+  display: block;
+  width: 100%;
+  margin-bottom: 14px;
+  border: none;
+  border-radius: 12px;
+}
+
+.post-spotify-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.post-spotify-field .spotify-player {
+  margin-bottom: 0;
+}
+
+.post-spotify-hint {
+  margin: 0;
+  font-size: 13px;
+  color: var(--error);
+}

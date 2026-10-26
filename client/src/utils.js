@@ -100,3 +100,9 @@ export function slugify(text) {
 export function pinnedFirst(posts) {
     return [...posts].sort((a, b) => Number(b.isPinned) - Number(a.isPinned));
 }
+
+export function spotifyEmbed(url) {
+    const match = /^https:\/\/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(track|album|playlist)\/([A-Za-z0-9]{22})/.exec(url || '');
+    if (!match) return null;
+    return { type: match[1], src: `https://open.spotify.com/embed/${match[1]}/${match[2]}` };
+}

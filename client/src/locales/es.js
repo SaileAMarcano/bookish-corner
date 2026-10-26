@@ -360,6 +360,10 @@ const es = {
         edited: 'editado',
         saveChanges: 'Guardar cambios',
         saving: 'Guardando…',
+        spotify: 'Spotify',
+        spotifyPlaceholder: 'Pega un enlace de Spotify (canción, álbum o playlist)',
+        spotifyHint: 'Ese enlace no es de una canción, un álbum o una playlist de Spotify.',
+        spotifyPlayer: 'Reproductor de Spotify',
     },
     bookPage: {
         loading: 'Cargando libro...',

@@ -104,7 +104,8 @@ CREATE TABLE posts (
     image_url  TEXT,
     is_spoiler BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-    edited_at TIMESTAMPTZ
+    edited_at TIMESTAMPTZ,
+    spotify_url TEXT
 );
 
 ALTER TABLE users ADD COLUMN pinned_post_id INTEGER REFERENCES posts (id) ON DELETE SET NULL;

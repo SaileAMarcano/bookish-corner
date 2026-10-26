@@ -360,6 +360,10 @@ const en = {
         edited: 'edited',
         saveChanges: 'Save changes',
         saving: 'Saving…',
+        spotify: 'Spotify',
+        spotifyPlaceholder: 'Paste a Spotify link (song, album or playlist)',
+        spotifyHint: 'That is not a Spotify link to a song, album or playlist.',
+        spotifyPlayer: 'Spotify player',
     },
     bookPage: {
         loading: 'Loading book...',

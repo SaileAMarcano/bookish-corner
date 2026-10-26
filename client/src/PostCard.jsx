@@ -6,6 +6,7 @@ import BookCover from './BookCover';
 import Notice from './Notice';
 import PostComments from './PostComments';
 import PostComposer from './PostComposer';
+import SpotifyPlayer from './SpotifyPlayer';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
@@ -183,6 +184,7 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                     )
                     }
 
+                    {post.spotifyUrl && <SpotifyPlayer url={post.spotifyUrl} />}
                     {error && <Notice message={error} />}
 
                     {
