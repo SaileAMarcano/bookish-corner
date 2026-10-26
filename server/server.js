@@ -117,21 +117,6 @@ app.get('/api/books', async (req, res) => {
     res.json(books);
 });
 
-app.get('/api/books/recent', requireAuth, async (req, res) => {
-    const books = await query(`
-        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
-               EXISTS (
-                   SELECT 1 FROM user_books
-                   WHERE user_books.work_id = w.id AND user_books.user_id = $1
-               ) AS in_library
-        FROM works w
-        ${JOIN_TRANSLATION} = $2
-        ORDER BY w.id DESC
-        LIMIT 12
-    `, [req.session.user.id, languageOf(req)]);
-    res.json(books);
-});
-
 app.get('/api/books/:id', requireAuth, async (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) {
