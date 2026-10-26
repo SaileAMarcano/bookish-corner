@@ -5432,7 +5432,15 @@ a.comment-author:hover {
 .profile-aside {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  padding: 0 22px;
+}
+
+.profile-aside>.profile-side-card {
+  padding: 22px 0 24px;
+}
+
+.profile-aside>.profile-side-card+.profile-side-card {
+  border-top: 1px solid var(--surface-2);
 }
 
 .profile-side-card {
@@ -5543,6 +5551,11 @@ a.comment-author:hover {
   .profile-aside {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 44px;
+  }
+
+  .profile-aside>.profile-side-card:nth-child(2) {
+    border-top: 0;
   }
 }
 

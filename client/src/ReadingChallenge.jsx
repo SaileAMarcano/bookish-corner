@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 const RING_RADIUS = 34;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 
-function ReadingChallenge({ books, readingGoal, isMe }) {
+function ReadingChallenge({ books, readingGoal, isMe, plain }) {
     const { t } = useTranslation();
 
     const thisYear = new Date().getFullYear();
@@ -14,7 +14,7 @@ function ReadingChallenge({ books, readingGoal, isMe }) {
     const goalPercent = readingGoal ? Math.min(100, Math.round((finishedThisYear * 100) / readingGoal)) : 0;
 
     return (
-        <section className="card profile-side-card">
+        <section className={plain ? 'profile-side-card' : 'card profile-side-card'}>
             <h3 className="display profile-side-title">{t('profileSide.challenge', { year: thisYear })}</h3>
 
             {readingGoal ? (

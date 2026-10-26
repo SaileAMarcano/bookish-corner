@@ -404,6 +404,7 @@ const en = {
         favorites: 'Favorite books',
         seeFavorites: 'See all favorite books',
         noFavoritesMine: 'Tap the heart on a book to add it here.',
+        seeReading: 'See everything you are reading',
         noFavorites: 'No favorite books yet.',
     },
     similar: {

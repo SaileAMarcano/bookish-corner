@@ -42,7 +42,7 @@ function SimilarReaders({ username }) {
     if (readers === null) return null;
 
     return (
-        <section className="card profile-side-card">
+        <section className="profile-side-card">
             <h3 className="display profile-side-title">{t('similar.title')}</h3>
 
             {readers.length === 0 && <p className="profile-about-empty">{t('similar.empty')}</p>}

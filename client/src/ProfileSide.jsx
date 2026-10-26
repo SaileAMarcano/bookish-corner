@@ -15,9 +15,18 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
     const favorites = books.filter((book) => book.isFavorite).slice(0, FAVORITES_SHOWN);
 
     return (
-        <aside className="profile-aside">
-            <section className="card profile-side-card">
-                <h3 className="display profile-side-title">{t('profileSide.readingNow')}</h3>
+        <aside className="card profile-aside">
+            <ReadingChallenge books={books} readingGoal={readingGoal} isMe={isMe} plain />
+
+            <section className="profile-side-card">
+                <div className="profile-side-head">
+                    <h3 className="display profile-side-title">{t('profileSide.readingNow')}</h3>
+                    {isMe && (
+                        <Link to="/reading" className="profile-side-more" aria-label={t('profileSide.seeReading')}>
+                            <Icon name="chevronRight" size={18} />
+                        </Link>
+                    )}
+                </div>
 
                 {reading.length === 0 && <p className="profile-about-empty">{t('profileSide.nothingReading')}</p>}
 
@@ -53,9 +62,7 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
                 })}
             </section>
 
-            <ReadingChallenge books={books} readingGoal={readingGoal} isMe={isMe} />
-
-            <section className="card profile-side-card">
+            <section className="profile-side-card">
                 <div className="profile-side-head">
                     <h3 className="display profile-side-title">{t('profileSide.favorites')}</h3>
                     {favorites.length > 0 && (
