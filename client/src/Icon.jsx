@@ -168,6 +168,7 @@ const ICONS = {
     ),
 
     chevronRight: <path d="M9 5l7 7-7 7" />,
+    chevronDown: <path d="M5 9l7 7 7-7" />,
 
     more: (
         <>

@@ -256,36 +256,50 @@ function App() {
             onError={setToast}
           />
 
-          <div className="header-user-wrap" ref={menuRef}>
-            <button className="header-user" onClick={() => setShowUserMenu(!showUserMenu)}>
-              <span className="header-user-name">{t('app.hi', { name: currentUser.displayName })}</span>
-              <span className="header-avatar">
-                <img
-                  src={getAvatarSrc(currentUser.avatarUrl)}
-                  alt=""
-                />
+          <div className="topbar-actions">
+            <LanguageSwitcher onChange={handleLanguageChange} />
+            <button type="button" className="theme-switch" role="switch" aria-checked={theme === 'dark'} aria-label={t('app.darkMode')} onClick={handleThemeToggle}>
+              <Icon name="sun" size={16} />
+              <span className='theme-switch-track'>
+                <span className="theme-switch-thumb"></span>
               </span>
+              <Icon name="moon" size={16} />
             </button>
 
-            {showUserMenu && (
-              <div className="header-menu">
-                <LanguageSwitcher onChange={handleLanguageChange} />
-                <button className="ghost-button theme-toggle" onClick={handleThemeToggle}>
-                  <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={14} />
-                  {theme === 'dark' ? t('app.lightMode') : t('app.darkMode')}
-                </button>
-                <Link
-                  to="/profile/edit"
-                  className="ghost-button"
-                  onClick={() => setShowUserMenu(false)}
-                >
-                  {t('app.editProfile')}
-                </Link>
-                <button className="ghost-button" onClick={handleLogout}>
-                  {t('app.logout')}
-                </button>
-              </div>
-            )}
+            <div className="header-user-wrap" ref={menuRef}>
+              <button
+                type="button"
+                className="header-user"
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                aria-expanded={showUserMenu}
+                aria-label={t('app.accountMenu')}>
+                <span className="header-avatar">
+                  <img src={getAvatarSrc(currentUser.avatarUrl)} alt="" />
+                </span>
+                <Icon name="chevronDown" size={16} />
+              </button>
+              {showUserMenu && (
+                <div className="header-menu">
+                  <div className="header-menu-extra">
+                    <LanguageSwitcher onChange={handleLanguageChange} />
+                    <button className="ghost-button theme-toggle" onClick={handleThemeToggle}>
+                      <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={14} />
+                      {theme === 'dark' ? t('app.lightMode') : t('app.darkMode')}
+                    </button>
+                  </div>
+                  <Link
+                    to="/profile/edit"
+                    className="ghost-button"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    {t('app.editProfile')}
+                  </Link>
+                  <button className="ghost-button" onClick={handleLogout}>
+                    {t('app.logout')}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 

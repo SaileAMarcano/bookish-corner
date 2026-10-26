@@ -4,12 +4,11 @@ import Icon from './Icon';
 import BookCover from './BookCover';
 import { apiFetch } from './api';
 
-const QUICK_LIMIT = 4;     // how many books the dropdown shows
-const MIN_LENGTH = 2;      // shorter searches wait
-const WAIT_MS = 350;       // pause after the last key before searching
+const QUICK_LIMIT = 4;
+const MIN_LENGTH = 2;
+const WAIT_MS = 350;
 
-// The search bar of the top bar, with "quick results" that drop down while you type.
-// "Search" / Enter (with nothing selected) / "See all" open the full results on the current page.
+
 function SearchBox({ q, books, onSubmit, onClear, onAdded, onError }) {
     const { t, i18n } = useTranslation();
     const [term, setTerm] = useState(q);
@@ -18,7 +17,6 @@ function SearchBox({ q, books, onSubmit, onClear, onAdded, onError }) {
     const [active, setActive] = useState(-1);
     const boxRef = useRef(null);
 
-    // When the URL search changes (Search, Clear, a book added...), the bar shows the same text.
     const [shownQ, setShownQ] = useState(q);
     if (q !== shownQ) {
         setShownQ(q);
@@ -29,7 +27,6 @@ function SearchBox({ q, books, onSubmit, onClear, onAdded, onError }) {
     const showDropdown = open && cleanTerm.length >= MIN_LENGTH;
     const isLoading = showDropdown && results.term !== cleanTerm;
 
-    // Debounce: wait until she stops typing, then ask for a few results.
     useEffect(() => {
         if (!open || cleanTerm.length < MIN_LENGTH) return;
 
@@ -50,7 +47,6 @@ function SearchBox({ q, books, onSubmit, onClear, onAdded, onError }) {
         };
     }, [cleanTerm, open, i18n.language]);
 
-    // Clicking anywhere outside the search closes the dropdown.
     useEffect(() => {
         if (!open) return;
 
@@ -68,7 +64,6 @@ function SearchBox({ q, books, onSubmit, onClear, onAdded, onError }) {
     const items = isLoading ? [] : results.items;
 
     const handleAdd = (book) => {
-        // Books from our catalog already have an id; the rest come from Open Library.
         const request = book.bookId
             ? apiFetch('/api/user-books', { method: 'POST', body: { bookId: book.bookId } })
             : apiFetch('/api/user-books/from-search', {
@@ -98,7 +93,6 @@ function SearchBox({ q, books, onSubmit, onClear, onAdded, onError }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Enter on a highlighted book adds it; otherwise it opens all the results.
         if (showDropdown && active >= 0 && items[active]) {
             if (!isAdded(items[active])) handleAdd(items[active]);
             return;
@@ -155,7 +149,6 @@ function SearchBox({ q, books, onSubmit, onClear, onAdded, onError }) {
                         </svg>
                     </button>
                 )}
-                <button type="submit" className="pill topbar-search-button">{t('app.search')}</button>
             </form>
 
             {showDropdown && (

@@ -34,7 +34,7 @@ function ProfileHeader({ profile, onShowFollows, children }) {
     };
 
     return (
-        <section className="card profile-header">
+        <section className="profile-header">
             <img className="profile-header-banner banner-light" src="/profile-banner-light.jpg" alt="" />
             <img className="profile-header-banner banner-dark" src="/profile-banner-dark.jpg" alt="" />
 
