@@ -38,7 +38,6 @@ const en = {
     },
     nav: {
         home: 'Home',
-
         reading: 'Currently Reading',
         library: 'My Library',
         reviews: 'Reviews',

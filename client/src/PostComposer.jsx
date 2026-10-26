@@ -25,7 +25,7 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
     const [error, setError] = useState('');
     const [isSending, setIsSending] = useState(false);
 
-    const hasContent = text.trim() !== '' || imageFile !== null || chosenBooks.length > 0;
+    const hasContent = text.trim() !== '' || imagePreview !== '' || chosenBooks.length > 0;
     const canSend = hasContent && !isSending;
 
     const handleImage = (e) => {
