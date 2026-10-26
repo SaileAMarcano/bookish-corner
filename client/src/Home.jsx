@@ -185,6 +185,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                                 currentUserId={currentUser.id}
                                 onChange={handlePostChange}
                                 onDeleted={handlePostDeleted}
+                                books={books}
                             />
                         ) : (
                             <ActivityCard

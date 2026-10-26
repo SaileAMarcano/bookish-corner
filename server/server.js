@@ -605,7 +605,7 @@ async function findOrCreateTags(client, tags) {
 
 async function findPosts(req, condition, value) {
     return query(`
-        SELECT p.id, p.text, p.image_url, p.is_spoiler, p.created_at,
+        SELECT p.id, p.text, p.image_url, p.is_spoiler, p.created_at, p.edited_at,
                u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
                COALESCE(u.pinned_post_id = p.id, false) AS is_pinned,
                (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
@@ -637,6 +637,31 @@ async function findPosts(req, condition, value) {
     `, [value, req.session.user.id, languageOf(req)]);
 }
 
+function postProblem(text, bookIds, tags) {
+    if (text && text.length > POST_MAX_LENGTH) return 'postTooLong';
+    if (bookIds.length > POST_MAX_BOOKS) return 'tooManyBooks';
+    if (tags.length > TAGS_MAX) return 'tooManyTags';
+    if (tags.some((tag) => tag.name.length > TAG_MAX_LENGTH)) return 'tagTooLong';
+    return null;
+}
+
+async function savePostLinks(client, postId, bookIds, tags) {
+    for (let i = 0; i < bookIds.length; i++) {
+        await client.query(
+            'INSERT INTO post_books (post_id, work_id, position) VALUES ($1, $2, $3)',
+            [postId, bookIds[i], i]
+        );
+    }
+
+    const tagIds = await findOrCreateTags(client, tags);
+    for (let i = 0; i < tagIds.length; i++) {
+        await client.query(
+            'INSERT INTO post_tags (post_id, tag_id, position) VALUES ($1, $2, $3)',
+            [postId, tagIds[i], i]
+        );
+    }
+}
+
 app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => {
     const text = req.body.text?.trim() || null;
     const bookIds = parseBookIds(req.body.bookIds);
@@ -646,17 +671,9 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
     if (!text && bookIds.length === 0 && !req.file) {
         return res.status(400).json({ error: msg(req, 'postEmpty') });
     }
-    if (text && text.length > POST_MAX_LENGTH) {
-        return res.status(400).json({ error: msg(req, 'postTooLong') });
-    }
-    if (bookIds.length > POST_MAX_BOOKS) {
-        return res.status(400).json({ error: msg(req, 'tooManyBooks') });
-    }
-    if (tags.length > TAGS_MAX) {
-        return res.status(400).json({ error: msg(req, 'tooManyTags') });
-    }
-    if (tags.some((tag) => tag.name.length > TAG_MAX_LENGTH)) {
-        return res.status(400).json({ error: msg(req, 'tagTooLong') });
+    const problem = postProblem(text, bookIds, tags);
+    if (problem) {
+        return res.status(400).json({ error: msg(req, problem) });
     }
 
     const imageUrl = req.file ? await uploadPostImage(req.file) : null;
@@ -672,21 +689,7 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
             [req.session.user.id, text, imageUrl, isSpoiler]
         );
         postId = result.rows[0].id;
-
-        for (let i = 0; i < bookIds.length; i++) {
-            await client.query(
-                'INSERT INTO post_books (post_id, work_id, position) VALUES ($1, $2, $3)',
-                [postId, bookIds[i], i]
-            );
-        }
-
-        const tagIds = await findOrCreateTags(client, tags);
-        for (let i = 0; i < tagIds.length; i++) {
-            await client.query(
-                'INSERT INTO post_tags (post_id, tag_id, position) VALUES ($1, $2, $3)',
-                [postId, tagIds[i], i]
-            );
-        }
+        await savePostLinks(client, postId, bookIds, tags);
 
         await client.query('COMMIT');
     } catch (error) {
@@ -1045,6 +1048,67 @@ app.delete('/api/posts/:id', requireAuth, async (req, res) => {
         await deletePostImage(post.imageUrl);
     }
     res.json({ message: 'Post deleted' });
+});
+
+app.patch('/api/posts/:id', requireAuth, upload.single('image'), async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+    if (post.userId !== req.session.user.id) {
+        return res.status(403).json({ error: msg(req, 'cannotEditPost') });
+    }
+
+    const text = req.body.text?.trim() || null;
+    const bookIds = parseBookIds(req.body.bookIds);
+    const tags = parseTags(req.body.tags);
+    const isSpoiler = req.body.isSpoiler === 'true';
+    const keepsImage = Boolean(post.imageUrl) && req.body.removeImage !== 'true';
+
+    if (!text && bookIds.length === 0 && !req.file && !keepsImage) {
+        return res.status(400).json({ error: msg(req, 'postEmpty') });
+    }
+    const problem = postProblem(text, bookIds, tags);
+    if (problem) {
+        return res.status(400).json({ error: msg(req, problem) });
+    }
+
+    const newImageUrl = req.file ? await uploadPostImage(req.file) : null;
+    const imageUrl = newImageUrl || (keepsImage ? post.imageUrl : null);
+
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        await client.query(
+            'UPDATE posts SET text = $1, image_url = $2, is_spoiler = $3, edited_at = now() WHERE id = $4',
+            [text, imageUrl, isSpoiler, post.id]
+        );
+        await client.query('DELETE FROM post_books WHERE post_id = $1', [post.id]);
+        await client.query('DELETE FROM post_tags WHERE post_id = $1', [post.id]);
+        await savePostLinks(client, post.id, bookIds, tags);
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        if (newImageUrl) {
+            await deletePostImage(newImageUrl);
+        }
+        if (error.code === '23503') {
+            return res.status(404).json({ error: msg(req, 'bookNotFound') });
+        }
+        throw error;
+    } finally {
+        client.release();
+    }
+
+    if (post.imageUrl && post.imageUrl !== imageUrl) {
+        await deletePostImage(post.imageUrl);
+    }
+
+    const [updated] = await findPosts(req, 'p.id = $1', post.id);
+    res.json(updated);
 });
 
 app.post('/api/posts/:id/pin', requireAuth, async (req, res) => {

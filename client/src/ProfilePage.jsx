@@ -233,6 +233,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                             onDeleted={handlePostDeleted}
                             onPinChange={handlePinChange}
                             showPinned
+                            books={books}
                         />
                     ))}
                 </div>

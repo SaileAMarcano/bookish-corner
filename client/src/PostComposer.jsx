@@ -9,14 +9,17 @@ import { apiFetch } from './api';
 const TEXT_MAX = 2000;
 const BOOKS_MAX = 4;
 
-function PostComposer({ books, onCreated }) {
+function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
     const { t } = useTranslation();
-    const [text, setText] = useState('');
+    const isEditing = Boolean(post);
+    const [text, setText] = useState(post?.text || '');
     const [imageFile, setImageFile] = useState(null);
-    const [imagePreview, setImagePreview] = useState('');
-    const [chosenBooks, setChosenBooks] = useState([]);
-    const [tags, setTags] = useState([]);
-    const [isSpoiler, setIsSpoiler] = useState(false);
+    const [imagePreview, setImagePreview] = useState(post?.imageUrl || '');
+    const [chosenBooks, setChosenBooks] = useState(
+        post ? post.books.map((book) => ({ ...book, bookId: book.id })) : []
+    );
+    const [tags, setTags] = useState(post ? post.tags.map((tag) => tag.name) : []);
+    const [isSpoiler, setIsSpoiler] = useState(post?.isSpoiler || false);
     const [pickerOpen, setPickerOpen] = useState(false);
     const [filter, setFilter] = useState('');
     const [error, setError] = useState('');
@@ -30,13 +33,13 @@ function PostComposer({ books, onCreated }) {
         e.target.value = '';
         if (!file) return;
 
-        if (imagePreview) URL.revokeObjectURL(imagePreview);
+        if (imageFile) URL.revokeObjectURL(imagePreview);
         setImageFile(file);
         setImagePreview(URL.createObjectURL(file));
     };
 
     const removeImage = () => {
-        URL.revokeObjectURL(imagePreview);
+        if (imageFile) URL.revokeObjectURL(imagePreview);
         setImageFile(null);
         setImagePreview('');
     };
@@ -64,7 +67,7 @@ function PostComposer({ books, onCreated }) {
     };
 
     const clearForm = () => {
-        if (imagePreview) URL.revokeObjectURL(imagePreview);
+        if (imageFile) URL.revokeObjectURL(imagePreview);
         setText('');
         setImageFile(null);
         setImagePreview('');
@@ -87,20 +90,31 @@ function PostComposer({ books, onCreated }) {
         if (imageFile) {
             formData.append('image', imageFile);
         }
+        if (isEditing) {
+            formData.append('removeImage', imagePreview === '');
+        }
+
+        const request = isEditing
+            ? apiFetch(`/api/posts/${post.id}`, { method: 'PATCH', body: formData })
+            : apiFetch('/api/posts', { method: 'POST', body: formData });
 
         setIsSending(true);
         setError('');
-        apiFetch('/api/posts', { method: 'POST', body: formData })
-            .then((post) => {
-                onCreated(post);
-                clearForm();
+        request
+            .then((savedPost) => {
+                if (isEditing) {
+                    onSaved(savedPost);
+                } else {
+                    onCreated(savedPost);
+                    clearForm();
+                }
             })
             .catch((err) => setError(err.message))
             .finally(() => setIsSending(false));
     };
 
     return (
-        <form className="card post-composer" onSubmit={handleSubmit}>
+        <form className={`card post-composer ${isEditing ? 'post-composer-editing' : ''}`} onSubmit={handleSubmit}>
             <textarea
                 className="post-composer-text"
                 value={text}
@@ -204,8 +218,16 @@ function PostComposer({ books, onCreated }) {
                     {t('posts.spoiler')}
                 </button>
 
+                {isEditing && (
+                    <button type="button" className="post-composer-cancel" onClick={onCancel}>
+                        {t('common.cancel')}
+                    </button>
+                )}
+
                 <button type="submit" className="post-composer-send" disabled={!canSend}>
-                    {isSending ? t('posts.publishing') : t('posts.publish')}
+                    {isEditing
+                        ? (isSending ? t('posts.saving') : t('posts.saveChanges'))
+                        : (isSending ? t('posts.publishing') : t('posts.publish'))}
                 </button>
             </div>
         </form>

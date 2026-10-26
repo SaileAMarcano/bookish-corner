@@ -103,7 +103,8 @@ CREATE TABLE posts (
     text       TEXT CHECK (length(text) <= 2000),
     image_url  TEXT,
     is_spoiler BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    edited_at TIMESTAMPTZ
 );
 
 ALTER TABLE users ADD COLUMN pinned_post_id INTEGER REFERENCES posts (id) ON DELETE SET NULL;

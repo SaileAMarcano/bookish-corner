@@ -5,15 +5,17 @@ import Icon from './Icon';
 import BookCover from './BookCover';
 import Notice from './Notice';
 import PostComments from './PostComments';
+import PostComposer from './PostComposer';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
-function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPinned, onPinChange }) {
+function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPinned, onPinChange, books = [] }) {
     const { t } = useTranslation();
     const [error, setError] = useState('');
     const [showComments, setShowComments] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [showSpoiler, setShowSpoiler] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
 
     const isOwner = post.userId === currentUserId;
     const hidesContent = post.isSpoiler && (post.text || post.imageUrl);
@@ -38,6 +40,11 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
         apiFetch(`/api/posts/${post.id}/pin`, { method: post.isPinned ? 'DELETE' : 'POST' })
             .then((state) => onPinChange(post.id, state.isPinned))
             .catch((err) => setError(err.message));
+    };
+
+    const handleSaved = (updatedPost) => {
+        onChange(post.id, updatedPost);
+        setIsEditing(false);
     };
 
     const handleDelete = () => {
@@ -68,7 +75,10 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
             <header className="post-head">
                 <img className="post-avatar" src={getAvatarSrc(post.avatarUrl)} alt="" />
                 <div>
-                    <Link to={`/u/${post.username}`} className="post-author">{post.displayName}</Link>
+                    <div className="post-date">
+                        {timeAgo(post.createdAt)}
+                        {post.editedAt && <span className="post-edited"> · {t('posts.edited')}</span>}
+                    </div>
                     <div className="post-date">{timeAgo(post.createdAt)}</div>
                 </div>
 
@@ -82,6 +92,18 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                         title={post.isPinned ? t('posts.unpin') : t('posts.pin')}
                     >
                         <Icon name="pin" />
+                    </button>
+                )}
+
+                {isOwner && !isEditing && (
+                    <button
+                        type="button"
+                        className="post-edit"
+                        onClick={() => setIsEditing(true)}
+                        aria-label={t('posts.editPost')}
+                        title={t('posts.editPost')}
+                    >
+                        <Icon name="pencil" />
                     </button>
                 )}
 
@@ -112,60 +134,69 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                 </div>
             )}
 
-            {hidesContent && showSpoiler && (
-                <button type="button" className="post-spoiler-hide" onClick={() => setShowSpoiler(false)}>
-                    <Icon name="eyeOff" size={14} />
-                    {t('posts.spoilerHide')}
-                </button>
+            {isEditing && (
+                <PostComposer books={books} post={post} onSaved={handleSaved} onCancel={() => setIsEditing(false)} />
             )}
 
-            <div className={`post-spoiler ${isHidden ? 'hidden' : ''}`}>
-                <div className="post-spoiler-content" inert={isHidden}>
-                    {post.text && <p className="post-text">{post.text}</p>}
+            {!isEditing && (<>
 
-                    {post.imageUrl && <img className="post-image" src={post.imageUrl} alt="" />}
-                </div>
-
-                {isHidden && (
-                    <button type="button" className="post-spoiler-cover" onClick={() => setShowSpoiler(true)}>
-                        <Icon name="eye" />
-                        <span className="post-spoiler-title">{t('posts.spoilerWarning')}</span>
-                        <span className="post-spoiler-hint">{t('posts.spoilerReveal')}</span>
+                {hidesContent && showSpoiler && (
+                    <button type="button" className="post-spoiler-hide" onClick={() => setShowSpoiler(false)}>
+                        <Icon name="eyeOff" size={14} />
+                        {t('posts.spoilerHide')}
                     </button>
                 )}
-            </div>
 
-            {post.books.length > 0 && (
-                <div className="post-books">
-                    {post.books.map((book) => (
-                        <Link key={book.id} to={`/book/${book.id}`} className="post-book book-link">
-                            <BookCover src={book.coverImage} className="post-book-cover" />
-                            <div className="post-book-info">
-                                <div className="display post-book-title">{book.title}</div>
-                                <div className="post-book-author">{book.author}</div>
-                            </div>
-                        </Link>
-                    ))}
+                <div className={`post-spoiler ${isHidden ? 'hidden' : ''}`}>
+                    <div className="post-spoiler-content" inert={isHidden}>
+                        {post.text && <p className="post-text">{post.text}</p>}
+
+                        {post.imageUrl && <img className="post-image" src={post.imageUrl} alt="" />}
+                    </div>
+
+                    {isHidden && (
+                        <button type="button" className="post-spoiler-cover" onClick={() => setShowSpoiler(true)}>
+                            <Icon name="eye" />
+                            <span className="post-spoiler-title">{t('posts.spoilerWarning')}</span>
+                            <span className="post-spoiler-hint">{t('posts.spoilerReveal')}</span>
+                        </button>
+                    )}
                 </div>
-            )
-            }
 
-            {error && <Notice message={error} />}
-
-            {
-                post.tags.length > 0 && (
-                    <div className="post-tags">
-                        {post.tags.map((tag) => (
-                            <Link
-                                key={tag.slug}
-                                to={`/tagged/${tag.slug}`}
-                                className={`pill post-tag ${tag.slug === activeTag ? 'active' : ''}`}
-                            >
-                                #{tag.name}
+                {post.books.length > 0 && (
+                    <div className="post-books">
+                        {post.books.map((book) => (
+                            <Link key={book.id} to={`/book/${book.id}`} className="post-book book-link">
+                                <BookCover src={book.coverImage} className="post-book-cover" />
+                                <div className="post-book-info">
+                                    <div className="display post-book-title">{book.title}</div>
+                                    <div className="post-book-author">{book.author}</div>
+                                </div>
                             </Link>
                         ))}
                     </div>
                 )
+                }
+
+                {error && <Notice message={error} />}
+
+                {
+                    post.tags.length > 0 && (
+                        <div className="post-tags">
+                            {post.tags.map((tag) => (
+                                <Link
+                                    key={tag.slug}
+                                    to={`/tagged/${tag.slug}`}
+                                    className={`pill post-tag ${tag.slug === activeTag ? 'active' : ''}`}
+                                >
+                                    #{tag.name}
+                                </Link>
+                            ))}
+                        </div>
+                    )
+                }
+
+            </>)
             }
 
             <footer className="post-actions">

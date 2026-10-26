@@ -356,6 +356,10 @@ const es = {
         pinned: 'Fijado',
         pin: 'Fijar en mi perfil',
         unpin: 'Quitar de mi perfil',
+        editPost: 'Editar publicación',
+        edited: 'editado',
+        saveChanges: 'Guardar cambios',
+        saving: 'Guardando…',
     },
     bookPage: {
         loading: 'Cargando libro...',

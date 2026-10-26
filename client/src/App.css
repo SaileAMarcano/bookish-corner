@@ -7209,3 +7209,60 @@ a.comment-author:hover {
   opacity: 0.6;
   cursor: default;
 }
+
+.post-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-left: auto;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.post-edit:hover {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.post-pin~.post-edit,
+.post-edit~.post-delete {
+  margin-left: 0;
+}
+
+.post-edited {
+  font-style: italic;
+}
+
+.post-composer-editing {
+  margin-bottom: 14px;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.post-composer-cancel {
+  min-height: 44px;
+  margin-left: auto;
+  padding: 0 20px;
+  border: 1px solid var(--surface-2);
+  border-radius: 999px;
+  background: none;
+  color: var(--text-2);
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.post-composer-cancel:hover {
+  color: var(--ink);
+}
+
+.post-composer-cancel+.post-composer-send {
+  margin-left: 0;
+}

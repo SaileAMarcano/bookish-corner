@@ -38,6 +38,7 @@ const en = {
     },
     nav: {
         home: 'Home',
+
         reading: 'Currently Reading',
         library: 'My Library',
         reviews: 'Reviews',
@@ -210,8 +211,8 @@ const en = {
             following: "The people you follow haven't shared anything yet.",
             recent: 'The community is quiet for now.',
         },
-        loadMore: 'Cargar más',
-        loadingMore: 'Cargando...',
+        loadMore: 'Load more',
+        loadingMore: 'Loading...',
     },
     activity: {
         finished: 'Finished a book',
@@ -356,6 +357,10 @@ const en = {
         pinned: 'Pinned',
         pin: 'Pin to my profile',
         unpin: 'Unpin from my profile',
+        editPost: 'Edit post',
+        edited: 'edited',
+        saveChanges: 'Save changes',
+        saving: 'Saving…',
     },
     bookPage: {
         loading: 'Loading book...',
