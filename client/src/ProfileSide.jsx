@@ -11,7 +11,7 @@ const FAVORITES_SHOWN = 5;
 function ProfileSide({ books, readingGoal, isMe, username }) {
     const { t } = useTranslation();
 
-    const reading = sortByLastRead(books.filter((book) => book.status === 'reading')).slice(0, 2);
+    const reading = sortByLastRead(books.filter((book) => book.status === 'reading')).slice(0, 1);
     const favorites = books.filter((book) => book.isFavorite).slice(0, FAVORITES_SHOWN);
 
     return (
