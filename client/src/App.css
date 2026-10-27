@@ -59,6 +59,22 @@
   --glass: rgba(40, 35, 30, 0.88);
 }
 
+:root[data-season="christmas"] {
+  --rose: #A23E4D;
+  --rose-deep: #8C2F39;
+  --rose-ink: #7A2530;
+  --rose-soft: #F3DCDC;
+  --snow: rgb(162 62 77 / 10%);
+}
+
+:root[data-theme="dark"][data-season="christmas"] {
+  --rose: #C24850;
+  --rose-deep: #A83A42;
+  --rose-ink: #F28B8B;
+  --rose-soft: #5A2A2E;
+  --snow: rgb(255 255 255 / 9%);
+}
+
 :root[data-season="grimm"] {
   --bg: #F7F5F5;
   --surface: #FFFFFF;
@@ -7425,4 +7441,29 @@ a.comment-author:hover {
 
 .theme-swatch-grimm {
   background: #C8102E;
+}
+
+:root[data-season="christmas"] .app-main {
+  background-image:
+    radial-gradient(circle, var(--snow) 2px, transparent 2.5px),
+    radial-gradient(circle, var(--snow) 1.5px, transparent 2px);
+  background-size: 140px 140px, 90px 90px;
+  background-position: 0 0, 45px 70px;
+}
+
+:root[data-season="christmas"] .post-composer:not(.post-composer-editing),
+:root[data-season="christmas"] .profile-side-card:has(> .challenge) {
+  position: relative;
+}
+
+:root[data-season="christmas"] .post-composer:not(.post-composer-editing)::after,
+:root[data-season="christmas"] .profile-side-card:has(> .challenge)::after {
+  content: '';
+  position: absolute;
+  top: -16px;
+  right: -10px;
+  width: 64px;
+  height: 72px;
+  background: url('/seasons/christmas/corner.png') center / contain no-repeat;
+  pointer-events: none;
 }
