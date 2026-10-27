@@ -32,6 +32,11 @@ import ThemePicker from './ThemePicker';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 
+const SEASON_FAVICONS = {
+  christmas: '/seasons/christmas/favicon.png',
+  grimm: '/seasons/grimm/favicon.png',
+};
+
 function applyUserLanguage(user) {
   if (user.language && user.language !== i18n.language) {
     i18n.changeLanguage(user.language);
@@ -66,7 +71,7 @@ function App() {
 
   useEffect(() => {
     document.documentElement.dataset.season = seasonTheme;
-    document.querySelector('link[rel="icon"]').href = seasonTheme === 'grimm' ? '/seasons/grimm/favicon.png' : '/logo-mark.png';
+    document.querySelector('link[rel="icon"]').href = SEASON_FAVICONS[seasonTheme] || '/logo-mark.png';
   }, [seasonTheme]);
 
   const [searchParams, setSearchParams] = useSearchParams();
@@ -261,6 +266,14 @@ function App() {
 
   return (
     <div className="app-shell">
+
+      {seasonTheme === 'christmas' && (
+        <video className="season-snow" autoPlay loop muted playsInline aria-hidden="true">
+          <source src="/seasons/christmas/snow.webm" type="video/webm" />
+          <source src="/seasons/christmas/snow.mp4" type="video/mp4" />
+        </video>
+      )}
+
       <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} />
 
       <div className="app-main">
