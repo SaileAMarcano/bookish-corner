@@ -22,6 +22,8 @@ CREATE TABLE users(
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     season_theme    TEXT NOT NULL DEFAULT 'classic' CHECK (season_theme IN ('classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal')),
     plus_until      TIMESTAMPTZ,
+    is_admin        BOOLEAN NOT NULL DEFAULT false,
+    gender_identity TEXT CHECK (gender_identity IN ('woman', 'man', 'nonbinary', 'unspecified'))
 );
 
 CREATE TABLE works (
@@ -194,6 +196,16 @@ CREATE TABLE theme_unlocks (
     PRIMARY KEY (user_id, theme)
 );
 
+CREATE TABLE user_roles (
+    user_id     INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    role        TEXT NOT NULL CHECK (role IN ('reader', 'writer', 'reviewer', 'creator', 'publisher', 'club_host', 'illustrator')),
+    position    SMALLINT NOT NULL CHECK (position IN (1, 2)),
+    verified_at TIMESTAMPTZ,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, role),
+    UNIQUE (user_id, position)
+);
+
 CREATE INDEX ON editions (work_id);
 CREATE INDEX ON user_books (work_id);
 CREATE INDEX ON likes (user_book_id);
@@ -228,3 +240,4 @@ ALTER TABLE user_book_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tag_follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE theme_unlocks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE user_roles ENABLE ROW LEVEL SECURITY;
