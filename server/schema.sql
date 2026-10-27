@@ -20,7 +20,7 @@ CREATE TABLE users(
     language        TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en', 'es')),
     theme           TEXT CHECK (theme IN ('light', 'dark')),
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
-    season_theme    TEXT NOT NULL DEFAULT 'classic' CHECK (season_theme IN ('classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal')),
+    season_theme    TEXT NOT NULL DEFAULT 'classic' CHECK (season_theme IN ('classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm')),
     plus_until      TIMESTAMPTZ,
     is_admin        BOOLEAN NOT NULL DEFAULT false,
     gender_identity TEXT CHECK (gender_identity IN ('woman', 'man', 'nonbinary', 'unspecified'))

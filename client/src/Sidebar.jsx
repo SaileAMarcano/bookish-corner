@@ -15,6 +15,8 @@ const NAV_ITEMS = [
     { to: '/profile?tab=posts', label: 'nav.profile', icon: 'about' },
 ];
 
+const SEASON_ILLUSTRATIONS = ['christmas', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
+
 function isActive(item, location) {
     const [path, query] = item.to.split('?');
 
@@ -25,16 +27,18 @@ function isActive(item, location) {
     return query === `tab=${tab}`;
 }
 
-function Sidebar({ readingCount }) {
+function Sidebar({ readingCount, seasonTheme }) {
     const location = useLocation();
     const { t } = useTranslation();
     const settingsActive = location.pathname === '/profile/edit';
+    const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
+    const mark = seasonTheme === 'grimm' ? '/seasons/grimm/favicon.png' : '/logo-mark.png';
 
     return (
         <aside className="sidebar">
             <Link to="/" className="sidebar-logo" aria-label="Bookish Corner">
-                <img className="sidebar-logo-image" src="/sidebar-illustration.png" alt="" />
-                <img className="sidebar-logo-mark" src="/logo-mark.png" alt="" />
+                <img className="sidebar-logo-image" src={illustration} alt="" />
+                <img className="sidebar-logo-mark" src={mark} alt="" />
                 <span className="display sidebar-logo-name">Bookish<br />Corner</span>
                 <span className="display sidebar-tagline">{t('nav.tagline')}</span>
             </Link>

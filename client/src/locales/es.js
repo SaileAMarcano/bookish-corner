@@ -50,6 +50,18 @@ const es = {
         settings: 'Configuración',
         tagline: 'Buenos libros. Días más amables.',
     },
+    themes: {
+        title: 'Tema',
+        locked: 'Bloqueado',
+        classic: 'Clásico',
+        christmas: 'Navidad',
+        valentine: 'San Valentín',
+        sage: 'Sage Garden',
+        lavender: 'Lavender Evening',
+        amber: 'Amber Autumn',
+        teal: 'Teal Night',
+        grimm: 'Grimm',
+    },
     public: {
         home: 'Inicio',
         about: 'Nosotros',

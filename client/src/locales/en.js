@@ -50,6 +50,18 @@ const en = {
         settings: 'Settings',
         tagline: 'Good books. Kinder days.',
     },
+    themes: {
+        title: 'Theme',
+        locked: 'Locked',
+        classic: 'Classic',
+        christmas: 'Christmas',
+        valentine: "Valentine's",
+        sage: 'Sage Garden',
+        lavender: 'Lavender Evening',
+        amber: 'Amber Autumn',
+        teal: 'Teal Night',
+        grimm: 'Grimm',
+    },
     public: {
         home: 'Home',
         about: 'About',

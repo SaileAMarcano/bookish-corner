@@ -59,6 +59,32 @@
   --glass: rgba(40, 35, 30, 0.88);
 }
 
+:root[data-season="grimm"] {
+  --bg: #F7F5F5;
+  --surface: #FFFFFF;
+  --surface-2: #E8E2E2;
+  --ink: #141414;
+  --text-2: #5F5A5A;
+  --rose: #C8102E;
+  --rose-deep: #A30D26;
+  --rose-ink: #8E0B21;
+  --rose-soft: #FBE4E7;
+  --glass: rgba(255, 255, 255, 0.9);
+}
+
+:root[data-theme="dark"][data-season="grimm"] {
+  --bg: #000000;
+  --surface: #0D0D0D;
+  --surface-2: #262626;
+  --ink: #F5F5F5;
+  --text-2: #A6A6A6;
+  --rose: #E02A3F;
+  --rose-deep: #F2475A;
+  --rose-ink: #FF6B7E;
+  --rose-soft: #3A0710;
+  --glass: rgba(13, 13, 13, 0.9);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -7308,4 +7334,95 @@ a.comment-author:hover {
   .sidebar-link.phone-hidden {
     display: none;
   }
+}
+
+.theme-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px 0 8px;
+  border-bottom: 1px solid var(--surface-2);
+}
+
+.theme-picker-title {
+  padding: 0 8px 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: var(--radius);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.theme-option:hover:not(:disabled) {
+  background: var(--bg);
+}
+
+.theme-option.active {
+  background: var(--rose-soft);
+  font-weight: 600;
+}
+
+.theme-option:disabled {
+  color: var(--text-2);
+  cursor: not-allowed;
+}
+
+.theme-option-name {
+  flex: 1;
+}
+
+.theme-swatch {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.theme-swatch-classic {
+  background: #C496A1;
+}
+
+.theme-swatch-christmas {
+  background: #A23E4D;
+}
+
+.theme-swatch-valentine {
+  background: #B04A60;
+}
+
+.theme-swatch-sage {
+  background: #62754A;
+}
+
+.theme-swatch-lavender {
+  background: #725B9C;
+}
+
+.theme-swatch-amber {
+  background: #875721;
+}
+
+.theme-swatch-teal {
+  background: #447A74;
+}
+
+.theme-swatch-grimm {
+  background: #C8102E;
 }

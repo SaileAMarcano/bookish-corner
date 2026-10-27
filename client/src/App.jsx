@@ -28,6 +28,7 @@ import Notice from './Notice';
 import Welcome from './Welcome';
 import SearchPanel from './SearchPanel';
 import SearchBox from './SearchBox';
+import ThemePicker from './ThemePicker';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 
@@ -60,6 +61,13 @@ function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
+
+  const seasonTheme = currentUser?.seasonTheme || 'classic';
+
+  useEffect(() => {
+    document.documentElement.dataset.season = seasonTheme;
+    document.querySelector('link[rel="icon"]').href = seasonTheme === 'grimm' ? '/seasons/grimm/favicon.png' : '/logo-mark.png';
+  }, [seasonTheme]);
 
   const [searchParams, setSearchParams] = useSearchParams();
   const q = searchParams.get('q') || '';
@@ -193,6 +201,16 @@ function App() {
       .catch((error) => setToast(error.message));
   };
 
+  const handleSeasonThemeChange = (next) => {
+    const previous = seasonTheme;
+    setCurrentUser((user) => ({ ...user, seasonTheme: next }));
+    apiFetch('/api/me/season-theme', { method: 'PATCH', body: { seasonTheme: next } })
+      .catch((error) => {
+        setCurrentUser((user) => ({ ...user, seasonTheme: previous }));
+        setToast(error.message);
+      });
+  };
+
   const handleSearch = (term) => {
     setSearchParams((params) => {
       params.set('q', term);
@@ -243,7 +261,7 @@ function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} />
+      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} />
 
       <div className="app-main">
         <header className="topbar">
@@ -278,6 +296,7 @@ function App() {
                 </span>
                 <Icon name="chevronDown" size={16} />
               </button>
+
               {showUserMenu && (
                 <div className="header-menu">
                   <div className="header-menu-extra">
@@ -287,6 +306,7 @@ function App() {
                       {theme === 'dark' ? t('app.lightMode') : t('app.darkMode')}
                     </button>
                   </div>
+                  <ThemePicker current={seasonTheme} unlocked={currentUser.unlockedThemes || ['classic']} onChange={handleSeasonThemeChange} />
                   <Link
                     to="/profile/edit"
                     className="ghost-button"

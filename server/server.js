@@ -1582,15 +1582,17 @@ app.patch('/api/me/theme', requireAuth, async (req, res) => {
     res.json({ theme });
 });
 
-const SEASON_THEMES = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal'];
+const SEASON_THEMES = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
 const FREE_SEASON_THEMES = ['classic', 'christmas', 'valentine'];
+const PAID_SEASON_THEMES = ['sage', 'lavender', 'amber', 'teal'];
 
 function hasPlus(user) {
     return user.isAdmin || (user.plusUntil !== null && user.plusUntil > new Date());
 }
 
 async function findUnlockedThemes(user) {
-    if (hasPlus(user)) return SEASON_THEMES;
+    if (user.isAdmin) return SEASON_THEMES;
+    if (hasPlus(user)) return [...FREE_SEASON_THEMES, ...PAID_SEASON_THEMES];
 
     const rows = await query('SELECT theme FROM theme_unlocks WHERE user_id = $1', [user.id]);
     return [...FREE_SEASON_THEMES, ...rows.map((row) => row.theme)];
