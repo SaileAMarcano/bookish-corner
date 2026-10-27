@@ -19,7 +19,9 @@ CREATE TABLE users(
     reader_type     TEXT CHECK (reader_type IN ('first-time', 'casual', 'avid')),
     language        TEXT NOT NULL DEFAULT 'en' CHECK (language IN ('en', 'es')),
     theme           TEXT CHECK (theme IN ('light', 'dark')),
-    created_at      TIMESTAMPTZ NOT NULL DEFAULT now() 
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
+    season_theme    TEXT NOT NULL DEFAULT 'classic' CHECK (season_theme IN ('classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal')),
+    plus_until      TIMESTAMPTZ,
 );
 
 CREATE TABLE works (
@@ -184,6 +186,14 @@ CREATE TABLE user_milestones (
     PRIMARY KEY (user_id, milestone_key)
 );
 
+CREATE TABLE theme_unlocks (
+    user_id     INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    theme       TEXT NOT NULL CHECK (theme IN ('sage', 'lavender', 'amber', 'teal')),
+    order_id    TEXT UNIQUE,
+    unlocked_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (user_id, theme)
+);
+
 CREATE INDEX ON editions (work_id);
 CREATE INDEX ON user_books (work_id);
 CREATE INDEX ON likes (user_book_id);
@@ -217,3 +227,4 @@ ALTER TABLE post_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE user_book_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE tag_follows ENABLE ROW LEVEL SECURITY;
 ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE theme_unlocks ENABLE ROW LEVEL SECURITY;
