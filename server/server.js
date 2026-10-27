@@ -1541,17 +1541,7 @@ app.post('/api/login', loginLimiter, async (req, res) => {
         email: user.email,
     };
 
-    res.json({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatarUrl: user.avatarUrl,
-        displayName: user.displayName || user.username,
-        readingGoal: user.readingGoal,
-        readerType: user.readerType,
-        language: user.language,
-        theme: user.theme,
-    });
+    res.json(await findMe(user.id));
 });
 
 app.get('/api/me', async (req, res) => {
@@ -1559,18 +1549,13 @@ app.get('/api/me', async (req, res) => {
         return res.status(401).json({ error: msg(req, 'notLoggedIn') });
     }
 
-    const [user] = await query(
-        `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
-    COALESCE(display_name, username) AS display_name
-         FROM users WHERE id = $1`,
-        [req.session.user.id]
-    );
+    const me = await findMe(req.session.user.id);
 
-    if (!user) {
+    if (!me) {
         return res.status(401).json({ error: msg(req, 'notLoggedIn') });
     }
 
-    res.json(user);
+    res.json(me);
 });
 
 app.patch('/api/me/language', requireAuth, async (req, res) => {
@@ -1595,6 +1580,53 @@ app.patch('/api/me/theme', requireAuth, async (req, res) => {
 
     await query('UPDATE users SET theme = $1 WHERE id = $2', [theme, req.session.user.id]);
     res.json({ theme });
+});
+
+const SEASON_THEMES = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal'];
+const FREE_SEASON_THEMES = ['classic', 'christmas', 'valentine'];
+
+function hasPlus(user) {
+    return user.isAdmin || (user.plusUntil !== null && user.plusUntil > new Date());
+}
+
+async function findUnlockedThemes(user) {
+    if (hasPlus(user)) return SEASON_THEMES;
+
+    const rows = await query('SELECT theme FROM theme_unlocks WHERE user_id = $1', [user.id]);
+    return [...FREE_SEASON_THEMES, ...rows.map((row) => row.theme)];
+}
+
+async function findMe(userId) {
+    const [user] = await query(
+        `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
+            season_theme, plus_until, is_admin, gender_identity,
+            COALESCE(display_name, username) AS display_name
+         FROM users WHERE id = $1`,
+        [userId]
+    );
+
+    if (!user) return null;
+
+    const unlockedThemes = await findUnlockedThemes(user);
+    const seasonTheme = unlockedThemes.includes(user.seasonTheme) ? user.seasonTheme : 'classic';
+    return { ...user, seasonTheme, isPlus: hasPlus(user), unlockedThemes };
+}
+
+app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
+    const { seasonTheme } = req.body;
+
+    if (!SEASON_THEMES.includes(seasonTheme)) {
+        return res.status(400).json({ error: msg(req, 'seasonThemeInvalid') });
+    }
+
+    const me = await findMe(req.session.user.id);
+
+    if (!me.unlockedThemes.includes(seasonTheme)) {
+        return res.status(403).json({ error: msg(req, 'themeLocked') });
+    }
+
+    await query('UPDATE users SET season_theme = $1 WHERE id = $2', [seasonTheme, me.id]);
+    res.json({ seasonTheme });
 });
 
 app.get('/api/profile', requireAuth, async (req, res) => {
