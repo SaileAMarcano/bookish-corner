@@ -15,14 +15,14 @@ const NAV_ITEMS = [
     { to: '/profile?tab=posts', label: 'nav.profile', icon: 'about' },
 ];
 
-const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
+const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
 
 const SEASON_MARKS = {
     christmas: '/seasons/christmas/mark.png',
     grimm: '/seasons/grimm/favicon.png',
 };
 
-const SEASON_SCENES = ['classic', 'christmas', 'sage', 'lavender', 'amber', 'teal'];
+const SEASON_SCENES = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
 
 function isActive(item, location) {
     const [path, query] = item.to.split('?');

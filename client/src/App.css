@@ -179,6 +179,32 @@
   --glass: rgba(33, 37, 47, 0.88);
 }
 
+:root[data-season="valentine"] {
+  --bg: #F7EAE6;
+  --surface: #FBF3F1;
+  --surface-2: #EFD9D6;
+  --ink: #2E2226;
+  --text-2: #6E5A60;
+  --rose: #A8405A;
+  --rose-deep: #8F334B;
+  --rose-ink: #8C1D36;
+  --rose-soft: #F6D3D0;
+  --glass: rgba(251, 243, 241, 0.88);
+}
+
+:root[data-theme="dark"][data-season="valentine"] {
+  --bg: #3A0812;
+  --surface: #4C0E1B;
+  --surface-2: #6E1A2B;
+  --ink: #FFF0F2;
+  --text-2: #F2B8C2;
+  --rose: #E04A60;
+  --rose-deep: #C93A50;
+  --rose-ink: #FFB3C0;
+  --rose-soft: #6E1A2B;
+  --glass: rgba(76, 14, 27, 0.88);
+}
+
 :root[data-season="grimm"] {
   --bg: #F7F5F5;
   --surface: #FFFFFF;
@@ -7735,5 +7761,28 @@ a.comment-author:hover {
 
   :root[data-season="classic"] .sidebar>.sidebar-scene {
     opacity: 0.6;
+  }
+
+  :root[data-season="valentine"] .post-composer:not(.post-composer-editing) {
+    position: relative;
+  }
+
+  :root[data-season="valentine"] .post-composer:not(.post-composer-editing)::after {
+    content: '';
+    position: absolute;
+    top: -24px;
+    right: -18px;
+    z-index: 1;
+    width: 110px;
+    height: 92px;
+    background: url('/seasons/valentine/corner.png') center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  :root[data-theme="dark"][data-season="grimm"] .sidebar>.sidebar-scene {
+    -webkit-mask-image: linear-gradient(to bottom, transparent, black 35%), linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to bottom, transparent, black 35%), linear-gradient(to right, transparent, black 12%, black 88%, transparent);
+    mask-composite: intersect;
   }
 }
