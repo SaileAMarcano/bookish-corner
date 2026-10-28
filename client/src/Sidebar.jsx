@@ -22,8 +22,6 @@ const SEASON_MARKS = {
     grimm: '/seasons/grimm/favicon.png',
 };
 
-const SEASON_SCENES = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
-
 function isActive(item, location) {
     const [path, query] = item.to.split('?');
 
@@ -65,10 +63,6 @@ function Sidebar({ readingCount, seasonTheme }) {
                 <Icon name="settings" size={20} />
                 <span className="sidebar-label">{t('nav.settings')}</span>
             </Link>
-
-            {SEASON_SCENES.includes(seasonTheme) && (
-                <img className="sidebar-scene" src={`/seasons/${seasonTheme}/scene.png`} alt="" />
-            )}
         </aside>
     );
 }

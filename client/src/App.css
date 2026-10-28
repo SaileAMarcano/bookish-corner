@@ -7597,18 +7597,6 @@ a.comment-author:hover {
   pointer-events: none;
 }
 
-:root[data-season="christmas"] .post-composer:not(.post-composer-editing)::after {
-  content: '';
-  position: absolute;
-  top: -22px;
-  right: -16px;
-  z-index: 1;
-  width: 86px;
-  height: 84px;
-  background: url('/seasons/christmas/corner.png') center / contain no-repeat;
-  pointer-events: none;
-}
-
 .season-snow {
   position: fixed;
   inset: 0;
@@ -7675,23 +7663,6 @@ a.comment-author:hover {
     background-image: url('/seasons/christmas/corner-bl-dark.svg');
   }
 
-  .sidebar>* {
-    position: relative;
-    z-index: 1;
-  }
-
-  .sidebar>.sidebar-scene {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    z-index: 0;
-    width: 100%;
-    max-height: 40vh;
-    object-fit: contain;
-    object-position: left bottom;
-    pointer-events: none;
-  }
-
   @media (min-width: 861px) {
     .sidebar {
       gap: 10px;
@@ -7718,12 +7689,6 @@ a.comment-author:hover {
 
     .sidebar-tagline {
       font-size: 15px;
-    }
-  }
-
-  @media (max-width: 1400px) {
-    .sidebar>.sidebar-scene {
-      display: none;
     }
   }
 
@@ -7758,56 +7723,4 @@ a.comment-author:hover {
       text-align: center;
     }
   }
-
-  :root[data-season="classic"] .sidebar>.sidebar-scene {
-    opacity: 0.6;
-  }
-
-  :root[data-season="valentine"] .post-composer:not(.post-composer-editing) {
-    position: relative;
-  }
-
-  :root[data-season="valentine"] .post-composer:not(.post-composer-editing)::after {
-    content: '';
-    position: absolute;
-    top: -24px;
-    right: -18px;
-    z-index: 1;
-    width: 110px;
-    height: 92px;
-    background: url('/seasons/valentine/corner.png') center / contain no-repeat;
-    pointer-events: none;
-  }
-
-  :root[data-theme="dark"][data-season="grimm"] .sidebar>.sidebar-scene {
-    -webkit-mask-image: linear-gradient(to bottom, transparent, black 35%), linear-gradient(to right, transparent, black 12%, black 88%, transparent);
-    -webkit-mask-composite: source-in;
-    mask-image: linear-gradient(to bottom, transparent, black 35%), linear-gradient(to right, transparent, black 12%, black 88%, transparent);
-    mask-composite: intersect;
-  }
-}
-
-:root[data-season="grimm"] .post-composer:not(.post-composer-editing) {
-  position: relative;
-}
-
-:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::before,
-:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::after {
-  content: '';
-  position: absolute;
-  top: -34px;
-  z-index: 1;
-  width: 34px;
-  height: 46px;
-  background: url('/seasons/grimm/horn.svg') center / contain no-repeat;
-  pointer-events: none;
-}
-
-:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::before {
-  left: 28px;
-}
-
-:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::after {
-  right: 28px;
-  transform: scaleX(-1);
 }
