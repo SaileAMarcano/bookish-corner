@@ -103,6 +103,21 @@ function requireAuth(req, res, next) {
     next();
 }
 
+function requireStaff(...roles) {
+    return async (req, res, next) => {
+        if (!req.session.user) {
+            return res.status(401).json({ error: msg(req, 'loginRequired') });
+        }
+
+        const [user] = await query('SELECT staff_role FROM users WHERE id = $1', [req.session.user.id]);
+
+        if (user?.staffRole !== 'admin' && !roles.includes(user?.staffRole)) {
+            return res.status(403).json({ error: msg(req, 'staffOnly') });
+        }
+        next();
+    };
+}
+
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
 const TRANSLATED_DESCRIPTION = 'COALESCE(t.description, w.description)';
 const JOIN_TRANSLATION = 'LEFT JOIN work_translations t ON t.work_id = w.id AND t.language';
@@ -1606,11 +1621,11 @@ const FREE_SEASON_THEMES = ['classic', 'christmas', 'valentine'];
 const PAID_SEASON_THEMES = ['sage', 'lavender', 'amber', 'teal'];
 
 function hasPlus(user) {
-    return user.isAdmin || (user.plusUntil !== null && user.plusUntil > new Date());
+    return user.staffRole === 'admin' || (user.plusUntil !== null && user.plusUntil > new Date());
 }
 
 async function findUnlockedThemes(user) {
-    if (user.isAdmin) return SEASON_THEMES;
+    if (user.staffRole === 'admin') return SEASON_THEMES;
     if (hasPlus(user)) return [...FREE_SEASON_THEMES, ...PAID_SEASON_THEMES];
 
     const rows = await query('SELECT theme FROM theme_unlocks WHERE user_id = $1', [user.id]);
@@ -1620,7 +1635,7 @@ async function findUnlockedThemes(user) {
 async function findMe(userId) {
     const [user] = await query(
         `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
-            season_theme, plus_until, is_admin, gender_identity,
+            season_theme, plus_until, staff_role, gender_identity,
             COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
         [userId]
@@ -1648,6 +1663,44 @@ app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
 
     await query('UPDATE users SET season_theme = $1 WHERE id = $2', [seasonTheme, me.id]);
     res.json({ seasonTheme });
+});
+
+const STAFF_ROLES = ['editor', 'moderator'];
+
+app.get('/api/admin/users', requireStaff('admin'), async (req, res) => {
+    const search = (req.query.q || '').trim();
+    const users = await query(`
+        SELECT id, username, COALESCE(display_name, username) AS display_name, avatar_url, staff_role
+        FROM users
+        WHERE username ILIKE $1 OR display_name ILIKE $1
+        ORDER BY staff_role IS NULL, username
+        LIMIT 20
+    `, [`%${search}%`]);
+    res.json(users);
+});
+
+app.patch('/api/admin/users/:id/staff-role', requireStaff('admin'), async (req, res) => {
+    const userId = Number(req.params.id);
+    const { staffRole } = req.body;
+
+    if (staffRole !== null && !STAFF_ROLES.includes(staffRole)) {
+        return res.status(400).json({ error: msg(req, 'staffRoleInvalid') });
+    }
+    if (userId === req.session.user.id) {
+        return res.status(400).json({ error: msg(req, 'ownStaffRole') });
+    }
+
+    const [user] = await query(
+        `UPDATE users SET staff_role = $1
+         WHERE id = $2 AND staff_role IS DISTINCT FROM 'admin'
+         RETURNING id, username, staff_role`,
+        [staffRole, userId]
+    );
+
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+    res.json(user);
 });
 
 app.get('/api/profile', requireAuth, async (req, res) => {

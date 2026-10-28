@@ -23,7 +23,7 @@ CREATE TABLE users(
     season_theme    TEXT NOT NULL DEFAULT 'classic' CHECK (season_theme IN ('classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm')),
     plus_until      TIMESTAMPTZ,
     is_admin        BOOLEAN NOT NULL DEFAULT false,
-    gender_identity TEXT CHECK (gender_identity IN ('woman', 'man', 'nonbinary', 'unspecified'))
+    gender_identity TEXT CHECK (gender_identity IN ('woman', 'man', 'nonbinary', 'unspecified')),
     staff_role      TEXT CHECK (staff_role IN ('admin', 'editor', 'moderator'))
 );
 
@@ -35,9 +35,9 @@ CREATE TABLE works (
     cover_image          TEXT,
     first_published_year SMALLINT,
     open_library_key     TEXT UNIQUE,
-    created_at           TIMESTAMPTZ NOT NULL DEFAULT now()
+    created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     added_by             INTEGER REFERENCES users (id) ON DELETE SET NULL,
-    update_at            TIMESTAMPTZ
+    updated_at            TIMESTAMPTZ
 );
 
 CREATE TABLE work_translations (
