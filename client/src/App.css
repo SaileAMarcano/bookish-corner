@@ -7786,3 +7786,28 @@ a.comment-author:hover {
     mask-composite: intersect;
   }
 }
+
+:root[data-season="grimm"] .post-composer:not(.post-composer-editing) {
+  position: relative;
+}
+
+:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::before,
+:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::after {
+  content: '';
+  position: absolute;
+  top: -34px;
+  z-index: 1;
+  width: 34px;
+  height: 46px;
+  background: url('/seasons/grimm/horn.svg') center / contain no-repeat;
+  pointer-events: none;
+}
+
+:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::before {
+  left: 28px;
+}
+
+:root[data-season="grimm"] .post-composer:not(.post-composer-editing)::after {
+  right: 28px;
+  transform: scaleX(-1);
+}
