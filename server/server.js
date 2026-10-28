@@ -13,12 +13,29 @@ const path = require('path');
 const helmet = require('helmet');
 const { rateLimit } = require('express-rate-limit');
 const app = express();
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
-app.use(express.json({ limit: '100kb' }));
-app.use(cors({
-    origin: 'http://localhost:5173',
-    credentials: true,
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+    app.set('trust proxy', 1);
+}
+
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    contentSecurityPolicy: {
+        directives: {
+            imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
+            frameSrc: ['https://open.spotify.com'],
+        },
+    },
 }));
+app.use(express.json({ limit: '100kb' }));
+
+if (!isProduction) {
+    app.use(cors({
+        origin: 'http://localhost:5173',
+        credentials: true,
+    }));
+}
 
 if (!process.env.SESSION_SECRET) {
     throw new Error('SESSION_SECRET is missing in server/.env');
@@ -30,7 +47,8 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,
+        secure: isProduction,
+        sameSite: 'lax';
         maxAge: 1000 * 60 * 60 * 24,
     },
 }));
@@ -49,8 +67,6 @@ const upload = multer({
         cb(null, true);
     },
 });
-
-app.use('/uploads', express.static('uploads'));
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -79,7 +95,7 @@ const apiLimiter = rateLimit({
 });
 app.use('/api', apiLimiter);
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 function requireAuth(req, res, next) {
     if (!req.session.user) {
         return res.status(401).json({ error: msg(req, 'loginRequired') });
@@ -1710,6 +1726,13 @@ app.post('/api/logout', (req, res) => {
         }
         res.json({ message: 'Logged out successfully' });
     });
+});
+
+const CLIENT_DIST = path.join(__dirname, '..', 'client', 'dist');
+
+app.use(express.static(CLIENT_DIST));
+app.get(/^(?!\/api\/).*/, (req, res) => {
+    res.sendFile(path.join(CLIENT_DIST, 'index.html'));
 });
 
 app.use((error, req, res, next) => {

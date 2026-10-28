@@ -1,6 +1,6 @@
 import i18n from './i18n';
 
-export const API_URL = "http://localhost:3000";
+export const API_URL = import.meta.env.DEV ? 'http://localhost:3000' : '';
 
 export function apiFetch(path, { body, ...options } = {}) {
     const isFormData = body instanceof FormData;
@@ -9,7 +9,6 @@ export function apiFetch(path, { body, ...options } = {}) {
     return fetch(`${API_URL}${path}`, {
         credentials: 'include',
         ...options,
-        // Accept-Language tells the server which language to use for its error messages.
         headers: sendsJson
             ? { 'Content-Type': 'application/json', 'Accept-Language': i18n.language }
             : { 'Accept-Language': i18n.language },
