@@ -441,7 +441,7 @@ const en = {
         useBadge: 'Show on my profile',
         removeBadge: 'Remove from my profile',
         items: {
-            'beta-tester': { name: 'Beta Tester', rule: 'Join A library of Us during the beta.' },
+            'beta-tester': { name: 'Beta Tester', rule: 'Join A Library of Us during the beta.' },
             'a-new-reader': { name: 'A New Reader', rule: 'Add your first book to your library.' },
             'first-chapter': { name: 'First Chapter', rule: 'Finish your first book.' },
             'first-review': { name: 'First Review', rule: 'Write your first review.' },

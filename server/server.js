@@ -1497,6 +1497,9 @@ const passwordProblem = (password) => {
 const USERNAME_MAX_LENGTH = 30;
 
 app.post('/api/register', authLimiter, async (req, res) => {
+    if (process.env.SIGNUP_OPEN !== 'true') {
+        return res.status(403).json({ error: msg(req, 'signupClosed') });
+    }
     const { username, email, password } = req.body;
     const language = LANGUAGES.includes(req.body.language) ? req.body.language : 'en';
 
