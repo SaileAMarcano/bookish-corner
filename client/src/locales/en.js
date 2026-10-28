@@ -9,7 +9,7 @@ const en = {
         viewAll: 'View all →',
     },
     errors: {
-        network: "We couldn't reach Bookish Corner. Please check your connection.",
+        network: "We couldn't reach A Library of Us. Please check your connection.",
         generic: 'Something went wrong. Please try again.',
     },
     language: {
@@ -18,7 +18,7 @@ const en = {
         es: 'Español',
     },
     app: {
-        opening: 'Opening Bookish Corner...',
+        opening: 'Opening A Library of Us...',
         darkMode: 'Dark mode',
         lightMode: 'Light mode',
         searchPlaceholder: 'Search books or people...',
@@ -66,7 +66,7 @@ const en = {
         home: 'Home',
         about: 'About',
         features: 'Features',
-        homeLink: 'Bookish Corner home',
+        homeLink: 'A Library of Us home',
         login: 'Log in',
         signup: 'Sign up',
         startReading: 'Start reading',
@@ -84,18 +84,18 @@ const en = {
         line1: 'Track your books',
         line2: 'Write your thoughts',
         line3: 'Find your people',
-        lead: "Bookish Corner is a small, warm space for readers. Search any book, add it to your shelf, keep track of how far you've gotten, and write down what you really thought — then see what other readers had to say about the same story.",
+        lead: "A Library of Us is a small, warm space for readers. Search any book, add it to your shelf, keep track of how far you've gotten, and write down what you really thought — then see what other readers had to say about the same story.",
     },
     about: {
-        eyebrow: 'About Bookish Corner',
+        eyebrow: 'About A Library of Us',
         title: 'More than a reading tracker',
-        lead1: 'Bookish Corner started with a simple wish: a place to keep track of books that feels as warm as the stories themselves. Not a spreadsheet, not a noisy feed.',
+        lead1: 'A Library of Us started with a simple wish: a place to keep track of books that feels as warm as the stories themselves. Not a spreadsheet, not a noisy feed.',
         lead2: 'Follow your progress page by page, write down what a book made you feel, and share it with readers who get it.',
         storyEyebrow: 'Our story',
         storyTitle: 'A cozy idea, for a brighter you.',
         story1: 'I have always kept my reading life in scattered places: notes on my phone, photos of pages, half-finished lists. I wanted one calm corner where all of it could live together.',
-        story2: 'So I built it. Bookish Corner is made by a reader, for readers: small on purpose, kind by design, and shaped by the people who use it.',
-        quote: 'A little corner, for a lot of stories.',
+        story2: 'So I built it. A Library of Us is made by a reader, for readers: small on purpose, kind by design, and shaped by the people who use it.',
+        quote: 'A little library, for a lot of stories.',
         values: {
             readers: {
                 title: 'For every kind of reader',
@@ -441,7 +441,7 @@ const en = {
         useBadge: 'Show on my profile',
         removeBadge: 'Remove from my profile',
         items: {
-            'beta-tester': { name: 'Beta Tester', rule: 'Join Bookish Corner during the beta.' },
+            'beta-tester': { name: 'Beta Tester', rule: 'Join A library of Us during the beta.' },
             'a-new-reader': { name: 'A New Reader', rule: 'Add your first book to your library.' },
             'first-chapter': { name: 'First Chapter', rule: 'Finish your first book.' },
             'first-review': { name: 'First Review', rule: 'Write your first review.' },

@@ -33,7 +33,6 @@ import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 
 const SEASON_FAVICONS = {
-  christmas: '/seasons/christmas/favicon.png',
   grimm: '/seasons/grimm/favicon.png',
 };
 

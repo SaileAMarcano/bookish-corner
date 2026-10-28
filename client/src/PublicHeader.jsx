@@ -15,7 +15,7 @@ function PublicHeader() {
         <header className="public-header">
             <Link to="/" className="public-brand" aria-label={t('public.homeLink')}>
                 <img src="/logo-mark.png" alt="" className="public-brand-mark" />
-                <span className="display public-brand-name">Bookish Corner</span>
+                <span className="display public-brand-name">A Library of Us</span>
             </Link>
 
             <nav className="public-nav">

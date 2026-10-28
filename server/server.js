@@ -48,7 +48,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         secure: isProduction,
-        sameSite: 'lax';
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 24,
     },
 }));
@@ -205,7 +205,7 @@ async function searchOpenLibrary(q, limit) {
     const url = `https://openlibrary.org/search.json?q=${encodeURIComponent(q)}&limit=${limit}&fields=key,title,author_name,first_publish_year,cover_i`;
 
     const response = await fetch(url, {
-        headers: { 'User-Agent': 'BookishCorner/1.0' },
+        headers: { 'User-Agent': 'ALibraryOfUs/1.0' },
         signal: AbortSignal.timeout(8000),
     });
     const data = await response.json();

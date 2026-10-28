@@ -9,7 +9,7 @@ const es = {
         viewAll: 'Ver todo →',
     },
     errors: {
-        network: 'No pudimos conectar con Bookish Corner. Revisa tu conexión.',
+        network: 'No pudimos conectar con A Library of Us. Revisa tu conexión.',
         generic: 'Algo salió mal. Inténtalo de nuevo.',
     },
     language: {
@@ -18,7 +18,7 @@ const es = {
         es: 'Español',
     },
     app: {
-        opening: 'Abriendo Bookish Corner...',
+        opening: 'Abriendo A Library of Us...',
         darkMode: 'Modo oscuro',
         lightMode: 'Modo claro',
         searchPlaceholder: 'Busca libros o personas...',
@@ -66,7 +66,7 @@ const es = {
         home: 'Inicio',
         about: 'Nosotros',
         features: 'Funciones',
-        homeLink: 'Inicio de Bookish Corner',
+        homeLink: 'Inicio de A Library of Us',
         login: 'Iniciar sesión',
         signup: 'Crear cuenta',
         startReading: 'Empieza a leer',
@@ -84,18 +84,18 @@ const es = {
         line1: 'Sigue tus libros',
         line2: 'Escribe lo que piensas',
         line3: 'Encuentra a tu gente',
-        lead: 'Bookish Corner es un espacio pequeño y cálido para lectores. Busca cualquier libro, añádelo a tu estantería, lleva la cuenta de cuánto has avanzado y escribe lo que de verdad pensaste. Después, descubre qué dijeron otros lectores de la misma historia.',
+        lead: 'A Library of Us es un espacio pequeño y cálido para lectores. Busca cualquier libro, añádelo a tu estantería, lleva la cuenta de cuánto has avanzado y escribe lo que de verdad pensaste. Después, descubre qué dijeron otros lectores de la misma historia.',
     },
     about: {
-        eyebrow: 'Sobre Bookish Corner',
+        eyebrow: 'Sobre A Library of Us',
         title: 'Más que un registro de lecturas',
-        lead1: 'Bookish Corner nació de un deseo sencillo: un lugar para llevar la cuenta de los libros que se sintiera tan cálido como las propias historias. Ni una hoja de cálculo ni un feed ruidoso.',
+        lead1: 'A Library of Us nació de un deseo sencillo: un lugar para llevar la cuenta de los libros que se sintiera tan cálido como las propias historias. Ni una hoja de cálculo ni un feed ruidoso.',
         lead2: 'Sigue tu avance página a página, escribe lo que un libro te hizo sentir y compártelo con lectores que te entienden.',
         storyEyebrow: 'Nuestra historia',
         storyTitle: 'Una idea acogedora, para una versión más brillante de ti.',
         story1: 'Siempre tuve mi vida lectora repartida en muchos sitios: notas en el teléfono, fotos de páginas, listas a medio hacer. Quería un rincón tranquilo donde todo pudiera vivir junto.',
-        story2: 'Así que lo construí. Bookish Corner está hecho por una lectora, para lectores: pequeño a propósito, amable por diseño y moldeado por quienes lo usan.',
-        quote: 'Un pequeño rincón, para muchas historias.',
+        story2: 'Así que lo construí. A Library of Us está hecho por una lectora, para lectores: pequeño a propósito, amable por diseño y moldeado por quienes lo usan.',
+        quote: 'Una pequeña biblioteca, para muchas historias.',
         values: {
             readers: {
                 title: 'Para cada tipo de lector',
@@ -441,7 +441,7 @@ const es = {
         useBadge: 'Mostrar en mi perfil',
         removeBadge: 'Quitar de mi perfil',
         items: {
-            'beta-tester': { name: 'Beta Tester', rule: 'Únete a Bookish Corner durante la beta.' },
+            'beta-tester': { name: 'Beta Tester', rule: 'Únete a A Library of Us durante la beta.' },
             'a-new-reader': { name: 'Nueva lectora', rule: 'Añade tu primer libro a tu biblioteca.' },
             'first-chapter': { name: 'Primer capítulo', rule: 'Termina tu primer libro.' },
             'first-review': { name: 'Primera reseña', rule: 'Escribe tu primera reseña.' },

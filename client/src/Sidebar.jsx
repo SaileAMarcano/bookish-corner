@@ -18,7 +18,6 @@ const NAV_ITEMS = [
 const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
 
 const SEASON_MARKS = {
-    christmas: '/seasons/christmas/mark.png',
     grimm: '/seasons/grimm/favicon.png',
 };
 
@@ -41,10 +40,10 @@ function Sidebar({ readingCount, seasonTheme }) {
 
     return (
         <aside className="sidebar">
-            <Link to="/" className="sidebar-logo" aria-label="Bookish Corner">
+            <Link to="/" className="sidebar-logo" aria-label="A Library of Us">
                 <img className="sidebar-logo-image" src={illustration} alt="" />
                 <img className="sidebar-logo-mark" src={mark} alt="" />
-                <span className="sidebar-logo-name">Bookish<span className="sidebar-logo-accent">Corner</span></span>
+                <span className="sidebar-logo-name">A Library<span className="sidebar-logo-accent">of Us</span></span>
                 <span className="sidebar-tagline">{t('nav.tagline')}</span>
             </Link>
 

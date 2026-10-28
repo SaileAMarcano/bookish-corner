@@ -39,7 +39,7 @@ function Welcome({ currentUser, onDone, onLanguageChange }) {
                 <LanguageSwitcher onChange={onLanguageChange} />
             </div>
             <div className="access-card welcome-card">
-                <img src="/logo.png" alt="Bookish Corner" className="access-logo welcome-logo" />
+                <img src="/logo.png" alt="A Library of Us" className="access-logo welcome-logo" />
 
                 <p className="welcome-hello">{t('welcome.hello', { name: currentUser.displayName })}</p>
                 <h1 className="display access-title">{t('welcome.question')}</h1>

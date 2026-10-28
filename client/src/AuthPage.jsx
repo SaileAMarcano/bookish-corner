@@ -66,7 +66,7 @@ function AuthPage({ mode, onLogin }) {
             </div>
             <div className="access-card">
                 <Link to="/" className="access-brand">
-                    <img src="/logo.png" alt="Bookish Corner" className="access-logo" />
+                    <img src="/logo.png" alt="A Library of Us" className="access-logo" />
                 </Link>
 
                 <h1 className="display access-title">{t(`auth.${mode}.title`)}</h1>
