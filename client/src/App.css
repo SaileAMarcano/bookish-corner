@@ -1321,13 +1321,9 @@ html {
   line-height: 0.95;
 }
 
-.sidebar-logo-accent {
+.siderbar-logo-accent {
   display: block;
-  color: #9C7A3C;
-}
-
-:root[data-theme="dark"] .sidebar-logo-accent {
-  color: #C9A45C;
+  color: var(--rose);
 }
 
 .sidebar-nav {
@@ -7519,12 +7515,6 @@ a.comment-author:hover {
     background-image: url('/seasons/christmas/snowflakes-dark.svg');
   }
 
-  :root[data-season="christmas"] .sidebar-logo-image {
-    width: calc(100% + 28px);
-    max-width: none;
-    margin: -14px -14px 10px;
-  }
-
   :root[data-season="christmas"] .app-main::before,
   :root[data-season="christmas"] .app-main::after {
     content: '';
@@ -7553,5 +7543,57 @@ a.comment-author:hover {
 
   :root[data-theme="dark"][data-season="christmas"] .app-main::after {
     background-image: url('/seasons/christmas/corner-bl-dark.svg');
+  }
+
+  .sidebar>* {
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar>.sidebar-scene {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 0;
+    width: 100%;
+    max-height: 30vh;
+    object-fit: contain;
+    object-position: left bottom;
+    pointer-events: none;
+  }
+
+  @media (min-width: 861px) {
+    .sidebar {
+      gap: 10px;
+      padding-top: 18px;
+    }
+
+    .sidebar-nav {
+      gap: 0;
+    }
+
+    .sidebar-link {
+      min-height: 36px;
+      font-size: 14px;
+    }
+
+    .sidebar-logo-image {
+      width: 96px;
+      margin-bottom: 2px;
+    }
+
+    .sidebar-logo-name {
+      font-size: 36px;
+    }
+
+    .sidebar-tagline {
+      font-size: 15px;
+    }
+  }
+
+  @media (max-width: 1400px) {
+    .sidebar>.sidebar-scene {
+      display: none;
+    }
   }
 }
