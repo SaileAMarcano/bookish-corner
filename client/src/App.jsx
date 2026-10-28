@@ -19,6 +19,7 @@ import GenrePage from './GenrePage';
 import UserPage from './UserPage';
 import BookPage from './BookPage';
 import AchievementsPage from './AchievementsPage';
+import AdminPage from './AdminPage';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -273,7 +274,7 @@ function App() {
         </video>
       )}
 
-      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} />
+      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} staffRole={currentUser.staffRole} />
 
       <div className="app-main">
         <header className="topbar">
@@ -388,6 +389,9 @@ function App() {
           <Route path="/book/:id" element={<BookPage books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
+          {currentUser.staffRole === 'admin' && (
+            <Route path="/admin" element={<AdminPage currentUser={currentUser} />} />
+          )}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

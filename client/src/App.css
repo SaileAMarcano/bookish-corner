@@ -7737,3 +7737,55 @@ a.comment-author:hover {
     }
   }
 }
+
+.admin-box {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 24px 28px;
+}
+
+.admin-search {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-search input {
+  padding: 10px 14px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+
+.admin-search input:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 1px;
+}
+
+.admin-message {
+  margin: 0;
+  color: var(--sage-text);
+  font-weight: 600;
+}
+
+.admin-role-select {
+  padding: 6px 10px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+.admin-role-badge {
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-size: 13px;
+  font-weight: 600;
+}

@@ -31,10 +31,11 @@ function isActive(item, location) {
     return query === `tab=${tab}`;
 }
 
-function Sidebar({ readingCount, seasonTheme }) {
+function Sidebar({ readingCount, seasonTheme, staffRole }) {
     const location = useLocation();
     const { t } = useTranslation();
     const settingsActive = location.pathname === '/profile/edit';
+    const adminActive = location.pathname === '/admin';
     const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
     const mark = SEASON_MARKS[seasonTheme] || '/logo-mark.png';
 
@@ -62,6 +63,12 @@ function Sidebar({ readingCount, seasonTheme }) {
                 <Icon name="settings" size={20} />
                 <span className="sidebar-label">{t('nav.settings')}</span>
             </Link>
+            {staffRole === 'admin' && (
+                <Link to="/admin" className={`sidebar-link sidebar-settings ${adminActive ? 'active' : ''}`} aria-label={t('nav.admin')}>
+                    <Icon name="lock" size={20} />
+                    <span className="sidebar-label">{t('nav.admin')}</span>
+                </Link>
+            )}
         </aside>
     );
 }
