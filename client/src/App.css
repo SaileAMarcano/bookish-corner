@@ -2332,6 +2332,19 @@ html {
   border-radius: var(--radius-lg);
   background: rgba(255, 250, 246, 0.92);
   box-shadow: 0 20px 50px rgba(120, 70, 80, 0.18);
+  color-scheme: light;
+  color: var(--ink);
+  --bg: #F4EDE0;
+  --surface: #FAF5EB;
+  --surface-2: #E6DDCF;
+  --ink: #2E2925;
+  --text-2: #6F675E;
+  --rose: #C496A1;
+  --rose-deep: #B07E8A;
+  --rose-ink: #864B5C;
+  --rose-soft: #F2DEDB;
+  --error: #9B4A3D;
+  --error-soft: #F0DCD6;
 }
 
 .access-brand {
