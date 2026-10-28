@@ -7660,7 +7660,7 @@ a.comment-author:hover {
     bottom: 0;
     z-index: 0;
     width: 100%;
-    max-height: 30vh;
+    max-height: 40vh;
     object-fit: contain;
     object-position: left bottom;
     pointer-events: none;
@@ -7699,5 +7699,41 @@ a.comment-author:hover {
     .sidebar>.sidebar-scene {
       display: none;
     }
+  }
+
+  .sidebar-logo-accent {
+    display: block;
+    color: var(--rose);
+  }
+
+  @media (min-width: 861px) {
+    .sidebar-logo {
+      display: grid;
+      grid-template-columns: auto auto;
+      justify-content: center;
+      align-items: center;
+      column-gap: 10px;
+      padding: 0;
+      text-align: left;
+    }
+
+    .sidebar-logo-image {
+      width: 78px;
+      margin: 0;
+    }
+
+    .sidebar-logo-name {
+      font-size: 34px;
+    }
+
+    .sidebar-tagline {
+      grid-column: 1 / -1;
+      margin-top: 4px;
+      text-align: center;
+    }
+  }
+
+  :root[data-season="classic"] .sidebar>.sidebar-scene {
+    opacity: 0.6;
   }
 }
