@@ -6,6 +6,7 @@ const { LANGUAGES, languageOf, msg } = require('./messages');
 const { syncMilestones } = require('./milestones');
 const cors = require('cors');
 const crypto = require('crypto');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
@@ -1782,6 +1783,50 @@ app.delete('/api/admin/invites/:id', requireStaff('admin'), async (req, res) => 
     res.json(invite);
 });
 
+app.get('/api/admin/summary', requireStaff('moderator'), async (req, res) => {
+    const [counts] = await query(`
+        SELECT
+            (SELECT COUNT(*) FROM users) AS readers,
+            (SELECT COUNT(*) FROM users WHERE created_at > now() - interval '7 days') AS new_readers,
+            (SELECT COUNT(*) FROM posts) AS posts,
+            (SELECT COUNT(*) FROM (
+                SELECT user_id FROM posts WHERE created_at > now() - interval '7 days'
+                UNION SELECT user_id FROM post_comments WHERE created_at > now() - interval '7 days'
+                UNION SELECT user_id FROM post_likes WHERE created_at > now() - interval '7 days'
+                UNION SELECT user_id FROM comments WHERE created_at > now() - interval '7 days'
+                UNION SELECT user_id FROM likes WHERE created_at > now() - interval '7 days'
+                UNION SELECT user_id FROM user_books WHERE last_read_at > now() - interval '7 days'
+            ) active) AS active_readers,
+            (SELECT COUNT(*) FROM invites WHERE status = 'pending') AS pending_invites,
+            (SELECT COUNT(*) FROM invites WHERE status = 'approved' AND used_at IS NULL) AS unused_invites
+    `);
+
+    const team = await query(`
+        SELECT staff_role AS role, COUNT(*) AS count
+        FROM users
+        WHERE staff_role IS NOT NULL
+        GROUP BY staff_role
+    `);
+
+    const pendingRequests = req.staffRole === 'admin'
+        ? await query(`
+            SELECT i.id, i.note, i.created_at, u.username AS requested_by
+            FROM invites i
+            LEFT JOIN users u ON u.id = i.created_by
+            WHERE i.status = 'pending'
+            ORDER BY i.created_at
+            LIMIT 5
+        `)
+        : [];
+
+    res.json({
+        ...counts,
+        signupOpen: process.env.SIGNUP_OPEN === 'true',
+        team: Object.fromEntries(team.map((row) => [row.role, row.count])),
+        pendingRequests,
+    });
+});
+
 const STAFF_ROLES = ['editor', 'moderator', 'designer'];
 
 app.get('/api/admin/users', requireStaff('moderator'), async (req, res) => {
@@ -2061,10 +2106,12 @@ app.post('/api/logout', (req, res) => {
 
 const CLIENT_DIST = path.join(__dirname, '..', 'client', 'dist');
 
-app.use(express.static(CLIENT_DIST));
-app.get(/^(?!\/api\/).*/, (req, res) => {
-    res.sendFile(path.join(CLIENT_DIST, 'index.html'));
-});
+if (fs.existsSync(CLIENT_DIST)) {
+    app.use(express.static(CLIENT_DIST));
+    app.get(/^(?!\/api\/).*/, (req, res) => {
+        res.sendFile(path.join(CLIENT_DIST, 'index.html'));
+    });
+}
 
 app.use((error, req, res, next) => {
     if (error.code === 'LIMIT_FILE_SIZE') {
