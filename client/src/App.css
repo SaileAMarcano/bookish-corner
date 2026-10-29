@@ -7789,3 +7789,20 @@ a.comment-author:hover {
   font-size: 13px;
   font-weight: 600;
 }
+
+.profile-staff-role {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 12px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(90deg, #FFADD399, #FCF6BD99, #D0F4DE99, #A9DEF999, #E4C1F999);
+  color: #4A3557;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+:root[data-theme="dark"] .profile-staff-role {
+  background: linear-gradient(90deg, #FFADD34D, #FCF6BD4D, #D0F4DE4D, #A9DEF94D, #E4C1F94D);
+  color: #F3EBDD;
+}

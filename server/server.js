@@ -1356,7 +1356,7 @@ app.get('/api/users', requireAuth, async (req, res) => {
 app.get('/api/users/:username', requireAuth, async (req, res) => {
     const [user] = await query(`
         SELECT id, username, COALESCE(display_name, username) AS display_name, bio, avatar_url,
-               about_me, favorite_quote, favorite_things, location, instagram_url, tiktok_url, reading_goal, created_at, 
+                about_me, favorite_quote, favorite_things, location, instagram_url, tiktok_url, reading_goal, created_at, staff_role, 
                (SELECT COUNT(*) FROM user_books
                WHERE user_books.user_id = users.id AND user_books.status = 'finished') AS books_read,
                (SELECT COUNT(*) FROM user_books
@@ -1665,7 +1665,7 @@ app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
     res.json({ seasonTheme });
 });
 
-const STAFF_ROLES = ['editor', 'moderator'];
+const STAFF_ROLES = ['editor', 'moderator', 'designer'];
 
 app.get('/api/admin/users', requireStaff('admin'), async (req, res) => {
     const search = (req.query.q || '').trim();
@@ -1864,7 +1864,7 @@ app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => 
 app.get('/api/profile', requireAuth, async (req, res) => {
     const [user] = await query(`
         SELECT id, username, email, bio, avatar_url, instagram_url, tiktok_url, about_me, favorite_quote,
-    favorite_things, location, reading_goal, reader_type, created_at,
+    favorite_things, location, reading_goal, reader_type, created_at, staff_role,
     COALESCE(display_name, username) AS display_name,
         (SELECT COUNT(*) FROM user_books
                    WHERE user_books.user_id = users.id AND user_books.status = 'finished') AS books_read,

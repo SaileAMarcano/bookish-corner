@@ -50,6 +50,10 @@ function ProfileHeader({ profile, onShowFollows, children }) {
                     </div>
                     <div className="profile-username">@{profile.username}</div>
 
+                    {profile.staffRole && (
+                        <span className={`profile-staff-role staff-${profile.staffRole}`}>{t(`admin.roles.${profile.staffRole}`)}</span>
+                    )}
+
                     {profile.bio && <p className="profile-bio">{profile.bio}</p>}
 
                     <div className="profile-meta">

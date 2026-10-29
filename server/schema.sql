@@ -24,7 +24,7 @@ CREATE TABLE users(
     plus_until      TIMESTAMPTZ,
     is_admin        BOOLEAN NOT NULL DEFAULT false,
     gender_identity TEXT CHECK (gender_identity IN ('woman', 'man', 'nonbinary', 'unspecified')),
-    staff_role      TEXT CHECK (staff_role IN ('admin', 'editor', 'moderator'))
+    staff_role      TEXT CHECK (staff_role IN ('admin', 'editor', 'moderator', 'designer'))
 );
 
 CREATE TABLE works (

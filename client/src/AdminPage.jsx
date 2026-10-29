@@ -5,7 +5,7 @@ import Notice from './Notice';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 
-const ROLE_OPTIONS = ['none', 'editor', 'moderator'];
+const ROLE_OPTIONS = ['none', 'editor', 'moderator', 'designer'];
 
 function AdminPage({ currentUser }) {
     const { t } = useTranslation();

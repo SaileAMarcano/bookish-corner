@@ -67,6 +67,7 @@ const es = {
             admin: 'Admin',
             editor: 'Editor',
             moderator: 'Moderador',
+            designer: 'Diseñadora',
         },
     },
     themes: {
