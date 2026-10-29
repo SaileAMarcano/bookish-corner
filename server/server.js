@@ -5,6 +5,7 @@ const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage, uploadCove
 const { LANGUAGES, languageOf, msg } = require('./messages');
 const { syncMilestones } = require('./milestones');
 const cors = require('cors');
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const PgSession = require('connect-pg-simple')(session);
@@ -1512,7 +1513,9 @@ const passwordProblem = (password) => {
 const USERNAME_MAX_LENGTH = 30;
 
 app.post('/api/register', authLimiter, async (req, res) => {
-    if (process.env.SIGNUP_OPEN !== 'true') {
+    const invite = typeof req.body.invite === 'string' ? req.body.invite.trim() : '';
+
+    if (process.env.SIGNUP_OPEN !== 'true' && !invite) {
         return res.status(403).json({ error: msg(req, 'signupClosed') });
     }
     const { username, email, password } = req.body;
@@ -1532,17 +1535,42 @@ app.post('/api/register', authLimiter, async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
+    const client = await pool.connect();
+
     try {
-        const [user] = await query(
+        await client.query('BEGIN');
+
+        if (invite) {
+            const claimed = await client.query(
+                'UPDATE invites SET used_at = now() WHERE code = $1 AND used_at IS NULL RETURNING code',
+                [invite]
+            );
+            if (claimed.rowCount === 0) {
+                await client.query('ROLLBACK');
+                return res.status(403).json({ error: msg(req, 'inviteInvalid') });
+            }
+        }
+
+        const result = await client.query(
             'INSERT INTO users (username, email, password_hash, language) VALUES ($1, $2, $3, $4) RETURNING id, username, email',
             [username, email, passwordHash, language]
         );
+        const user = result.rows[0];
+
+        if (invite) {
+            await client.query('UPDATE invites SET used_by = $1 WHERE code = $2', [user.id, invite]);
+        }
+
+        await client.query('COMMIT');
         res.status(201).json(user);
     } catch (error) {
+        await client.query('ROLLBACK');
         if (error.code === '23505') {
             return res.status(400).json({ error: msg(req, 'userTaken') });
         }
         throw error;
+    } finally {
+        client.release();
     }
 });
 
@@ -1663,6 +1691,40 @@ app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
 
     await query('UPDATE users SET season_theme = $1 WHERE id = $2', [seasonTheme, me.id]);
     res.json({ seasonTheme });
+});
+
+app.get('/api/admin/invites', requireStaff('admin'), async (req, res) => {
+    const invites = await query(`
+        SELECT i.code, i.note, i.created_at, i.used_at, u.username AS used_by
+        FROM invites i
+        LEFT JOIN users u ON u.id = i.used_by
+        ORDER BY i.created_at DESC
+        LIMIT 50
+    `);
+    res.json(invites);
+});
+
+app.post('/api/admin/invites', requireStaff('admin'), async (req, res) => {
+    const note = (req.body.note || '').trim().slice(0, 80) || null;
+    const code = crypto.randomBytes(16).toString('base64url');
+
+    const [invite] = await query(
+        'INSERT INTO invites (code, note, created_by) VALUES ($1, $2, $3) RETURNING code, note, created_at, used_at',
+        [code, note, req.session.user.id]
+    );
+    res.status(201).json({ ...invite, usedBy: null });
+});
+
+app.delete('/api/admin/invites/:code', requireStaff('admin'), async (req, res) => {
+    const [invite] = await query(
+        'DELETE FROM invites WHERE code = $1 AND used_at IS NULL RETURNING code',
+        [req.params.code]
+    );
+
+    if (!invite) {
+        return res.status(404).json({ error: msg(req, 'inviteInvalid') });
+    }
+    res.json(invite);
 });
 
 const STAFF_ROLES = ['editor', 'moderator', 'designer'];
