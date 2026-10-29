@@ -15,6 +15,12 @@ const NAV_ITEMS = [
     { to: '/profile?tab=posts', label: 'nav.profile', icon: 'about' },
 ];
 
+const ADMIN_ITEMS = [
+    { to: '/admin', label: 'nav.adminSummary', icon: 'genres', roles: ['admin', 'moderator'] },
+    { to: '/admin/people', label: 'nav.adminPeople', icon: 'following', roles: ['admin', 'moderator'] },
+    { to: '/admin/invites', label: 'nav.adminInvites', icon: 'mail', roles: ['admin', 'moderator'] },
+];
+
 const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
 
 const SEASON_MARKS = {
@@ -35,7 +41,7 @@ function Sidebar({ readingCount, seasonTheme, staffRole }) {
     const location = useLocation();
     const { t } = useTranslation();
     const settingsActive = location.pathname === '/profile/edit';
-    const adminActive = location.pathname === '/admin';
+    const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(staffRole));
     const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
     const mark = SEASON_MARKS[seasonTheme] || '/logo-mark.png';
 
@@ -63,11 +69,16 @@ function Sidebar({ readingCount, seasonTheme, staffRole }) {
                 <Icon name="settings" size={20} />
                 <span className="sidebar-label">{t('nav.settings')}</span>
             </Link>
-            {['admin', 'moderator'].includes(staffRole) && (
-                <Link to="/admin" className={`sidebar-link sidebar-settings ${adminActive ? 'active' : ''}`} aria-label={t('nav.admin')}>
-                    <Icon name="lock" size={20} />
-                    <span className="sidebar-label">{t('nav.admin')}</span>
-                </Link>
+            {adminItems.length > 0 && (
+                <>
+                    <p className="sidebar-section-label">{t('nav.adminSection')}</p>
+                    {adminItems.map((item) => (
+                        <Link key={item.to} to={item.to} className={`sidebar-link sidebar-settings ${location.pathname === item.to ? 'active' : ''}`} aria-label={t(item.label)}>
+                            <Icon name={item.icon} size={20} />
+                            <span className="sidebar-label">{t(item.label)}</span>
+                        </Link>
+                    ))}
+                </>
             )}
         </aside>
     );

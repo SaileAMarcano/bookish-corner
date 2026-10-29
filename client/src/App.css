@@ -7881,3 +7881,95 @@ a.comment-author:hover {
   font-weight: 600;
   text-align: center;
 }
+
+.sidebar-section-label {
+  margin: auto 0 0;
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-2);
+}
+
+@media (max-width: 1400px) {
+  .sidebar-section-label {
+    display: none;
+  }
+
+  .sidebar-section-label+.sidebar-link {
+    margin-top: auto;
+  }
+}
+
+.admin-hero-action {
+  display: inline-block;
+  text-decoration: none;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 18px;
+}
+
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+}
+
+.admin-stat-label {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.admin-stat-number {
+  font-size: 34px;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.admin-stat-note {
+  font-size: 12px;
+  color: var(--text-2);
+}
+
+.admin-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(260px, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.admin-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.admin-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--surface-2);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.admin-row strong {
+  color: var(--ink);
+}
+
+@media (max-width: 860px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-columns {
+    grid-template-columns: 1fr;
+  }
+}

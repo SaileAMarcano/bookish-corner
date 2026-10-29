@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
-import InvitePanel from './InvitePanel';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 
@@ -53,7 +52,7 @@ function AdminPage({ currentUser }) {
             <div className="card tagged-hero">
                 <div>
                     <div className="tagged-kicker">{t('admin.kicker')}</div>
-                    <h1 className="display tagged-title">{t('admin.title')}</h1>
+                    <h1 className="display tagged-title">{t('admin.peopleTitle')}</h1>
                     <p className="tagged-count">{t(isAdmin ? 'admin.lead' : 'admin.leadModerator')}</p>
                 </div>
             </div>
@@ -108,7 +107,6 @@ function AdminPage({ currentUser }) {
                     </ul>
                 )}
             </section>
-            <InvitePanel isAdmin={isAdmin} />
         </main>
     );
 }

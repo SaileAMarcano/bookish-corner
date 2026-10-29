@@ -20,6 +20,8 @@ import UserPage from './UserPage';
 import BookPage from './BookPage';
 import AchievementsPage from './AchievementsPage';
 import AdminPage from './AdminPage';
+import AdminSummary from './AdminSummary';
+import AdminInvites from './AdminInvites';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -390,7 +392,11 @@ function App() {
           <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           {['admin', 'moderator'].includes(currentUser.staffRole) && (
-            <Route path="/admin" element={<AdminPage currentUser={currentUser} />} />
+            <>
+              <Route path="/admin" element={<AdminSummary currentUser={currentUser} />} />
+              <Route path="/admin/people" element={<AdminPage currentUser={currentUser} />} />
+              <Route path="/admin/invites" element={<AdminInvites currentUser={currentUser} />} />
+            </>
           )}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

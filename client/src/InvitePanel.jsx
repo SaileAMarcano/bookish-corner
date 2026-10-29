@@ -79,11 +79,6 @@ function InvitePanel({ isAdmin }) {
 
     return (
         <section className="card admin-box">
-            <div>
-                <h2 className="section-label">{t('invites.title')}</h2>
-                <p className="invite-lead">{isAdmin ? t('invites.lead') : t('invites.leadModerator')}</p>
-            </div>
-
             <form className="invite-form" onSubmit={handleCreate}>
                 <input
                     type="text"
