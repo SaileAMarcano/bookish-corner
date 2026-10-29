@@ -24,6 +24,7 @@ import AdminSummary from './AdminSummary';
 import AdminInvites from './AdminInvites';
 import AdminCatalog from './AdminCatalog';
 import AdminActivity from './AdminActivity';
+import AdminModeration from './AdminModeration';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -63,6 +64,7 @@ function App() {
   const [userStatus, setUserStatus] = useState('loading');
   const [userError, setUserError] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [moderationCount, setModerationCount] = useState(0);
   const navigate = useNavigate();
 
   const theme = themeOf(currentUser);
@@ -163,6 +165,18 @@ function App() {
   useEffect(() => {
     setShowUserMenu(false);
   }, [location]);
+
+  const canModerate = ['admin', 'moderator'].includes(currentUser?.staffRole);
+
+  const loadModerationCount = () => {
+    apiFetch('/api/admin/reports/count')
+      .then((data) => setModerationCount(data.count))
+      .catch(() => { });
+  };
+
+  useEffect(() => {
+    if (canModerate) loadModerationCount();
+  }, [canModerate, location.pathname]);
 
   const handleLike = (userBookId, alreadyLiked) => {
     apiFetch(`/api/user-books/${userBookId}/like`, {
@@ -278,7 +292,7 @@ function App() {
         </video>
       )}
 
-      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} staffRole={currentUser.staffRole} />
+      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} staffRole={currentUser.staffRole} moderationCount={moderationCount} />
 
       <div className="app-main">
         <header className="topbar">
@@ -396,6 +410,7 @@ function App() {
           {['admin', 'moderator'].includes(currentUser.staffRole) && (
             <>
               <Route path="/admin" element={<AdminSummary currentUser={currentUser} />} />
+              <Route path="/admin/moderation" element={<AdminModeration onResolved={loadModerationCount} />} />
               <Route path="/admin/people" element={<AdminPage currentUser={currentUser} />} />
               <Route path="/admin/invites" element={<AdminInvites currentUser={currentUser} />} />
               <Route path="/admin/activity" element={<AdminActivity />} />

@@ -61,27 +61,35 @@ function AdminSummary({ currentUser }) {
                     </div>
 
                     <div className="admin-columns">
-                        {isAdmin && (
-                            <section className="card admin-box">
-                                <h2 className="section-label">{t('adminSummary.attention')}</h2>
+                        <section className="card admin-box">
+                            <h2 className="section-label">{t('adminSummary.attention')}</h2>
 
-                                {summary.pendingRequests.length === 0 ? (
-                                    <p className="tags-empty">{t('adminSummary.attentionEmpty')}</p>
-                                ) : (
-                                    <ul className="follow-list">
-                                        {summary.pendingRequests.map((request) => (
-                                            <li key={request.id} className="follow-row">
-                                                <div className="follow-name">
-                                                    <span className="search-title">{request.note || t('invites.noNote')}</span>
-                                                    <span className="search-author">{t('invites.requestedBy', { username: request.requestedBy || '—' })}</span>
-                                                </div>
-                                                <Link to="/admin/invites" className="invite-action">{t('adminSummary.review')}</Link>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </section>
-                        )}
+                            {summary.pendingReports === 0 && summary.pendingRequests.length === 0 ? (
+                                <p className="tags-empty">{t('adminSummary.attentionEmpty')}</p>
+                            ) : (
+                                <ul className="follow-list">
+                                    {summary.pendingReports > 0 && (
+                                        <li className="follow-row">
+                                            <span className="moderation-alert" aria-hidden="true">!</span>
+                                            <div className="follow-name">
+                                                <span className="search-title">{t('adminSummary.reports', { count: summary.pendingReports })}</span>
+                                                <span className="search-author">{t('adminSummary.reportsNote')}</span>
+                                            </div>
+                                            <Link to="/admin/moderation" className="invite-action">{t('adminSummary.seeReports')}</Link>
+                                        </li>
+                                    )}
+                                    {summary.pendingRequests.map((request) => (
+                                        <li key={request.id} className="follow-row">
+                                            <div className="follow-name">
+                                                <span className="search-title">{request.note || t('invites.noNote')}</span>
+                                                <span className="search-author">{t('invites.requestedBy', { username: request.requestedBy || '—' })}</span>
+                                            </div>
+                                            <Link to="/admin/invites" className="invite-action">{t('adminSummary.review')}</Link>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+                        </section>
 
                         <div className="admin-side">
                             <section className="card admin-box">

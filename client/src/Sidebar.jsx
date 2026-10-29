@@ -17,6 +17,7 @@ const NAV_ITEMS = [
 
 const ADMIN_ITEMS = [
     { to: '/admin', label: 'nav.adminSummary', icon: 'genres', roles: ['admin', 'moderator'] },
+    { to: '/admin/moderation', label: 'nav.adminModeration', icon: 'flag', roles: ['admin', 'moderator'] },
     { to: '/admin/people', label: 'nav.adminPeople', icon: 'following', roles: ['admin', 'moderator'] },
     { to: '/admin/invites', label: 'nav.adminInvites', icon: 'mail', roles: ['admin', 'moderator'] },
     { to: '/admin/catalog', label: 'nav.adminCatalog', icon: 'library', roles: ['admin', 'editor'] },
@@ -39,7 +40,7 @@ function isActive(item, location) {
     return query === `tab=${tab}`;
 }
 
-function Sidebar({ readingCount, seasonTheme, staffRole }) {
+function Sidebar({ readingCount, seasonTheme, staffRole, moderationCount }) {
     const location = useLocation();
     const { t } = useTranslation();
     const settingsActive = location.pathname === '/profile/edit';
@@ -78,6 +79,7 @@ function Sidebar({ readingCount, seasonTheme, staffRole }) {
                         <Link key={item.to} to={item.to} className={`sidebar-link sidebar-settings ${location.pathname === item.to ? 'active' : ''}`} aria-label={t(item.label)}>
                             <Icon name={item.icon} size={20} />
                             <span className="sidebar-label">{t(item.label)}</span>
+                            {item.to === '/admin/moderation' && moderationCount > 0 && <span className="sidebar-badge">{moderationCount}</span>}
                         </Link>
                     ))}
                 </>

@@ -26,6 +26,9 @@ function AdminActivity() {
         if (ROLE_ACTIONS.includes(action.action)) {
             return t('staffActivity.toUser', { username: action.target });
         }
+        if (action.action.startsWith('report_')) {
+            return [t(`moderation.types.${action.detail}`), action.target].filter(Boolean).join(' · ');
+        }
         return t('staffActivity.quoted', { title: action.target });
     };
 

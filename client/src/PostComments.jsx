@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import Notice from './Notice';
+import ReportButton from './ReportButton';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
@@ -94,6 +95,11 @@ function PostComments({ post, currentUserId, onCountChange }) {
                         >
                             <Icon name="trash" size={15} />
                         </button>
+                    )}
+
+
+                    {comment.userId !== currentUserId && (
+                        <ReportButton targetType="post_comment" targetId={comment.id} />
                     )}
                 </div>
             ))}
