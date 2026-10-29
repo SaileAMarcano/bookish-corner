@@ -5,6 +5,7 @@ import Notice from './Notice';
 import Icon from './Icon';
 import BookCover from './BookCover';
 import BookEditorForm from './BookEditorForm';
+import BookRequestsCard from './BookRequestsCard';
 import { apiFetch } from './api';
 
 function AdminCatalog() {
@@ -14,6 +15,7 @@ function AdminCatalog() {
     const [error, setError] = useState('');
     const [message, setMessage] = useState('');
     const [editingId, setEditingId] = useState(null);
+    const [request, setRequest] = useState(null);
     const [confirmId, setConfirmId] = useState(null);
     const [version, setVersion] = useState(0);
 
@@ -39,13 +41,27 @@ function AdminCatalog() {
     const handleSaved = (text) => {
         setMessage(text);
         setEditingId(null);
+        setRequest(null);
         setVersion((current) => current + 1);
     };
 
     const handleEdit = (id) => {
         setMessage('');
+        setRequest(null);
         setEditingId(id);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleComplete = (bookRequest) => {
+        setMessage('');
+        setEditingId(null);
+        setRequest(bookRequest);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const handleCancel = () => {
+        setEditingId(null);
+        setRequest(null);
     };
 
     const handleDelete = (book) => {
@@ -68,6 +84,8 @@ function AdminCatalog() {
             });
     };
 
+    const formKey = editingId ?? (request ? `request-${request.id}` : 'new');
+
     return (
         <main className="page admin-page">
             <div className="card tagged-hero">
@@ -82,66 +100,72 @@ function AdminCatalog() {
 
             <div className="catalog-columns">
                 <BookEditorForm
-                    key={`${editingId ?? 'new'}-${version}`}
+                    key={`${formKey}-${version}`}
                     bookId={editingId}
+                    initial={request ? { title: request.title, author: request.author || '' } : null}
+                    requestId={request ? request.id : null}
                     onSaved={handleSaved}
-                    onCancel={() => setEditingId(null)}
+                    onCancel={handleCancel}
                 />
 
-                <section className="card admin-box">
-                    <h2 className="section-label">{t('catalog.listTitle')}</h2>
+                <div className="admin-side">
+                    <BookRequestsCard version={version} onComplete={handleComplete} />
 
-                    <label className="admin-search">
-                        <input
-                            type="search"
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder={t('catalog.searchPlaceholder')}
-                            aria-label={t('catalog.searchPlaceholder')}
-                        />
-                    </label>
+                    <section className="card admin-box">
+                        <h2 className="section-label">{t('catalog.listTitle')}</h2>
 
-                    {error && <Notice message={error} />}
+                        <label className="admin-search">
+                            <input
+                                type="search"
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder={t('catalog.searchPlaceholder')}
+                                aria-label={t('catalog.searchPlaceholder')}
+                            />
+                        </label>
 
-                    {!books ? (
-                        <p className="tags-empty">{t('admin.loading')}</p>
-                    ) : books.length === 0 ? (
-                        <p className="tags-empty">{t('catalog.empty')}</p>
-                    ) : (
-                        <ul className="follow-list">
-                            {books.map((book) => (
-                                <li key={book.id} className="follow-row">
-                                    <BookCover src={book.coverImage} className="catalog-list-cover" />
+                        {error && <Notice message={error} />}
 
-                                    <div className="follow-name">
-                                        <Link to={`/book/${book.id}`} className="search-title">{book.title}</Link>
-                                        <span className="search-author">
-                                            {book.author}
-                                            {book.year && ` · ${book.year}`}
-                                        </span>
-                                        <span className="search-author">
-                                            {t('catalog.readers', { count: book.readers })}
-                                            {book.addedBy && ` · ${t('catalog.addedBy', { username: book.addedBy })}`}
-                                        </span>
-                                    </div>
+                        {!books ? (
+                            <p className="tags-empty">{t('admin.loading')}</p>
+                        ) : books.length === 0 ? (
+                            <p className="tags-empty">{t('catalog.empty')}</p>
+                        ) : (
+                            <ul className="follow-list">
+                                {books.map((book) => (
+                                    <li key={book.id} className="follow-row">
+                                        <BookCover src={book.coverImage} className="catalog-list-cover" />
 
-                                    <button type="button" className="invite-action" onClick={() => handleEdit(book.id)}>
-                                        <Icon name="pencil" size={14} />
-                                        {t('catalog.edit')}
-                                    </button>
-                                    <button
-                                        type="button"
-                                        className="invite-action"
-                                        onClick={() => handleDelete(book)}
-                                        aria-label={t('catalog.delete')}
-                                    >
-                                        {confirmId === book.id ? t('catalog.confirmDelete') : <Icon name="trash" size={14} />}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </section>
+                                        <div className="follow-name">
+                                            <Link to={`/book/${book.id}`} className="search-title">{book.title}</Link>
+                                            <span className="search-author">
+                                                {book.author}
+                                                {book.year && ` · ${book.year}`}
+                                            </span>
+                                            <span className="search-author">
+                                                {t('catalog.readers', { count: book.readers })}
+                                                {book.addedBy && ` · ${t('catalog.addedBy', { username: book.addedBy })}`}
+                                            </span>
+                                        </div>
+
+                                        <button type="button" className="invite-action" onClick={() => handleEdit(book.id)}>
+                                            <Icon name="pencil" size={14} />
+                                            {t('catalog.edit')}
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="invite-action"
+                                            onClick={() => handleDelete(book)}
+                                            aria-label={t('catalog.delete')}
+                                        >
+                                            {confirmId === book.id ? t('catalog.confirmDelete') : <Icon name="trash" size={14} />}
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </section>
+                </div>
             </div>
         </main>
     );

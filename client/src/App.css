@@ -8106,3 +8106,56 @@ a.comment-author:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.catalog-requests-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.catalog-request-initial {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 56px;
+  border-radius: var(--radius-sm);
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+}
+
+.book-request {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 14px;
+  border-top: 1px solid var(--surface-2);
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.book-request-form input {
+  flex: 1;
+  min-width: 160px;
+  padding: 9px 12px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+
+.book-request-form .access-error {
+  width: 100%;
+  margin: 0;
+}
+
+.book-request-done {
+  font-weight: 600;
+  color: var(--sage-text);
+}

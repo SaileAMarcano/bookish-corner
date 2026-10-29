@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
+import BookRequestBox from './BookRequestBox';
 
 
 function SearchPanel({ q, books, onAdded, onError, onClose }) {
@@ -135,6 +136,8 @@ function SearchPanel({ q, books, onAdded, onError, onClose }) {
                     )}
                 </div>
             ))}
+
+            {!isSearching && <BookRequestBox q={q} />}
         </section>
     );
 }

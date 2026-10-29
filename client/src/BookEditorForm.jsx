@@ -29,9 +29,9 @@ function toForm(book) {
     return form;
 }
 
-function BookEditorForm({ bookId, onSaved, onCancel }) {
+function BookEditorForm({ bookId, initial, requestId, onSaved, onCancel }) {
     const { t } = useTranslation();
-    const [form, setForm] = useState(EMPTY_BOOK);
+    const [form, setForm] = useState({ ...EMPTY_BOOK, ...initial });
     const [cover, setCover] = useState(null);
     const [coverPreview, setCoverPreview] = useState('');
     const [error, setError] = useState('');
@@ -69,7 +69,7 @@ function BookEditorForm({ bookId, onSaved, onCancel }) {
         for (const [key, value] of Object.entries(form)) {
             data.append(key, value);
         }
-        if (cover) data.append('cover', cover);
+        if (requestId) data.append('requestId', requestId);
 
         apiFetch(isEditing ? `/api/editor/books/${bookId}` : '/api/editor/books', {
             method: isEditing ? 'PATCH' : 'POST',
@@ -84,7 +84,7 @@ function BookEditorForm({ bookId, onSaved, onCancel }) {
 
     return (
         <form className="card admin-box catalog-form" onSubmit={handleSubmit}>
-            <h2 className="section-label">{isEditing ? t('catalog.editTitle') : t('catalog.addTitle')}</h2>
+            <h2 className="section-label">{isEditing ? t('catalog.editTitle') : requestId ? t('catalog.completeTitle') : t('catalog.addTitle')}</h2>
 
             <label className="catalog-cover-field">
                 {coverPreview ? (
@@ -174,7 +174,7 @@ function BookEditorForm({ bookId, onSaved, onCancel }) {
             {error && <Notice message={error} />}
 
             <div className="catalog-actions">
-                {isEditing && (
+                {(isEditing || requestId) && (
                     <button type="button" className="invite-action" onClick={onCancel}>
                         {t('catalog.cancel')}
                     </button>
