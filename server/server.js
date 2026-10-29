@@ -115,6 +115,8 @@ function requireStaff(...roles) {
         if (user?.staffRole !== 'admin' && !roles.includes(user?.staffRole)) {
             return res.status(403).json({ error: msg(req, 'staffOnly') });
         }
+
+        req.staffRole = user.staffRole;
         next();
     };
 }
@@ -1542,7 +1544,7 @@ app.post('/api/register', authLimiter, async (req, res) => {
 
         if (invite) {
             const claimed = await client.query(
-                'UPDATE invites SET used_at = now() WHERE code = $1 AND used_at IS NULL RETURNING code',
+                "UPDATE invites SET used_at = now() WHERE code = $1 AND used_at IS NULL AND status = 'approved' RETURNING code",
                 [invite]
             );
             if (claimed.rowCount === 0) {
@@ -1693,33 +1695,85 @@ app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
     res.json({ seasonTheme });
 });
 
-app.get('/api/admin/invites', requireStaff('admin'), async (req, res) => {
+const INVITE_FIELDS = `
+    i.id, i.note, i.status, i.created_at, i.used_at,
+    requester.username AS requested_by,
+    used.username AS used_by,
+    CASE WHEN i.status = 'approved' THEN i.code END AS code
+`;
+
+const INVITE_JOINS = `
+    LEFT JOIN users requester ON requester.id = i.created_by
+    LEFT JOIN users used ON used.id = i.used_by
+`;
+
+async function findInvite(id) {
+    const [invite] = await query(`SELECT ${INVITE_FIELDS} FROM invites i ${INVITE_JOINS} WHERE i.id = $1`, [id]);
+    return invite;
+}
+
+app.get('/api/admin/invites', requireStaff('moderator'), async (req, res) => {
+    const onlyFrom = req.staffRole === 'admin' ? null : req.session.user.id;
+
     const invites = await query(`
-        SELECT i.code, i.note, i.created_at, i.used_at, u.username AS used_by
+        SELECT ${INVITE_FIELDS}
         FROM invites i
-        LEFT JOIN users u ON u.id = i.used_by
-        ORDER BY i.created_at DESC
+        ${INVITE_JOINS}
+        WHERE $1::int IS NULL OR i.created_by = $1
+        ORDER BY i.status = 'pending' DESC, i.created_at DESC
         LIMIT 50
-    `);
+    `, [onlyFrom]);
     res.json(invites);
 });
 
-app.post('/api/admin/invites', requireStaff('admin'), async (req, res) => {
+app.post('/api/admin/invites', requireStaff('moderator'), async (req, res) => {
     const note = (req.body.note || '').trim().slice(0, 80) || null;
     const code = crypto.randomBytes(16).toString('base64url');
+    const isAdmin = req.staffRole === 'admin';
 
-    const [invite] = await query(
-        'INSERT INTO invites (code, note, created_by) VALUES ($1, $2, $3) RETURNING code, note, created_at, used_at',
-        [code, note, req.session.user.id]
-    );
-    res.status(201).json({ ...invite, usedBy: null });
+    const [created] = await query(`
+        INSERT INTO invites (code, note, created_by, status, reviewed_by, reviewed_at)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id
+    `, [
+        code,
+        note,
+        req.session.user.id,
+        isAdmin ? 'approved' : 'pending',
+        isAdmin ? req.session.user.id : null,
+        isAdmin ? new Date() : null,
+    ]);
+
+    res.status(201).json(await findInvite(created.id));
 });
 
-app.delete('/api/admin/invites/:code', requireStaff('admin'), async (req, res) => {
-    const [invite] = await query(
-        'DELETE FROM invites WHERE code = $1 AND used_at IS NULL RETURNING code',
-        [req.params.code]
-    );
+app.patch('/api/admin/invites/:id/review', requireStaff('admin'), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'inviteInvalid') });
+    }
+
+    const status = req.body.approve === true ? 'approved' : 'rejected';
+
+    const [reviewed] = await query(`
+        UPDATE invites SET status = $1, reviewed_by = $2, reviewed_at = now()
+        WHERE id = $3 AND status = 'pending'
+        RETURNING id
+    `, [status, req.session.user.id, id]);
+
+    if (!reviewed) {
+        return res.status(404).json({ error: msg(req, 'inviteInvalid') });
+    }
+    res.json(await findInvite(id));
+});
+
+app.delete('/api/admin/invites/:id', requireStaff('admin'), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'inviteInvalid') });
+    }
+
+    const [invite] = await query('DELETE FROM invites WHERE id = $1 AND used_at IS NULL RETURNING id', [id]);
 
     if (!invite) {
         return res.status(404).json({ error: msg(req, 'inviteInvalid') });
@@ -1729,7 +1783,7 @@ app.delete('/api/admin/invites/:code', requireStaff('admin'), async (req, res) =
 
 const STAFF_ROLES = ['editor', 'moderator', 'designer'];
 
-app.get('/api/admin/users', requireStaff('admin'), async (req, res) => {
+app.get('/api/admin/users', requireStaff('moderator'), async (req, res) => {
     const search = (req.query.q || '').trim();
     const users = await query(`
         SELECT id, username, COALESCE(display_name, username) AS display_name, avatar_url, staff_role

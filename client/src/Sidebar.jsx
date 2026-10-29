@@ -63,7 +63,7 @@ function Sidebar({ readingCount, seasonTheme, staffRole }) {
                 <Icon name="settings" size={20} />
                 <span className="sidebar-label">{t('nav.settings')}</span>
             </Link>
-            {staffRole === 'admin' && (
+            {['admin', 'moderator'].includes(staffRole) && (
                 <Link to="/admin" className={`sidebar-link sidebar-settings ${adminActive ? 'active' : ''}`} aria-label={t('nav.admin')}>
                     <Icon name="lock" size={20} />
                     <span className="sidebar-label">{t('nav.admin')}</span>

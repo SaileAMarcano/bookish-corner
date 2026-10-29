@@ -10,6 +10,7 @@ const ROLE_OPTIONS = ['none', 'editor', 'moderator', 'designer'];
 
 function AdminPage({ currentUser }) {
     const { t } = useTranslation();
+    const isAdmin = currentUser.staffRole === 'admin';
     const [search, setSearch] = useState('');
     const [people, setPeople] = useState(null);
     const [error, setError] = useState('');
@@ -53,7 +54,7 @@ function AdminPage({ currentUser }) {
                 <div>
                     <div className="tagged-kicker">{t('admin.kicker')}</div>
                     <h1 className="display tagged-title">{t('admin.title')}</h1>
-                    <p className="tagged-count">{t('admin.lead')}</p>
+                    <p className="tagged-count">{t(isAdmin ? 'admin.lead' : 'admin.leadModerator')}</p>
                 </div>
             </div>
 
@@ -86,9 +87,9 @@ function AdminPage({ currentUser }) {
                                     <span className="search-author">@{person.username}</span>
                                 </Link>
 
-                                {person.staffRole === 'admin' || person.id === currentUser.id ? (
+                                {!isAdmin || person.staffRole === 'admin' || person.id === currentUser.id ? (
                                     <span className="admin-role-badge">
-                                        {person.id === currentUser.id ? t('admin.you') : t('admin.roles.admin')}
+                                        {person.id === currentUser.id ? t('admin.you') : t(`admin.roles.${person.staffRole || 'none'}`)}
                                     </span>
                                 ) : (
                                     <select

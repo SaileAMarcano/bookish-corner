@@ -216,6 +216,10 @@ CREATE TABLE invites (
     used_by    INTEGER REFERENCES users (id) ON DELETE SET NULL,
     used_at    TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+    id          INTEGER GENERATED ALWAYS AS IDENTITY UNIQUE,
+    status      TEXT NOT NULL DEFAULT 'approved' CHECK (status IN ('pending', 'approved', 'rejected')),
+    reviewed_by INTEGER REFERENCES users (id) ON DELETE SET NULL,
+    reviewed_at TIMESTAMPTZ
 );
 
 CREATE INDEX ON editions (work_id);
