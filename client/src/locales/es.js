@@ -184,6 +184,7 @@ const es = {
         backHome: 'Volver al inicio',
         username: 'Nombre de usuario',
         usernamePlaceholder: 'Elige un nombre de usuario',
+        usernameHint: 'Letras, números, puntos o guiones bajos. Sin espacios ni @.',
         email: 'Correo electrónico',
         emailPlaceholder: 'tu@ejemplo.com',
         password: 'Contraseña',

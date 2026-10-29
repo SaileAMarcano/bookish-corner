@@ -184,6 +184,7 @@ const en = {
         backHome: 'Back to home',
         username: 'Username',
         usernamePlaceholder: 'Choose a username',
+        usernameHint: 'Letters, numbers, dots or underscores. No spaces or @.',
         email: 'Email',
         emailPlaceholder: 'you@example.com',
         password: 'Password',

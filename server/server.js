@@ -1510,7 +1510,7 @@ const passwordProblem = (password) => {
     return null;
 }
 
-const USERNAME_MAX_LENGTH = 30;
+const USERNAME_PATTERN = /^[a-zA-Z0-9_.]{3,30}$/;
 
 app.post('/api/register', authLimiter, async (req, res) => {
     const invite = typeof req.body.invite === 'string' ? req.body.invite.trim() : '';
@@ -1524,8 +1524,8 @@ app.post('/api/register', authLimiter, async (req, res) => {
     if (!username || !email || !password) {
         return res.status(400).json({ error: msg(req, 'registerFieldsRequired') });
     }
-    if (username.length > USERNAME_MAX_LENGTH) {
-        return res.status(400).json({ error: msg(req, 'usernameTooLong') });
+    if (!USERNAME_PATTERN.test(username)) {
+        return res.status(400).json({ error: msg(req, 'usernameInvalid') });
     }
 
     const problem = passwordProblem(password);

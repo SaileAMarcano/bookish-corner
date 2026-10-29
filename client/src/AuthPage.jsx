@@ -89,12 +89,13 @@ function AuthPage({ mode, onLogin }) {
                                     className="access-input"
                                     type="text"
                                     placeholder={t('auth.usernamePlaceholder')}
-                                    autoComplete="username"
+                                    autoComplete="nickname"
                                     maxLength={30}
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
                                 />
                             </span>
+                            <span className="access-hint">{t('auth.usernameHint')}</span>
                         </label>
                     )}
 
