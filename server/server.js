@@ -1,7 +1,7 @@
 const express = require('express');
 const { query, pool } = require('./database');
 const { descriptionFrom } = require('./openLibrary');
-const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage } = require('./storage');
+const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage, uploadCover, deleteCover } = require('./storage');
 const { LANGUAGES, languageOf, msg } = require('./messages');
 const { syncMilestones } = require('./milestones');
 const cors = require('cors');
@@ -1701,6 +1701,164 @@ app.patch('/api/admin/users/:id/staff-role', requireStaff('admin'), async (req, 
         return res.status(404).json({ error: msg(req, 'notFound') });
     }
     res.json(user);
+});
+
+function readBookForm(req) {
+    const rawYear = (req.body.year || '').trim();
+
+    return {
+        title: (req.body.title || '').trim().slice(0, 200),
+        author: (req.body.author || '').trim().slice(0, 120),
+        year: rawYear === '' ? null : Number(rawYear),
+        description: (req.body.description || '').trim().slice(0, 3000) || null,
+        titleEs: (req.body.titleEs || '').trim().slice(0, 200) || null,
+        descriptionEs: (req.body.descriptionEs || '').trim().slice(0, 3000) || null,
+    };
+}
+
+function bookFormProblem(book) {
+    if (!book.title || !book.author) return 'bookFieldsRequired';
+
+    const maxYear = new Date().getFullYear() + 5;
+    if (book.year !== null && (!Number.isInteger(book.year) || book.year < 1 || book.year > maxYear)) {
+        return 'bookYearInvalid';
+    }
+    return null;
+}
+
+async function saveSpanishTranslation(workId, book) {
+    if (!book.titleEs && !book.descriptionEs) {
+        await query(`DELETE FROM work_translations WHERE work_id = $1 AND language = 'es'`, [workId]);
+        return;
+    }
+
+    await query(`
+        INSERT INTO work_translations (work_id, language, title, description)
+        VALUES ($1, 'es', $2, $3)
+        ON CONFLICT (work_id, language)
+        DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description
+    `, [workId, book.titleEs || book.title, book.descriptionEs]);
+}
+
+app.get('/api/editor/books', requireStaff('editor'), async (req, res) => {
+    const term = escapeLike(plainSearch((req.query.q || '').trim()));
+
+    const books = await query(`
+        SELECT w.id, w.title, w.author, w.first_published_year AS year, w.cover_image,
+               u.username AS added_by,
+               EXISTS (SELECT 1 FROM work_translations t WHERE t.work_id = w.id AND t.language = 'es') AS has_spanish,
+               (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id) AS readers
+        FROM works w
+        LEFT JOIN users u ON u.id = w.added_by
+        WHERE ${plainText('w.title')} LIKE $1
+           OR ${plainText('w.author')} LIKE $1
+           OR EXISTS (
+               SELECT 1 FROM work_translations any_t
+               WHERE any_t.work_id = w.id AND ${plainText('any_t.title')} LIKE $1
+           )
+        ORDER BY w.created_at DESC, w.id DESC
+        LIMIT 30
+    `, [`%${term}%`]);
+    res.json(books);
+});
+
+app.get('/api/editor/books/:id', requireStaff('editor'), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+
+    const [book] = await query(`
+        SELECT w.id, w.title, w.author, w.description, w.cover_image, w.first_published_year AS year,
+               t.title AS title_es, t.description AS description_es
+        FROM works w
+        LEFT JOIN work_translations t ON t.work_id = w.id AND t.language = 'es'
+        WHERE w.id = $1
+    `, [id]);
+
+    if (!book) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+    res.json(book);
+});
+
+app.post('/api/editor/books', requireStaff('editor'), upload.single('cover'), async (req, res) => {
+    const book = readBookForm(req);
+    const problem = bookFormProblem(book);
+    if (problem) {
+        return res.status(400).json({ error: msg(req, problem) });
+    }
+
+    const coverImage = req.file ? await uploadCover(req.file) : null;
+
+    const [work] = await query(`
+        INSERT INTO works (title, author, description, cover_image, first_published_year, added_by)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id
+    `, [book.title, book.author, book.description, coverImage, book.year, req.session.user.id]);
+
+    await saveSpanishTranslation(work.id, book);
+    res.status(201).json(work);
+});
+
+app.patch('/api/editor/books/:id', requireStaff('editor'), upload.single('cover'), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+
+    const book = readBookForm(req);
+    const problem = bookFormProblem(book);
+    if (problem) {
+        return res.status(400).json({ error: msg(req, problem) });
+    }
+
+    const [current] = await query('SELECT cover_image FROM works WHERE id = $1', [id]);
+    if (!current) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+
+    const coverImage = req.file ? await uploadCover(req.file) : current.coverImage;
+
+    await query(`
+        UPDATE works
+        SET title = $1, author = $2, description = $3, cover_image = $4,
+            first_published_year = $5, updated_at = now()
+        WHERE id = $6
+    `, [book.title, book.author, book.description, coverImage, book.year, id]);
+
+    await saveSpanishTranslation(id, book);
+
+    if (req.file) {
+        await deleteCover(current.coverImage);
+    }
+    res.json({ id });
+});
+
+app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+
+    const [book] = await query(`
+        SELECT cover_image,
+               (SELECT COUNT(*) FROM user_books WHERE work_id = $1)
+             + (SELECT COUNT(*) FROM post_books WHERE work_id = $1) AS uses
+        FROM works
+        WHERE id = $1
+    `, [id]);
+
+    if (!book) {
+        return res.status(404).json({ error: msg(req, 'bookNotFound') });
+    }
+    if (book.uses > 0) {
+        return res.status(409).json({ error: msg(req, 'bookInUse') });
+    }
+
+    await query('DELETE FROM works WHERE id = $1', [id]);
+    await deleteCover(book.coverImage);
+    res.json({ id });
 });
 
 app.get('/api/profile', requireAuth, async (req, res) => {

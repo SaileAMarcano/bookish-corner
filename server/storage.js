@@ -14,6 +14,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SEC
 
 const AVATAR_BUCKET = 'avatars';
 const POST_IMAGE_BUCKET = 'post-images';
+const COVER_BUCKET = 'book-covers';
 const EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif' };
 
 
@@ -52,5 +53,7 @@ const uploadAvatar = (file) => uploadImage(AVATAR_BUCKET, file);
 const deleteAvatar = (publicUrl) => deleteImage(AVATAR_BUCKET, publicUrl);
 const uploadPostImage = (file) => uploadImage(POST_IMAGE_BUCKET, file);
 const deletePostImage = (publicUrl) => deleteImage(POST_IMAGE_BUCKET, publicUrl);
+const uploadCover = (file) => uploadImage(COVER_BUCKET, file);
+const deleteCover = (publicUrl) => deleteImage(COVER_BUCKET, publicUrl);
 
-module.exports = { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage };
+module.exports = { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage, uploadCover, deleteCover };
