@@ -8215,3 +8215,93 @@ a.comment-author:hover {
   background: var(--rose-soft);
   color: var(--rose-ink);
 }
+
+.report-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.report-button:hover {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.post-head .report-button,
+.book-review-foot .report-button {
+  margin-left: auto;
+}
+
+.profile-header-actions .report-button,
+.tagged-hero .report-button {
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--surface-2);
+}
+
+.report-dialog {
+  width: min(440px, calc(100vw - 32px));
+  padding: 26px 28px;
+  border: 1px solid var(--surface-2);
+  color: var(--ink);
+}
+
+.report-dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+
+.report-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.report-title {
+  margin: 0;
+  font-size: 24px;
+}
+
+.report-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.report-reason {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  cursor: pointer;
+}
+
+.report-reason input {
+  accent-color: var(--rose-deep);
+}
+
+.report-form textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  resize: vertical;
+}
+
+.report-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}

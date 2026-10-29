@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import PostCard from './PostCard';
 import BookCover from './BookCover';
 import Notice from './Notice';
+import ReportButton from './ReportButton';
 import { apiFetch } from './api';
 
 function TaggedPage({ currentUser }) {
@@ -96,6 +97,8 @@ function TaggedPage({ currentUser }) {
                 >
                     {data.tag.isFollowing ? t('tagged.followingTag') : t('tagged.follow')}
                 </button>
+
+                <ReportButton targetType="tag" targetId={data.tag.id} />
             </div>
 
             {followError && <Notice message={followError} />}

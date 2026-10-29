@@ -192,6 +192,14 @@ const ICONS = {
         </>
     ),
 
+
+    flag: (
+        <>
+            <path d="M5 21V4" />
+            <path d="M5 4h11l-2 4 2 4H5" />
+        </>
+    ),
+
 };
 
 function Icon({ name, size = 17 }) {

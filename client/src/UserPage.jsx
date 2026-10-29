@@ -5,6 +5,7 @@ import BookItem from './BookItem';
 import PostCard from './PostCard';
 import Notice from './Notice';
 import ProfileHeader from './ProfileHeader';
+import ReportButton from './ReportButton';
 import ProfileTabs, { PROFILE_TABS } from './ProfileTabs';
 import ProfileBooks from './ProfileBooks';
 import FollowList from './FollowList';
@@ -147,6 +148,8 @@ function UserPage({ currentUser }) {
                 <button type="button" className={`tag-follow profile-follow ${profile.isFollowing ? 'following' : ''}`} onClick={handleFollow} aria-pressed={profile.isFollowing}>
                     {profile.isFollowing ? t('userPage.followingButton') : t('userPage.follow')}
                 </button>
+
+                <ReportButton targetType="profile" targetId={profile.id} />
             </ProfileHeader>
 
             {actionError && <Notice message={actionError} />}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import BookModal from './BookModal';
 import ReviewComments from './ReviewComments';
+import ReportButton from './ReportButton';
 import Icon from './Icon';
 import StarRating from './StarRating';
 import Notice from './Notice';
@@ -202,6 +203,10 @@ function BookPage({ books, onLibraryChange }) {
                                     <Icon name="comment" />
                                     {t('book.comments', { count: review.commentCount })}
                                 </button>
+
+                                {!review.isMine && (
+                                    <ReportButton targetType="review" targetId={review.id} />
+                                )}
                             </div>
 
                             {openComments === review.id && (

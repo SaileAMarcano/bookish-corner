@@ -972,7 +972,7 @@ app.get('/api/tagged/:slug', requireAuth, async (req, res) => {
     `, [tag.id, languageOf(req)]);
 
     const follow = await followState(req, tag.id);
-    res.json({ tag: { name: tag.name, slug: tag.slug, ...follow }, posts, relatedTags, books });
+    res.json({ tag: { id: tag.id, name: tag.name, slug: tag.slug, ...follow }, posts, relatedTags, books });
 });
 
 async function followState(req, tagId) {

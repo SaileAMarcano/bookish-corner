@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
+import ReportButton from './ReportButton';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
@@ -69,6 +70,8 @@ function ReviewComments({ reviewId, onCountChange }) {
                         </div>
                         <p className="post-comment-text">{comment.text}</p>
                     </div>
+
+                    <ReportButton targetType="review_comment" targetId={comment.id} />
                 </div>
             ))}
 

@@ -7,6 +7,7 @@ import Notice from './Notice';
 import PostComments from './PostComments';
 import PostComposer from './PostComposer';
 import SpotifyPlayer from './SpotifyPlayer';
+import ReportButton from './ReportButton';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
@@ -119,6 +120,8 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                         <Icon name="trash" />
                     </button>
                 )}
+
+                {!isOwner && <ReportButton targetType="post" targetId={post.id} />}
             </header>
 
             {
