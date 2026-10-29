@@ -1656,6 +1656,7 @@ function hasPlus(user) {
 
 async function findUnlockedThemes(user) {
     if (user.staffRole === 'admin') return SEASON_THEMES;
+    if (['moderator', 'designer'].includes(user.staffRole)) return [...FREE_SEASON_THEMES, ...PAID_SEASON_THEMES];
     if (hasPlus(user)) return [...FREE_SEASON_THEMES, ...PAID_SEASON_THEMES];
 
     const rows = await query('SELECT theme FROM theme_unlocks WHERE user_id = $1', [user.id]);
