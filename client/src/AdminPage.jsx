@@ -108,7 +108,7 @@ function AdminPage({ currentUser }) {
                     </ul>
                 )}
             </section>
-            <InvitePanel />
+            <InvitePanel isAdmin={isAdmin} />
         </main>
     );
 }
