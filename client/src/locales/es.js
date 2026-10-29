@@ -70,6 +70,20 @@ const es = {
             designer: 'Diseñadora',
         },
     },
+    invites: {
+        title: 'Invitaciones',
+        lead: 'Cada enlace crea una sola cuenta y funciona aunque el registro esté cerrado.',
+        noteLabel: '¿Para quién es?',
+        notePlaceholder: '¿Para quién es? (opcional)',
+        create: 'Crear invitación',
+        empty: 'Todavía no hay invitaciones.',
+        noNote: 'Invitación',
+        unused: 'Sin usar',
+        usedBy: 'Usada por @{{username}}',
+        copy: 'Copiar enlace',
+        copied: '¡Copiado!',
+        delete: 'Cancelar invitación',
+    },
     themes: {
         title: 'Tema',
         locked: 'Bloqueado',
@@ -150,6 +164,7 @@ const es = {
         },
     },
     auth: {
+        invited: 'Te invitaron a A Library of Us ✨',
         login: {
             title: 'Qué bueno verte',
             subtitle: '¡Nos alegra tenerte de vuelta!',

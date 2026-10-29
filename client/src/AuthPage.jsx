@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import Icon from './Icon';
@@ -32,6 +33,8 @@ function AuthPage({ mode, onLogin }) {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [searchParams] = useSearchParams();
+    const invite = searchParams.get('invite') || '';
 
     const text = MODES[mode];
     const isSignup = mode === 'signup';
@@ -44,7 +47,7 @@ function AuthPage({ mode, onLogin }) {
 
         const cleanEmail = email.trim();
         const register = isSignup
-            ? apiFetch('/api/register', { method: 'POST', body: { username: username.trim(), email: cleanEmail, password, language: i18n.language } })
+            ? apiFetch('/api/register', { method: 'POST', body: { username: username.trim(), email: cleanEmail, password, language: i18n.language, invite } })
             : Promise.resolve();
 
         register
@@ -74,6 +77,9 @@ function AuthPage({ mode, onLogin }) {
                     {t(`auth.${mode}.subtitle`)}
                     <Icon name={text.subtitleIcon} size={14} />
                 </p>
+
+                {isSignup && invite && <p className="access-invite">{t('auth.invited')}</p>}
+
                 <form className="access-form" onSubmit={handleSubmit}>
                     {isSignup && (
                         <label className="access-field">

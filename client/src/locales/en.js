@@ -70,6 +70,20 @@ const en = {
             designer: 'Designer',
         },
     },
+    invites: {
+        title: 'Invitations',
+        lead: 'Each link creates one account and works even while sign-ups are closed.',
+        noteLabel: 'Who is it for?',
+        notePlaceholder: 'Who is it for? (optional)',
+        create: 'Create invitation',
+        empty: 'No invitations yet.',
+        noNote: 'Invitation',
+        unused: 'Not used yet',
+        usedBy: 'Used by @{{username}}',
+        copy: 'Copy link',
+        copied: 'Copied!',
+        delete: 'Cancel invitation',
+    },
     themes: {
         title: 'Theme',
         locked: 'Locked',
@@ -150,6 +164,7 @@ const en = {
         },
     },
     auth: {
+        invited: "You've been invited to A Library of Us ✨",
         login: {
             title: 'Welcome back',
             subtitle: 'So good to see you again!',

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
+import InvitePanel from './InvitePanel';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 
@@ -106,6 +107,7 @@ function AdminPage({ currentUser }) {
                     </ul>
                 )}
             </section>
+            <InvitePanel />
         </main>
     );
 }

@@ -7806,3 +7806,72 @@ a.comment-author:hover {
   background: linear-gradient(90deg, #FFADD34D, #FCF6BD4D, #D0F4DE4D, #A9DEF94D, #E4C1F94D);
   color: #F3EBDD;
 }
+
+.invite-lead {
+  margin: 4px 0 0;
+  font-size: 14px;
+  color: var(--text-2);
+}
+
+.invite-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.invite-form input {
+  flex: 1;
+  min-width: 180px;
+  padding: 10px 14px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+}
+
+.invite-create {
+  padding: 10px 18px;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--rose-deep);
+  color: #fff;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.invite-create:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.invite-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--rose-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.invite-action:hover {
+  border-color: var(--rose-deep);
+}
+
+.access-invite {
+  margin: -14px 0 18px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
