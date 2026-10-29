@@ -1830,6 +1830,7 @@ app.get('/api/admin/summary', requireStaff('moderator'), async (req, res) => {
                 UNION SELECT user_id FROM user_books WHERE last_read_at > now() - interval '7 days'
             ) active) AS active_readers,
             (SELECT COUNT(*) FROM invites WHERE status = 'pending') AS pending_invites,
+            (SELECT COUNT(DISTINCT (target_type, target_id)) FROM reports WHERE status = 'pending') AS pending_reports,
             (SELECT COUNT(*) FROM invites i WHERE i.status = 'approved' AND i.used_at IS NULL AND ${INVITE_EXPIRES} > now()) AS unused_invites
     `);
 
@@ -1872,6 +1873,169 @@ app.get('/api/admin/activity', requireStaff('moderator'), async (req, res) => {
         LIMIT 100
     `, [days]);
     res.json(actions);
+});
+
+const REPORT_TYPES = ['post', 'post_comment', 'review', 'review_comment', 'profile', 'tag'];
+const REPORT_REASONS = ['spoiler', 'offensive', 'harassment', 'spam', 'other'];
+const REPORT_ACTIONS = { dismiss: 'dismissed', spoiler: 'spoiler', remove: 'removed' };
+
+const REPORT_TARGETS = {
+    post: `
+        SELECT p.id, p.text, p.image_url, p.is_spoiler, u.id AS author_id, u.username AS author
+        FROM posts p JOIN users u ON u.id = p.user_id
+        WHERE p.id = $1`,
+    post_comment: `
+        SELECT c.id, c.text, u.id AS author_id, u.username AS author
+        FROM post_comments c JOIN users u ON u.id = c.user_id
+        WHERE c.id = $1`,
+    review: `
+        SELECT ub.id, ub.review AS text, ub.work_id, w.title AS book_title, u.id AS author_id, u.username AS author
+        FROM user_books ub JOIN users u ON u.id = ub.user_id JOIN works w ON w.id = ub.work_id
+        WHERE ub.id = $1 AND ub.review IS NOT NULL`,
+    review_comment: `
+        SELECT c.id, c.text, ub.work_id, w.title AS book_title, u.id AS author_id, u.username AS author
+        FROM comments c
+        JOIN users u ON u.id = c.user_id
+        JOIN user_books ub ON ub.id = c.user_book_id
+        JOIN works w ON w.id = ub.work_id
+        WHERE c.id = $1`,
+    profile: `
+        SELECT u.id, u.bio AS text, u.display_name, u.about_me, u.avatar_url, u.id AS author_id, u.username AS author
+        FROM users u
+        WHERE u.id = $1`,
+    tag: `
+        SELECT t.id, t.name AS text, t.slug, NULL::int AS author_id, NULL AS author
+        FROM tags t
+        WHERE t.id = $1`,
+};
+
+async function findReportTarget(type, id) {
+    const [target] = await query(REPORT_TARGETS[type], [id]);
+    return target || null;
+}
+
+async function removeReportedContent(type, target) {
+    if (type === 'post') {
+        await query('DELETE FROM posts WHERE id = $1', [target.id]);
+        if (target.imageUrl) await deletePostImage(target.imageUrl);
+    } else if (type === 'post_comment') {
+        await query('DELETE FROM post_comments WHERE id = $1', [target.id]);
+    } else if (type === 'review') {
+        await query('UPDATE user_books SET review = NULL WHERE id = $1', [target.id]);
+    } else if (type === 'review_comment') {
+        await query('DELETE FROM comments WHERE id = $1', [target.id]);
+    } else if (type === 'profile') {
+        await query(`
+            UPDATE users
+            SET display_name = NULL, bio = NULL, about_me = NULL, favorite_quote = NULL,
+                favorite_things = NULL, location = NULL, avatar_url = NULL
+            WHERE id = $1
+        `, [target.id]);
+        if (target.avatarUrl) await deleteAvatar(target.avatarUrl);
+    } else if (type === 'tag') {
+        await query('DELETE FROM tags WHERE id = $1', [target.id]);
+    }
+}
+
+app.post('/api/reports', requireAuth, async (req, res) => {
+    const { targetType, reason } = req.body;
+    const targetId = Number(req.body.targetId);
+    const details = (req.body.details || '').trim().slice(0, 500) || null;
+
+    if (!REPORT_TYPES.includes(targetType) || !Number.isInteger(targetId) || !REPORT_REASONS.includes(reason)) {
+        return res.status(400).json({ error: msg(req, 'reportInvalid') });
+    }
+
+    const target = await findReportTarget(targetType, targetId);
+    if (!target) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+    if (target.authorId === req.session.user.id) {
+        return res.status(400).json({ error: msg(req, 'reportOwn') });
+    }
+
+    await query(`
+        INSERT INTO reports (target_type, target_id, reason, details, reported_by)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (target_type, target_id, reported_by) DO NOTHING
+    `, [targetType, targetId, reason, details, req.session.user.id]);
+
+    res.status(201).json({ message: 'Reported' });
+});
+
+app.get('/api/admin/reports/count', requireStaff('moderator'), async (req, res) => {
+    const [row] = await query(`
+        SELECT COUNT(DISTINCT (target_type, target_id)) AS count
+        FROM reports
+        WHERE status = 'pending'
+    `);
+    res.json(row);
+});
+
+app.get('/api/admin/reports', requireStaff('moderator'), async (req, res) => {
+    const type = REPORT_TYPES.includes(req.query.type) ? req.query.type : null;
+
+    const groups = await query(`
+        SELECT r.target_type, r.target_id, COUNT(*) AS reports, MIN(r.created_at) AS first_reported_at,
+               mode() WITHIN GROUP (ORDER BY r.reason) AS reason,
+               json_agg(json_build_object(
+                   'reason', r.reason, 'details', r.details, 'username', u.username, 'createdAt', r.created_at
+               ) ORDER BY r.created_at) AS entries
+        FROM reports r
+        LEFT JOIN users u ON u.id = r.reported_by
+        WHERE r.status = 'pending' AND ($1::text IS NULL OR r.target_type = $1)
+        GROUP BY r.target_type, r.target_id
+        ORDER BY COUNT(*) DESC, MIN(r.created_at)
+        LIMIT 50
+    `, [type]);
+
+    for (const group of groups) {
+        group.target = await findReportTarget(group.targetType, group.targetId);
+    }
+    res.json(groups);
+});
+
+app.post('/api/admin/reports/resolve', requireStaff('moderator'), async (req, res) => {
+    const { targetType, action } = req.body;
+    const targetId = Number(req.body.targetId);
+    const note = (req.body.note || '').trim().slice(0, 500);
+
+    if (!REPORT_TYPES.includes(targetType) || !Number.isInteger(targetId) || !REPORT_ACTIONS[action]) {
+        return res.status(400).json({ error: msg(req, 'reportInvalid') });
+    }
+    if (action === 'spoiler' && targetType !== 'post') {
+        return res.status(400).json({ error: msg(req, 'reportInvalid') });
+    }
+    if (!note) {
+        return res.status(400).json({ error: msg(req, 'reportNoteRequired') });
+    }
+
+    const [pending] = await query(`
+        SELECT COUNT(*) AS count FROM reports
+        WHERE target_type = $1 AND target_id = $2 AND status = 'pending'
+    `, [targetType, targetId]);
+
+    if (Number(pending.count) === 0) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+
+    const target = await findReportTarget(targetType, targetId);
+
+    if (target && action === 'spoiler') {
+        await query('UPDATE posts SET is_spoiler = true WHERE id = $1', [target.id]);
+    }
+    if (target && action === 'remove') {
+        await removeReportedContent(targetType, target);
+    }
+
+    await query(`
+        UPDATE reports SET status = $1, resolution_note = $2, resolved_by = $3, resolved_at = now()
+        WHERE target_type = $4 AND target_id = $5 AND status = 'pending'
+    `, [REPORT_ACTIONS[action], note, req.session.user.id, targetType, targetId]);
+
+    const label = target?.author ? `@${target.author}` : target ? `#${target.text}` : null;
+    await logAction(req, `report_${REPORT_ACTIONS[action]}`, label, targetType);
+    res.json({ status: REPORT_ACTIONS[action] });
 });
 
 const STAFF_ROLES = ['editor', 'moderator', 'designer'];
