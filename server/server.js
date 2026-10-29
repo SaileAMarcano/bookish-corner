@@ -122,6 +122,13 @@ function requireStaff(...roles) {
     };
 }
 
+async function logAction(req, action, target, detail = null) {
+    await query(
+        'INSERT INTO staff_actions (actor_id, action, target, detail) VALUES ($1, $2, $3, $4)',
+        [req.session.user.id, action, target, detail]
+    );
+}
+
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
 const TRANSLATED_DESCRIPTION = 'COALESCE(t.description, w.description)';
 const JOIN_TRANSLATION = 'LEFT JOIN work_translations t ON t.work_id = w.id AND t.language';
@@ -1745,7 +1752,7 @@ app.post('/api/admin/invites', requireStaff('moderator'), async (req, res) => {
         isAdmin ? req.session.user.id : null,
         isAdmin ? new Date() : null,
     ]);
-
+    await logAction(req, isAdmin ? 'invite_created' : 'invite_requested', note);
     res.status(201).json(await findInvite(created.id));
 });
 
@@ -1760,12 +1767,13 @@ app.patch('/api/admin/invites/:id/review', requireStaff('admin'), async (req, re
     const [reviewed] = await query(`
         UPDATE invites SET status = $1, reviewed_by = $2, reviewed_at = now()
         WHERE id = $3 AND status = 'pending'
-        RETURNING id
+        RETURNING id, note
     `, [status, req.session.user.id, id]);
 
     if (!reviewed) {
         return res.status(404).json({ error: msg(req, 'inviteInvalid') });
     }
+    await logAction(req, status === 'approved' ? 'invite_approved' : 'invite_rejected', reviewed.note);
     res.json(await findInvite(id));
 });
 
@@ -1775,11 +1783,12 @@ app.delete('/api/admin/invites/:id', requireStaff('admin'), async (req, res) => 
         return res.status(404).json({ error: msg(req, 'inviteInvalid') });
     }
 
-    const [invite] = await query('DELETE FROM invites WHERE id = $1 AND used_at IS NULL RETURNING id', [id]);
+    const [invite] = await query('DELETE FROM invites WHERE id = $1 AND used_at IS NULL RETURNING id, note'[id]);
 
     if (!invite) {
         return res.status(404).json({ error: msg(req, 'inviteInvalid') });
     }
+    await logAction(req, 'invite_deleted', invite.note);
     res.json(invite);
 });
 
@@ -1827,6 +1836,21 @@ app.get('/api/admin/summary', requireStaff('moderator'), async (req, res) => {
     });
 });
 
+app.get('/api/admin/activity', requireStaff('moderator'), async (req, res) => {
+    const days = req.query.days === '30' ? 30 : 7;
+
+    const actions = await query(`
+        SELECT a.id, a.action, a.target, a.detail, a.created_at,
+               COALESCE(u.display_name, u.username) AS actor
+        FROM staff_actions a
+        LEFT JOIN users u ON u.id = a.actor_id
+        WHERE a.created_at > now() - make_interval(days => $1)
+        ORDER BY a.created_at DESC
+        LIMIT 100
+    `, [days]);
+    res.json(actions);
+});
+
 const STAFF_ROLES = ['editor', 'moderator', 'designer'];
 
 app.get('/api/admin/users', requireStaff('moderator'), async (req, res) => {
@@ -1862,6 +1886,7 @@ app.patch('/api/admin/users/:id/staff-role', requireStaff('admin'), async (req, 
     if (!user) {
         return res.status(404).json({ error: msg(req, 'notFound') });
     }
+    await logAction(req, staffRole ? 'role_given' : 'role_removed', user.username, staffRole);
     res.json(user);
 });
 
@@ -2011,6 +2036,7 @@ app.post('/api/editor/books', requireStaff('editor'), upload.single('cover'), as
     await saveTranslations(work.id, book);
     await saveIsbn(work.id, book);
     await markRequestAdded(req.body.requestId, work.id, req.session.user.id);
+    await logAction(req, 'book_added', book.title);
     res.status(201).json(work);
 });
 
@@ -2049,6 +2075,7 @@ app.patch('/api/editor/books/:id', requireStaff('editor'), upload.single('cover'
     if (req.file) {
         await deleteCover(current.coverImage);
     }
+    await logAction(req, 'book_updated', book.title);
     res.json({ id });
 });
 
@@ -2102,12 +2129,13 @@ app.patch('/api/editor/book-requests/:id', requireStaff('editor'), async (req, r
     const [request] = await query(`
         UPDATE book_requests SET status = 'rejected', resolved_by = $1, resolved_at = now()
         WHERE id = $2 AND status = 'pending'
-        RETURNING id
+        RETURNING id, title
     `, [req.session.user.id, id]);
 
     if (!request) {
         return res.status(404).json({ error: msg(req, 'notFound') });
     }
+    await logAction(req, 'request_rejected', request.title);
     res.json(request);
 });
 
@@ -2128,7 +2156,7 @@ app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => 
     }
 
     const [book] = await query(`
-        SELECT cover_image,
+        SELECT title, cover_image,
                (SELECT COUNT(*) FROM user_books WHERE work_id = $1)
              + (SELECT COUNT(*) FROM post_books WHERE work_id = $1) AS uses
         FROM works
@@ -2144,6 +2172,7 @@ app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => 
 
     await query('DELETE FROM works WHERE id = $1', [id]);
     await deleteCover(book.coverImage);
+    await logAction(req, 'book_delete', book.title);
     res.json({ id });
 });
 
