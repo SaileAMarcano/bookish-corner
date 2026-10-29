@@ -8185,3 +8185,33 @@ a.comment-author:hover {
   border-radius: 50%;
   background: var(--sage);
 }
+
+.invite-columns {
+  align-items: stretch;
+  margin-bottom: 18px;
+}
+
+.invite-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.invite-badge-active {
+  background: var(--sage-soft);
+  color: var(--sage-text);
+}
+
+.invite-badge-used {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.invite-badge-pending {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
