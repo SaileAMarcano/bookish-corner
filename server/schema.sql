@@ -37,7 +37,9 @@ CREATE TABLE works (
     open_library_key     TEXT UNIQUE,
     created_at           TIMESTAMPTZ NOT NULL DEFAULT now(),
     added_by             INTEGER REFERENCES users (id) ON DELETE SET NULL,
-    updated_at            TIMESTAMPTZ
+    updated_at            TIMESTAMPTZ,
+    language             TEXT CHECK (language IN ('en', 'es', 'other')),
+    genre                TEXT
 );
 
 CREATE TABLE work_translations (

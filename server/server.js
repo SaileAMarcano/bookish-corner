@@ -161,7 +161,7 @@ app.get('/api/books/:id', requireAuth, async (req, res) => {
     const [book] = await query(`
         ${WORK_GENRES}
         SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, ${TRANSLATED_DESCRIPTION} AS description,
-               w.cover_image, w.first_published_year AS year, wg.genre,
+               w.cover_image, w.first_published_year AS year, COALESCE(wg.genre, w.genre) AS genre,
                (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id) AS readers,
                (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id AND ub.status = 'want-to-read') AS want_count,
                (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id AND ub.rating > 0) AS rating_count,
@@ -1865,16 +1865,26 @@ app.patch('/api/admin/users/:id/staff-role', requireStaff('admin'), async (req, 
     res.json(user);
 });
 
+const BOOK_LANGUAGES = ['en', 'es', 'other'];
+const TRANSLATION_LANGUAGES = ['en', 'es'];
+
 function readBookForm(req) {
-    const rawYear = (req.body.year || '').trim();
+    const text = (field, max) => (req.body[field] || '').trim().slice(0, max);
+    const rawYear = text('year', 10);
+    const rawIsbn = text('isbn', 30);
 
     return {
-        title: (req.body.title || '').trim().slice(0, 200),
-        author: (req.body.author || '').trim().slice(0, 120),
+        title: text('title', 200),
+        author: text('author', 120),
         year: rawYear === '' ? null : Number(rawYear),
-        description: (req.body.description || '').trim().slice(0, 3000) || null,
-        titleEs: (req.body.titleEs || '').trim().slice(0, 200) || null,
-        descriptionEs: (req.body.descriptionEs || '').trim().slice(0, 3000) || null,
+        isbn: rawIsbn === '' ? null : rawIsbn.replace(/[\s-]/g, ''),
+        language: text('language', 10) || 'en',
+        genre: text('genre', 40) || null,
+        description: text('description', 3000) || null,
+        translations: {
+            en: { title: text('titleEn', 200) || null, description: text('descriptionEn', 3000) || null },
+            es: { title: text('titleEs', 200) || null, description: text('descriptionEs', 3000) || null },
+        },
     };
 }
 
@@ -1885,21 +1895,53 @@ function bookFormProblem(book) {
     if (book.year !== null && (!Number.isInteger(book.year) || book.year < 1 || book.year > maxYear)) {
         return 'bookYearInvalid';
     }
+    if (book.isbn !== null && !/^\d{13}$/.test(book.isbn)) return 'isbnInvalid';
+    if (!BOOK_LANGUAGES.includes(book.language)) return 'bookLanguageInvalid';
+    if (book.genre !== null && !GENRES.includes(book.genre)) return 'bookGenreInvalid';
     return null;
 }
 
-async function saveSpanishTranslation(workId, book) {
-    if (!book.titleEs && !book.descriptionEs) {
-        await query(`DELETE FROM work_translations WHERE work_id = $1 AND language = 'es'`, [workId]);
-        return;
-    }
+async function saveTranslations(workId, book) {
+    for (const language of TRANSLATION_LANGUAGES) {
+        const translation = book.translations[language];
 
-    await query(`
-        INSERT INTO work_translations (work_id, language, title, description)
-        VALUES ($1, 'es', $2, $3)
-        ON CONFLICT (work_id, language)
-        DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description
-    `, [workId, book.titleEs || book.title, book.descriptionEs]);
+        if (language === book.language || (!translation.title && !translation.description)) {
+            await query('DELETE FROM work_translations WHERE work_id = $1 AND language = $2', [workId, language]);
+            continue;
+        }
+
+        await query(`
+            INSERT INTO work_translations (work_id, language, title, description)
+            VALUES ($1, $2, $3, $4)
+            ON CONFLICT (work_id, language)
+            DO UPDATE SET title = EXCLUDED.title, description = EXCLUDED.description
+        `, [workId, language, translation.title || book.title, translation.description]);
+    }
+}
+
+async function isbnUsedElsewhere(isbn, workId) {
+    if (!isbn) return false;
+
+    const [edition] = await query('SELECT work_id FROM editions WHERE isbn_13 = $1', [isbn]);
+    return Boolean(edition) && edition.workId !== workId;
+}
+
+async function saveIsbn(workId, book) {
+    if (!book.isbn) return;
+
+    const [edition] = await query(
+        'SELECT id FROM editions WHERE work_id = $1 ORDER BY isbn_13 IS NULL, id LIMIT 1',
+        [workId]
+    );
+
+    if (edition) {
+        await query('UPDATE editions SET isbn_13 = $1 WHERE id = $2', [book.isbn, edition.id]);
+    } else {
+        await query(
+            'INSERT INTO editions (work_id, title, language, isbn_13, published_year) VALUES ($1, $2, $3, $4, $5)',
+            [workId, book.title, book.language, book.isbn, book.year]
+        );
+    }
 }
 
 app.get('/api/editor/books', requireStaff('editor'), async (req, res) => {
@@ -1932,9 +1974,13 @@ app.get('/api/editor/books/:id', requireStaff('editor'), async (req, res) => {
 
     const [book] = await query(`
         SELECT w.id, w.title, w.author, w.description, w.cover_image, w.first_published_year AS year,
-               t.title AS title_es, t.description AS description_es
+               w.language, w.genre,
+               (SELECT e.isbn_13 FROM editions e WHERE e.work_id = w.id ORDER BY e.isbn_13 IS NULL, e.id LIMIT 1) AS isbn,
+               en.title AS title_en, en.description AS description_en,
+               es.title AS title_es, es.description AS description_es
         FROM works w
-        LEFT JOIN work_translations t ON t.work_id = w.id AND t.language = 'es'
+        LEFT JOIN work_translations en ON en.work_id = w.id AND en.language = 'en'
+        LEFT JOIN work_translations es ON es.work_id = w.id AND es.language = 'es'
         WHERE w.id = $1
     `, [id]);
 
@@ -1950,16 +1996,20 @@ app.post('/api/editor/books', requireStaff('editor'), upload.single('cover'), as
     if (problem) {
         return res.status(400).json({ error: msg(req, problem) });
     }
+    if (await isbnUsedElsewhere(book.isbn, null)) {
+        return res.status(400).json({ error: msg(req, 'isbnTaken') });
+    }
 
     const coverImage = req.file ? await uploadCover(req.file) : null;
 
     const [work] = await query(`
-        INSERT INTO works (title, author, description, cover_image, first_published_year, added_by)
-        VALUES ($1, $2, $3, $4, $5, $6)
+        INSERT INTO works (title, author, description, cover_image, first_published_year, language, genre, added_by)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
         RETURNING id
-    `, [book.title, book.author, book.description, coverImage, book.year, req.session.user.id]);
+    `, [book.title, book.author, book.description, coverImage, book.year, book.language, book.genre, req.session.user.id]);
 
-    await saveSpanishTranslation(work.id, book);
+    await saveTranslations(work.id, book);
+    await saveIsbn(work.id, book);
     res.status(201).json(work);
 });
 
@@ -1979,17 +2029,21 @@ app.patch('/api/editor/books/:id', requireStaff('editor'), upload.single('cover'
     if (!current) {
         return res.status(404).json({ error: msg(req, 'bookNotFound') });
     }
+    if (await isbnUsedElsewhere(book.isbn, id)) {
+        return res.status(400).json({ error: msg(req, 'isbnTaken') });
+    }
 
     const coverImage = req.file ? await uploadCover(req.file) : current.coverImage;
 
     await query(`
         UPDATE works
         SET title = $1, author = $2, description = $3, cover_image = $4,
-            first_published_year = $5, updated_at = now()
-        WHERE id = $6
-    `, [book.title, book.author, book.description, coverImage, book.year, id]);
+            first_published_year = $5, language = $6, genre = $7, updated_at = now()
+        WHERE id = $8
+    `, [book.title, book.author, book.description, coverImage, book.year, book.language, book.genre, id]);
 
-    await saveSpanishTranslation(id, book);
+    await saveTranslations(id, book);
+    await saveIsbn(id, book);
 
     if (req.file) {
         await deleteCover(current.coverImage);
