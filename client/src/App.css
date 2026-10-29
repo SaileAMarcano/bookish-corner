@@ -8159,3 +8159,29 @@ a.comment-author:hover {
   font-weight: 600;
   color: var(--sage-text);
 }
+
+.activity-log {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.activity-log-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--surface-2);
+}
+
+.activity-log-row:first-child {
+  border-top: none;
+}
+
+.activity-log-dot {
+  flex-shrink: 0;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sage);
+}

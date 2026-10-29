@@ -23,6 +23,7 @@ import AdminPage from './AdminPage';
 import AdminSummary from './AdminSummary';
 import AdminInvites from './AdminInvites';
 import AdminCatalog from './AdminCatalog';
+import AdminActivity from './AdminActivity';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -397,6 +398,7 @@ function App() {
               <Route path="/admin" element={<AdminSummary currentUser={currentUser} />} />
               <Route path="/admin/people" element={<AdminPage currentUser={currentUser} />} />
               <Route path="/admin/invites" element={<AdminInvites currentUser={currentUser} />} />
+              <Route path="/admin/activity" element={<AdminActivity />} />
             </>
           )}
           {['admin', 'editor'].includes(currentUser.staffRole) && (

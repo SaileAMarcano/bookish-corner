@@ -20,6 +20,7 @@ const ADMIN_ITEMS = [
     { to: '/admin/people', label: 'nav.adminPeople', icon: 'following', roles: ['admin', 'moderator'] },
     { to: '/admin/invites', label: 'nav.adminInvites', icon: 'mail', roles: ['admin', 'moderator'] },
     { to: '/admin/catalog', label: 'nav.adminCatalog', icon: 'library', roles: ['admin', 'editor'] },
+    { to: '/admin/activity', label: 'nav.adminActivity', icon: 'clock', roles: ['admin', 'moderator'] },
 ];
 
 const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
