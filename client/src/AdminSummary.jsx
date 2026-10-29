@@ -51,7 +51,7 @@ function AdminSummary({ currentUser }) {
             ) : (
                 <>
                     <div className="admin-stats">
-                        {stats.map((stats) => (
+                        {stats.map((stat) => (
                             <div key={stat.label} className="card admin-stat">
                                 <span className="admin-stat-label">{stat.label}</span>
                                 <span className="display admin-stat-number">{stat.number}</span>
