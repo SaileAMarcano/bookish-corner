@@ -1552,7 +1552,9 @@ app.post('/api/register', authLimiter, async (req, res) => {
 
         if (invite) {
             const claimed = await client.query(
-                "UPDATE invites SET used_at = now() WHERE code = $1 AND used_at IS NULL AND status = 'approved' RETURNING code",
+                `UPDATE invites i SET used_at = now()
+                 WHERE i.code = $1 AND i.used_at IS NULL AND i.status = 'approved' AND ${INVITE_EXPIRES} > now()
+                 RETURNING i.code`,
                 [invite]
             );
             if (claimed.rowCount === 0) {
@@ -1704,11 +1706,17 @@ app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
     res.json({ seasonTheme });
 });
 
+const INVITE_DAYS = 14;
+const INVITE_EXPIRES = `COALESCE(i.reviewed_at, i.created_at) + make_interval(days => ${INVITE_DAYS})`;
+
 const INVITE_FIELDS = `
     i.id, i.note, i.status, i.created_at, i.used_at,
+    ${INVITE_EXPIRES} AS expires_at,
+    i.status = 'approved' AND i.used_at IS NULL AND ${INVITE_EXPIRES} <= now() AS expired,
     requester.username AS requested_by,
+    COALESCE(requester.display_name, requester.username) AS created_by_name,
     used.username AS used_by,
-    CASE WHEN i.status = 'approved' THEN i.code END AS code
+    CASE WHEN i.status = 'approved' AND ${INVITE_EXPIRES} > now() THEN i.code END AS code
 `;
 
 const INVITE_JOINS = `
@@ -1732,7 +1740,22 @@ app.get('/api/admin/invites', requireStaff('moderator'), async (req, res) => {
         ORDER BY i.status = 'pending' DESC, i.created_at DESC
         LIMIT 50
     `, [onlyFrom]);
-    res.json(invites);
+
+    const [counts] = await query(`
+        SELECT
+            COUNT(*) FILTER (WHERE i.status = 'approved' AND i.used_at IS NULL AND ${INVITE_EXPIRES} > now()) AS unused,
+            COUNT(*) FILTER (WHERE i.used_at IS NOT NULL) AS used,
+            COUNT(*) FILTER (WHERE i.status = 'approved' AND i.used_at IS NULL AND ${INVITE_EXPIRES} <= now()) AS expired,
+            COUNT(*) FILTER (WHERE i.status = 'pending') AS pending
+        FROM invites i
+    `);
+
+    res.json({
+        invites,
+        counts,
+        expiryDays: INVITE_DAYS,
+        signupOpen: process.env.SIGNUP_OPEN === 'true',
+    });
 });
 
 app.post('/api/admin/invites', requireStaff('moderator'), async (req, res) => {
@@ -1783,7 +1806,7 @@ app.delete('/api/admin/invites/:id', requireStaff('admin'), async (req, res) => 
         return res.status(404).json({ error: msg(req, 'inviteInvalid') });
     }
 
-    const [invite] = await query('DELETE FROM invites WHERE id = $1 AND used_at IS NULL RETURNING id, note'[id]);
+    const [invite] = await query('DELETE FROM invites WHERE id = $1 AND used_at IS NULL RETURNING id, note', [id]);
 
     if (!invite) {
         return res.status(404).json({ error: msg(req, 'inviteInvalid') });
@@ -1807,7 +1830,7 @@ app.get('/api/admin/summary', requireStaff('moderator'), async (req, res) => {
                 UNION SELECT user_id FROM user_books WHERE last_read_at > now() - interval '7 days'
             ) active) AS active_readers,
             (SELECT COUNT(*) FROM invites WHERE status = 'pending') AS pending_invites,
-            (SELECT COUNT(*) FROM invites WHERE status = 'approved' AND used_at IS NULL) AS unused_invites
+            (SELECT COUNT(*) FROM invites i WHERE i.status = 'approved' AND i.used_at IS NULL AND ${INVITE_EXPIRES} > now()) AS unused_invites
     `);
 
     const team = await query(`
@@ -2172,7 +2195,7 @@ app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => 
 
     await query('DELETE FROM works WHERE id = $1', [id]);
     await deleteCover(book.coverImage);
-    await logAction(req, 'book_delete', book.title);
+    await logAction(req, 'book_deleted', book.title);
     res.json({ id });
 });
 
