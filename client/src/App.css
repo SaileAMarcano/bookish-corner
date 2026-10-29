@@ -7973,3 +7973,136 @@ a.comment-author:hover {
     grid-template-columns: 1fr;
   }
 }
+
+.catalog-message {
+  margin: 0 0 14px;
+}
+
+.catalog-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.catalog-cover-field {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px dashed var(--surface-2);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.catalog-cover-preview {
+  flex-shrink: 0;
+  width: 56px;
+  height: 84px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+.catalog-cover-empty {
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 24px;
+}
+
+.catalog-cover-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.catalog-cover-text strong {
+  font-size: 14px;
+  color: var(--ink);
+}
+
+.catalog-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.catalog-field input,
+.catalog-field select,
+.catalog-field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+
+.catalog-field textarea {
+  resize: vertical;
+}
+
+.catalog-field input:focus-visible,
+.catalog-field select:focus-visible,
+.catalog-field textarea:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 1px;
+}
+
+.catalog-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.catalog-translations {
+  padding-top: 12px;
+  border-top: 1px solid var(--surface-2);
+}
+
+.catalog-translations summary {
+  font-weight: 600;
+  color: var(--rose-ink);
+  cursor: pointer;
+}
+
+.catalog-translation {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.catalog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.catalog-list-cover {
+  flex-shrink: 0;
+  width: 40px;
+  height: 60px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+}
+
+@media (max-width: 1100px) {
+  .catalog-columns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 520px) {
+  .catalog-pair {
+    grid-template-columns: 1fr;
+  }
+}
