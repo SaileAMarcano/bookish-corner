@@ -2010,6 +2010,7 @@ app.post('/api/editor/books', requireStaff('editor'), upload.single('cover'), as
 
     await saveTranslations(work.id, book);
     await saveIsbn(work.id, book);
+    await markRequestAdded(req.body.requestId, work.id, req.session.user.id);
     res.status(201).json(work);
 });
 
@@ -2050,6 +2051,75 @@ app.patch('/api/editor/books/:id', requireStaff('editor'), upload.single('cover'
     }
     res.json({ id });
 });
+
+app.post('/api/book-requests', requireAuth, async (req, res) => {
+    const title = (req.body.title || '').trim().slice(0, 200);
+    const author = (req.body.author || '').trim().slice(0, 120) || null;
+
+    if (!title) {
+        return res.status(400).json({ error: msg(req, 'requestTitleRequired') });
+    }
+
+    let [request] = await query(`
+        SELECT id FROM book_requests
+        WHERE status = 'pending' AND ${plainText('title')} = $1
+    `, [plainSearch(title)]);
+
+    if (!request) {
+        [request] = await query(
+            'INSERT INTO book_requests (title, author, created_by) VALUES ($1, $2, $3) RETURNING id',
+            [title, author, req.session.user.id]
+        );
+    }
+
+    await query(
+        'INSERT INTO book_request_votes (request_id, user_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [request.id, req.session.user.id]
+    );
+
+    res.status(201).json({ id: request.id });
+});
+
+app.get('/api/editor/book-requests', requireStaff('editor'), async (req, res) => {
+    const requests = await query(`
+        SELECT r.id, r.title, r.author, r.created_at, u.username AS requested_by,
+               (SELECT COUNT(*) FROM book_request_votes v WHERE v.request_id = r.id) AS votes
+        FROM book_requests r
+        LEFT JOIN users u ON u.id = r.created_by
+        WHERE r.status = 'pending'
+        ORDER BY votes DESC, r.created_at
+        LIMIT 30
+    `);
+    res.json(requests);
+});
+
+app.patch('/api/editor/book-requests/:id', requireStaff('editor'), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+
+    const [request] = await query(`
+        UPDATE book_requests SET status = 'rejected', resolved_by = $1, resolved_at = now()
+        WHERE id = $2 AND status = 'pending'
+        RETURNING id
+    `, [req.session.user.id, id]);
+
+    if (!request) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+    res.json(request);
+});
+
+async function markRequestAdded(requestId, workId, userId) {
+    const id = Number(requestId);
+    if (!Number.isInteger(id)) return;
+
+    await query(`
+        UPDATE book_requests SET status = 'added', work_id = $1, resolved_by = $2, resolved_at = now()
+        WHERE id = $3 AND status = 'pending'
+    `, [workId, userId, id]);
+}
 
 app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => {
     const id = Number(req.params.id);
