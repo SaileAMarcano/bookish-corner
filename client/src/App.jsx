@@ -26,6 +26,7 @@ import AdminCatalog from './AdminCatalog';
 import AdminActivity from './AdminActivity';
 import AdminModeration from './AdminModeration';
 import NotificationBell from './NotificationBell';
+import NotificationsPage from './NotificationsPage';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -402,6 +403,7 @@ function App() {
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
+          <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/genres" element={<GenresPage />} />

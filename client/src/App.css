@@ -8543,3 +8543,47 @@ a.search-title:hover {
     width: auto;
   }
 }
+
+.notifications-page {
+  max-width: 820px;
+}
+
+.notifications-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.notifications-title {
+  margin: 0;
+  font-size: 44px;
+}
+
+.notifications-group {
+  margin-top: 22px;
+}
+
+.notifications-day {
+  margin: 0 0 10px;
+  font-size: 22px;
+}
+
+.notifications-list {
+  overflow: hidden;
+}
+
+.notifications-list .notification-item {
+  padding: 16px 22px;
+}
+
+.notifications-list .notification-item:first-child {
+  border-top: none;
+}
+
+.notifications-page .home-load-more {
+  display: block;
+  margin: 22px auto 0;
+}

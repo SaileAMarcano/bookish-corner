@@ -31,6 +31,11 @@ function NotificationBell() {
     }, [location.pathname]);
 
     useEffect(() => {
+        window.addEventListener('notifications:changed', loadCount);
+        return () => window.removeEventListener('notifications:changed', loadCount);
+    }, []);
+
+    useEffect(() => {
         if (!isOpen) return;
 
         const handleClickOutside = (e) => {

@@ -334,6 +334,19 @@ const es = {
         empty: 'Todavía no hay nada nuevo.',
         seeAll: 'Ver todas las notificaciones',
         unread: 'No leída',
+        title: 'Notificaciones',
+        readAll: 'Marcar todas como leídas',
+        emptyUnread: 'Estás al día. ✨',
+        loadMore: 'Cargar más',
+        tabs: {
+            all: 'Todas',
+            unread: 'No leídas',
+        },
+        days: {
+            today: 'Hoy',
+            yesterday: 'Ayer',
+            earlier: 'Antes',
+        },
         types: {
             post_like: 'le dio me gusta a tu publicación.',
             post_comment: 'comentó tu publicación.',

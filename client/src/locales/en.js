@@ -334,6 +334,19 @@ const en = {
         empty: 'Nothing new yet.',
         seeAll: 'View all notifications',
         unread: 'Unread',
+        title: 'Notifications',
+        readAll: 'Mark all as read',
+        emptyUnread: 'You are all caught up. ✨',
+        loadMore: 'Load more',
+        tabs: {
+            all: 'All',
+            unread: 'Unread',
+        },
+        days: {
+            today: 'Today',
+            yesterday: 'Yesterday',
+            earlier: 'Earlier',
+        },
         types: {
             post_like: 'liked your post.',
             post_comment: 'commented on your post.',
