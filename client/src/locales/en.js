@@ -356,6 +356,9 @@ const en = {
             book_added: 'The book you asked for, "{{title}}", is now in the library.',
         },
     },
+    postPage: {
+        back: 'Back',
+    },
     themes: {
         title: 'Theme',
         locked: 'Locked',

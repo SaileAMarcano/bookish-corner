@@ -8587,3 +8587,14 @@ a.search-title:hover {
   display: block;
   margin: 22px auto 0;
 }
+
+.post-page {
+  max-width: 760px;
+}
+
+.post-page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}

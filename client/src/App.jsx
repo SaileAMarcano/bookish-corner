@@ -27,6 +27,7 @@ import AdminActivity from './AdminActivity';
 import AdminModeration from './AdminModeration';
 import NotificationBell from './NotificationBell';
 import NotificationsPage from './NotificationsPage';
+import PostPage from './PostPage';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -404,6 +405,7 @@ function App() {
           />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
           <Route path="/tags" element={<TagsPage />} />
           <Route path="/genres" element={<GenresPage />} />

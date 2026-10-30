@@ -356,6 +356,9 @@ const es = {
             book_added: 'El libro que pediste, «{{title}}», ya está en la biblioteca.',
         },
     },
+    postPage: {
+        back: 'Volver',
+    },
     themes: {
         title: 'Tema',
         locked: 'Bloqueado',

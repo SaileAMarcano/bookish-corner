@@ -11,10 +11,10 @@ import ReportButton from './ReportButton';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
-function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPinned, onPinChange, books = [] }) {
+function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPinned, onPinChange, books = [], openComments = false }) {
     const { t } = useTranslation();
     const [error, setError] = useState('');
-    const [showComments, setShowComments] = useState(false);
+    const [showComments, setShowComments] = useState(openComments);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [showSpoiler, setShowSpoiler] = useState(false);
     const [isEditing, setIsEditing] = useState(false);

@@ -793,6 +793,16 @@ app.post('/api/posts', requireAuth, upload.single('image'), async (req, res) => 
     res.status(201).json(post);
 });
 
+app.get('/api/posts/:id', requireAuth, async (req, res) => {
+    const post = await postFromUrl(req);
+    if (!post) {
+        return res.status(404).json({ error: msg(req, 'postNotFound') });
+    }
+
+    const [fullPost] = await findPosts(req, 'p.id = $1', post.id);
+    res.json(fullPost);
+});
+
 app.get('/api/posts', requireAuth, async (req, res) => {
     const posts = await findPosts(req, 'p.user_id = $1', req.session.user.id);
     res.json(posts);
