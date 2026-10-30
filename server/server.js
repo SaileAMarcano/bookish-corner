@@ -808,7 +808,7 @@ const FEED_ORDER = {
     'for-you': `(CASE WHEN i.from_followed THEN 3 ELSE 0 END
                 + CASE WHEN i.followed_tag THEN 2 ELSE 0 END
                 + LEAST(i.buzz, 10) * 0.3
-                - EXTRACT(EPOCH FROM now() - i.happened_at) / 86400 * 0.5) DESC, i.happened_at DESC`,
+                - EXTRACT(EPOCH FROM now() - i.happened_at) / 3600 * 0.25) DESC, i.happened_at DESC`,
     following: 'i.happened_at DESC',
     recent: 'i.happened_at DESC',
 };
