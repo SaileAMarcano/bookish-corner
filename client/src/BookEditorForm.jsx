@@ -69,6 +69,7 @@ function BookEditorForm({ bookId, initial, requestId, onSaved, onCancel }) {
         for (const [key, value] of Object.entries(form)) {
             data.append(key, value);
         }
+        if (cover) data.append('cover', cover);
         if (requestId) data.append('requestId', requestId);
 
         apiFetch(isEditing ? `/api/editor/books/${bookId}` : '/api/editor/books', {
