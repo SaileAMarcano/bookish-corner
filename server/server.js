@@ -129,6 +129,33 @@ async function logAction(req, action, target, detail = null) {
     );
 }
 
+async function notify(userId, actorId, type, refs = {}) {
+    if (userId === actorId) return;
+
+    await query(`
+        INSERT INTO notifications (user_id, actor_id, type, post_id, post_comment_id, user_book_id, comment_id, work_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+    `, [
+        userId,
+        actorId,
+        type,
+        refs.postId ?? null,
+        refs.postCommentId ?? null,
+        refs.userBookId ?? null,
+        refs.commentId ?? null,
+        refs.workId ?? null,
+    ]);
+}
+
+async function unnotify(userId, actorId, type, refs = {}) {
+    await query(`
+        DELETE FROM notifications
+        WHERE user_id = $1 AND actor_id = $2 AND type = $3
+          AND post_id IS NOT DISTINCT FROM $4
+          AND user_book_id IS NOT DISTINCT FROM $5
+    `, [userId, actorId, type, refs.postId ?? null, refs.userBookId ?? null]);
+}
+
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
 const TRANSLATED_DESCRIPTION = 'COALESCE(t.description, w.description)';
 const JOIN_TRANSLATION = 'LEFT JOIN work_translations t ON t.work_id = w.id AND t.language';
@@ -367,7 +394,7 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
 app.post('/api/user-books/:id/like', requireAuth, async (req, res) => {
     const { id } = req.params;
 
-    const [userBook] = await query('SELECT user_id FROM user_books WHERE id = $1', [id]);
+    const [userBook] = await query('SELECT id, user_id, work_id FROM user_books WHERE id = $1', [id]);
     if (!userBook) {
         return res.status(404).json({ error: msg(req, 'reviewNotFound') });
     }
@@ -377,6 +404,7 @@ app.post('/api/user-books/:id/like', requireAuth, async (req, res) => {
 
     try {
         await query('INSERT INTO likes (user_id, user_book_id) VALUES ($1, $2)', [req.session.user.id, id]);
+        await notify(userBook.userId, req.session.user.id, 'review_like', { userBookId: userBook.id, workId: userBook.workId });
         res.status(201).json({ message: 'Liked' });
     } catch (error) {
         if (error.code === '23505') {
@@ -387,10 +415,16 @@ app.post('/api/user-books/:id/like', requireAuth, async (req, res) => {
 });
 
 app.delete('/api/user-books/:id/like', requireAuth, async (req, res) => {
-    await query(
-        'DELETE FROM likes WHERE user_id = $1 AND user_book_id = $2',
-        [req.session.user.id, req.params.id]
-    );
+    const [like] = await query(`
+        DELETE FROM likes l
+        USING user_books ub
+        WHERE l.user_id = $1 AND l.user_book_id = $2 AND ub.id = l.user_book_id
+        RETURNING ub.user_id, ub.id
+    `, [req.session.user.id, req.params.id]);
+
+    if (like) {
+        await unnotify(like.userId, req.session.user.id, 'review_like', { userBookId: like.id });
+    }
     res.json({ message: 'Unliked' });
 });
 
@@ -545,6 +579,13 @@ app.post('/api/user-books/:id/comments', requireAuth, async (req, res) => {
             'INSERT INTO comments (user_id, user_book_id, text) VALUES ($1, $2, $3) RETURNING id',
             [req.session.user.id, id, text.trim()]
         );
+
+        const [review] = await query('SELECT id, user_id, work_id FROM user_books WHERE id = $1', [id]);
+        await notify(review.userId, req.session.user.id, 'review_comment', {
+            userBookId: review.id,
+            commentId: comment.id,
+            workId: review.workId,
+        });
 
         const [newComment] = await query(`
             SELECT comments.id, comments.text, comments.created_at, users.username, 
@@ -1036,10 +1077,14 @@ app.post('/api/posts/:id/like', requireAuth, async (req, res) => {
         return res.status(404).json({ error: msg(req, 'postNotFound') });
     }
 
-    await query(
-        'INSERT INTO post_likes (user_id, post_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+    const [liked] = await query(
+        'INSERT INTO post_likes (user_id, post_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING post_id',
         [req.session.user.id, post.id]
     );
+
+    if (liked) {
+        await notify(post.userId, req.session.user.id, 'post_like', { postId: post.id });
+    }
     res.json(await likeState(req, post.id));
 });
 
@@ -1050,6 +1095,7 @@ app.delete('/api/posts/:id/like', requireAuth, async (req, res) => {
     }
 
     await query('DELETE FROM post_likes WHERE user_id = $1 AND post_id = $2', [req.session.user.id, post.id]);
+    await unnotify(post.userId, req.session.user.id, 'post_like', { postId: post.id });
     res.json(await likeState(req, post.id));
 });
 
@@ -1212,6 +1258,8 @@ app.post('/api/posts/:id/comments', requireAuth, async (req, res) => {
         [req.session.user.id, post.id, text]
     );
 
+    await notify(post.userId, req.session.user.id, 'post_comment', { postId: post.id, postCommentId: created.id });
+
     const [comment] = await query(`
         SELECT ${POST_COMMENT_FIELDS}
         FROM post_comments c
@@ -1288,10 +1336,14 @@ app.post('/api/users/:username/follow', requireAuth, async (req, res) => {
         return res.status(400).json({ error: msg(req, 'cannotFollowSelf') });
     }
 
-    await query(
-        'INSERT INTO follows (follower_id, following_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+    const [followed] = await query(
+        'INSERT INTO follows (follower_id, following_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING following_id',
         [req.session.user.id, user.id]
     );
+
+    if (followed) {
+        await notify(user.id, req.session.user.id, 'follow');
+    }
     res.json(await userFollowState(req, user.id));
 });
 
@@ -1305,6 +1357,7 @@ app.delete('/api/users/:username/follow', requireAuth, async (req, res) => {
         'DELETE FROM follows WHERE follower_id = $1 AND following_id = $2',
         [req.session.user.id, user.id]
     );
+    await unnotify(user.id, req.session.user.id, 'follow');
     res.json(await userFollowState(req, user.id));
 });
 
@@ -1875,6 +1928,70 @@ app.get('/api/admin/activity', requireStaff('moderator'), async (req, res) => {
     res.json(actions);
 });
 
+const NOTIFICATIONS_PAGE_SIZE = 20;
+
+app.get('/api/notifications', requireAuth, async (req, res) => {
+    const unreadOnly = req.query.filter === 'unread';
+    const page = Math.max(Number(req.query.page) || 0, 0);
+
+    const rows = await query(`
+        SELECT n.id, n.type, n.read_at, n.created_at, n.post_id, n.work_id,
+               u.username AS actor_username, COALESCE(u.display_name, u.username) AS actor_name,
+               u.avatar_url AS actor_avatar, u.bio AS actor_bio,
+               ${TRANSLATED_TITLE} AS book_title,
+               COALESCE(pc.text, c.text) AS comment_text
+        FROM notifications n
+        LEFT JOIN users u ON u.id = n.actor_id
+        LEFT JOIN works w ON w.id = n.work_id
+        ${JOIN_TRANSLATION} = $2
+        LEFT JOIN post_comments pc ON pc.id = n.post_comment_id
+        LEFT JOIN comments c ON c.id = n.comment_id
+        WHERE n.user_id = $1 AND (NOT $3 OR n.read_at IS NULL)
+        ORDER BY n.created_at DESC, n.id DESC
+        LIMIT $4 OFFSET $5
+    `, [
+        req.session.user.id,
+        languageOf(req),
+        unreadOnly,
+        NOTIFICATIONS_PAGE_SIZE + 1,
+        page * NOTIFICATIONS_PAGE_SIZE,
+    ]);
+
+    res.json({
+        items: rows.slice(0, NOTIFICATIONS_PAGE_SIZE),
+        hasMore: rows.length > NOTIFICATIONS_PAGE_SIZE,
+    });
+});
+
+app.get('/api/notifications/unread-count', requireAuth, async (req, res) => {
+    const [row] = await query(
+        'SELECT COUNT(*) AS count FROM notifications WHERE user_id = $1 AND read_at IS NULL',
+        [req.session.user.id]
+    );
+    res.json(row);
+});
+
+app.post('/api/notifications/read-all', requireAuth, async (req, res) => {
+    await query(
+        'UPDATE notifications SET read_at = now() WHERE user_id = $1 AND read_at IS NULL',
+        [req.session.user.id]
+    );
+    res.json({ message: 'Read' });
+});
+
+app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+
+    await query(
+        'UPDATE notifications SET read_at = now() WHERE id = $1 AND user_id = $2 AND read_at IS NULL',
+        [id, req.session.user.id]
+    );
+    res.json({ id });
+});
+
 const REPORT_TYPES = ['post', 'post_comment', 'review', 'review_comment', 'profile', 'tag'];
 const REPORT_REASONS = ['spoiler', 'offensive', 'harassment', 'spam', 'other'];
 const REPORT_ACTIONS = { dismiss: 'dismissed', spoiler: 'spoiler', remove: 'removed' };
@@ -2330,10 +2447,18 @@ async function markRequestAdded(requestId, workId, userId) {
     const id = Number(requestId);
     if (!Number.isInteger(id)) return;
 
-    await query(`
+    const [request] = await query(`
         UPDATE book_requests SET status = 'added', work_id = $1, resolved_by = $2, resolved_at = now()
         WHERE id = $3 AND status = 'pending'
+        RETURNING id
     `, [workId, userId, id]);
+
+    if (!request) return;
+
+    await query(`
+        INSERT INTO notifications (user_id, type, work_id)
+        SELECT user_id, 'book_added', $1 FROM book_request_votes WHERE request_id = $2
+    `, [workId, id]);
 }
 
 app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => {
