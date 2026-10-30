@@ -25,6 +25,7 @@ import AdminInvites from './AdminInvites';
 import AdminCatalog from './AdminCatalog';
 import AdminActivity from './AdminActivity';
 import AdminModeration from './AdminModeration';
+import NotificationBell from './NotificationBell';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -314,6 +315,8 @@ function App() {
               </span>
               <Icon name="moon" size={16} />
             </button>
+
+            <NotificationBell />
 
             <div className="header-user-wrap" ref={menuRef}>
               <button

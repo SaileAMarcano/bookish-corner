@@ -326,6 +326,23 @@ const en = {
         practicesTitle: 'Good practices',
         practices: 'Always look at the original content and the reason before deciding, and leave a note that explains your decision. Reported people do not lose access: if something keeps happening, let the admin know.',
     },
+    notifications: {
+        bell: 'Notifications',
+        bellUnread_one: 'Notifications, {{count}} unread',
+        bellUnread_other: 'Notifications, {{count}} unread',
+        recent: 'Recent notifications',
+        empty: 'Nothing new yet.',
+        seeAll: 'View all notifications',
+        unread: 'Unread',
+        types: {
+            post_like: 'liked your post.',
+            post_comment: 'commented on your post.',
+            review_like: 'liked your review of "{{title}}".',
+            review_comment: 'commented on your review of "{{title}}".',
+            follow: 'started following you.',
+            book_added: 'The book you asked for, "{{title}}", is now in the library.',
+        },
+    },
     themes: {
         title: 'Theme',
         locked: 'Locked',

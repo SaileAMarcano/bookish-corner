@@ -326,6 +326,23 @@ const es = {
         practicesTitle: 'Buenas prácticas',
         practices: 'Revisa siempre el contenido original y el motivo antes de decidir, y deja una nota que explique tu decisión. Las personas reportadas no pierden el acceso: si algo se repite, avísale a la admin.',
     },
+    notifications: {
+        bell: 'Notificaciones',
+        bellUnread_one: 'Notificaciones, {{count}} sin leer',
+        bellUnread_other: 'Notificaciones, {{count}} sin leer',
+        recent: 'Notificaciones recientes',
+        empty: 'Todavía no hay nada nuevo.',
+        seeAll: 'Ver todas las notificaciones',
+        unread: 'No leída',
+        types: {
+            post_like: 'le dio me gusta a tu publicación.',
+            post_comment: 'comentó tu publicación.',
+            review_like: 'le dio me gusta a tu reseña de «{{title}}».',
+            review_comment: 'comentó tu reseña de «{{title}}».',
+            follow: 'empezó a seguirte.',
+            book_added: 'El libro que pediste, «{{title}}», ya está en la biblioteca.',
+        },
+    },
     themes: {
         title: 'Tema',
         locked: 'Bloqueado',
