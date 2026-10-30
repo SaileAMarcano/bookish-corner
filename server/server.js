@@ -55,7 +55,7 @@ app.use(session({
     },
 }));
 
-const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/gif'];
+const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 const upload = multer({
     storage: multer.memoryStorage(),

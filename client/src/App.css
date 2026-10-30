@@ -8390,3 +8390,12 @@ a.comment-author:hover {
     margin-left: 0;
   }
 }
+
+a.search-title {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+a.search-title:hover {
+  text-decoration: underline;
+}

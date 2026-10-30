@@ -95,7 +95,7 @@ function BookEditorForm({ bookId, initial, requestId, onSaved, onCancel }) {
                 <span className="catalog-cover-text">
                     <strong>{t('catalog.cover')}</strong>
                     <span>{t('catalog.coverHint')}</span>
-                    <input type="file" accept="image/jpeg,image/png,image/gif" onChange={handleCover} />
+                    <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" onChange={handleCover} />
                 </span>
             </label>
 

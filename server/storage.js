@@ -15,7 +15,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SEC
 const AVATAR_BUCKET = 'avatars';
 const POST_IMAGE_BUCKET = 'post-images';
 const COVER_BUCKET = 'book-covers';
-const EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif' };
+const EXTENSIONS = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp' };
 
 
 async function uploadImage(bucket, file) {
