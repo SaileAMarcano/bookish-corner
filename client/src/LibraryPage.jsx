@@ -94,7 +94,7 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
         .filter((book) => status === 'all' || book.status === status)
         .filter((book) => !words || simplify(`${book.title} ${book.author}`).includes(words))
         .sort(SORTERS[sortBy]);
-    const otherBooks = shown.filter((book) => book.status !== 'finished');
+    const otherBooks = shown.filter((book) => book.status !== 'finished' && book.status !== 'reading');
     const yearGroups = groupReadBooks(shown);
     const currentYear = new Date().getFullYear();
     const finishedThisYear = groupReadBooks(books).find((group) => group.year === currentYear)?.books.length || 0;
