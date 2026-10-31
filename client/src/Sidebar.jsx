@@ -1,18 +1,39 @@
+import { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 
 const NAV_ITEMS = [
-    { to: '/', label: 'nav.home', icon: 'home' },
-    { to: '/reading', label: 'nav.reading', icon: 'reading' },
-    { to: '/library', label: 'nav.library', icon: 'library' },
-    { to: '/profile?tab=lists', label: 'nav.lists', icon: 'lists', hideOnPhone: true },
-    { to: '/tags', label: 'nav.tags', icon: 'tag' },
-    { to: '/genres', label: 'nav.genres', icon: 'genres' },
-    { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews', hideOnPhone: true },
-    { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },
-    { to: '/profile?tab=following', label: 'nav.following', icon: 'following' },
-    { to: '/profile?tab=posts', label: 'nav.profile', icon: 'about' },
+    { to: '/', label: 'nav.home', icon: 'home' }, {
+        key: 'library',
+        label: 'nav.library',
+        icon: 'library',
+        children: [
+            { to: '/library', label: 'nav.library', icon: 'library' },
+            { to: '/reading', label: 'nav.reading', icon: 'reading' },
+        ],
+    },
+    {
+        key: 'profile',
+        label: 'nav.profile',
+        icon: 'about',
+        children: [
+            { to: '/profile?tab=posts', label: 'nav.profile', icon: 'about' },
+            { to: '/profile?tab=favorites', label: 'nav.favorites', icon: 'favorites' },
+            { to: '/profile?tab=following', label: 'nav.following', icon: 'following' },
+            { to: '/profile?tab=lists', label: 'nav.lists', icon: 'lists' },
+        ],
+    },
+    {
+        key: 'explore',
+        label: 'nav.explore',
+        icon: 'search',
+        children: [
+            { to: '/tags', label: 'nav.tags', icon: 'tag' },
+            { to: '/genres', label: 'nav.genres', icon: 'genres' },
+        ],
+    },
+    { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
 ];
 
 const ADMIN_ITEMS = [
@@ -40,13 +61,85 @@ function isActive(item, location) {
     return query === `tab=${tab}`;
 }
 
-function Sidebar({ readingCount, seasonTheme, staffRole, moderationCount }) {
+function isGroupActive(item, location) {
+    if (item.key === 'profile') {
+        const tab = new URLSearchParams(location.search).get('tab') || 'posts';
+        return location.pathname === '/profile' && tab !== 'reviews';
+    }
+
+    if (item.key === 'explore') {
+        return item.children.some((child) => isActive(child, location))
+            || location.pathname.startsWith('/genre/')
+            || location.pathname.startsWith('/tagged/');
+    }
+
+    return item.children.some((child) => isActive(child, location));
+}
+
+function closeMenus(container, restoreFocus = false) {
+    container?.querySelectorAll('.sidebar-nav-group[open]').forEach((group) => {
+        if (restoreFocus && group.contains(document.activeElement)) {
+            group.querySelector('summary')?.focus();
+        }
+        group.open = false;
+    });
+}
+
+function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0 }) {
     const location = useLocation();
     const { t } = useTranslation();
+    const navRef = useRef(null);
     const settingsActive = location.pathname === '/profile/edit';
     const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(staffRole));
     const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
     const mark = SEASON_MARKS[seasonTheme] || '/logo-mark.png';
+
+    useEffect(() => {
+        closeMenus(navRef.current);
+    }, [location.pathname, location.search]);
+
+    useEffect(() => {
+        function handlePointerDown(event) {
+            if (!navRef.current?.contains(event.target)) {
+                closeMenus(navRef.current);
+            }
+        }
+
+        function handleKeyDown(event) {
+            if (event.key === 'Escape') {
+                closeMenus(navRef.current, true);
+            }
+        }
+
+        document.addEventListener('pointerdown', handlePointerDown);
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown);
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+    }, []);
+
+    function renderLink(item, nested = false) {
+        const active = isActive(item, location);
+        const count = item.to === '/reading' ? readingCount
+            : item.to === '/admin/moderation' ? moderationCount : 0;
+
+        return (
+            <Link
+                key={item.to}
+                to={item.to}
+                className={`sidebar-link ${active ? 'active' : ''} ${nested ? 'sidebar-sublink' : ''}`}
+                aria-label={t(item.label)}
+                aria-current={active ? 'page' : undefined}
+                onClick={() => closeMenus(navRef.current)}
+            >
+                <Icon name={item.icon} size={nested ? 18 : 20} />
+                <span className="sidebar-label">{t(item.label)}</span>
+                {count > 0 && <span className="sidebar-badge">{count}</span>}
+            </Link>
+        );
+    }
 
     return (
         <aside className="sidebar">
@@ -57,35 +150,49 @@ function Sidebar({ readingCount, seasonTheme, staffRole, moderationCount }) {
                 <span className="sidebar-tagline">{t('nav.tagline')}</span>
             </Link>
 
-            <nav className="sidebar-nav">
-                {NAV_ITEMS.map((item) => (
-                    <Link key={item.to} to={item.to} className={`sidebar-link ${isActive(item, location) ? 'active' : ''} ${item.hideOnPhone ? 'phone-hidden' : ''}`} aria-label={t(item.label)}>
-                        <Icon name={item.icon} size={20} />
-                        <span className="sidebar-label">{t(item.label)}</span>
-                        {item.to === '/reading' && readingCount > 0 && <span className="sidebar-badge">{readingCount}</span>}
-                    </Link>
-                ))}
+            <nav className="sidebar-nav" ref={navRef}>
+                {NAV_ITEMS.map((item) => item.children ? (
+                    <details className="sidebar-nav-group" name="sidebar-navigation" key={item.key}>
+                        <summary
+                            className={`sidebar-link ${isGroupActive(item, location) ? 'active' : ''}`}
+                            aria-label={t(item.label)}
+                        >
+                            <Icon name={item.icon} size={20} />
+                            <span className="sidebar-label">{t(item.label)}</span>
+                            <span className="sidebar-group-arrow"><Icon name="chevronDown" size={14} /></span>
+                        </summary>
+                        <div className="sidebar-subnav">
+                            {item.children.map((child) => renderLink(child, true))}
+                        </div>
+                    </details>
+                ) : renderLink(item))}
             </nav>
 
             <hr className="sidebar-divider" />
-            <Link to="/profile/edit" className={`sidebar-link sidebar-settings ${settingsActive ? 'active' : ''}`} aria-label={t('nav.settings')}>
+            <Link
+                to="/profile/edit"
+                className={`sidebar-link sidebar-settings ${settingsActive ? 'active' : ''}`}
+                aria-label={t('nav.settings')}
+                aria-current={settingsActive ? 'page' : undefined}
+            >
                 <Icon name="settings" size={20} />
                 <span className="sidebar-label">{t('nav.settings')}</span>
             </Link>
+
             {adminItems.length > 0 && (
-                <>
-                    <p className="sidebar-section-label">{t('nav.adminSection')}</p>
-                    {adminItems.map((item) => (
-                        <Link key={item.to} to={item.to} className={`sidebar-link sidebar-settings ${location.pathname === item.to ? 'active' : ''}`} aria-label={t(item.label)}>
-                            <Icon name={item.icon} size={20} />
-                            <span className="sidebar-label">{t(item.label)}</span>
-                            {item.to === '/admin/moderation' && moderationCount > 0 && <span className="sidebar-badge">{moderationCount}</span>}
-                        </Link>
-                    ))}
-                </>
+                <details className="sidebar-admin" open={location.pathname.startsWith('/admin')}>
+                    <summary className="sidebar-link" aria-label={t('nav.adminSection')}>
+                        <Icon name="settings" size={20} />
+                        <span className="sidebar-label">{t('nav.adminSection')}</span>
+                        <span className="sidebar-group-arrow"><Icon name="chevronDown" size={14} /></span>
+                    </summary>
+                    <div className="sidebar-subnav">
+                        {adminItems.map((item) => renderLink(item, true))}
+                    </div>
+                </details>
             )}
         </aside>
     );
 }
 
-export default Sidebar
+export default Sidebar;
