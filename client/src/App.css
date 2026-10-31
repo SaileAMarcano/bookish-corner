@@ -498,7 +498,7 @@ body {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(58, 54, 42, 0.35);
+  background: rgba(0, 0, 0, 0.90);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9101,7 +9101,7 @@ a.search-title:hover {
   cursor: pointer;
 }
 
-.library-grid-update[aria-pressed="true"] {
+.library-grid-tile.selected .library-grid-update {
   border-color: var(--rose-ink);
   background: var(--rose-ink);
   color: var(--surface);
@@ -9451,4 +9451,42 @@ a.search-title:hover {
 .year-shelf-rewards>a {
   color: var(--rose-ink);
   text-underline-offset: 3px;
+}
+
+.library-layout>.library-main {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+}
+
+.library-challenge-side {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.library-challenge-side .library-year-challenge {
+  margin-bottom: 0;
+}
+
+.library-challenge-side .library-year-heading {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.library-challenge-side .library-year-challenge-track {
+  flex-basis: 100%;
+}
+
+@media (max-width: 1100px) {
+  .library-layout>.library-main {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  .library-challenge-side {
+    grid-column: 1;
+    grid-row: auto;
+    max-width: none;
+  }
 }

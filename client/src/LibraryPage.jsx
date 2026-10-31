@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import BookModal from './BookModal';
 import StarRating from './StarRating';
 import Icon from './Icon';
-import ProgressPanel from './ProgressPanel';
 import ReadingNow from './ReadingNow';
 import LibraryYearChallenge from './LibraryYearChallenge';
 import YearShelf from './YearShelf';
-import { nightstandMessage, sortByLastRead } from './utils';
+import { nightstandMessage } from './utils';
 import { groupReadBooks } from './libraryUtils';
 
 const STATUS_FILTERS = ['all', 'reading', 'want-to-read', 'finished', 'paused', 'dnf'];
@@ -62,7 +61,7 @@ function LibraryTile({ book, isSelected, onEdit, onChoose }) {
                 </small>
             )}
             {book.status !== 'finished' && (
-                <button type="button" className="library-grid-update" onClick={onChoose} aria-pressed={isSelected}>
+                <button type="button" className="library-grid-update" onClick={onChoose} aria-haspopup="dialog">
                     {t('library.updateThis')}
                 </button>
             )}
@@ -76,28 +75,13 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('recent');
-    const [panelId, setPanelId] = useState(null);
+    const [activeId, setActiveId] = useState(null);
     const [view, setView] = useState('grid');
-    const [focusRequest, setFocusRequest] = useState(0);
-    const panelRef = useRef(null);
     const selectedBook = books.find((book) => book.id === selectedId);
-    const panelBook = books.find((book) => book.id === panelId)
-        || sortByLastRead(books.filter((book) => book.status === 'reading'))[0];
 
-    useEffect(() => {
-        if (focusRequest === 0) return;
-
-        const panel = panelRef.current;
-        panel?.scrollIntoView({
-            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
-            block: 'nearest',
-        });
-        panel?.querySelector('#panel-page')?.focus({ preventScroll: true });
-    }, [focusRequest]);
-
-    function choose(book) {
-        setPanelId(book.id);
-        setFocusRequest((value) => value + 1);
+    function openBook(book) {
+        setActiveId(book.id);
+        setSelectedId(book.id);
     }
 
     const counts = books.reduce((totals, book) => {
@@ -125,9 +109,9 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
                     <LibraryTile
                         key={book.id}
                         book={book}
-                        isSelected={panelBook?.id === book.id}
-                        onEdit={() => setSelectedId(book.id)}
-                        onChoose={() => choose(book)}
+                        isSelected={activeId === book.id}
+                        onEdit={() => openBook(book)}
+                        onChoose={() => openBook(book)}
                     />
                 ))}
             </div>
@@ -137,7 +121,7 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
     return (
         <main className="page library-page">
             <h1 className="display library-heading">{t('nav.library')}</h1>
-            <ReadingNow books={books} booksStatus={booksStatus} onOpen={(book) => setSelectedId(book.id)} />
+            <ReadingNow books={books} booksStatus={booksStatus} onOpen={openBook} />
 
             <div className="library-view-switch" role="group" aria-label={t('library.shelf.viewLabel')}>
                 <button type="button" className={'book-filter-chip ' + (view === 'grid' ? 'active' : '')}
@@ -152,6 +136,12 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
 
             {view === 'grid' ? (
                 <div className="library-layout">
+                    {booksStatus === 'ready' && (
+                        <aside className="library-side library-challenge-side" aria-label={t('profileSide.challenge', { year: currentYear })}>
+                            <LibraryYearChallenge year={currentYear} count={finishedThisYear} readingGoal={readingGoal} />
+                        </aside>
+                    )}
+
                     <div className="library-main">
                         <div className="library-tools">
                             <div className="book-filter library-status-tabs" role="group" aria-label={t('profileBooks.filterLabel')}>
@@ -203,10 +193,13 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
                             </section>
                         )}
 
-                        {booksStatus === 'ready' && (
-                            <section className="library-book-group" aria-labelledby={'library-year-' + currentYear}>
-                                <LibraryYearChallenge year={currentYear} count={finishedThisYear} readingGoal={readingGoal} />
-                                {currentYearBooks.length > 0 && renderGrid(currentYearBooks)}
+                        {currentYearBooks.length > 0 && (
+                            <section className="library-book-group" aria-labelledby={'library-read-year-' + currentYear}>
+                                <h2 className="display library-year-heading" id={'library-read-year-' + currentYear}>
+                                    {currentYear}
+                                    <span>· {t('library.bookCount', { count: currentYearBooks.length })}</span>
+                                </h2>
+                                {renderGrid(currentYearBooks)}
                             </section>
                         )}
 
@@ -220,14 +213,6 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
                             </section>
                         ))}
                     </div>
-
-                    <aside className="library-side" ref={panelRef}>
-                        {panelBook ? (
-                            <ProgressPanel key={panelBook.id} book={panelBook} onSaved={onUpdate} />
-                        ) : (
-                            <div className="progress-panel progress-panel-empty">{t('library.panelEmpty')}</div>
-                        )}
-                    </aside>
                 </div>
             ) : (
                 <YearShelf key={username} books={books} booksStatus={booksStatus} readingGoal={readingGoal} username={username} />
