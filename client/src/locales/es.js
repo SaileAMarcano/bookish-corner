@@ -781,6 +781,12 @@ const es = {
         manyText: 'Míralos en tu página de logros.',
     },
     library: {
+        yearChallenge: {
+            count: '{{finished}} de {{goal}}',
+            progress: 'Avance del reto de lectura',
+            editGoal: 'Editar meta',
+            complete: '¡Meta cumplida!',
+        },
         counters: {
             finished: 'Leídos',
             reading: 'Leyendo',

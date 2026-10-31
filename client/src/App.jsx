@@ -412,7 +412,7 @@ function App() {
           <Route path="/u/:username" element={<UserPage currentUser={currentUser} />} />
           <Route path="/book/:id" element={<BookPage books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/reading" element={<Navigate to="/library" replace />} />
-          <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
+          <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} readingGoal={currentUser.readingGoal} />} />
           {['admin', 'moderator'].includes(currentUser.staffRole) && (
             <>
               <Route path="/admin" element={<AdminSummary currentUser={currentUser} />} />

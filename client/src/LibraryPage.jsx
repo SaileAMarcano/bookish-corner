@@ -7,6 +7,7 @@ import StarRating from './StarRating';
 import Icon from './Icon';
 import ProgressPanel from './ProgressPanel';
 import ReadingNow from './ReadingNow';
+import LibraryYearChallenge from './LibraryYearChallenge';
 import { nightstandMessage, sortByLastRead } from './utils';
 import { groupReadBooks } from './libraryUtils';
 
@@ -68,7 +69,7 @@ function LibraryTile({ book, isSelected, onEdit, onChoose }) {
     );
 }
 
-function LibraryPage({ books, onUpdate, booksStatus }) {
+function LibraryPage({ books, onUpdate, booksStatus, readingGoal }) {
     const { t } = useTranslation();
     const [selectedId, setSelectedId] = useState(null);
     const [status, setStatus] = useState('all');
@@ -98,6 +99,10 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
         .sort(SORTERS[sortBy]);
     const otherBooks = shown.filter((book) => book.status !== 'finished');
     const yearGroups = groupReadBooks(shown);
+    const currentYear = new Date().getFullYear();
+    const finishedThisYear = groupReadBooks(books).find((group) => group.year === currentYear)?.books.length || 0;
+    const currentYearBooks = yearGroups.find((group) => group.year === currentYear)?.books || [];
+    const pastYearGroups = yearGroups.filter((group) => group.year !== currentYear);
     const emptyMessage = nightstandMessage(booksStatus, books);
 
     function renderGrid(items) {
@@ -156,32 +161,39 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
                         </div>
                     </div>
 
-                    {books.length === 0 ? (
-                        emptyMessage && <div className="card home-empty">{emptyMessage}</div>
-                    ) : shown.length === 0 ? (
-                        <div className="card profile-empty">{t('library.noMatches')}</div>
-                    ) : (
-                        <>
-                            {otherBooks.length > 0 && (
-                                <section className="library-book-group" aria-labelledby="library-current-heading">
-                                    <h2 className="display library-year-heading" id="library-current-heading">
-                                        {status === 'all' ? t('library.onShelf') : t(`library.counters.${status}`)}
-                                        <span>· {t('library.bookCount', { count: otherBooks.length })}</span>
-                                    </h2>
-                                    {renderGrid(otherBooks)}
-                                </section>
-                            )}
-                            {yearGroups.map(({ year, books: yearBooks }) => (
-                                <section className="library-book-group" key={year ?? 'undated'} aria-labelledby={`library-year-${year ?? 'undated'}`}>
-                                    <h2 className="display library-year-heading" id={`library-year-${year ?? 'undated'}`}>
-                                        {year ?? t('library.undated')}
-                                        <span>· {t('library.bookCount', { count: yearBooks.length })}</span>
-                                    </h2>
-                                    {renderGrid(yearBooks)}
-                                </section>
-                            ))}
-                        </>
+                    {books.length === 0 && emptyMessage && (
+                        <div className="card home-empty">{emptyMessage}</div>
                     )}
+                    {books.length > 0 && shown.length === 0 && (
+                        <div className="card profile-empty">{t('library.noMatches')}</div>
+                    )}
+
+                    {otherBooks.length > 0 && (
+                        <section className="library-book-group" aria-labelledby="library-current-heading">
+                            <h2 className="display library-year-heading" id="library-current-heading">
+                                {status === 'all' ? t('library.onShelf') : t('library.counters.' + status)}
+                                <span>· {t('library.bookCount', { count: otherBooks.length })}</span>
+                            </h2>
+                            {renderGrid(otherBooks)}
+                        </section>
+                    )}
+
+                    {booksStatus === 'ready' && (
+                        <section className="library-book-group" aria-labelledby={'library-year-' + currentYear}>
+                            <LibraryYearChallenge year={currentYear} count={finishedThisYear} readingGoal={readingGoal} />
+                            {currentYearBooks.length > 0 && renderGrid(currentYearBooks)}
+                        </section>
+                    )}
+
+                    {pastYearGroups.map(({ year, books: yearBooks }) => (
+                        <section className="library-book-group" key={year ?? 'undated'} aria-labelledby={'library-year-' + (year ?? 'undated')}>
+                            <h2 className="display library-year-heading" id={'library-year-' + (year ?? 'undated')}>
+                                {year ?? t('library.undated')}
+                                <span>· {t('library.bookCount', { count: yearBooks.length })}</span>
+                            </h2>
+                            {renderGrid(yearBooks)}
+                        </section>
+                    ))}
                 </div>
 
                 <aside className="library-side">

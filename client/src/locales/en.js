@@ -781,6 +781,12 @@ const en = {
         manyText: 'See them all on your achievements page.',
     },
     library: {
+        yearChallenge: {
+            count: '{{finished}} of {{goal}}',
+            progress: 'Reading challenge progress',
+            editGoal: 'Edit goal',
+            complete: 'Goal reached!',
+        },
         counters: {
             finished: 'Read',
             reading: 'Reading',
