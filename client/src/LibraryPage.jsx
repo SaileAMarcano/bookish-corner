@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
@@ -78,15 +78,26 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
     const [sortBy, setSortBy] = useState('recent');
     const [panelId, setPanelId] = useState(null);
     const [view, setView] = useState('grid');
+    const [focusRequest, setFocusRequest] = useState(0);
+    const panelRef = useRef(null);
     const selectedBook = books.find((book) => book.id === selectedId);
     const panelBook = books.find((book) => book.id === panelId)
         || sortByLastRead(books.filter((book) => book.status === 'reading'))[0];
 
+    useEffect(() => {
+        if (focusRequest === 0) return;
+
+        const panel = panelRef.current;
+        panel?.scrollIntoView({
+            behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth',
+            block: 'nearest',
+        });
+        panel?.querySelector('#panel-page')?.focus({ preventScroll: true });
+    }, [focusRequest]);
+
     function choose(book) {
         setPanelId(book.id);
-        if (window.matchMedia('(max-width: 1100px)').matches) {
-            document.querySelector('.library-side')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        setFocusRequest((value) => value + 1);
     }
 
     const counts = books.reduce((totals, book) => {
@@ -210,7 +221,7 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
                         ))}
                     </div>
 
-                    <aside className="library-side">
+                    <aside className="library-side" ref={panelRef}>
                         {panelBook ? (
                             <ProgressPanel key={panelBook.id} book={panelBook} onSaved={onUpdate} />
                         ) : (

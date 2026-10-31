@@ -9009,6 +9009,7 @@ a.search-title:hover {
 .library-grid-tile.selected {
   outline: 2px solid var(--rose);
   outline-offset: 3px;
+  background: var(--rose-soft);
 }
 
 .library-grid-cover-wrap {
@@ -9087,19 +9088,29 @@ a.search-title:hover {
 }
 
 .library-grid-update {
-  align-self: flex-start;
-  padding: 4px 0;
-  border: 0;
-  background: none;
+  align-self: stretch;
+  min-height: 36px;
+  padding: 8px 10px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--surface);
   color: var(--rose-ink);
   font: inherit;
   font-size: 12px;
-  text-align: left;
+  text-align: center;
   cursor: pointer;
 }
 
 .library-grid-update[aria-pressed="true"] {
+  border-color: var(--rose-ink);
+  background: var(--rose-ink);
+  color: var(--surface);
   font-weight: 600;
+}
+
+.library-grid-update:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 3px;
 }
 
 .cover-fabric {

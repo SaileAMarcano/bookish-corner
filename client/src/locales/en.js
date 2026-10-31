@@ -835,6 +835,7 @@ const en = {
         bookCount_one: '{{count}} book',
         bookCount_other: '{{count}} books',
         updateThis: 'Update progress',
+        saved: 'Progress saved.',
         panelEmpty: 'Choose a book from the list to update your progress.',
     },
     profileHeader: {

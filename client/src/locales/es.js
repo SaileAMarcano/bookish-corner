@@ -835,6 +835,7 @@ const es = {
         bookCount_one: '{{count}} libro',
         bookCount_other: '{{count}} libros',
         updateThis: 'Actualizar progreso',
+        saved: 'Progreso guardado.',
         panelEmpty: 'Elige un libro de la lista para actualizar tu progreso.',
     },
     profileHeader: {
