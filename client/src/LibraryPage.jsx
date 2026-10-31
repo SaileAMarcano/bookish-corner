@@ -8,6 +8,7 @@ import Icon from './Icon';
 import ProgressPanel from './ProgressPanel';
 import ReadingNow from './ReadingNow';
 import LibraryYearChallenge from './LibraryYearChallenge';
+import YearShelf from './YearShelf';
 import { nightstandMessage, sortByLastRead } from './utils';
 import { groupReadBooks } from './libraryUtils';
 
@@ -69,13 +70,14 @@ function LibraryTile({ book, isSelected, onEdit, onChoose }) {
     );
 }
 
-function LibraryPage({ books, onUpdate, booksStatus, readingGoal }) {
+function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
     const { t } = useTranslation();
     const [selectedId, setSelectedId] = useState(null);
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('recent');
     const [panelId, setPanelId] = useState(null);
+    const [view, setView] = useState('grid');
     const selectedBook = books.find((book) => book.id === selectedId);
     const panelBook = books.find((book) => book.id === panelId)
         || sortByLastRead(books.filter((book) => book.status === 'reading'))[0];
@@ -126,84 +128,99 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal }) {
             <h1 className="display library-heading">{t('nav.library')}</h1>
             <ReadingNow books={books} booksStatus={booksStatus} onOpen={(book) => setSelectedId(book.id)} />
 
-            <div className="library-layout">
-                <div className="library-main">
-                    <div className="library-tools">
-                        <div className="book-filter library-status-tabs" role="group" aria-label={t('profileBooks.filterLabel')}>
-                            {STATUS_FILTERS.map((key) => (
-                                <button
-                                    key={key}
-                                    type="button"
-                                    className={`book-filter-chip ${status === key ? 'active' : ''}`}
-                                    onClick={() => setStatus(key)}
-                                    aria-pressed={status === key}
-                                >
-                                    {key === 'all' ? t('profileBooks.all') : t(`library.counters.${key}`)}
-                                    <span className="book-filter-count">{counts[key] || 0}</span>
-                                </button>
-                            ))}
+            <div className="library-view-switch" role="group" aria-label={t('library.shelf.viewLabel')}>
+                <button type="button" className={'book-filter-chip ' + (view === 'grid' ? 'active' : '')}
+                    aria-pressed={view === 'grid'} onClick={() => setView('grid')}>
+                    {t('library.shelf.covers')}
+                </button>
+                <button type="button" className={'book-filter-chip ' + (view === 'shelf' ? 'active' : '')}
+                    aria-pressed={view === 'shelf'} onClick={() => setView('shelf')}>
+                    {t('library.shelf.title')}
+                </button>
+            </div>
+
+            {view === 'grid' ? (
+                <div className="library-layout">
+                    <div className="library-main">
+                        <div className="library-tools">
+                            <div className="book-filter library-status-tabs" role="group" aria-label={t('profileBooks.filterLabel')}>
+                                {STATUS_FILTERS.map((key) => (
+                                    <button
+                                        key={key}
+                                        type="button"
+                                        className={`book-filter-chip ${status === key ? 'active' : ''}`}
+                                        onClick={() => setStatus(key)}
+                                        aria-pressed={status === key}
+                                    >
+                                        {key === 'all' ? t('profileBooks.all') : t(`library.counters.${key}`)}
+                                        <span className="book-filter-count">{counts[key] || 0}</span>
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="library-search-sort">
+                                <label className="library-search">
+                                    <Icon name="search" size={16} />
+                                    <input
+                                        type="search"
+                                        value={search}
+                                        onChange={(event) => setSearch(event.target.value)}
+                                        placeholder={t('library.search')}
+                                        aria-label={t('library.search')}
+                                    />
+                                </label>
+                                <select className="library-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label={t('library.sortBy')}>
+                                    {SORTS.map((key) => <option key={key} value={key}>{t(`library.sort.${key}`)}</option>)}
+                                </select>
+                            </div>
                         </div>
 
-                        <div className="library-search-sort">
-                            <label className="library-search">
-                                <Icon name="search" size={16} />
-                                <input
-                                    type="search"
-                                    value={search}
-                                    onChange={(event) => setSearch(event.target.value)}
-                                    placeholder={t('library.search')}
-                                    aria-label={t('library.search')}
-                                />
-                            </label>
-                            <select className="library-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label={t('library.sortBy')}>
-                                {SORTS.map((key) => <option key={key} value={key}>{t(`library.sort.${key}`)}</option>)}
-                            </select>
-                        </div>
+                        {books.length === 0 && emptyMessage && (
+                            <div className="card home-empty">{emptyMessage}</div>
+                        )}
+                        {books.length > 0 && shown.length === 0 && (
+                            <div className="card profile-empty">{t('library.noMatches')}</div>
+                        )}
+
+                        {otherBooks.length > 0 && (
+                            <section className="library-book-group" aria-labelledby="library-current-heading">
+                                <h2 className="display library-year-heading" id="library-current-heading">
+                                    {status === 'all' ? t('library.onShelf') : t('library.counters.' + status)}
+                                    <span>· {t('library.bookCount', { count: otherBooks.length })}</span>
+                                </h2>
+                                {renderGrid(otherBooks)}
+                            </section>
+                        )}
+
+                        {booksStatus === 'ready' && (
+                            <section className="library-book-group" aria-labelledby={'library-year-' + currentYear}>
+                                <LibraryYearChallenge year={currentYear} count={finishedThisYear} readingGoal={readingGoal} />
+                                {currentYearBooks.length > 0 && renderGrid(currentYearBooks)}
+                            </section>
+                        )}
+
+                        {pastYearGroups.map(({ year, books: yearBooks }) => (
+                            <section className="library-book-group" key={year ?? 'undated'} aria-labelledby={'library-year-' + (year ?? 'undated')}>
+                                <h2 className="display library-year-heading" id={'library-year-' + (year ?? 'undated')}>
+                                    {year ?? t('library.undated')}
+                                    <span>· {t('library.bookCount', { count: yearBooks.length })}</span>
+                                </h2>
+                                {renderGrid(yearBooks)}
+                            </section>
+                        ))}
                     </div>
 
-                    {books.length === 0 && emptyMessage && (
-                        <div className="card home-empty">{emptyMessage}</div>
-                    )}
-                    {books.length > 0 && shown.length === 0 && (
-                        <div className="card profile-empty">{t('library.noMatches')}</div>
-                    )}
-
-                    {otherBooks.length > 0 && (
-                        <section className="library-book-group" aria-labelledby="library-current-heading">
-                            <h2 className="display library-year-heading" id="library-current-heading">
-                                {status === 'all' ? t('library.onShelf') : t('library.counters.' + status)}
-                                <span>· {t('library.bookCount', { count: otherBooks.length })}</span>
-                            </h2>
-                            {renderGrid(otherBooks)}
-                        </section>
-                    )}
-
-                    {booksStatus === 'ready' && (
-                        <section className="library-book-group" aria-labelledby={'library-year-' + currentYear}>
-                            <LibraryYearChallenge year={currentYear} count={finishedThisYear} readingGoal={readingGoal} />
-                            {currentYearBooks.length > 0 && renderGrid(currentYearBooks)}
-                        </section>
-                    )}
-
-                    {pastYearGroups.map(({ year, books: yearBooks }) => (
-                        <section className="library-book-group" key={year ?? 'undated'} aria-labelledby={'library-year-' + (year ?? 'undated')}>
-                            <h2 className="display library-year-heading" id={'library-year-' + (year ?? 'undated')}>
-                                {year ?? t('library.undated')}
-                                <span>· {t('library.bookCount', { count: yearBooks.length })}</span>
-                            </h2>
-                            {renderGrid(yearBooks)}
-                        </section>
-                    ))}
+                    <aside className="library-side">
+                        {panelBook ? (
+                            <ProgressPanel key={panelBook.id} book={panelBook} onSaved={onUpdate} />
+                        ) : (
+                            <div className="progress-panel progress-panel-empty">{t('library.panelEmpty')}</div>
+                        )}
+                    </aside>
                 </div>
-
-                <aside className="library-side">
-                    {panelBook ? (
-                        <ProgressPanel key={panelBook.id} book={panelBook} onSaved={onUpdate} />
-                    ) : (
-                        <div className="progress-panel progress-panel-empty">{t('library.panelEmpty')}</div>
-                    )}
-                </aside>
-            </div>
+            ) : (
+                <YearShelf key={username} books={books} booksStatus={booksStatus} readingGoal={readingGoal} username={username} />
+            )}
 
             {selectedBook && <BookModal key={selectedBook.id} book={selectedBook} onClose={() => setSelectedId(null)} onUpdate={onUpdate} />}
         </main>

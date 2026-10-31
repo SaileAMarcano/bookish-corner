@@ -781,6 +781,26 @@ const es = {
         manyText: 'Míralos en tu página de logros.',
     },
     library: {
+        shelf: {
+            viewLabel: 'Vista de la biblioteca',
+            covers: 'Portadas',
+            title: 'Estante del año',
+            description: 'Un lomo por cada libro terminado. Tus logros desbloquean adornos para todos tus estantes.',
+            scroll: 'Desliza horizontalmente para ver todos los libros. Selecciona un lomo para abrir su página.',
+            yearLabel: 'Estante: {{year}}',
+            empty: 'Tu próximo libro terminado estrenará este estante.',
+            booksError: 'No se pudieron cargar tus libros. Intenta recargar la página.',
+            rewards: 'Los adornos de tu estante',
+            unlocked: 'Desbloqueado',
+            locked: 'Por descubrir',
+            objects: {
+                candle: 'Vela',
+                quill: 'Pluma en tintero',
+                stars: 'Frasco de estrellas',
+                flowers: 'Flores',
+                tea: 'Taza de té',
+            },
+        },
         yearChallenge: {
             count: '{{finished}} de {{goal}}',
             progress: 'Avance del reto de lectura',

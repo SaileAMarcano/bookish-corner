@@ -781,6 +781,26 @@ const en = {
         manyText: 'See them all on your achievements page.',
     },
     library: {
+        shelf: {
+            viewLabel: 'Library view',
+            covers: 'Covers',
+            title: 'Yearly shelf',
+            description: 'A spine for every finished book. Your achievements unlock decorations for all your shelves.',
+            scroll: 'Scroll sideways to see every book. Select a spine to open its page.',
+            yearLabel: 'Shelf: {{year}}',
+            empty: 'Your next finished book will start this shelf.',
+            booksError: 'Your books could not be loaded. Try reloading the page.',
+            rewards: 'Your shelf decorations',
+            unlocked: 'Unlocked',
+            locked: 'Yet to discover',
+            objects: {
+                candle: 'Candle',
+                quill: 'Quill and inkwell',
+                stars: 'Jar of stars',
+                flowers: 'Flowers',
+                tea: 'Cup of tea',
+            },
+        },
         yearChallenge: {
             count: '{{finished}} of {{goal}}',
             progress: 'Reading challenge progress',

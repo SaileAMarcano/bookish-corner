@@ -9262,3 +9262,182 @@ a.search-title:hover {
   font-size: 13px;
   text-underline-offset: 3px;
 }
+
+.library-view-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.year-shelf-intro {
+  margin-bottom: 24px;
+}
+
+.year-shelf-intro h2,
+.year-shelf-rewards h2 {
+  margin: 0 0 8px;
+  font-size: 28px;
+}
+
+.year-shelf-intro p {
+  margin: 6px 0;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.year-shelf-card {
+  margin-bottom: 28px;
+  padding: 20px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+}
+
+.year-shelf-card .library-year-challenge {
+  padding: 0;
+  border: 0;
+}
+
+.year-shelf-scroll {
+  overflow-x: auto;
+  padding: 6px 4px 12px;
+}
+
+.year-shelf-stage {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  width: max-content;
+  min-width: 100%;
+  min-height: 205px;
+  box-sizing: border-box;
+  padding: 0 12px 18px;
+}
+
+.year-shelf-stage::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 18px;
+  border-radius: 2px 2px 5px 5px;
+  background: repeating-linear-gradient(2deg, transparent 0 5px, #38251c18 6px 7px),
+    linear-gradient(#ba9573, #8f674a 45%, #5b3d30 48%, #79543d);
+  box-shadow: 0 5px 8px #24170f24;
+  content: '';
+}
+
+.year-shelf-spine {
+  display: flex;
+  flex: 0 0 44px;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: var(--spine-height);
+  box-sizing: border-box;
+  padding: 12px 8px;
+  border: 1px solid #ffffff25;
+  border-radius: 4px 5px 2px 2px;
+  background: repeating-linear-gradient(90deg, transparent 0 3px, #ffffff08 3px 4px), var(--spine-color);
+  box-shadow: inset 3px 0 #00000020, inset -2px 0 #ffffff12;
+  color: #fff3da;
+  text-decoration: none;
+}
+
+.year-shelf-spine span {
+  overflow: hidden;
+  max-height: 100%;
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  writing-mode: vertical-rl;
+}
+
+.year-shelf-spine:hover {
+  filter: brightness(1.12);
+}
+
+.year-shelf-spine:focus-visible,
+.year-shelf-scroll:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 3px;
+}
+
+.year-shelf-empty {
+  width: min(50vw, 280px);
+  margin: 0 12px 20px 0;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.year-shelf-decorations {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  margin-left: auto;
+  padding-left: 24px;
+}
+
+.year-shelf-object {
+  display: block;
+  width: 42px;
+  height: 64px;
+  color: var(--ink);
+}
+
+.year-shelf-reward-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 16px;
+  padding: 0;
+  margin: 16px 0;
+  list-style: none;
+}
+
+.year-shelf-reward-list li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.year-shelf-reward-list svg {
+  flex-shrink: 0;
+}
+
+.year-shelf-reward-list strong,
+.year-shelf-reward-list span,
+.year-shelf-reward-list small {
+  display: block;
+}
+
+.year-shelf-reward-list strong {
+  font-size: 14px;
+}
+
+.year-shelf-reward-list span {
+  margin: 4px 0;
+  color: var(--amber);
+  font-size: 12px;
+}
+
+.year-shelf-reward-list small {
+  color: var(--text-2);
+  line-height: 1.5;
+}
+
+.year-shelf-locked svg {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.year-shelf-rewards>a {
+  color: var(--rose-ink);
+  text-underline-offset: 3px;
+}
