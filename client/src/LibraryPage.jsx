@@ -8,14 +8,13 @@ import Icon from './Icon';
 import ProgressPanel from './ProgressPanel';
 import ReadingNow from './ReadingNow';
 import { nightstandMessage, sortByLastRead } from './utils';
+import { groupReadBooks } from './libraryUtils';
 
-const STATUS_COUNTERS = ['finished', 'reading', 'want-to-read', 'paused', 'dnf'];
+const STATUS_FILTERS = ['all', 'reading', 'want-to-read', 'finished', 'paused', 'dnf'];
 const SORTS = ['recent', 'title', 'author', 'rating'];
 
 function byRecent(a, b) {
-    const dateA = a.lastReadAt || a.createdAt;
-    const dateB = b.lastReadAt || b.createdAt;
-    return new Date(dateB) - new Date(dateA);
+    return new Date(b.lastReadAt || b.createdAt) - new Date(a.lastReadAt || a.createdAt);
 }
 
 function simplify(text) {
@@ -29,53 +28,42 @@ const SORTERS = {
     rating: (a, b) => b.rating - a.rating || byRecent(a, b),
 };
 
-function LibraryRow({ book, isSelected, onEdit, onChoose }) {
+function LibraryTile({ book, isSelected, onEdit, onChoose }) {
     const { t } = useTranslation();
-    const percent = book.totalPages ? Math.round(((book.currentPage || 0) * 100) / book.totalPages) : null;
-    const shownPercent = book.status === 'finished' ? 100 : percent;
 
     return (
-        <article className={`library-row ${isSelected ? 'selected' : ''}`}>
-            <Link to={`/book/${book.bookId}`} className="library-cover-link">
-                <BookCover src={book.coverImage} className="library-cover" />
-            </Link>
-
-            <div className="library-info">
-                <Link to={`/book/${book.bookId}`} className="display library-title">{book.title}</Link>
-                <div className="library-author">{book.author}</div>
-
-                {book.rating > 0 && <StarRating value={book.rating} size={16} />}
-
-                {book.review && <p className="library-review">{book.review}</p>}
-
-                <div className="library-status-row">
-                    <span className={`pill book-status status-${book.status}`}>{t(`status.${book.status}`)}</span>
-
-                    {book.totalPages ? (
-                        <div className="progress library-progress">
-                            <span className="library-pages">
-                                {t('library.pages', { current: book.status === 'finished' ? book.totalPages : book.currentPage || 0, total: book.totalPages })}
-                            </span>
-                            <div className="progress-track">
-                                <div className="progress-fill" style={{ width: `${shownPercent}%` }}></div>
-                            </div>
-                            <div className="progress-label">{shownPercent}%</div>
-                        </div>
-                    ) : (
-                        <span className="library-pages">{t('library.noPages')}</span>
-                    )}
-                </div>
-
-                {book.status !== 'finished' && !isSelected && (
-                    <button type="button" className="library-choose" onClick={onChoose}>
-                        {t('library.updateThis')}
-                    </button>
-                )}
+        <article className={`library-grid-tile ${isSelected ? 'selected' : ''}`}>
+            <div className="library-grid-cover-wrap">
+                <Link to={`/book/${book.bookId}`} className="library-grid-cover-link" aria-label={book.title}>
+                    <BookCover
+                        src={book.coverImage}
+                        className="library-grid-cover"
+                        title={book.title}
+                        author={book.author}
+                        bookId={book.bookId}
+                    />
+                </Link>
+                <span className="library-grid-status">{t(`library.counters.${book.status}`)}</span>
             </div>
 
-            <button type="button" className="library-more" onClick={onEdit} aria-label={t('library.edit', { title: book.title })}>
-                <Icon name="more" size={18} />
-            </button>
+            <div className="library-grid-caption">
+                <h3 className="display"><Link to={`/book/${book.bookId}`}>{book.title}</Link></h3>
+                <button type="button" className="library-grid-more" onClick={onEdit} aria-label={t('library.edit', { title: book.title })}>
+                    <Icon name="more" size={18} />
+                </button>
+            </div>
+            <div className="library-grid-author">{book.author}</div>
+            {book.rating > 0 && <StarRating value={book.rating} size={15} />}
+            {book.status !== 'finished' && book.totalPages > 0 && (
+                <small className="library-grid-pages">
+                    {t('library.pages', { current: book.currentPage || 0, total: book.totalPages })}
+                </small>
+            )}
+            {book.status !== 'finished' && (
+                <button type="button" className="library-grid-update" onClick={onChoose} aria-pressed={isSelected}>
+                    {t('library.updateThis')}
+                </button>
+            )}
         </article>
     );
 }
@@ -88,50 +76,56 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
     const [sortBy, setSortBy] = useState('recent');
     const [panelId, setPanelId] = useState(null);
     const selectedBook = books.find((book) => book.id === selectedId);
+    const panelBook = books.find((book) => book.id === panelId)
+        || sortByLastRead(books.filter((book) => book.status === 'reading'))[0];
 
-    // The panel shows the book she chose, or else the one she read most recently.
-    const panelBook =
-        books.find((book) => book.id === panelId) ||
-        sortByLastRead(books.filter((book) => book.status === 'reading'))[0];
-
-    const choose = (book) => {
+    function choose(book) {
         setPanelId(book.id);
-        // On small screens the panel is below the list: bring it into view.
         if (window.matchMedia('(max-width: 1100px)').matches) {
             document.querySelector('.library-side')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-    };
+    }
 
+    const counts = books.reduce((totals, book) => {
+        totals.all += 1;
+        totals[book.status] = (totals[book.status] || 0) + 1;
+        return totals;
+    }, { all: 0 });
     const words = simplify(search.trim());
     const shown = books
         .filter((book) => status === 'all' || book.status === status)
         .filter((book) => !words || simplify(`${book.title} ${book.author}`).includes(words))
         .sort(SORTERS[sortBy]);
+    const otherBooks = shown.filter((book) => book.status !== 'finished');
+    const yearGroups = groupReadBooks(shown);
     const emptyMessage = nightstandMessage(booksStatus, books);
+
+    function renderGrid(items) {
+        return (
+            <div className="library-grid">
+                {items.map((book) => (
+                    <LibraryTile
+                        key={book.id}
+                        book={book}
+                        isSelected={panelBook?.id === book.id}
+                        onEdit={() => setSelectedId(book.id)}
+                        onChoose={() => choose(book)}
+                    />
+                ))}
+            </div>
+        );
+    }
 
     return (
         <main className="page library-page">
             <h1 className="display library-heading">{t('nav.library')}</h1>
-            <ReadingNow
-                books={books}
-                booksStatus={booksStatus}
-                onOpen={(book) => setSelectedId(book.id)}
-            />
+            <ReadingNow books={books} booksStatus={booksStatus} onOpen={(book) => setSelectedId(book.id)} />
+
             <div className="library-layout">
                 <div className="library-main">
-
-                    <div className="library-counters">
-                        {STATUS_COUNTERS.map((status) => (
-                            <div key={status} className="library-counter">
-                                <div className="library-counter-number">{books.filter((book) => book.status === status).length}</div>
-                                <div className="library-counter-label">{t(`library.counters.${status}`)}</div>
-                            </div>
-                        ))}
-                    </div>
-
                     <div className="library-tools">
-                        <div className="book-filter" role="group" aria-label={t('profileBooks.filterLabel')}>
-                            {['all', ...STATUS_COUNTERS].map((key) => (
+                        <div className="book-filter library-status-tabs" role="group" aria-label={t('profileBooks.filterLabel')}>
+                            {STATUS_FILTERS.map((key) => (
                                 <button
                                     key={key}
                                     type="button"
@@ -140,6 +134,7 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
                                     aria-pressed={status === key}
                                 >
                                     {key === 'all' ? t('profileBooks.all') : t(`library.counters.${key}`)}
+                                    <span className="book-filter-count">{counts[key] || 0}</span>
                                 </button>
                             ))}
                         </div>
@@ -155,11 +150,8 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
                                     aria-label={t('library.search')}
                                 />
                             </label>
-
                             <select className="library-sort" value={sortBy} onChange={(event) => setSortBy(event.target.value)} aria-label={t('library.sortBy')}>
-                                {SORTS.map((key) => (
-                                    <option key={key} value={key}>{t(`library.sort.${key}`)}</option>
-                                ))}
+                                {SORTS.map((key) => <option key={key} value={key}>{t(`library.sort.${key}`)}</option>)}
                             </select>
                         </div>
                     </div>
@@ -169,17 +161,26 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
                     ) : shown.length === 0 ? (
                         <div className="card profile-empty">{t('library.noMatches')}</div>
                     ) : (
-                        <div className="library-list">
-                            {shown.map((book) => (
-                                <LibraryRow
-                                    key={book.id}
-                                    book={book}
-                                    isSelected={panelBook?.id === book.id}
-                                    onEdit={() => setSelectedId(book.id)}
-                                    onChoose={() => choose(book)}
-                                />
+                        <>
+                            {otherBooks.length > 0 && (
+                                <section className="library-book-group" aria-labelledby="library-current-heading">
+                                    <h2 className="display library-year-heading" id="library-current-heading">
+                                        {status === 'all' ? t('library.onShelf') : t(`library.counters.${status}`)}
+                                        <span>· {t('library.bookCount', { count: otherBooks.length })}</span>
+                                    </h2>
+                                    {renderGrid(otherBooks)}
+                                </section>
+                            )}
+                            {yearGroups.map(({ year, books: yearBooks }) => (
+                                <section className="library-book-group" key={year ?? 'undated'} aria-labelledby={`library-year-${year ?? 'undated'}`}>
+                                    <h2 className="display library-year-heading" id={`library-year-${year ?? 'undated'}`}>
+                                        {year ?? t('library.undated')}
+                                        <span>· {t('library.bookCount', { count: yearBooks.length })}</span>
+                                    </h2>
+                                    {renderGrid(yearBooks)}
+                                </section>
                             ))}
-                        </div>
+                        </>
                     )}
                 </div>
 
@@ -192,11 +193,9 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
                 </aside>
             </div>
 
-            {selectedBook && (
-                <BookModal book={selectedBook} onClose={() => setSelectedId(null)} onUpdate={onUpdate} />
-            )}
+            {selectedBook && <BookModal key={selectedBook.id} book={selectedBook} onClose={() => setSelectedId(null)} onUpdate={onUpdate} />}
         </main>
     );
 }
 
-export default LibraryPage
+export default LibraryPage;
