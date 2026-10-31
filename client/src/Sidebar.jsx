@@ -4,15 +4,8 @@ import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 
 const NAV_ITEMS = [
-    { to: '/', label: 'nav.home', icon: 'home' }, {
-        key: 'library',
-        label: 'nav.library',
-        icon: 'library',
-        children: [
-            { to: '/library', label: 'nav.library', icon: 'library' },
-            { to: '/reading', label: 'nav.reading', icon: 'reading' },
-        ],
-    },
+    { to: '/', label: 'nav.home', icon: 'home' },
+    { to: '/library', label: 'nav.library', icon: 'library' },
     {
         key: 'profile',
         label: 'nav.profile',
@@ -122,7 +115,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
 
     function renderLink(item, nested = false) {
         const active = isActive(item, location);
-        const count = item.to === '/reading' ? readingCount
+        const count = item.to === '/library' ? readingCount
             : item.to === '/admin/moderation' ? moderationCount : 0;
 
         return (

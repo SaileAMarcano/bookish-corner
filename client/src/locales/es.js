@@ -539,6 +539,9 @@ const es = {
         by: 'de {{author}}',
         progress: 'Progreso de lectura',
         startedOn: 'Empezado el {{date}}',
+        count_one: '{{count}} libro en curso',
+        count_other: '{{count}} libros en curso',
+        updateBook: 'Actualizar progreso de {{title}}',
     },
     status: {
         'want-to-read': 'Quiero leerlo',

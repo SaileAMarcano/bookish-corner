@@ -22,7 +22,7 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
                 <div className="profile-side-head">
                     <h3 className="display profile-side-title">{t('profileSide.readingNow')}</h3>
                     {isMe && (
-                        <Link to="/reading" className="profile-side-more" aria-label={t('profileSide.seeReading')}>
+                        <Link to="/library" className="profile-side-more" aria-label={t('profileSide.seeReading')}>
                             <Icon name="chevronRight" size={18} />
                         </Link>
                     )}

@@ -138,7 +138,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                 <section className="home-section">
                     <div className="home-section-head">
                         <h2 className="display home-section-title">{t('home.continueReading')}</h2>
-                        <Link to="/reading" className="home-section-link">{t('common.viewAll')}</Link>
+                        <Link to="/library" className="home-section-link">{t('common.viewAll')}</Link>
                     </div>
 
                     {continueBook ? (

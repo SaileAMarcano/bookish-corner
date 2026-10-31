@@ -10,7 +10,6 @@ import Landing from './Landing';
 import AboutPage from './AboutPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
-import ReadingPage from './ReadingPage';
 import LibraryPage from './LibraryPage';
 import TaggedPage from './TaggedPage';
 import TagsPage from './TagsPage';
@@ -412,7 +411,7 @@ function App() {
           <Route path="/genre/:slug" element={<GenrePage />} />
           <Route path="/u/:username" element={<UserPage currentUser={currentUser} />} />
           <Route path="/book/:id" element={<BookPage books={books} onLibraryChange={loadUserBooks} />} />
-          <Route path="/reading" element={<ReadingPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
+          <Route path="/reading" element={<Navigate to="/library" replace />} />
           <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} />} />
           {['admin', 'moderator'].includes(currentUser.staffRole) && (
             <>

@@ -6,6 +6,7 @@ import BookModal from './BookModal';
 import StarRating from './StarRating';
 import Icon from './Icon';
 import ProgressPanel from './ProgressPanel';
+import ReadingNow from './ReadingNow';
 import { nightstandMessage, sortByLastRead } from './utils';
 
 const STATUS_COUNTERS = ['finished', 'reading', 'want-to-read', 'paused', 'dnf'];
@@ -110,9 +111,14 @@ function LibraryPage({ books, onUpdate, booksStatus }) {
 
     return (
         <main className="page library-page">
+            <h1 className="display library-heading">{t('nav.library')}</h1>
+            <ReadingNow
+                books={books}
+                booksStatus={booksStatus}
+                onOpen={(book) => setSelectedId(book.id)}
+            />
             <div className="library-layout">
                 <div className="library-main">
-                    <h1 className="display library-heading">{t('nav.library')}</h1>
 
                     <div className="library-counters">
                         {STATUS_COUNTERS.map((status) => (
