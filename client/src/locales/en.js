@@ -1,5 +1,10 @@
 // English texts of the app. Every key here must also exist in es.js.
 const en = {
+    reviewSpoiler: {
+        warning: 'This review contains spoilers.',
+        show: 'Show review',
+        hide: 'Hide review',
+    },
     common: {
         tryAgain: 'Try again',
         cancel: 'Cancel',
@@ -592,6 +597,7 @@ const en = {
         rate: 'Rate {{value}} out of 5',
     },
     modal: {
+        containsSpoilers: 'Contains spoilers',
         diaryTitle: 'Your reading journal',
         readingStatus: 'Reading status',
         aboutBook: 'About the book',

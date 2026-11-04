@@ -6,6 +6,7 @@ import BookCover from './BookCover';
 import Notice from './Notice';
 import StarRating from './StarRating';
 import ReviewComments from './ReviewComments';
+import ReviewText from './ReviewText';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
 
@@ -64,7 +65,7 @@ function ActivityCard({ activity, currentUserId, onChange }) {
                     )}
 
                     {activity.kind === 'finished' && activity.review && (
-                        <p className="activity-text">{activity.review}</p>
+                        <ReviewText text={activity.review} isSpoiler={activity.reviewIsSpoiler} className="activity-text" />
                     )}
 
                     {activity.kind === 'progress' && activity.totalPages && (

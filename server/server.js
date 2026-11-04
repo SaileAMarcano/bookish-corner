@@ -214,7 +214,7 @@ app.get('/api/books/:id', requireAuth, async (req, res) => {
     }
 
     const reviews = await query(`
-        SELECT ub.id, ub.review, ub.rating, ub.status, ub.created_at,
+        SELECT ub.id, ub.review, ub.review_is_spoiler, ub.rating, ub.status, ub.created_at,
                u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
                (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id) AS like_count,
                (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id) AS comment_count,
@@ -436,7 +436,7 @@ const PROGRESS_NOTE_MAX_LENGTH = 280;
 
 app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
-    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, progressNote } = req.body;
+    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, progressNote, reviewIsSpoiler } = req.body;
 
     const [userBook] = await query("SELECT *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on FROM user_books WHERE id = $1", [id]);
     if (!userBook) {
@@ -467,6 +467,9 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     if (typeof review === 'string' && review.length > REVIEW_MAX_LENGTH) {
         return res.status(400).json({ error: msg(req, 'reviewTooLong') });
     }
+    if (reviewIsSpoiler !== undefined && typeof reviewIsSpoiler !== 'boolean') {
+        return res.status(400).json({ error: msg(req, 'reviewSpoilerInvalid') });
+    }
     if (progressNote !== undefined && progressNote !== null && typeof progressNote !== 'string') {
         return res.status(400).json({ error: msg(req, 'progressNoteTooLong') });
     }
@@ -485,6 +488,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const newGenre = keepOrSet(genre, userBook.genre);
     const cleanReview = typeof review === 'string' ? review.trim() || null : review;
     const newReview = keepOrSet(cleanReview, userBook.review);
+    const newReviewIsSpoiler = newReview ? keepOrSet(reviewIsSpoiler, userBook.reviewIsSpoiler) : false;
     const noteGiven = progressNote !== undefined;
     const cleanNote = typeof progressNote === 'string' ? progressNote.trim() || null : null;
 
@@ -505,6 +509,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
         SET status = COALESCE($1, status),
             progress = COALESCE($2, progress),
             review = $3,
+            review_is_spoiler = $18,
             is_favorite = COALESCE($4, is_favorite),
             genre = $5,
             current_page = $6,
@@ -521,7 +526,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
                                     ELSE progress_note_at END
         WHERE id = $13
         RETURNING *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on
-    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote, dates.readYear, dates.finishedOn]);
+    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote, dates.readYear, dates.finishedOn, newReviewIsSpoiler]);
 
     res.json(updated);
 });
@@ -544,7 +549,7 @@ app.delete('/api/user-books/:id', requireAuth, async (req, res) => {
 
 async function findUserBooks(req, ownerId) {
     return query(`
-        SELECT ub.id, ub.status, ub.review, ub.is_favorite, ub.genre, ub.rating,
+        SELECT ub.id, ub.status, ub.review, ub.review_is_spoiler, ub.is_favorite, ub.genre, ub.rating,
                ub.current_page, ub.total_pages, ub.current_chapter,
                ub.started_at, ub.finished_at, ub.last_read_at, ub.created_at,
                ub.read_year, to_char(ub.finished_on, 'YYYY-MM-DD') AS finished_on,
@@ -834,7 +839,7 @@ const FEED_ORDER = {
 
 async function findActivity(req, ids) {
     return query(`
-        SELECT ub.id, ub.user_id, ub.status, ub.rating, ub.review, ub.current_page, ub.total_pages, ub.progress_note,
+        SELECT ub.id, ub.user_id, ub.status, ub.rating, ub.review, ub.review_is_spoiler, ub.current_page, ub.total_pages, ub.progress_note,
                CASE WHEN ub.status = 'finished' THEN 'finished'
                     WHEN COALESCE(ub.current_page, 0) > 0 OR ub.progress > 0 THEN 'progress'
                     ELSE 'started'
@@ -2057,7 +2062,7 @@ async function removeReportedContent(type, target) {
     } else if (type === 'post_comment') {
         await query('DELETE FROM post_comments WHERE id = $1', [target.id]);
     } else if (type === 'review') {
-        await query('UPDATE user_books SET review = NULL WHERE id = $1', [target.id]);
+        await query('UPDATE user_books SET review = NULL, review_is_spoiler = false WHERE id = $1', [target.id]);
     } else if (type === 'review_comment') {
         await query('DELETE FROM comments WHERE id = $1', [target.id]);
     } else if (type === 'profile') {

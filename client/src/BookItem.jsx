@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import BookModal from './BookModal';
 import Icon from './Icon';
+import ReviewText from './ReviewText';
 
 function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
     const { t } = useTranslation();
@@ -59,7 +60,7 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
                 )}
 
                 {book.review && (
-                    <p className="book-review">{book.review}</p>
+                    <ReviewText text={book.review} isSpoiler={book.reviewIsSpoiler} className="book-review" />
                 )}
 
                 {!readOnly && (

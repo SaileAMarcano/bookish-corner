@@ -20,6 +20,7 @@ function BookModal({ book, onClose, onUpdate }) {
     const [status, setStatus] = useState(book.status || 'reading');
     const [rating, setRating] = useState(book.rating || 0);
     const [review, setReview] = useState(book.review || '');
+    const [reviewIsSpoiler, setReviewIsSpoiler] = useState(Boolean(book.reviewIsSpoiler));
     const [genre, setGenre] = useState(book.genre || '');
     const [currentPage, setCurrentPage] = useState(book.currentPage ?? '');
     const [totalPages, setTotalPages] = useState(book.totalPages ?? '');
@@ -129,6 +130,7 @@ function BookModal({ book, onClose, onUpdate }) {
             status,
             rating,
             review,
+            reviewIsSpoiler: Boolean(review.trim()) && reviewIsSpoiler,
             genre: genre || null,
             currentPage: toNumber(currentPage),
             totalPages: toNumber(totalPages),
@@ -429,6 +431,16 @@ function BookModal({ book, onClose, onUpdate }) {
                                     />
                                 </label>
                                 <span className="book-diary-review-count">{review.length} / 5000</span>
+                                <label className="book-diary-check">
+                                    <input
+                                        type="checkbox"
+                                        name="reviewIsSpoiler"
+                                        checked={Boolean(review.trim()) && reviewIsSpoiler}
+                                        disabled={!review.trim()}
+                                        onChange={(event) => setReviewIsSpoiler(event.target.checked)}
+                                    />
+                                    {t('modal.containsSpoilers')}
+                                </label>
                                 <label>
                                     {t('modal.genreLabel')}
                                     <select

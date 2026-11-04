@@ -9916,3 +9916,47 @@ a.search-title:hover {
     font-size: 16px;
   }
 }
+.review-spoiler {
+  min-width: 0;
+}
+
+.review-spoiler [hidden] {
+  display: none !important;
+}
+
+.review-spoiler-warning {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  padding: 12px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.review-spoiler-warning > svg {
+  flex-shrink: 0;
+}
+
+.review-spoiler-warning > span {
+  flex: 1 1 150px;
+}
+
+.review-spoiler-warning > button {
+  margin-left: auto;
+  padding: 4px 0;
+  border: 0;
+  background: none;
+  color: var(--rose-ink);
+  font: inherit;
+  font-weight: 600;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.review-spoiler-warning > button:hover {
+  text-decoration: underline;
+}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import BookModal from './BookModal';
 import ReviewComments from './ReviewComments';
+import ReviewText from './ReviewText';
 import ReportButton from './ReportButton';
 import Icon from './Icon';
 import StarRating from './StarRating';
@@ -179,7 +180,7 @@ function BookPage({ books, onLibraryChange }) {
 
                             {review.rating > 0 && <StarRating value={review.rating} size={16} />}
 
-                            <p className="book-review-text">{review.review}</p>
+                            <ReviewText text={review.review} isSpoiler={review.reviewIsSpoiler} className="book-review-text" />
 
                             <div className="book-review-foot">
                                 {review.isMine ? (

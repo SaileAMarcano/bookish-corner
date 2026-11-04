@@ -76,6 +76,7 @@ CREATE TABLE user_books (
     total_pages     INTEGER CHECK (total_pages > 0),
     current_chapter INTEGER CHECK (current_chapter >= 0),
     review          TEXT,
+    review_is_spoiler BOOLEAN NOT NULL DEFAULT false,
     rating          NUMERIC(2, 1) NOT NULL DEFAULT 0
                     CHECK (rating BETWEEN 0 AND 5 AND rating * 2 = round(rating * 2)),
     genre           TEXT,

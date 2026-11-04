@@ -1,5 +1,10 @@
 // Textos en español de la app. Cada clave tiene que existir también en en.js.
 const es = {
+    reviewSpoiler: {
+        warning: 'Esta reseña contiene spoilers.',
+        show: 'Mostrar reseña',
+        hide: 'Ocultar reseña',
+    },
     common: {
         tryAgain: 'Intentar de nuevo',
         cancel: 'Cancelar',
@@ -592,6 +597,7 @@ const es = {
         rate: 'Calificar con {{value}} de 5',
     },
     modal: {
+        containsSpoilers: 'Contiene spoilers',
         diaryTitle: 'Tu diario de lectura',
         readingStatus: 'Estado de lectura',
         aboutBook: 'Acerca del libro',
