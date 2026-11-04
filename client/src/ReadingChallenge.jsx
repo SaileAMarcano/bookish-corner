@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { getReadYear } from './libraryUtils';
 
 const RING_RADIUS = 34;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
@@ -9,8 +10,9 @@ function ReadingChallenge({ books, readingGoal, isMe, plain }) {
 
     const thisYear = new Date().getFullYear();
     const finishedThisYear = books.filter(
-        (book) => book.status === 'finished' && book.finishedAt?.startsWith(String(thisYear))
+        (book) => getReadYear(book) === thisYear
     ).length;
+
     const goalPercent = readingGoal ? Math.min(100, Math.round((finishedThisYear * 100) / readingGoal)) : 0;
 
     return (

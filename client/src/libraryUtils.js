@@ -1,7 +1,6 @@
 export function getReadYear(book) {
-    if (book.status !== 'finished' || !book.finishedAt) return null;
-    const date = new Date(book.finishedAt);
-    return Number.isNaN(date.getTime()) ? null : date.getUTCFullYear();
+    if (book.status !== 'finished') return null;
+    return Number.isInteger(book.readYear) ? book.readYear : null;
 }
 
 export function groupReadBooks(books) {

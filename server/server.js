@@ -4,6 +4,7 @@ const { descriptionFrom } = require('./openLibrary');
 const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage, uploadCover, deleteCover } = require('./storage');
 const { LANGUAGES, languageOf, msg } = require('./messages');
 const { syncMilestones } = require('./milestones');
+const { resolveReadingDates } = require('./readingDates');
 const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -437,7 +438,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
     const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, progressNote } = req.body;
 
-    const [userBook] = await query('SELECT * FROM user_books WHERE id = $1', [id]);
+    const [userBook] = await query("SELECT *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on FROM user_books WHERE id = $1", [id]);
     if (!userBook) {
         return res.status(404).json({ error: msg(req, 'notFound') });
     }
@@ -473,6 +474,11 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
         return res.status(400).json({ error: msg(req, 'progressNoteTooLong') });
     }
 
+    const dates = resolveReadingDates(userBook, req.body);
+    if (dates.error) {
+        return res.status(400).json({ error: msg(req, dates.error) });
+    }
+
     const newTotal = keepOrSet(totalPages, userBook.totalPages);
     const newPage = keepOrSet(currentPage, userBook.currentPage);
     const newChapter = keepOrSet(currentChapter, userBook.currentChapter);
@@ -505,6 +511,8 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
             total_pages = $7,
             current_chapter = $8,
             rating = COALESCE($9, rating),
+            read_year = $16,
+            finished_on = $17::date,
             started_at = CASE WHEN $10 THEN now() ELSE started_at END,
             finished_at = CASE WHEN $11 THEN now() ELSE finished_at END,
             last_read_at = CASE WHEN $12 THEN now() ELSE last_read_at END,
@@ -512,8 +520,8 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
             progress_note_at = CASE WHEN $14 THEN (CASE WHEN $15::text IS NULL THEN NULL ELSE now() END)
                                     ELSE progress_note_at END
         WHERE id = $13
-        RETURNING *
-    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote]);
+        RETURNING *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on
+    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote, dates.readYear, dates.finishedOn]);
 
     res.json(updated);
 });
@@ -539,6 +547,7 @@ async function findUserBooks(req, ownerId) {
         SELECT ub.id, ub.status, ub.review, ub.is_favorite, ub.genre, ub.rating,
                ub.current_page, ub.total_pages, ub.current_chapter,
                ub.started_at, ub.finished_at, ub.last_read_at, ub.created_at,
+               ub.read_year, to_char(ub.finished_on, 'YYYY-MM-DD') AS finished_on,
                ub.progress_note, ub.progress_note_at,
                CASE WHEN ub.status = 'finished' THEN 100
                     WHEN ub.total_pages > 0

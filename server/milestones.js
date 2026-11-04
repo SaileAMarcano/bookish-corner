@@ -27,7 +27,7 @@ async function readerStats(userId) {
                 WHERE user_id = u.id AND status = 'finished') AS finished,
                (SELECT COUNT(*) FROM user_books
                 WHERE user_id = u.id AND status = 'finished'
-                  AND EXTRACT(YEAR FROM finished_at) = EXTRACT(YEAR FROM now())) AS finished_this_year,
+                        AND read_year = EXTRACT(YEAR FROM now() AT TIME ZONE 'UTC')) AS finished_this_year,
                (SELECT COUNT(*) FROM user_books
                 WHERE user_id = u.id AND review IS NOT NULL AND trim(review) <> '') AS reviews,
                (SELECT COUNT(DISTINCT genre) FROM user_books
