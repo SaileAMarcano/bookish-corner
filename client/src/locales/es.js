@@ -596,6 +596,9 @@ const es = {
         skip: 'Saltar la meta por ahora',
     },
     home: {
+        greeting: 'Hola, {{name}}',
+        greetingFallback: 'Hola',
+        greetingLead: 'Tu espacio para leer, compartir y descubrir.',
         resultsFor: 'Resultados para "{{q}}"',
         clear: 'Limpiar',
         searching: 'Buscando...',
@@ -906,6 +909,7 @@ const es = {
         close: 'Cerrar',
         manyTitle: '¡Conseguiste {{count}} logros!',
         manyText: 'Míralos en tu página de logros.',
+        newAchievement: 'Nuevo logro',
     },
     library: {
         shelf: {

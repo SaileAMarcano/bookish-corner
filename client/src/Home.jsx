@@ -132,10 +132,23 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
     const [selectedId, setSelectedId] = useState(null);
     const selectedBook = books.find((book) => book.id === selectedId);
     const emptyMessage = nightstandMessage(booksStatus, books);
+    const greetingName = currentUser.displayName?.trim() || currentUser.username;
 
     return (
         <main className="page home">
             <div className="home-main">
+                <header className="home-greeting">
+                    <h1 className="display home-greeting-title">
+                        <span>{t(greetingName ? 'home.greeting' : 'home.greetingFallback', { name: greetingName })}</span>
+                        <span className="home-greeting-rays" aria-hidden="true"><i /><i /><i /></span>
+                    </h1>
+                    <p className="home-greeting-lead">{t('home.greetingLead')}</p>
+                    <div className="home-greeting-stars" aria-hidden="true">
+                        <Icon name="sparkle" size={44} /><Icon name="sparkle" size={28} /><Icon name="sparkle" size={22} />
+                        <span /><span /><span /><span />
+                    </div>
+                </header>
+
                 <section className="home-section">
                     <div className="home-section-head">
                         <h2 className="display home-section-title">{t('home.continueReading')}</h2>

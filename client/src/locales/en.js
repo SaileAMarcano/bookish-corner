@@ -596,6 +596,9 @@ const en = {
         skip: 'Skip the goal for now',
     },
     home: {
+        greeting: 'Hello, {{name}}',
+        greetingFallback: 'Hello',
+        greetingLead: 'Your space to read, share and discover.',
         resultsFor: 'Results for "{{q}}"',
         clear: 'Clear',
         searching: 'Searching...',
@@ -906,6 +909,7 @@ const en = {
         close: 'Close',
         manyTitle: 'You earned {{count}} achievements!',
         manyText: 'See them all on your achievements page.',
+        newAchievement: 'New achievement',
     },
     library: {
         shelf: {
