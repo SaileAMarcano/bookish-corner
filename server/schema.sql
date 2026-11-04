@@ -82,12 +82,21 @@ CREATE TABLE user_books (
     is_favorite     BOOLEAN NOT NULL DEFAULT false,
     started_at      TIMESTAMPTZ,
     finished_at     TIMESTAMPTZ,
+    read_year       SMALLINT,
+    finished_on     DATE,
     last_read_at    TIMESTAMPTZ,
     progress_note   TEXT CHECK (length(progress_note) <= 280),
     progress_note_at TIMESTAMPTZ,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     UNIQUE (user_id, work_id),
-    CHECK (current_page <= total_pages)
+    CHECK (current_page <= total_pages),
+    CONSTRAINT user_books_read_year_range
+        CHECK (read_year BETWEEN 1000 AND 9999),
+    CONSTRAINT user_books_finished_on_year
+        CHECK (
+            finished_on IS NULL
+            OR (read_year IS NOT NULL AND read_year = EXTRACT(YEAR FROM finished_on))
+        )
 );
 
 CREATE TABLE likes (
