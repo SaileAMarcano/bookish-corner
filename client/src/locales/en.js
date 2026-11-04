@@ -1,5 +1,82 @@
 // English texts of the app. Every key here must also exist in es.js.
 const en = {
+    discoverySearch: {
+        "title": "Find your next connection",
+        "placeholder": "Search books, people or authors…",
+        "typeLabel": "Search category",
+        "types": {
+            "books": "Books",
+            "people": "People",
+            "authors": "Authors"
+        },
+        "start": "Type at least two characters to search.",
+        "empty": {
+            "books": "No books match your search.",
+            "people": "No people match your search.",
+            "authors": "No authors match your search."
+        },
+        "keepOpen": "Add books, follow people or open several results. Click outside this panel to close the search.",
+        "adding": "Adding…",
+        "author": "Author",
+        "authorBooks": "Books by {{name}}",
+        "openBooks": "See books by this author",
+        "catalogBooks_one": "{{count}} book in our catalog",
+        "catalogBooks_other": "{{count}} books in our catalog",
+        "catalogOnly": "Open Library is unavailable right now. Showing the books already in our catalog."
+    },
+    brandEmpty: {
+        "favorites": "No favorites yet"
+    },
+    explorePage: {
+        "title": "Explore",
+        "kicker": "Between books and people",
+        "lead": "Find your next story, and readers to share it with.",
+        "tags": "Conversations to follow",
+        "allTags": "All tags",
+        "genres": "A world of genres",
+        "allGenres": "All genres",
+        "reviews": "Notes from other readers",
+        "reviewsLead": "A different perspective can be the start of a new favorite.",
+        "openReviews": "Discover reviews",
+        "readerHint": "Add books and follow tags to find readers with things in common."
+    },
+    reviewsPage: {
+        "kicker": "The community’s reading journal",
+        "lead": "What stayed with us after the last page.",
+        "write": "Write a review",
+        "edit": "Edit review",
+        "chooseBook": "Which book would you like to review?",
+        "chooseHint": "Choose a book from your library. Your existing review will stay in the same place.",
+        "searchLibrary": "Search your books…",
+        "noBookMatches": "No books match your search.",
+        "noLibraryBooks": "Add a book to your library to write your first review.",
+        "results": "Community reviews",
+        "empty": "No reviews here yet",
+        "emptyHint": "Try another search, follow more readers, or share a review of your own.",
+        "scopeLabel": "Whose reviews to show",
+        "scope": {
+            "all": "Community",
+            "following": "Following"
+        },
+        "search": "Search by book, author or reader…",
+        "searchButton": "Search",
+        "orderLabel": "Order reviews",
+        "recent": "Most recent",
+        "popular": "Most liked",
+        "refresh": "Refresh reviews"
+    },
+    achievementArt: {
+        "title": "Your reading sky",
+        "lead": "Every achievement lights a star in your window.",
+        "summary_one": "{{count}} of {{total}} stars lit",
+        "summary_other": "{{count}} of {{total}} stars lit",
+        "levels": {
+            "dim": "Undiscovered",
+            "silver": "Silver · in progress",
+            "gold": "Gold · earned"
+        },
+        "levelHint": "Dim: yet to start. Silver: progress made. Gold: achievement earned."
+    },
     reviewSpoiler: {
         warning: 'This review contains spoilers.',
         show: 'Show review',
@@ -16,6 +93,10 @@ const en = {
     errors: {
         network: "We couldn't reach A Library of Us. Please check your connection.",
         generic: 'Something went wrong. Please try again.',
+        crashTitle: 'This page closed unexpectedly',
+        crashText: 'Something failed while showing it. Your books and data are safe.',
+        reload: 'Reload the page',
+        goHome: 'Go to home',
     },
     language: {
         label: 'Language',
@@ -857,14 +938,12 @@ const en = {
         panelTitle: 'Update progress',
         noteLabel: 'Note (optional)',
         notePlaceholder: 'How is it going? Any thoughts?',
-        panelEmpty: 'Choose a book to update your progress.',
         onShelf: 'On your shelf',
         undated: 'No finish date',
         bookCount_one: '{{count}} book',
         bookCount_other: '{{count}} books',
         updateThis: 'Update progress',
         saved: 'Progress saved.',
-        panelEmpty: 'Choose a book from the list to update your progress.',
     },
     profileHeader: {
         joined: 'Joined {{date}}',

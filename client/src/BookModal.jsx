@@ -11,12 +11,13 @@ import { genreLabel, GENRES, pagePercent, pageSummary } from './utils';
 const STATUSES = ['want-to-read', 'reading', 'paused', 'dnf', 'finished'];
 const toNumber = (value) => value === '' ? null : Number(value);
 
-function BookModal({ book, onClose, onUpdate }) {
+function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
     const { t } = useTranslation();
-    const currentYear = new Date().getUTCFullYear();
-    const today = new Date().toISOString().slice(0, 10);
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const today = `${currentYear}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const modalRef = useRef(null);
-    const [tab, setTab] = useState('reading');
+    const [tab, setTab] = useState(initialTab === 'review' ? 'review' : 'reading');
     const [status, setStatus] = useState(book.status || 'reading');
     const [rating, setRating] = useState(book.rating || 0);
     const [review, setReview] = useState(book.review || '');

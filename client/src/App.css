@@ -1,6 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@500&display=swap');
 
 :root {
+  --logo-ink: #2D241F;
+  --logo-rose: #C8979F;
+  --logo-plum: #8B515E;
+  --logo-sage: #8E9980;
+  --logo-lavender: #8F8DA8;
+  --logo-gold: #E4B766;
+  --logo-paper: #FAF4E8;
   --bg: #F4EDE0;
   --surface: #FAF5EB;
   --surface-2: #E6DDCF;
@@ -19,8 +26,8 @@
   --sage-soft: #DCE2D3;
   --error: #9B4A3D;
   --error-soft: #F0DCD6;
-  --star-fill: #FCE7A2;
-  --star-line: #AD8B74;
+  --star-fill: #E4B766;
+  --star-line: #9C7A3C;
   --rose-soft: #F2DEDB;
   --glass: rgba(250, 245, 235, 0.88);
   --content-max: 1500px;
@@ -54,8 +61,8 @@
   --sage-soft: #323A2C;
   --error: #F0A090;
   --error-soft: #4D2A24;
-  --star-fill: #E9C96B;
-  --star-line: #C9A98F;
+  --star-fill: #E4B766;
+  --star-line: #B8934F;
   --glass: rgba(40, 35, 30, 0.88);
 }
 
@@ -9771,6 +9778,10 @@ a.search-title:hover {
   font-size: 11px;
 }
 
+.book-diary-review-count + .book-diary-check {
+  margin-bottom: 16px;
+}
+
 .book-diary-comments {
   padding: 15px 0;
   border-top: 1px solid var(--surface-2);
@@ -9960,3 +9971,256 @@ a.search-title:hover {
 .review-spoiler-warning > button:hover {
   text-decoration: underline;
 }
+
+
+.brand-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--rose-ink);
+  font-size: 11px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.discovery-header { margin-bottom: 32px; }
+.discovery-header h1 { margin: 10px 0; font-size: clamp(2.2rem, 5vw, 3.4rem); font-style: italic; font-weight: 500; }
+.discovery-header p { max-width: 620px; margin: 0; color: var(--text-2); line-height: 1.6; }
+.discovery-header-actions { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+.brand-primary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 10px 18px; border: 1px solid var(--rose-ink); border-radius: 8px; background: var(--rose-ink); color: var(--surface); font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.brand-primary:disabled { opacity: .55; cursor: default; }
+.explore-layout { display: grid; grid-template-columns: minmax(0, 1fr) 310px; align-items: start; gap: 32px; }
+.explore-main, .explore-side, .achievement-cards { min-width: 0; }
+.explore-side { display: grid; gap: 22px; }
+.explore-side > .profile-side-card { border: 1px solid var(--surface-2); border-radius: var(--radius-lg); background: var(--surface); }
+.explore-section { scroll-margin-top: 100px; }
+.explore-section + .explore-section { margin-top: 32px; }
+.explore-tags-heading { margin: 18px 0 12px; }
+.explore-tag-followed { border-color: var(--rose); }
+.discovery-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.discovery-section-heading h2 { display: flex; align-items: center; gap: 10px; margin: 0; font-size: 1.35rem; font-weight: 500; }
+.discovery-section-heading h2 > svg { color: var(--lavender); flex-shrink: 0; }
+.discovery-section-heading > a { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; color: var(--rose-ink); font-size: 12px; }
+.explore-tags { display: flex; flex-wrap: wrap; gap: 10px; }
+.explore-tag { display: grid; gap: 5px; padding: 12px 16px; border: 1px solid var(--surface-2); border-radius: 8px; background: var(--surface); color: var(--ink); text-decoration: none; overflow-wrap: anywhere; }
+.explore-tag strong { font-size: 13px; font-weight: 500; }
+.explore-tag > span { color: var(--text-2); font-size: 11px; }
+.explore-tag:hover, .explore-genre:hover { border-color: var(--rose); background-color: var(--rose-soft); }
+.explore-genres { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+.explore-genre { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-height: 155px; padding: 22px 16px; border: 1px solid var(--surface-2); border-radius: 56px 56px 8px 8px; background: var(--surface); color: var(--ink); text-decoration: none; }
+.explore-genre > svg { color: var(--lavender); }
+.explore-genre[data-tone="1"] > svg { color: var(--rose-ink); }
+.explore-genre[data-tone="2"] > svg { color: var(--sage-text); }
+.explore-genre[data-tone="3"] > svg { color: var(--amber); }
+.explore-genre strong { margin-top: auto; font-size: 1.1rem; overflow-wrap: anywhere; }
+.explore-genre > span { color: var(--text-2); font-size: 11px; }
+.explore-reviews-link { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 24px; border: 1px solid var(--surface-2); color: var(--ink); text-decoration: none; }
+.explore-reviews-link > svg { color: var(--rose-ink); }
+.explore-reviews-link > strong { font-size: 1.4rem; font-weight: 500; }
+.explore-reviews-link > span { color: var(--text-2); font-size: 13px; line-height: 1.6; }
+.explore-reviews-link .explore-link-label { display: flex; align-items: center; gap: 8px; color: var(--rose-ink); }
+
+.brand-empty { display: grid; grid-template-columns: 72px minmax(0, 1fr); align-items: center; gap: 20px; padding: 26px; text-align: left; }
+.brand-empty-window, .brand-empty-icon { grid-area: 1 / 1; width: 72px; }
+.brand-empty-window { height: 84px; }
+.brand-empty-icon { display: grid; place-items: center; padding-top: 15px; color: var(--rose-ink); }
+.brand-empty-copy { grid-area: 1 / 2; min-width: 0; }
+.brand-empty-copy .brand-empty-title { margin: 0; color: var(--ink); font-size: 1.2rem; font-weight: 500; line-height: 1.4; }
+.brand-empty-copy > p:not(.brand-empty-title) { margin: 8px 0 0; color: var(--text-2); font-size: 13px; line-height: 1.6; }
+.brand-empty-copy > a { display: inline-block; margin-top: 12px; color: var(--rose-ink); font-size: 13px; }
+.brand-empty-compact { grid-template-columns: 44px minmax(0, 1fr); gap: 12px; padding: 12px 0; }
+.brand-empty-compact .brand-empty-window, .brand-empty-compact .brand-empty-icon { width: 44px; }
+.brand-empty-compact .brand-empty-window { height: 53px; }
+.brand-empty-compact .brand-empty-icon { padding-top: 10px; }
+.brand-empty-compact .brand-empty-icon svg { width: 17px; height: 17px; }
+.brand-empty-compact .brand-empty-title { font: inherit; font-size: 13px; line-height: 1.5; }
+.profile-header-avatar img { outline: 1px solid color-mix(in srgb, var(--amber) 55%, transparent); outline-offset: 3px; }
+.profile-aside, .home-side .card { border: 1px solid var(--surface-2); box-shadow: 0 4px 16px rgb(30 24 40 / 3%); }
+.home .continue-card { border: 1px solid var(--surface-2); border-top: 2px solid color-mix(in srgb, var(--lavender) 50%, var(--surface-2)); }
+.home .continue-button, .post-composer-send { display: inline-flex; align-items: center; justify-content: center; gap: 7px; }
+.home .continue-card .progress-fill, .home-side .challenge-ring-fill { background: var(--amber); stroke: var(--amber); }
+.home-side .home-quote { color: var(--ink); }
+.home .post-card { border: 1px solid var(--surface-2); }
+.home .post-action.active > svg, .community-review .post-action.active > svg { fill: var(--amber); color: var(--amber); }
+.post-composer { border: 1px solid var(--surface-2); }
+
+.reviews-page { max-width: 1200px; }
+.review-toolbar { display: grid; gap: 18px; margin-bottom: 26px; }
+.review-toolbar .profile-tabs { margin: 0; }
+.review-search-form { display: flex; gap: 10px; }
+.discovery-search { display: flex; flex: 1; min-width: 0; align-items: center; gap: 10px; padding: 10px 13px; border: 1px solid var(--surface-2); border-radius: 8px; background: var(--surface); color: var(--text-2); }
+.discovery-search:focus-within { outline: 2px solid var(--rose); outline-offset: 2px; }
+.discovery-search input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; }
+.discovery-search input::placeholder { color: var(--text-2); }
+.review-search-form > select { max-width: 180px; padding: 10px; border: 1px solid var(--surface-2); border-radius: 8px; background: var(--surface); color: var(--ink); font: inherit; font-size: 13px; }
+.review-results { display: grid; gap: 20px; max-width: 850px; }
+.community-review { min-width: 0; padding: 24px; border: 1px solid var(--surface-2); }
+.community-review-reader { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+.community-review-reader > div { min-width: 0; }
+.community-review-reader .post-author { overflow-wrap: anywhere; }
+.community-review-reader .post-date { display: block; margin-top: 3px; }
+.review-edit-button { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; padding: 8px; border: 0; background: none; color: var(--rose-ink); font: inherit; font-size: 12px; cursor: pointer; }
+.community-review-book { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
+.community-review-book > a { flex-shrink: 0; }
+.community-review-book > div { min-width: 0; }
+.community-review-cover { display: block; width: 70px; height: 105px; object-fit: cover; border-radius: 4px; box-shadow: 2px 4px 12px rgb(30 24 40 / 12%); }
+.community-review-cover.cover-fabric { padding: 7px; }
+.community-review-cover .cover-fabric-title { font-size: 11px; }
+.community-review-cover .cover-fabric-author { font-size: 7px; }
+.community-review-title { color: var(--ink); font-size: 1.4rem; text-decoration: none; overflow-wrap: anywhere; }
+.community-review-book p { margin: 7px 0 10px; color: var(--text-2); font-size: 13px; }
+.community-review-text { margin: 16px 0 20px; white-space: pre-wrap; overflow-wrap: anywhere; line-height: 1.8; font-size: 15px; }
+.community-review .post-actions { flex-wrap: wrap; }
+.review-refresh { margin-top: 24px; padding: 10px 0; border: 0; background: none; color: var(--rose-ink); text-decoration: underline; text-underline-offset: 3px; font: inherit; font-size: 13px; cursor: pointer; }
+.review-book-picker { box-sizing: border-box; width: min(560px, calc(100% - 32px)); max-height: 85dvh; margin: auto; padding: 24px; border: 1px solid var(--surface-2); border-radius: 16px; background: var(--surface); color: var(--ink); }
+.review-book-picker::backdrop { background: rgb(0 0 0 / 85%); }
+.review-book-picker > header { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.review-book-picker h2 { margin: 0; font-size: 1.5rem; font-weight: 500; }
+.review-book-picker > header > button { display: grid; flex-shrink: 0; place-items: center; width: 36px; height: 36px; border: 0; border-radius: 50%; background: var(--surface-2); color: var(--ink); cursor: pointer; }
+.review-book-picker > p { margin: 12px 0 20px; color: var(--text-2); font-size: 13px; line-height: 1.6; }
+.review-picker-list { display: grid; gap: 8px; margin-top: 20px; }
+.review-picker-list > button { display: flex; align-items: center; gap: 14px; width: 100%; padding: 12px; border: 1px solid var(--surface-2); border-radius: 8px; background: var(--surface); color: var(--ink); text-align: left; cursor: pointer; }
+.review-picker-list > button:hover { background: var(--rose-soft); border-color: var(--rose); }
+.review-picker-list > button > span { flex: 1; min-width: 0; }
+.review-picker-list strong { display: block; font-size: 1.1rem; overflow-wrap: anywhere; }
+.review-picker-list small { display: block; margin-top: 6px; color: var(--text-2); }
+.review-picker-cover { flex-shrink: 0; width: 38px; height: 56px; object-fit: cover; border-radius: 3px; }
+.review-picker-cover.cover-fabric { padding: 4px; }
+.review-picker-cover .cover-fabric-title { font-size: 7px; }
+.review-picker-cover .cover-fabric-author, .review-picker-cover .cover-fabric-star { display: none; }
+
+.window-seal { display: inline-flex; align-items: center; justify-content: center; }
+.window-seal > .achievement-mark { width: 100%; height: 100%; }
+.achievement-mark { display: block; color: var(--badge-edge); --badge-edge: var(--amber); --badge-fill: var(--amber-soft); }
+.achievement-mark-dim { --badge-edge: var(--text-2); --badge-fill: var(--surface-2); }
+.achievement-mark-silver { --badge-edge: #6C6782; --badge-fill: #ECEAF1; }
+:root[data-theme="dark"] .achievement-mark-silver { --badge-edge: #D1CEDC; --badge-fill: #363341; }
+.achievement-mark-fill { fill: var(--badge-fill); }
+.achievement-mark-frame { fill: none; stroke: var(--badge-edge); stroke-width: 1.25; }
+.achievement-mark-star { fill: var(--badge-edge); }
+.achievement-mark-gold .achievement-mark-star { fill: var(--logo-gold); stroke: var(--logo-ink); stroke-width: 1; stroke-linejoin: round; }
+.achievement-mark.profile-badge { display: inline-block; vertical-align: middle; }
+.achievement-layout { display: grid; grid-template-columns: minmax(250px, .7fr) minmax(0, 1.3fr); gap: 30px; align-items: start; }
+.achievement-cards .achievements-grid { grid-template-columns: repeat(auto-fit, minmax(min(270px, 100%), 1fr)); }
+.achievement-cards .achievements-hint { margin: 0 0 22px; }
+.achievement-cards .achievement { align-items: center; }
+.achievement-cards .achievement-locked { opacity: 1; }
+.achievement-level-label { display: block; margin-bottom: 5px; color: var(--text-2); font-size: 10px; letter-spacing: .04em; }
+.constellation-card { padding: 26px 22px; border: 1px solid var(--surface-2); text-align: center; background: radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--lavender) 10%, var(--surface)), var(--surface) 70%); }
+.constellation-card > h2 { margin: 0 0 10px; font-size: 1.6rem; font-weight: 500; }
+.constellation-card > p { margin: 0; color: var(--text-2); font-size: 13px; line-height: 1.6; }
+.achievement-constellation { display: block; width: 100%; max-width: 300px; height: auto; margin: 18px auto 4px; }
+.constellation-sky { fill: var(--logo-rose); }
+.constellation-frame { fill: none; stroke: var(--logo-ink); stroke-width: 2.5; }
+.constellation-line { fill: none; stroke: var(--logo-paper); stroke-width: .8; opacity: .35; }
+.constellation-line.lit { stroke: var(--logo-gold); stroke-width: 1.2; opacity: .9; }
+.constellation-star { fill: var(--logo-paper); stroke: var(--logo-ink); stroke-width: 1.2; stroke-linejoin: round; opacity: .35; }
+.constellation-point-silver .constellation-star { opacity: 1; }
+.constellation-point-gold .constellation-star { fill: var(--logo-gold); opacity: 1; }
+.constellation-art { fill: none; stroke: var(--logo-ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.constellation-feather { fill: var(--logo-lavender); }
+.constellation-cork { fill: var(--logo-gold); }
+.constellation-bottle, .constellation-book-bottom { fill: var(--logo-sage); }
+.constellation-book-top { fill: var(--logo-plum); }
+.constellation-pages { fill: var(--logo-paper); }
+.constellation-band { stroke: var(--logo-gold); stroke-width: 3; }
+.constellation-card .constellation-count { color: var(--ink); }
+.achievement-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: 10px 16px; margin: 20px 0; padding: 0; list-style: none; }
+.achievement-legend li { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-2); }
+.achievement-legend i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--text-2); }
+.legend-dim { background: var(--surface-2); }
+.legend-silver { background: var(--logo-paper); box-shadow: inset 0 0 0 1px var(--logo-ink); }
+.legend-gold { background: var(--logo-gold); box-shadow: inset 0 0 0 1px var(--logo-ink); }
+.constellation-card .constellation-note { font-size: 11px; }
+.discovery-page :focus-visible, .achievement-layout :focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; }
+
+@media (max-width: 1100px) {
+  .explore-layout { grid-template-columns: minmax(0, 1fr); }
+  .explore-side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .achievement-layout { grid-template-columns: minmax(220px, .7fr) minmax(0, 1.3fr); gap: 18px; }
+}
+
+@media (max-width: 700px) {
+  .discovery-header-actions { align-items: flex-start; flex-direction: column; gap: 20px; }
+  .explore-side, .achievement-layout { grid-template-columns: minmax(0, 1fr); }
+  .explore-genres { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .discovery-section-heading { flex-wrap: wrap; }
+  .review-search-form { flex-wrap: wrap; }
+  .review-search-form .discovery-search { flex-basis: calc(100% - 90px); }
+  .review-search-form > select { max-width: 100%; width: 100%; }
+  .community-review { padding: 18px; }
+  .community-review-reader { flex-wrap: wrap; }
+  .review-edit-button { margin-left: 0; }
+  .community-review-title { font-size: 1.2rem; }
+  .review-book-picker { padding: 20px; }
+  .discovery-search input { font-size: 16px; }
+  .achievement-constellation { max-width: 250px; }
+  .brand-empty { gap: 12px; padding: 20px 16px; }
+  .brand-empty-compact { padding: 12px 0; }
+}
+
+
+.explore-search-box { margin: 0 0 30px; max-width: 880px; }
+.explore-search-form { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 12px 18px; border: 1px solid var(--surface-2); border-radius: 12px; background: var(--surface); color: var(--text-2); }
+.explore-search-form:focus-within { outline: 2px solid var(--rose); outline-offset: 2px; }
+.explore-search-form input { width: 100%; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--ink); font: inherit; font-size: 14px; }
+.explore-search-form input::placeholder { color: var(--text-2); }
+.discovery-search-panel { position: fixed; z-index: 90; top: 84px; left: calc(var(--sidebar-width) + 32px); right: 32px; max-width: 880px; max-height: calc(100dvh - 112px); display: flex; flex-direction: column; border: 1px solid var(--surface-2); border-radius: 14px; background: var(--surface); color: var(--ink); box-shadow: 0 18px 50px rgb(0 0 0 / 24%); }
+.discovery-search-header { flex-shrink: 0; padding: 20px 22px 0; border-bottom: 1px solid var(--surface-2); }
+.discovery-search-header h2 { margin: 0 0 14px; font-size: 1.35rem; font-weight: 500; }
+.discovery-search-header .discovery-search { background: var(--bg); }
+.discovery-search-types { display: flex; gap: 10px; margin-top: 14px; }
+.discovery-search-types button { display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 8px 12px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: var(--text-2); font: inherit; font-size: 13px; cursor: pointer; }
+.discovery-search-types button.active { color: var(--rose-ink); border-bottom-color: var(--rose); }
+.discovery-search-content { min-height: 100px; overflow-y: auto; overscroll-behavior: contain; padding: 8px 22px; scrollbar-width: thin; }
+.discovery-search-status { padding: 16px 0; color: var(--text-2); font-size: 13px; }
+.discovery-search-hint { flex-shrink: 0; margin: 0; padding: 12px 22px; border-top: 1px solid var(--surface-2); color: var(--text-2); font-size: 11px; line-height: 1.6; }
+.discovery-result-row { display: flex; align-items: center; gap: 14px; min-width: 0; padding: 14px 0; }
+.discovery-book-result + .discovery-book-result, .discovery-person-result + .discovery-person-result, .discovery-author-result + .discovery-author-result { border-top: 1px solid var(--surface-2); }
+.discovery-result-cover { flex-shrink: 0; width: 44px; height: 66px; object-fit: cover; border-radius: 3px; }
+.discovery-result-cover.cover-fabric { padding: 4px; }
+.discovery-result-cover .cover-fabric-title { font-size: 8px; }
+.discovery-result-cover .cover-fabric-author, .discovery-result-cover .cover-fabric-star { display: none; }
+.discovery-result-info { display: flex; flex: 1; min-width: 0; flex-direction: column; align-items: flex-start; gap: 5px; text-decoration: none; color: var(--ink); }
+.discovery-result-title { color: var(--ink); font-size: 15px; font-weight: 500; text-decoration: none; overflow-wrap: anywhere; }
+.discovery-result-title:hover { color: var(--rose-ink); }
+.discovery-result-meta { display: block; color: var(--text-2); font-size: 12px; text-decoration: none; overflow-wrap: anywhere; }
+a.discovery-result-meta:hover { color: var(--rose-ink); text-decoration: underline; }
+.discovery-result-year { color: var(--text-2); font-size: 11px; }
+.discovery-result-action { flex-shrink: 0; min-height: 38px; padding: 8px 12px; border: 1px solid var(--rose); border-radius: 7px; background: var(--rose-soft); color: var(--rose-ink); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+.discovery-result-action:disabled { opacity: .6; cursor: default; }
+.discovery-result-added { display: inline-flex; flex-shrink: 0; align-items: center; gap: 4px; color: var(--sage-text); font-size: 11px; }
+.discovery-result-error { margin: 0 0 12px; color: var(--error); font-size: 12px; }
+.discovery-author-result { color: var(--ink); text-decoration: none; }
+.discovery-author-result:hover { background: var(--rose-soft); }
+.discovery-author-icon { display: grid; flex-shrink: 0; place-items: center; width: 44px; height: 52px; border: 1px solid var(--surface-2); border-radius: 24px 24px 5px 5px; background: var(--rose-soft); color: var(--rose-ink); }
+.author-back { display: inline-flex; align-items: center; gap: 8px; margin-bottom: 24px; color: var(--rose-ink); font-size: 13px; }
+.author-books { max-width: 880px; padding: 8px 22px; border: 1px solid var(--surface-2); border-radius: 12px; background: var(--surface); }
+.author-catalog-note { color: var(--text-2); font-size: 13px; line-height: 1.6; }
+.discovery-search-panel :focus-visible { outline: 2px solid var(--rose); outline-offset: 3px; }
+.discovery-search-panel .discovery-search input:focus-visible { outline: 0; }
+.discovery-search-content .book-request { margin: 12px 0; }
+
+@media (max-width: 860px) {
+  .discovery-search-panel { left: 16px; right: 16px; top: 76px; max-width: none; max-height: calc(100dvh - 156px); }
+}
+
+@media (max-width: 480px) {
+  .discovery-search-header { padding: 16px 14px 0; }
+  .discovery-search-content { padding: 8px 14px; }
+  .discovery-search-hint { padding: 10px 14px; }
+  .discovery-search-types { justify-content: space-between; gap: 4px; }
+  .discovery-search-types button { gap: 5px; padding: 8px; font-size: 12px; }
+  .discovery-result-row { flex-wrap: wrap; gap: 10px; }
+  .discovery-result-action, .discovery-result-added { margin-left: 54px; }
+  .discovery-result-info { flex-basis: calc(100% - 56px); }
+  .discovery-author-result { flex-wrap: nowrap; }
+  .discovery-author-result .discovery-result-info { flex-basis: auto; }
+  .explore-search-form input, .discovery-search-header input { font-size: 16px; }
+  .author-books { padding: 8px 14px; }
+}
+
+.error-boundary { display: grid; place-items: center; min-height: 100vh; padding: 24px 16px; background: var(--bg); color: var(--ink); }
+.error-boundary-card { width: min(100%, 520px); border: 1px solid var(--surface-2); border-radius: var(--radius-lg); background: var(--surface); }
+.error-boundary-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-top: 16px; }
+.error-boundary-actions a { margin-top: 0; }

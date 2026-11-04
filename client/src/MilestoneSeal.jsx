@@ -1,31 +1,15 @@
-import { useTranslation } from 'react-i18next';
-import Icon from './Icon';
+import AchievementMark from './AchievementMark';
 
-function MilestoneSeal({ milestoneKey, locked, size = 84 }) {
-    const { t } = useTranslation();
-
+function MilestoneSeal({ milestoneKey, locked, level, size = 84 }) {
     return (
-        <span className={`seal ${locked ? 'seal-locked' : ''}`} style={{ width: size, height: size }}>
-            <img
-                className="seal-image"
-                src={`/badges/${milestoneKey}.webp`}
-                alt={t(`milestones.items.${milestoneKey}.name`)}
-            />
-
-            {locked && (
-                <span className="seal-lock">
-                    <Icon name="lock" size={13} />
-                </span>
-            )}
+        <span className="seal window-seal" style={{ width: size, height: size }}>
+            <AchievementMark milestoneKey={milestoneKey} level={level || (locked ? 'dim' : 'gold')} />
         </span>
     );
 }
 
 export function ProfileBadge({ milestoneKey }) {
-    const { t } = useTranslation();
-    const name = t(`milestones.items.${milestoneKey}.name`);
-
-    return <img className="profile-badge" src={`/badges/${milestoneKey}.webp`} alt={name} title={name} />;
+    return <AchievementMark className="profile-badge" milestoneKey={milestoneKey} />;
 }
 
-export default MilestoneSeal
+export default MilestoneSeal;

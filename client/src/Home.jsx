@@ -6,6 +6,7 @@ import { timeAgo, sortByLastRead, pageSummary, nightstandMessage } from './utils
 import { apiFetch } from './api';
 import BookModal from './BookModal';
 import Notice from './Notice';
+import EmptyState from './EmptyState';
 import BookCover from './BookCover';
 import PostComposer from './PostComposer';
 import PostCard from './PostCard';
@@ -42,7 +43,7 @@ function ContinueReading({ book, onOpen }) {
                 )}
             </div>
             <button type="button" className="pill continue-button" onClick={onOpen}>
-                {t('home.updateProgress')}
+                <Icon name="feather" size={15} />{t('home.updateProgress')}
             </button>
         </div>
     );
@@ -144,7 +145,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                     {continueBook ? (
                         <ContinueReading key={continueBook.id} book={continueBook} onOpen={() => setSelectedId(continueBook.id)} />
                     ) : (
-                        emptyMessage && <div className="card home-empty">{emptyMessage}</div>
+                        emptyMessage && <div className="card home-empty"><EmptyState compact title={emptyMessage} /></div>
                     )}
                 </section>
 
@@ -172,7 +173,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                     )}
 
                     {feed && feed.length === 0 && (
-                        <div className="card profile-empty">{t(`home.feedEmpty.${feedTab}`)}</div>
+                        <div className="card profile-empty"><EmptyState kind="writing" compact title={t(`home.feedEmpty.${feedTab}`)} /></div>
                     )}
 
                     {feed && feed.map((item) =>

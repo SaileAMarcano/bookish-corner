@@ -1,5 +1,82 @@
 // Textos en español de la app. Cada clave tiene que existir también en en.js.
 const es = {
+    discoverySearch: {
+        "title": "Encuentra tu próxima conexión",
+        "placeholder": "Busca libros, personas o autores…",
+        "typeLabel": "Categoría de búsqueda",
+        "types": {
+            "books": "Libros",
+            "people": "Personas",
+            "authors": "Autores"
+        },
+        "start": "Escribe al menos dos caracteres para buscar.",
+        "empty": {
+            "books": "No hay libros que coincidan con tu búsqueda.",
+            "people": "No hay personas que coincidan con tu búsqueda.",
+            "authors": "No hay autores que coincidan con tu búsqueda."
+        },
+        "keepOpen": "Añade libros, sigue personas o abre varios resultados. Haz clic fuera de este panel para cerrar la búsqueda.",
+        "adding": "Añadiendo…",
+        "author": "Autor",
+        "authorBooks": "Libros de {{name}}",
+        "openBooks": "Ver libros de este autor",
+        "catalogBooks_one": "{{count}} libro en nuestro catálogo",
+        "catalogBooks_other": "{{count}} libros en nuestro catálogo",
+        "catalogOnly": "Open Library no está disponible por ahora. Se muestran los libros que ya están en nuestro catálogo."
+    },
+    brandEmpty: {
+        "favorites": "Todavía no hay favoritos"
+    },
+    explorePage: {
+        "title": "Explorar",
+        "kicker": "Entre libros y personas",
+        "lead": "Encuentra tu próxima historia y lectoras con quienes compartirla.",
+        "tags": "Conversaciones que seguir",
+        "allTags": "Todas las etiquetas",
+        "genres": "Un mundo de géneros",
+        "allGenres": "Todos los géneros",
+        "reviews": "Notas de otras lectoras",
+        "reviewsLead": "Otra mirada puede ser el comienzo de un nuevo favorito.",
+        "openReviews": "Descubrir reseñas",
+        "readerHint": "Añade libros y sigue etiquetas para encontrar lectoras con gustos en común."
+    },
+    reviewsPage: {
+        "kicker": "El diario de lectura de la comunidad",
+        "lead": "Lo que nos quedó después de la última página.",
+        "write": "Escribir una reseña",
+        "edit": "Editar reseña",
+        "chooseBook": "¿Sobre qué libro quieres escribir?",
+        "chooseHint": "Elige un libro de tu Biblioteca. Tu reseña existente se editará en el mismo lugar.",
+        "searchLibrary": "Busca entre tus libros…",
+        "noBookMatches": "No hay libros que coincidan con tu búsqueda.",
+        "noLibraryBooks": "Añade un libro a tu Biblioteca para escribir tu primera reseña.",
+        "results": "Reseñas de la comunidad",
+        "empty": "Todavía no hay reseñas aquí",
+        "emptyHint": "Prueba otra búsqueda, sigue a más lectoras o comparte tu propia reseña.",
+        "scopeLabel": "De quién quieres ver reseñas",
+        "scope": {
+            "all": "Comunidad",
+            "following": "Siguiendo"
+        },
+        "search": "Busca por libro, autor o lectora…",
+        "searchButton": "Buscar",
+        "orderLabel": "Ordenar reseñas",
+        "recent": "Más recientes",
+        "popular": "Más me gusta",
+        "refresh": "Actualizar reseñas"
+    },
+    achievementArt: {
+        "title": "Tu cielo de lecturas",
+        "lead": "Cada logro enciende una estrella en tu ventana.",
+        "summary_one": "{{count}} de {{total}} estrellas encendidas",
+        "summary_other": "{{count}} de {{total}} estrellas encendidas",
+        "levels": {
+            "dim": "Por descubrir",
+            "silver": "Plata · en progreso",
+            "gold": "Oro · conseguido"
+        },
+        "levelHint": "Apagada: por empezar. Plata: ya hay progreso. Oro: logro conseguido."
+    },
     reviewSpoiler: {
         warning: 'Esta reseña contiene spoilers.',
         show: 'Mostrar reseña',
@@ -16,6 +93,10 @@ const es = {
     errors: {
         network: 'No pudimos conectar con A Library of Us. Revisa tu conexión.',
         generic: 'Algo salió mal. Inténtalo de nuevo.',
+        crashTitle: 'Esta página se cerró de golpe',
+        crashText: 'Algo falló al mostrarla. Tus libros y tus datos están a salvo.',
+        reload: 'Recargar la página',
+        goHome: 'Ir al inicio',
     },
     language: {
         label: 'Idioma',
@@ -857,14 +938,12 @@ const es = {
         panelTitle: 'Actualizar progreso',
         noteLabel: 'Nota (opcional)',
         notePlaceholder: '¿Cómo va? ¿Algún pensamiento?',
-        panelEmpty: 'Elige un libro para actualizar tu progreso.',
         onShelf: 'En tu estante',
         undated: 'Sin fecha de finalización',
         bookCount_one: '{{count}} libro',
         bookCount_other: '{{count}} libros',
         updateThis: 'Actualizar progreso',
         saved: 'Progreso guardado.',
-        panelEmpty: 'Elige un libro de la lista para actualizar tu progreso.',
     },
     profileHeader: {
         joined: 'Se unió en {{date}}',

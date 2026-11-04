@@ -216,7 +216,7 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                     onClick={handleLike}
                     aria-pressed={post.hasLiked}
                 >
-                    <Icon name="favorites" />
+                    <Icon name="sparkle" />
                     {t('posts.like')} ({post.likeCount})
                 </button>
 

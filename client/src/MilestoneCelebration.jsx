@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { apiFetch } from './api';
+import AchievementMark from './AchievementMark';
 
 const NOTE_TIME = 4000;
 const NOTE_LEAVE = 400;
@@ -104,7 +105,7 @@ function MilestoneCelebration({ currentUser, books }) {
 
                         <div className="beta-sheet">
                             <div className="beta-seal">
-                                <img className="beta-badge" src="/badges/beta-tester.webp" alt="" />
+                                <AchievementMark className="beta-badge" milestoneKey="beta-tester" />
                                 <img className="beta-stars" src="/celebrations/beta-stars.svg" alt="" />
                             </div>
 
@@ -129,7 +130,7 @@ function MilestoneCelebration({ currentUser, books }) {
             {note && (
                 <div key={note.key} className={`milestone-note ${leaving ? 'leaving' : ''}`} role="status">
                     <Link to="/achievements" className="milestone-note-link">
-                        <img className="milestone-note-badge" src={`/badges/${note.key}.webp`} alt="" />
+                        <AchievementMark className="milestone-note-badge" milestoneKey={note.key} />
 
                         <span className="milestone-note-info">
                             <strong className="milestone-note-title">

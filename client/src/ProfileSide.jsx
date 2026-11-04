@@ -2,13 +2,12 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import Icon from './Icon';
-import SimilarReaders from './SimilarReaders';
-import ReadingChallenge from './ReadingChallenge';
+import EmptyState from './EmptyState';
 import { pagePercent, sortByLastRead } from './utils';
 
 const FAVORITES_SHOWN = 5;
 
-function ProfileSide({ books, readingGoal, isMe, username }) {
+function ProfileSide({ books, isMe }) {
     const { t } = useTranslation();
 
     const reading = sortByLastRead(books.filter((book) => book.status === 'reading')).slice(0, 1);
@@ -16,7 +15,6 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
 
     return (
         <aside className="card profile-aside">
-            <ReadingChallenge books={books} readingGoal={readingGoal} isMe={isMe} plain />
 
             <section className="profile-side-card">
                 <div className="profile-side-head">
@@ -28,7 +26,7 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
                     )}
                 </div>
 
-                {reading.length === 0 && <p className="profile-about-empty">{t('profileSide.nothingReading')}</p>}
+                {reading.length === 0 && <EmptyState compact title={t('profileSide.nothingReading')} />}
 
                 {reading.map((book) => {
                     const percent = pagePercent(book.currentPage, book.totalPages);
@@ -73,9 +71,7 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
                 </div>
 
                 {favorites.length === 0 ? (
-                    <p className="profile-about-empty">
-                        {isMe ? t('profileSide.noFavoritesMine') : t('profileSide.noFavorites')}
-                    </p>
+                    <EmptyState compact kind="favorites" title={t('brandEmpty.favorites')} description={isMe ? t('profileSide.noFavoritesMine') : undefined} />
                 ) : (
                     <div className="side-favorites">
                         {favorites.map((book) => (
@@ -87,7 +83,6 @@ function ProfileSide({ books, readingGoal, isMe, username }) {
                 )}
             </section>
 
-            <SimilarReaders username={username} />
         </aside>
     );
 }

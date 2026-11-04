@@ -36,7 +36,7 @@ function GenrePage() {
         return (
             <main className="page tagged-page">
                 <Notice message={error} />
-                <Link to="/genres" className="genre-all">{t('genrePage.allGenres')}</Link>
+                <Link to="/explore#genres" className="genre-all">{t('genrePage.allGenres')}</Link>
             </main>
         );
     }
@@ -58,7 +58,7 @@ function GenrePage() {
                     <p className="tagged-count">{t('genrePage.bookCount', { count: data.books.length })}</p>
                 </div>
 
-                <Link to="/genres" className="genre-all">{t('genrePage.allGenres')}</Link>
+                <Link to="/explore#genres" className="genre-all">{t('genrePage.allGenres')}</Link>
             </div>
 
             {data.books.length === 0 ? (

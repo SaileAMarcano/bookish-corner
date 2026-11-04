@@ -265,6 +265,7 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
                 )}
 
                 <button type="submit" className="post-composer-send" disabled={!canSend}>
+                    <Icon name="feather" size={15} />
                     {isEditing
                         ? (isSending ? t('posts.saving') : t('posts.saveChanges'))
                         : (isSending ? t('posts.publishing') : t('posts.publish'))}

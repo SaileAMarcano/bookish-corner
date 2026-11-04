@@ -12,11 +12,12 @@ import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import LibraryPage from './LibraryPage';
 import TaggedPage from './TaggedPage';
-import TagsPage from './TagsPage';
-import GenresPage from './GenresPage';
+import ExplorePage from './ExplorePage';
+import ReviewsPage from './ReviewsPage';
 import GenrePage from './GenrePage';
 import UserPage from './UserPage';
 import BookPage from './BookPage';
+import AuthorPage from './AuthorPage';
 import AchievementsPage from './AchievementsPage';
 import AdminPage from './AdminPage';
 import AdminSummary from './AdminSummary';
@@ -59,6 +60,7 @@ function themeOf(user) {
 function App() {
   const { t } = useTranslation();
   const [books, setBooks] = useState([])
+  const booksLoadVersion = useRef(0);
   const [booksStatus, setBooksStatus] = useState('loading');
   const [booksError, setBooksError] = useState('');
   const [toast, setToast] = useState('');
@@ -82,16 +84,20 @@ function App() {
     document.querySelector('link[rel="icon"]').href = SEASON_FAVICONS[seasonTheme] || '/logo-mark.png';
   }, [seasonTheme]);
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const q = searchParams.get('q') || '';
+  const [searchParams] = useSearchParams();
+  const [q, setQ] = useState(() => searchParams.get('q') || '');
+  const [searchOpen, setSearchOpen] = useState(() => Boolean(searchParams.get('q')));
 
   const loadUserBooks = () => {
-    apiFetch('/api/user-books')
+    const version = ++booksLoadVersion.current;
+    return apiFetch('/api/user-books')
       .then((data) => {
+        if (version !== booksLoadVersion.current) return;
         setBooks(data);
         setBooksStatus('ready');
       })
       .catch((error) => {
+        if (version !== booksLoadVersion.current) return;
         setBooksError(error.message);
         setBooksStatus('error');
       });
@@ -202,6 +208,8 @@ function App() {
     apiFetch('/api/logout', { method: 'POST' })
       .then(() => {
         setCurrentUser(null);
+        setQ('');
+        setSearchOpen(false);
         navigate('/');
       })
       .catch((error) => setToast(error.message));
@@ -237,23 +245,11 @@ function App() {
   };
 
   const handleSearch = (term) => {
-    setSearchParams((params) => {
-      params.set('q', term);
-      return params;
-    });
+    setQ(term);
+    setSearchOpen(true);
   };
 
-  const closeSearch = () => {
-    setSearchParams((params) => {
-      params.delete('q');
-      return params;
-    });
-  };
-
-  const handleBookAdded = () => {
-    loadUserBooks();
-    closeSearch();
-  };
+  const closeSearch = () => setSearchOpen(false);
 
   if (userStatus === 'loading') {
     return <div className="app-status">{t('app.opening')}</div>;
@@ -300,11 +296,9 @@ function App() {
         <header className="topbar">
           <SearchBox
             q={q}
-            books={books}
-            onSubmit={handleSearch}
-            onClear={closeSearch}
-            onAdded={loadUserBooks}
-            onError={setToast}
+            onChange={handleSearch}
+            onOpen={() => setSearchOpen(true)}
+            open={searchOpen}
           />
 
           <div className="topbar-actions">
@@ -362,18 +356,7 @@ function App() {
           <Notice message={booksError} onRetry={retryBooks} />
         )}
 
-        {q && (
-          <div className="page search-page">
-            <SearchPanel
-              key={q}
-              q={q}
-              books={books}
-              onAdded={handleBookAdded}
-              onError={setToast}
-              onClose={closeSearch}
-            />
-          </div>
-        )}
+        {searchOpen && <SearchPanel q={q} books={books} onAdded={loadUserBooks} onChange={handleSearch} onClose={closeSearch} />}
 
         <Routes>
           <Route
@@ -406,11 +389,14 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
-          <Route path="/tags" element={<TagsPage />} />
-          <Route path="/genres" element={<GenresPage />} />
+          <Route path="/explore" element={<ExplorePage currentUser={currentUser} searchTerm={q} onSearch={handleSearch} onOpenSearch={() => setSearchOpen(true)} searchOpen={searchOpen} />} />
+          <Route path="/reviews" element={<ReviewsPage books={books} booksStatus={booksStatus} onLibraryChange={loadUserBooks} />} />
+          <Route path="/tags" element={<Navigate to="/explore#tags" replace />} />
+          <Route path="/genres" element={<Navigate to="/explore#genres" replace />} />
           <Route path="/genre/:slug" element={<GenrePage />} />
           <Route path="/u/:username" element={<UserPage currentUser={currentUser} />} />
           <Route path="/book/:id" element={<BookPage books={books} onLibraryChange={loadUserBooks} />} />
+          <Route path="/author/:name" element={<AuthorPage books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/reading" element={<Navigate to="/library" replace />} />
           <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} readingGoal={currentUser.readingGoal} username={currentUser.username} />} />
           {['admin', 'moderator'].includes(currentUser.staffRole) && (

@@ -325,6 +325,103 @@ app.get('/api/search-books', async (req, res) => {
     res.json(results);
 });
 
+const AUTHOR_BOOK_PAGE_SIZE = 24;
+const authorIdentity = (name) => plainSearch(name).replace(/[.\s]+/g, '');
+
+app.get('/api/search-authors', requireAuth, async (req, res) => {
+    const q = req.query.q ?? '';
+    if (typeof q !== 'string' || q.length > 120) {
+        return res.status(400).json({ error: msg(req, 'searchInputInvalid') });
+    }
+    if (q.trim().length < 2) return res.json([]);
+    const term = escapeLike(plainSearch(q.trim()));
+    const authors = await query(`
+        SELECT btrim(w.author) AS name, COUNT(*) AS catalog_count
+        FROM works w
+        WHERE ${plainText('w.author')} LIKE $1 AND btrim(w.author) <> ''
+        GROUP BY btrim(w.author)
+        ORDER BY ${plainText('btrim(w.author)')} LIKE $2 DESC, catalog_count DESC, name
+        LIMIT $3
+    `, [`%${term}%`, `${term}%`, SEARCH_LIMIT]);
+
+    const seen = new Set(authors.map((author) => authorIdentity(author.name)));
+    if (authors.length < SEARCH_LIMIT) {
+        try {
+            const response = await fetch(`https://openlibrary.org/search/authors.json?${new URLSearchParams({ q: q.trim(), limit: SEARCH_LIMIT })}`, {
+                headers: { 'User-Agent': 'ALibraryOfUs/1.0' }, signal: AbortSignal.timeout(8000),
+            });
+            if (!response.ok) throw new Error('Author search unavailable');
+            const data = await response.json();
+            if (!Array.isArray(data.docs)) throw new Error('Invalid author search response');
+            for (const item of data.docs) {
+                if (typeof item.name !== 'string' || !item.name.trim() || item.name.length > 120) continue;
+                const name = item.name.trim();
+                const identity = authorIdentity(name);
+                if (seen.has(identity)) continue;
+                authors.push({ name, catalogCount: 0 });
+                seen.add(identity);
+                if (authors.length === SEARCH_LIMIT) break;
+            }
+        } catch {
+            if (!authors.length) return res.status(503).json({ error: msg(req, 'searchUnavailable') });
+        }
+    }
+    res.json(authors);
+});
+
+app.get('/api/author-books', requireAuth, async (req, res) => {
+    const { name, page = '0' } = req.query;
+    if (typeof name !== 'string' || !name.trim() || name.length > 120
+        || typeof page !== 'string' || !/^\d{1,3}$/.test(page) || Number(page) > 100) {
+        return res.status(400).json({ error: msg(req, 'searchInputInvalid') });
+    }
+    const offset = Number(page) * AUTHOR_BOOK_PAGE_SIZE;
+    const items = await query(`
+        SELECT w.id AS book_id, w.open_library_key, ${TRANSLATED_TITLE} AS title,
+               w.author, w.cover_image, w.first_published_year AS year
+        FROM works w
+        ${JOIN_TRANSLATION} = $2
+        WHERE ${plainText('btrim(w.author)')} = $1
+        ORDER BY title, w.id
+        LIMIT $3 OFFSET $4
+    `, [plainSearch(name.trim()), languageOf(req), AUTHOR_BOOK_PAGE_SIZE, offset]);
+    const hasLocalMore = items.length === AUTHOR_BOOK_PAGE_SIZE;
+    try {
+        const params = new URLSearchParams({ author: name.trim(), limit: AUTHOR_BOOK_PAGE_SIZE, offset, fields: 'key,title,author_name,first_publish_year,cover_i' });
+        const response = await fetch(`https://openlibrary.org/search.json?${params}`, {
+            headers: { 'User-Agent': 'ALibraryOfUs/1.0' }, signal: AbortSignal.timeout(8000),
+        });
+        if (!response.ok) throw new Error('Author books unavailable');
+        const data = await response.json();
+        if (!Array.isArray(data.docs)) throw new Error('Invalid author books response');
+        const remote = data.docs.flatMap((book) => {
+            if (typeof book.key !== 'string' || typeof book.title !== 'string') return [];
+            const key = book.key.startsWith('/works/') ? book.key : `/works/${book.key}`;
+            if (!/^\/works\/OL\d+W$/.test(key)) return [];
+            return [{ bookId: null, openLibraryKey: key, title: book.title, author: book.author_name?.[0] || name.trim(), year: book.first_publish_year || null, coverImage: book.cover_i ? `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg` : null }];
+        });
+        const known = remote.length ? await query(`
+            SELECT w.id AS book_id, w.open_library_key, ${TRANSLATED_TITLE} AS title,
+                   w.author, w.cover_image, w.first_published_year AS year
+            FROM works w ${JOIN_TRANSLATION} = $2
+            WHERE w.open_library_key = ANY($1)
+        `, [remote.map((book) => book.openLibraryKey), languageOf(req)]) : [];
+        const byKey = new Map(known.map((book) => [book.openLibraryKey, book]));
+        const seen = new Set(items.map((book) => book.openLibraryKey || `book-${book.bookId}`));
+        for (const result of remote) {
+            const book = byKey.get(result.openLibraryKey) || result;
+            const key = book.openLibraryKey || `book-${book.bookId}`;
+            if (!seen.has(key)) { items.push(book); seen.add(key); }
+        }
+        const total = Number(data.numFound ?? data.num_found ?? offset + data.docs.length);
+        res.json({ items, hasMore: hasLocalMore || offset + AUTHOR_BOOK_PAGE_SIZE < total });
+    } catch {
+        if (!items.length) return res.status(503).json({ error: msg(req, 'searchUnavailable') });
+        res.json({ items, hasMore: hasLocalMore, externalUnavailable: true });
+    }
+});
+
+
 app.post('/api/user-books', requireAuth, async (req, res) => {
     const { bookId } = req.body;
     const status = req.body.status === 'want-to-read' ? 'want-to-read' : 'reading';
@@ -510,6 +607,10 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
             progress = COALESCE($2, progress),
             review = $3,
             review_is_spoiler = $18,
+            review_updated_at = CASE
+                WHEN review IS DISTINCT FROM $3 OR review_is_spoiler IS DISTINCT FROM $18
+                    THEN CASE WHEN $3 IS NULL THEN NULL ELSE now() END
+                ELSE review_updated_at END,
             is_favorite = COALESCE($4, is_favorite),
             genre = $5,
             current_page = $6,
@@ -917,6 +1018,45 @@ app.get('/api/feed', requireAuth, async (req, res) => {
         hasMore: items.length === FEED_PAGE_SIZE,
     });
 });
+
+const REVIEW_PAGE_SIZE = 24;
+
+app.get('/api/reviews', requireAuth, async (req, res) => {
+    const { scope = 'all', order = 'recent', page = '0', q = '' } = req.query;
+    if (!['all', 'following'].includes(scope) || !['recent', 'popular'].includes(order)
+        || typeof page !== 'string' || !/^\d{1,4}$/.test(page) || Number(page) > 500
+        || typeof q !== 'string' || q.length > 120) {
+        return res.status(400).json({ error: msg(req, 'reviewFiltersInvalid') });
+    }
+
+    const followed = scope === 'following'
+        ? 'AND EXISTS (SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.following_id = ub.user_id)'
+        : '';
+    const ordering = order === 'popular' ? 'like_count DESC, ub.review_updated_at DESC NULLS LAST, ub.id DESC' : 'ub.review_updated_at DESC NULLS LAST, ub.id DESC';
+    const term = `%${escapeLike(plainSearch(q.trim()))}%`;
+    const items = await query(`
+        SELECT ub.id, ub.review, ub.review_is_spoiler, ub.rating,
+               COALESCE(ub.review_updated_at, ub.created_at) AS review_updated_at,
+               w.id AS book_id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
+               u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               ub.user_id = $1 AS is_mine,
+               (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id) AS like_count,
+               (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id) AS comment_count,
+               EXISTS (SELECT 1 FROM likes l WHERE l.user_book_id = ub.id AND l.user_id = $1) AS has_liked
+        FROM user_books ub
+        JOIN users u ON u.id = ub.user_id
+        JOIN works w ON w.id = ub.work_id
+        ${JOIN_TRANSLATION} = $2
+        WHERE ub.review IS NOT NULL AND btrim(ub.review) <> ''
+          AND ${plainText("concat_ws(' ', w.title, t.title, w.author, u.username, u.display_name)")} LIKE $3
+          ${followed}
+        ORDER BY ${ordering}
+        LIMIT $4 OFFSET $5
+    `, [req.session.user.id, languageOf(req), term, REVIEW_PAGE_SIZE + 1, Number(page) * REVIEW_PAGE_SIZE]);
+
+    res.json({ items: items.slice(0, REVIEW_PAGE_SIZE), hasMore: items.length > REVIEW_PAGE_SIZE });
+});
+
 
 app.get('/api/tags', requireAuth, async (req, res) => {
     const slug = slugify(String(req.query.q ?? ''));
@@ -2062,7 +2202,7 @@ async function removeReportedContent(type, target) {
     } else if (type === 'post_comment') {
         await query('DELETE FROM post_comments WHERE id = $1', [target.id]);
     } else if (type === 'review') {
-        await query('UPDATE user_books SET review = NULL, review_is_spoiler = false WHERE id = $1', [target.id]);
+        await query('UPDATE user_books SET review = NULL, review_is_spoiler = false, review_updated_at = NULL WHERE id = $1', [target.id]);
     } else if (type === 'review_comment') {
         await query('DELETE FROM comments WHERE id = $1', [target.id]);
     } else if (type === 'profile') {

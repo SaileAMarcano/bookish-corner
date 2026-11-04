@@ -17,16 +17,8 @@ const NAV_ITEMS = [
             { to: '/profile?tab=lists', label: 'nav.lists', icon: 'lists' },
         ],
     },
-    {
-        key: 'explore',
-        label: 'nav.explore',
-        icon: 'search',
-        children: [
-            { to: '/tags', label: 'nav.tags', icon: 'tag' },
-            { to: '/genres', label: 'nav.genres', icon: 'genres' },
-        ],
-    },
-    { to: '/profile?tab=reviews', label: 'nav.reviews', icon: 'reviews' },
+    { to: '/explore', label: 'nav.explore', icon: 'search' },
+    { to: '/reviews', label: 'nav.reviews', icon: 'feather' },
 ];
 
 const ADMIN_ITEMS = [
@@ -47,6 +39,10 @@ const SEASON_MARKS = {
 function isActive(item, location) {
     const [path, query] = item.to.split('?');
 
+    if (path === '/explore') {
+        return location.pathname === path || location.pathname.startsWith('/genre/') || location.pathname.startsWith('/tagged/');
+    }
+
     if (location.pathname !== path) return false;
     if (!query) return true;
 
@@ -58,12 +54,6 @@ function isGroupActive(item, location) {
     if (item.key === 'profile') {
         const tab = new URLSearchParams(location.search).get('tab') || 'posts';
         return location.pathname === '/profile' && tab !== 'reviews';
-    }
-
-    if (item.key === 'explore') {
-        return item.children.some((child) => isActive(child, location))
-            || location.pathname.startsWith('/genre/')
-            || location.pathname.startsWith('/tagged/');
     }
 
     return item.children.some((child) => isActive(child, location));
@@ -124,7 +114,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
                 to={item.to}
                 className={`sidebar-link ${active ? 'active' : ''} ${nested ? 'sidebar-sublink' : ''}`}
                 aria-label={t(item.label)}
-                aria-current={active ? 'page' : undefined}
+                aria-current={active ? (location.pathname === item.to.split('?')[0] ? 'page' : 'location') : undefined}
                 onClick={() => closeMenus(navRef.current)}
             >
                 <Icon name={item.icon} size={nested ? 18 : 20} />

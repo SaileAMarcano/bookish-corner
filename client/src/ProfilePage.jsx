@@ -15,6 +15,7 @@ import ProfileBooks from './ProfileBooks';
 import ProfileAbout from './ProfileAbout';
 import ProfileSide from './ProfileSide';
 import Icon from './Icon';
+import EmptyState from './EmptyState';
 
 
 function FavoriteCard({ book, onToggleFavorite }) {
@@ -117,7 +118,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
 
     const renderBookGrid = (list, emptyText) => {
         if (list.length === 0) {
-            return <div className="card profile-empty">{emptyText}</div>;
+            return <div className="card profile-empty"><EmptyState compact title={emptyText} kind={activeTab === 'favorites' ? 'favorites' : 'writing'} /></div>;
         }
 
         return (
@@ -165,9 +166,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                         <p className="profile-about-lead">{t('profile.favoritesLead')}</p>
 
                         {favorites.length === 0 ? (
-                            <p className="profile-about-empty">
-                                {t('profile.noFavorites')}
-                            </p>
+                            <EmptyState compact kind="favorites" title={t('brandEmpty.favorites')} description={t('profile.noFavorites')} />
                         ) : (
                             <div className="fav-row">
                                 {favorites.map((book) => (
@@ -221,7 +220,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     )}
 
                     {posts && posts.length === 0 && (
-                        <div className="card profile-empty">{t('posts.empty')}</div>
+                        <div className="card profile-empty"><EmptyState kind="writing" compact title={t('posts.empty')} /></div>
                     )}
 
                     {posts && pinnedFirst(posts).map((post) => (
@@ -244,7 +243,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
             return <FollowList username={profile.username} />;
         }
 
-        return <div className="card profile-empty">{t('profile.comingSoon')}</div>
+        return <div className="card profile-empty"><EmptyState kind="soon" compact title={t('profile.comingSoon')} /></div>
     }
 
     return (

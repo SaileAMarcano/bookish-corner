@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import BookItem from './BookItem';
 import PostCard from './PostCard';
 import Notice from './Notice';
+import EmptyState from './EmptyState';
 import ProfileHeader from './ProfileHeader';
 import ReportButton from './ReportButton';
 import ProfileTabs, { PROFILE_TABS } from './ProfileTabs';
@@ -93,7 +94,7 @@ function UserPage({ currentUser }) {
 
     const renderBooks = (list, emptyText) => {
         if (list.length === 0) {
-            return <div className="card profile-empty">{emptyText}</div>;
+            return <div className="card profile-empty"><EmptyState compact title={emptyText} kind={activeTab === 'favorites' ? 'favorites' : 'writing'} /></div>;
         }
 
         return (
@@ -116,7 +117,7 @@ function UserPage({ currentUser }) {
             );
         }
         if (activeTab === 'lists') {
-            return <div className="card profile-empty">{t('profile.comingSoon')}</div>;
+            return <div className="card profile-empty"><EmptyState kind="soon" compact title={t('profile.comingSoon')} /></div>;
         }
         if (activeTab === 'about') {
             return <ProfileAbout profile={profile} />;
@@ -133,7 +134,7 @@ function UserPage({ currentUser }) {
 
         return (
             <div className="post-list">
-                {posts.length === 0 && <div className="card profile-empty"> {t('userPage.emptyPosts', { name })}</div>}
+                {posts.length === 0 && <div className="card profile-empty"><EmptyState kind="writing" compact title={t('userPage.emptyPosts', { name })} /></div>}
 
                 {pinnedFirst(posts).map((post) => (
                     <PostCard key={post.id} post={post} currentUserId={currentUser.id} onChange={handlePostChange} onDeleted={() => { }} showPinned />

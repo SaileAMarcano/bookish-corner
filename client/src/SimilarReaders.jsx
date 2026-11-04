@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import Notice from './Notice';
+import EmptyState from './EmptyState';
 import { apiFetch } from "./api";
 import { getAvatarSrc } from "./utils";
 
@@ -9,24 +10,28 @@ function SimilarReaders({ username }) {
     const { t } = useTranslation();
     const [readers, setReaders] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const [pending, setPending] = useState(false);
 
     useEffect(() => {
         let ignore = false;
 
         apiFetch(`/api/users/${encodeURIComponent(username)}/similar`)
             .then((data) => {
-                if (!ignore) setReaders(data.map((reader) => ({ ...reader, isFollowing: false })));
+                if (!ignore) { setReaders(data.map((reader) => ({ ...reader, isFollowing: false }))); setError(''); }
             })
-            .catch(() => {
-                if (!ignore) setReaders([]);
+            .catch((err) => {
+                if (!ignore) { setError(err.message); setReaders([]); }
             });
 
         return () => {
             ignore = true;
         };
-    }, [username]);
+    }, [username, retry]);
 
     const handleFollow = (reader) => {
+        if (pending) return;
+        setPending(true);
         setError('');
         apiFetch(`/api/users/${encodeURIComponent(reader.username)}/follow`, {
             method: reader.isFollowing ? 'DELETE' : 'POST',
@@ -36,7 +41,8 @@ function SimilarReaders({ username }) {
                     current.map((item) => (item.id === reader.id ? { ...item, isFollowing: state.isFollowing } : item))
                 )
             )
-            .catch((err) => setError(err.message));
+            .catch((err) => setError(err.message))
+            .finally(() => setPending(false));
     };
 
     if (readers === null) return null;
@@ -45,7 +51,7 @@ function SimilarReaders({ username }) {
         <section className="profile-side-card">
             <h3 className="display profile-side-title">{t('similar.title')}</h3>
 
-            {readers.length === 0 && <p className="profile-about-empty">{t('similar.empty')}</p>}
+            {readers.length === 0 && !error && <EmptyState compact kind="readers" title={t('similar.empty')} description={t('explorePage.readerHint')} />}
 
             {readers.map((reader) => (
                 <div key={reader.id} className="similar-row">
@@ -60,13 +66,13 @@ function SimilarReaders({ username }) {
                         </div>
                     </div>
 
-                    <button type="button" className={`tag-follow similar-follow ${reader.isFollowing ? 'following' : ''}`} onClick={() => handleFollow(reader)} aria-pressed={reader.isFollowing}>
+                    <button type="button" className={`tag-follow similar-follow ${reader.isFollowing ? 'following' : ''}`} disabled={pending} onClick={() => handleFollow(reader)} aria-pressed={reader.isFollowing}>
                         {reader.isFollowing ? t('userPage.followingButton') : t('userPage.follow')}
                     </button>
                 </div>
             ))}
 
-            {error && <Notice message={error} />}
+            {error && <Notice message={error} onRetry={() => setRetry((value) => value + 1)} />}
         </section>
     );
 }

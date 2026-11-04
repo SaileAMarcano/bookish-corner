@@ -49,7 +49,7 @@ function HomeSide({ books, currentUser }) {
                 <section className="card profile-side-card">
                     <div className="profile-side-head">
                         <h3 className="display profile-side-title">{t('home.popularTags')}</h3>
-                        <Link to="/tags" className="profile-side-more" aria-label={t('home.seeAllTags')}>
+                        <Link to="/explore#tags" className="profile-side-more" aria-label={t('home.seeAllTags')}>
                             <Icon name="chevronRight" size={18} />
                         </Link>
                     </div>

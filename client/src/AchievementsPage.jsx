@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
+import AchievementConstellation from './AchievementConstellation';
+import EmptyState from './EmptyState';
+import { achievementLevel } from './achievementUtils';
 import MilestoneSeal, { ProfileBadge } from './MilestoneSeal';
 import { apiFetch } from './api';
 import { getAvatarSrc, parseDbDate } from './utils';
@@ -12,9 +15,10 @@ function MilestoneCard({ milestone, onChooseBadge }) {
 
     return (
         <article className={`achievement ${locked ? 'achievement-locked' : ''} ${milestone.claimed ? 'achievement-claimed' : ''}`}>
-            <MilestoneSeal milestoneKey={milestone.key} locked={locked} />
+            <MilestoneSeal milestoneKey={milestone.key} locked={locked} level={achievementLevel(milestone)} />
 
             <div className="achievement-info">
+                <span className="achievement-level-label">{t(`achievementArt.levels.${achievementLevel(milestone)}`)}</span>
                 <h3 className="display achievement-name">{t(`milestones.items.${milestone.key}.name`)}</h3>
                 <p className="achievement-rule">{t(`milestones.items.${milestone.key}.rule`)}</p>
 
@@ -130,29 +134,34 @@ function AchievementsPage({ currentUser }) {
                 </div>
             </section>
 
-            <h2 className="display achievements-section-title">{t('milestones.earned')}</h2>
-            {earned.length === 0 ? (
-                <p className="profile-about-empty">{t('milestones.noneYet')}</p>
-            ) : (
-                <div className="achievements-grid">
-                    {earned.map((milestone) => (
-                        <MilestoneCard key={milestone.key} milestone={milestone} onChooseBadge={handleChooseBadge} />
-                    ))}
-                </div>
-            )}
-
-            {inProgress.length > 0 && (
-                <>
-                    <h2 className="display achievements-section-title">{t('milestones.inProgress')}</h2>
+            <div className="achievement-layout">
+                <AchievementConstellation milestones={milestones} />
+                <div className="achievement-cards">
                     <p className="achievements-hint">{t('milestones.badgeHint')}</p>
                     {badgeError && <Notice message={badgeError} />}
-                    <div className="achievements-grid">
-                        {inProgress.map((milestone) => (
-                            <MilestoneCard key={milestone.key} milestone={milestone} />
-                        ))}
-                    </div>
-                </>
-            )}
+                    <h2 className="display achievements-section-title">{t('milestones.earned')}</h2>
+                    {earned.length === 0 ? (
+                        <EmptyState kind="soon" compact title={t('milestones.noneYet')} />
+                    ) : (
+                        <div className="achievements-grid">
+                            {earned.map((milestone) => (
+                                <MilestoneCard key={milestone.key} milestone={milestone} onChooseBadge={handleChooseBadge} />
+                            ))}
+                        </div>
+                    )}
+
+                    {inProgress.length > 0 && (
+                        <>
+                            <h2 className="display achievements-section-title">{t('milestones.inProgress')}</h2>
+                            <div className="achievements-grid">
+                                {inProgress.map((milestone) => (
+                                    <MilestoneCard key={milestone.key} milestone={milestone} />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
         </main>
     );
 }
