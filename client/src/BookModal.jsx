@@ -1,385 +1,483 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
-import { pagePercent, pageSummary, getAvatarSrc, genreLabel, GENRES } from './utils';
-import { apiFetch } from './api';
-import Notice from './Notice';
 import Icon from './Icon';
+import Notice from './Notice';
+import ReviewComments from './ReviewComments';
 import StarRating from './StarRating';
+import { apiFetch } from './api';
+import { genreLabel, GENRES, pagePercent, pageSummary } from './utils';
 
 const STATUSES = ['want-to-read', 'reading', 'paused', 'dnf', 'finished'];
-
-const STATUS_ICONS = {
-    'want-to-read': 'reading',
-    'reading': 'library',
-    'paused': 'pause',
-    'dnf': 'close',
-    'finished': 'check',
-}
-
-const toNumber = (value) => (value === '' ? null : Number(value));
+const toNumber = (value) => value === '' ? null : Number(value);
 
 function BookModal({ book, onClose, onUpdate }) {
-    const { t, i18n } = useTranslation()
-    const statusLabel = (value) => t(`status.${value}`, { defaultValue: value })
-    const [comments, setComments] = useState([])
-    const [commentText, setCommentText] = useState('')
-    const [review, setReview] = useState(book.review || '')
-    const [status, setStatus] = useState(book.status || 'reading')
-    const [currentPage, setCurrentPage] = useState(book.currentPage ?? '')
-    const [totalPages, setTotalPages] = useState(book.totalPages ?? '')
-    const [currentChapter, setCurrentChapter] = useState(book.currentChapter ?? '')
-    const [isSavingProgress, setIsSavingProgress] = useState(false)
-    const [genre, setGenre] = useState(book.genre || '')
-    const [isSaving, setIsSaving] = useState(false)
-    const [isEditingReview, setIsEditingReview] = useState(false)
-    const [confirmingRemove, setConfirmingRemove] = useState(false)
-    const [isRemoving, setIsRemoving] = useState(false)
-    const [removeError, setRemoveError] = useState('')
-    const [rating, setRating] = useState(book.rating || 0)
-    const [ratingError, setRatingError] = useState('')
-    const [commentError, setCommentError] = useState('')
-    const [reviewError, setReviewError] = useState('')
-    const [progressError, setProgressError] = useState('')
+    const { t } = useTranslation();
+    const currentYear = new Date().getUTCFullYear();
+    const today = new Date().toISOString().slice(0, 10);
+    const modalRef = useRef(null);
+    const [tab, setTab] = useState('reading');
+    const [status, setStatus] = useState(book.status || 'reading');
+    const [rating, setRating] = useState(book.rating || 0);
+    const [review, setReview] = useState(book.review || '');
+    const [genre, setGenre] = useState(book.genre || '');
+    const [currentPage, setCurrentPage] = useState(book.currentPage ?? '');
+    const [totalPages, setTotalPages] = useState(book.totalPages ?? '');
+    const [currentChapter, setCurrentChapter] = useState(book.currentChapter ?? '');
+    const [readYear, setReadYear] = useState(book.status === 'finished' ? book.readYear ?? currentYear : currentYear);
+    const [unknownYear, setUnknownYear] = useState(book.status === 'finished' && book.readYear == null);
+    const [finishedOn, setFinishedOn] = useState(book.status === 'finished' ? book.finishedOn || '' : '');
+    const [exactDate, setExactDate] = useState(book.status === 'finished' && Boolean(book.finishedOn));
+    const [commentCount, setCommentCount] = useState(book.commentCount || 0);
+    const [isSaving, setIsSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [error, setError] = useState('');
+    const [confirmingRemove, setConfirmingRemove] = useState(false);
+    const [isRemoving, setIsRemoving] = useState(false);
+    const [removeError, setRemoveError] = useState('');
+    const formId = `book-diary-${book.id}`;
+    const busy = isSaving || isRemoving;
 
     useEffect(() => {
-        apiFetch(`/api/user-books/${book.id}/comments`)
-            .then((data) => setComments(data))
-            .catch((error) => setCommentError(error.message))
-    }, [book.id])
+        const previousFocus = document.activeElement;
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        modalRef.current?.querySelector('.book-diary-close')?.focus();
 
-    const handleAddComment = () => {
-        if (commentText.trim() === '') return
-        setCommentError('')
+        return () => {
+            document.body.style.overflow = previousOverflow;
+            if (previousFocus?.isConnected) previousFocus.focus();
+        };
+    }, [book.id]);
 
-        apiFetch(`/api/user-books/${book.id}/comments`, { method: 'POST', body: { text: commentText } })
-            .then((newComment) => {
-                setComments((prevComments) => [newComment, ...prevComments])
-                setCommentText('')
-                onUpdate()
-            })
-            .catch((error) => setCommentError(error.message))
+    function closeModal() {
+        if (!busy) onClose();
     }
 
-    const handleSaveReview = () => {
-        setIsSaving(true)
-        setReviewError('')
+    function handleKeys(event) {
+        if (event.target.closest('dialog[open]')) return;
 
-        apiFetch(`/api/user-books/${book.id}`, {
-            method: 'PATCH',
-            body: { review, status, genre: genre || null },
-        })
-            .then(() => {
-                setIsEditingReview(false)
-                onUpdate()
-            })
-            .catch((error) => setReviewError(error.message))
-            .finally(() => setIsSaving(false))
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            closeModal();
+        }
+
+        if (event.key !== 'Tab') return;
+
+        const elements = [...modalRef.current.querySelectorAll('button, input, select, textarea, a[href], summary')]
+            .filter((element) => !element.matches(':disabled') && element.tabIndex >= 0 && element.getClientRects().length > 0);
+        const first = elements[0];
+        const last = elements.at(-1);
+
+        if (event.shiftKey && event.target === first) {
+            event.preventDefault();
+            last?.focus();
+        } else if (!event.shiftKey && event.target === last) {
+            event.preventDefault();
+            first?.focus();
+        }
     }
 
-    const handleSaveProgress = () => {
-        setIsSavingProgress(true)
-        setProgressError('')
+    function handleTabKeys(event) {
+        if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
 
-        apiFetch(`/api/user-books/${book.id}`, {
-            method: 'PATCH',
-            body: {
-                currentPage: toNumber(currentPage),
-                totalPages: toNumber(totalPages),
-                currentChapter: toNumber(currentChapter),
-            },
-        })
-            .then(() => onUpdate())
-            .catch((error) => setProgressError(error.message))
-            .finally(() => setIsSavingProgress(false))
+        event.preventDefault();
+        const next = event.key === 'Home' ? 'reading' : event.key === 'End' ? 'review' : tab === 'reading' ? 'review' : 'reading';
+        setTab(next);
+        modalRef.current.querySelector(`[data-diary-tab="${next}"]`)?.focus();
     }
 
-    const handleRate = (newRating) => {
-        const previous = rating
-        setRating(newRating)
-        setRatingError('')
+    let pageError = '';
 
-        apiFetch(`/api/user-books/${book.id}`, { method: 'PATCH', body: { rating: newRating } })
-            .then(() => onUpdate())
-            .catch((error) => {
-                setRating(previous)
-                setRatingError(error.message)
-            })
-    }
-
-    const handleRemove = () => {
-        setIsRemoving(true)
-        setRemoveError('')
-
-        apiFetch(`/api/user-books/${book.id}`, { method: 'DELETE' })
-            .then(() => {
-                onUpdate()
-                onClose()
-            })
-            .catch((error) => {
-                setRemoveError(error.message)
-                setIsRemoving(false)
-            })
-    }
-
-    let pageError = ''
-    if (totalPages !== '' && Number(totalPages) < 1) {
-        pageError = t('modal.totalTooLow')
+    if ([currentPage, totalPages, currentChapter].some((value) => value !== '' && (!Number.isInteger(Number(value)) || Number(value) < 0))) {
+        pageError = t('modal.wholeNumbers');
+    } else if (totalPages !== '' && Number(totalPages) < 1) {
+        pageError = t('modal.totalTooLow');
     } else if (currentPage !== '' && totalPages !== '' && Number(currentPage) > Number(totalPages)) {
-        pageError = t('modal.pageTooHigh')
+        pageError = t('modal.pageTooHigh');
     }
 
-    const pagesPercent = pagePercent(Number(currentPage), Number(totalPages))
-    const livePercent = book.status === 'finished' ? 100 : (pagesPercent ?? book.progress ?? 0)
+    let yearError = '';
 
-    const progressFields = [
-        { label: t('modal.currentPage'), icon: 'library', value: currentPage, onChange: setCurrentPage, min: 0 },
-        { label: t('modal.totalPages'), icon: 'posts', value: totalPages, onChange: setTotalPages, min: 1 },
-        { label: t('modal.chapter'), icon: 'reading', value: currentChapter, onChange: setCurrentChapter, min: 0, placeholder: t('modal.optional') },
-    ]
+    if (status === 'finished' && !unknownYear) {
+        if (!Number.isInteger(Number(readYear)) || Number(readYear) < 1000 || Number(readYear) > currentYear) {
+            yearError = t('modal.invalidYear');
+        } else if (exactDate) {
+            const date = new Date(finishedOn + 'T00:00:00.000Z');
+
+            if (!finishedOn || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== finishedOn || finishedOn > today || Number(finishedOn.slice(0, 4)) !== Number(readYear)) {
+                yearError = t('modal.invalidDate');
+            }
+        }
+    }
+
+    async function handleSave(event) {
+        event.preventDefault();
+        if (busy) return;
+
+        if (pageError || yearError) {
+            setTab('reading');
+            return;
+        }
+
+        setIsSaving(true);
+        setError('');
+        setSaved(false);
+
+        const body = {
+            status,
+            rating,
+            review,
+            genre: genre || null,
+            currentPage: toNumber(currentPage),
+            totalPages: toNumber(totalPages),
+            currentChapter: toNumber(currentChapter),
+        };
+
+        if (status === 'finished') {
+            body.readYear = unknownYear ? null : Number(readYear);
+            body.finishedOn = !unknownYear && exactDate ? finishedOn : null;
+        }
+
+        try {
+            await apiFetch(`/api/user-books/${book.id}`, { method: 'PATCH', body });
+            await onUpdate();
+            setSaved(true);
+        } catch (err) {
+            setError(err.message);
+        } finally {
+            setIsSaving(false);
+        }
+    }
+
+    async function handleRemove() {
+        if (busy) return;
+
+        setIsRemoving(true);
+        setRemoveError('');
+
+        try {
+            await apiFetch(`/api/user-books/${book.id}`, { method: 'DELETE' });
+            await onUpdate();
+            onClose();
+        } catch (err) {
+            setRemoveError(err.message);
+            setIsRemoving(false);
+        }
+    }
+
+    const percent = status === 'finished' ? 100 : pagePercent(Number(currentPage), Number(totalPages)) ?? (book.status === 'finished' ? 0 : book.progress || 0);
+    const fields = [
+        { name: 'currentPage', label: t('modal.currentPage'), value: currentPage, change: setCurrentPage, min: 0 },
+        { name: 'totalPages', label: t('modal.totalPages'), value: totalPages, change: setTotalPages, min: 1 },
+        { name: 'currentChapter', label: t('modal.chapter'), value: currentChapter, change: setCurrentChapter, min: 0 },
+    ];
 
     return (
-        <div className="modal-overlay" onClick={onClose}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <div className="modal-body">
+        <div className="modal-overlay" onClick={closeModal}>
+            <div
+                className="modal book-diary"
+                ref={modalRef}
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={`${formId}-title`}
+                onClick={(event) => event.stopPropagation()}
+                onKeyDown={handleKeys}
+            >
+                <header className="book-diary-brand">
+                    <img src="/logo-mark.png" alt="" />
+                    <div>
+                        <span className="display">A Library of Us</span>
+                        <small>{t('modal.diaryTitle')}</small>
+                    </div>
                     <button
-                        className="modal-close"
-                        onClick={onClose}
+                        type="button"
+                        className="book-diary-close"
+                        onClick={closeModal}
+                        disabled={busy}
                         aria-label={t('common.close')}
                     >
-                        <svg
-                            width="14" height="14" viewBox="0 0 24 24"
-                            fill="none" stroke="currentColor"
-                            strokeWidth="2.5" strokeLinecap="round"
-                        >
-                            <line x1="5" y1="5" x2="19" y2="19" />
-                            <line x1="19" y1="5" x2="5" y2="19" />
-                        </svg>
+                        <Icon name="close" />
                     </button>
+                </header>
 
-                    <div className="modal-header">
-                        <BookCover src={book.coverImage} className="modal-cover" />
-                        <div className="modal-heading">
-                            <h2 className="display modal-title">{book.title}</h2>
-                            <div className="modal-author">{book.author}</div>
-
-                            <span className={`pill modal-status status-${book.status}`}>
-                                <Icon name={STATUS_ICONS[book.status]} size={15} />
-                                {statusLabel(book.status)}
-                            </span>
-                            <StarRating value={rating} onChange={handleRate} />
-                        </div>
-                    </div>
-
-                    {ratingError && <Notice message={ratingError} />}
-
-                    <p className="modal-description">{book.description}</p>
-                    <section className="modal-section">
-                        <h3 className="section-label">{t('modal.progressTitle')}</h3>
-
-                        <div className="progress-summary">
-                            <p className="progress-big">
-                                <span className="display progress-percent">{livePercent}%</span>
-                                {t('modal.complete')}
-                            </p>
-                            <span className="progress-pages">{pageSummary({ currentPage, totalPages })}</span>
-                        </div>
-
-                        <div className="progress-track progress-track-big">
-                            <div className="progress-fill" style={{ width: `${livePercent}%` }}></div>
-                        </div>
-
-                        <div className="progress-fields">
-                            {progressFields.map((field) => (
-                                <label key={field.label} className="progress-field">
-                                    <Icon name={field.icon} size={22} />
-                                    <span className="progress-field-text">
-                                        {field.label}
-                                        <input
-                                            className="progress-input"
-                                            type="number"
-                                            min={field.min}
-                                            placeholder={field.placeholder}
-                                            value={field.value}
-                                            onChange={(e) => field.onChange(e.target.value)}
-                                        />
-                                    </span>
-                                </label>
-                            ))}
-                        </div>
-
-                        {pageError && <div className="progress-error">{pageError}</div>}
-                        {progressError && <Notice message={progressError} />}
-
-                        <button
-                            type="button"
-                            className="pill modal-primary"
-                            onClick={handleSaveProgress}
-                            disabled={isSavingProgress || pageError !== ''}
-                        >
-                            {isSavingProgress ? t('common.saving') : t('modal.saveProgress')}
-                        </button>
-                    </section>
-
-                    <section className="modal-section">
-                        <div className="review-head">
-                            <h3 className="section-label">{t('modal.yourReview')}</h3>
-
-                            {book.review && !isEditingReview && (
-                                <button
-                                    type="button"
-                                    className="review-edit"
-                                    onClick={() => setIsEditingReview(true)}
-                                >
-                                    <Icon name="pencil" size={15} />
-                                    {t('modal.edit')}
-                                </button>
-                            )}
-                        </div>
-
-                        {book.review && !isEditingReview ? (
-                            <>
-                                <blockquote className="modal-review">{book.review}</blockquote>
-
-                                <div className="book-meta">
-                                    <span className={`pill book-status status-${book.status}`}>
-                                        {statusLabel(book.status)}
-                                    </span>
-                                    {book.status !== 'want-to-read' && (
-                                        <span className="progress-label">{t('book.complete', { percent: book.progress })}</span>
-                                    )}
-                                </div>
-                            </>
-                        ) : (
-                            <>
-                                <textarea
-                                    className="profile-textarea review-textarea"
-                                    value={review}
-                                    onChange={(e) => setReview(e.target.value)}
-                                    placeholder={t('modal.reviewPlaceholder')}
-                                    maxLength={5000}
+                <div className="book-diary-scroll">
+                    <form id={formId} onSubmit={handleSave} onChange={() => setSaved(false)} noValidate>
+                        <fieldset className="book-diary-fields" disabled={busy}>
+                            <div className="book-diary-header">
+                                <BookCover
+                                    src={book.coverImage}
+                                    className="book-diary-cover"
+                                    title={book.title}
+                                    author={book.author}
+                                    bookId={book.bookId}
                                 />
-
-                                <div className="review-controls">
+                                <div className="book-diary-heading">
+                                    <h2 className="display" id={`${formId}-title`}>{book.title}</h2>
+                                    <p>{book.author}</p>
                                     <select
-                                        className="review-select"
+                                        className="book-diary-status"
                                         value={status}
-                                        onChange={(e) => setStatus(e.target.value)}
+                                        onChange={(event) => setStatus(event.target.value)}
+                                        aria-label={t('modal.readingStatus')}
                                     >
                                         {STATUSES.map((value) => (
-                                            <option key={value} value={value}>{statusLabel(value)}</option>
+                                            <option key={value} value={value}>{t(`status.${value}`)}</option>
                                         ))}
                                     </select>
+                                    <StarRating
+                                        value={rating}
+                                        size={23}
+                                        onChange={(value) => {
+                                            setRating(value);
+                                            setSaved(false);
+                                        }}
+                                    />
+                                </div>
+                            </div>
 
-                                    <select
-                                        className="review-select"
-                                        value={genre}
-                                        onChange={(e) => setGenre(e.target.value)}
-                                    >
-                                        <option value="">{t('modal.genrePlaceholder')}</option>
-                                        {GENRES.map((g) => (
-                                            <option key={g} value={g}>{genreLabel(g)}</option>
-                                        ))}
-                                    </select>
+                            {book.description && (
+                                <details className="book-diary-description">
+                                    <summary>{t('modal.aboutBook')}</summary>
+                                    <p>{book.description}</p>
+                                </details>
+                            )}
 
+                            <div
+                                className="book-diary-tabs"
+                                role="tablist"
+                                aria-label={t('modal.sections')}
+                                onKeyDown={handleTabKeys}
+                            >
+                                {['reading', 'review'].map((value) => (
                                     <button
                                         type="button"
-                                        className="pill review-save"
-                                        onClick={handleSaveReview}
-                                        disabled={isSaving}
+                                        key={value}
+                                        role="tab"
+                                        id={`${formId}-tab-${value}`}
+                                        data-diary-tab={value}
+                                        aria-controls={`${formId}-panel-${value}`}
+                                        aria-selected={tab === value}
+                                        tabIndex={tab === value ? 0 : -1}
+                                        onClick={() => setTab(value)}
                                     >
-                                        {isSaving ? t('common.saving') : t('common.save')}
+                                        {t(value === 'reading' ? 'modal.readingTab' : 'modal.reviewTab')}
                                     </button>
+                                ))}
+                            </div>
 
-                                    {book.review && (
-                                        <button
-                                            type="button"
-                                            className="ghost-button"
-                                            onClick={() => {
-                                                setReview(book.review)
-                                                setStatus(book.status)
-                                                setGenre(book.genre || '')
-                                                setIsEditingReview(false)
-                                            }}
-                                        >
-                                            {t('common.cancel')}
-                                        </button>
+                            <section
+                                className="book-diary-panel"
+                                role="tabpanel"
+                                id={`${formId}-panel-reading`}
+                                aria-labelledby={`${formId}-tab-reading`}
+                                hidden={tab !== 'reading'}
+                            >
+                                <h3 className="display book-diary-section-title">
+                                    <Icon name="library" />
+                                    {t('modal.progressTitle')}
+                                </h3>
+
+                                <div className="book-diary-numbers">
+                                    {fields.map((field) => (
+                                        <label key={field.name}>
+                                            {field.label}
+                                            <input
+                                                name={field.name}
+                                                type="number"
+                                                inputMode="numeric"
+                                                min={field.min}
+                                                step="1"
+                                                value={field.value}
+                                                placeholder={t('modal.optional')}
+                                                onChange={(event) => field.change(event.target.value)}
+                                            />
+                                        </label>
+                                    ))}
+                                </div>
+
+                                <div className="book-diary-progress-label">
+                                    <span>
+                                        <strong className="display">{percent}%</strong> {t('modal.complete')}
+                                    </span>
+                                    <span>{pageSummary({ currentPage, totalPages })}</span>
+                                </div>
+                                <div
+                                    className="book-diary-track"
+                                    role="progressbar"
+                                    aria-label={t('modal.progressTitle')}
+                                    aria-valuemin={0}
+                                    aria-valuemax={100}
+                                    aria-valuenow={percent}
+                                >
+                                    <div style={{ width: `${percent}%` }} />
+                                </div>
+
+                                {pageError && <p className="book-diary-error">{pageError}</p>}
+
+                                <div className="book-diary-year">
+                                    <h3 className="display book-diary-section-title">
+                                        <Icon name="sparkle" />
+                                        {t('modal.readingYear')}
+                                    </h3>
+
+                                    {status !== 'finished' ? (
+                                        <p className="book-diary-hint">{t('modal.yearPending')}</p>
+                                    ) : (
+                                        <>
+                                            <div className="book-diary-year-row">
+                                                <label>
+                                                    {t('modal.finishedIn')}
+                                                    <input
+                                                        name="readYear"
+                                                        type="number"
+                                                        inputMode="numeric"
+                                                        min="1000"
+                                                        max={currentYear}
+                                                        step="1"
+                                                        value={readYear}
+                                                        disabled={unknownYear}
+                                                        onChange={(event) => {
+                                                            setReadYear(event.target.value);
+                                                            if (finishedOn && !finishedOn.startsWith(event.target.value + '-')) {
+                                                                setFinishedOn('');
+                                                            }
+                                                        }}
+                                                    />
+                                                </label>
+                                                <p className="book-diary-hint">
+                                                    {t('modal.destinationLabel')}
+                                                    <strong>
+                                                        {unknownYear ? t('library.undated') : t('modal.destination', { year: readYear || '…' })}
+                                                    </strong>
+                                                </p>
+                                            </div>
+
+                                            <label className="book-diary-check">
+                                                <input
+                                                    type="checkbox"
+                                                    name="unknownYear"
+                                                    checked={unknownYear}
+                                                    onChange={(event) => {
+                                                        setUnknownYear(event.target.checked);
+                                                        if (event.target.checked) {
+                                                            setExactDate(false);
+                                                            setFinishedOn('');
+                                                        }
+                                                    }}
+                                                />
+                                                {t('modal.unknownYear')}
+                                            </label>
+
+                                            <label className="book-diary-check">
+                                                <input
+                                                    type="checkbox"
+                                                    name="exactDate"
+                                                    checked={exactDate}
+                                                    disabled={unknownYear}
+                                                    onChange={(event) => setExactDate(event.target.checked)}
+                                                />
+                                                {t('modal.exactDate')}
+                                            </label>
+
+                                            {exactDate && !unknownYear && (
+                                                <label className="book-diary-date">
+                                                    {t('modal.finishedOn')}
+                                                    <input
+                                                        name="finishedOn"
+                                                        type="date"
+                                                        max={today}
+                                                        value={finishedOn}
+                                                        onChange={(event) => {
+                                                            setFinishedOn(event.target.value);
+                                                            if (event.target.value) {
+                                                                setReadYear(Number(event.target.value.slice(0, 4)));
+                                                            }
+                                                        }}
+                                                    />
+                                                </label>
+                                            )}
+
+                                            <p className="book-diary-hint">{t('modal.yearHint')}</p>
+                                            {yearError && <p className="book-diary-error">{yearError}</p>}
+                                        </>
                                     )}
                                 </div>
-                            </>
-                        )}
-                        {reviewError && <Notice message={reviewError} />}
-                    </section>
+                            </section>
 
-                    <section className="modal-section">
-                        <h3 className="section-label">{t('modal.commentsTitle', { count: comments.length })}</h3>
+                            <section
+                                className="book-diary-panel"
+                                role="tabpanel"
+                                id={`${formId}-panel-review`}
+                                aria-labelledby={`${formId}-tab-review`}
+                                hidden={tab !== 'review'}
+                            >
+                                <h3 className="display book-diary-section-title">
+                                    <Icon name="feather" />
+                                    {t('modal.yourReview')}
+                                </h3>
+                                <label className="book-diary-review">
+                                    {t('modal.reviewLead')}
+                                    <textarea
+                                        name="review"
+                                        rows="5"
+                                        maxLength={5000}
+                                        value={review}
+                                        placeholder={t('modal.reviewPlaceholder')}
+                                        onChange={(event) => setReview(event.target.value)}
+                                    />
+                                </label>
+                                <span className="book-diary-review-count">{review.length} / 5000</span>
+                                <label>
+                                    {t('modal.genreLabel')}
+                                    <select
+                                        name="genre"
+                                        value={genre}
+                                        onChange={(event) => setGenre(event.target.value)}
+                                    >
+                                        <option value="">{t('modal.genrePlaceholder')}</option>
+                                        {GENRES.map((value) => (
+                                            <option key={value} value={value}>{genreLabel(value)}</option>
+                                        ))}
+                                    </select>
+                                </label>
+                            </section>
+                        </fieldset>
+                    </form>
 
-                        {comments.length === 0 ? (
-                            <p className="comment-empty">{t('modal.noComments')}</p>
-                        ) : (
-                            <ul className="comment-list">
-                                {comments.map((comment) => (
-                                    <li key={comment.id} className="comment-item">
-                                        <img className="comment-avatar" src={getAvatarSrc(comment.avatarUrl)} alt="" />
-                                        <div className="comment-body">
-                                            <div className="comment-head">
-                                                <Link to={`/u/${comment.username}`} className="comment-author">{comment.username}</Link>
-                                                <span className="comment-date">
-                                                    · {new Date(comment.createdAt).toLocaleDateString(i18n.language, {
-                                                        month: 'short',
-                                                        day: 'numeric',
-                                                    })}
-                                                </span>
-                                            </div>
-                                            <p className="comment-text">{comment.text}</p>
-                                        </div>
-                                    </li>
-                                ))}
-                            </ul>
-                        )}
-                        {commentError && <Notice message={commentError} />}
-                        <form
-                            className="comment-form"
-                            onSubmit={(e) => {
-                                e.preventDefault()
-                                handleAddComment()
+                    {error && <Notice message={error} />}
+
+                    <details className="book-diary-comments">
+                        <summary>{t('modal.commentsTitle', { count: commentCount })}</summary>
+                        <ReviewComments
+                            reviewId={book.id}
+                            onCountChange={(count) => {
+                                setCommentCount(count);
+                                onUpdate();
                             }}
-                        >
-                            <input
-                                className="comment-input"
-                                type="text"
-                                value={commentText}
-                                onChange={(e) => setCommentText(e.target.value)}
-                                placeholder={t('modal.writeComment')}
-                                aria-label={t('modal.writeComment')}
-                                maxLength={1000}
-                            />
-                            <button type="submit" className="pill comment-send">{t('modal.comment')}</button>
-                        </form>
-                    </section>
-                    <div className="modal-remove">
-                        {removeError && <Notice message={removeError} />}
+                        />
+                    </details>
 
+                    <div className="book-diary-remove">
+                        {removeError && <Notice message={removeError} />}
                         {confirmingRemove ? (
                             <>
-                                <p className="modal-remove-text">
-                                    {t('modal.removeText')}
-                                </p>
-                                <div className="modal-remove-actions">
+                                <p>{t('modal.removeText')}</p>
+                                <div>
                                     <button
                                         type="button"
-                                        className="modal-remove-confirm"
+                                        className="book-diary-danger"
+                                        disabled={busy}
                                         onClick={handleRemove}
-                                        disabled={isRemoving}
                                     >
                                         {isRemoving ? t('modal.removing') : t('modal.removeYes')}
                                     </button>
                                     <button
                                         type="button"
-                                        className="ghost-button"
+                                        className="book-diary-secondary"
+                                        disabled={busy}
                                         onClick={() => setConfirmingRemove(false)}
-                                        disabled={isRemoving}
                                     >
                                         {t('common.cancel')}
                                     </button>
@@ -389,13 +487,41 @@ function BookModal({ book, onClose, onUpdate }) {
                             <button
                                 type="button"
                                 className="modal-remove-button"
+                                disabled={busy}
                                 onClick={() => setConfirmingRemove(true)}
-                            > <Icon name="trash" size={17} />
+                            >
+                                <Icon name="trash" size={15} />
                                 {t('modal.removeButton')}
                             </button>
                         )}
                     </div>
                 </div>
+
+                <footer className="book-diary-footer">
+                    <p
+                        className={`book-diary-feedback ${pageError || yearError ? 'book-diary-error' : ''}`}
+                        role="status"
+                    >
+                        {pageError || yearError || (saved ? t('modal.saved') : '')}
+                    </p>
+                    <button
+                        type="button"
+                        className="book-diary-secondary"
+                        disabled={busy}
+                        onClick={closeModal}
+                    >
+                        {t('common.cancel')}
+                    </button>
+                    <button
+                        type="submit"
+                        form={formId}
+                        className="book-diary-save"
+                        disabled={busy || Boolean(pageError || yearError)}
+                    >
+                        <Icon name="feather" size={17} />
+                        {isSaving ? t('common.saving') : t('modal.saveChanges')}
+                    </button>
+                </footer>
             </div>
         </div>
     );

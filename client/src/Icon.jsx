@@ -74,6 +74,11 @@ const ICONS = {
 
     pencil: <path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" />,
 
+    feather: <>
+        <path d="M20.2 12.2a6 6 0 0 0-8.4-8.4L3 12.5V21h8.5z" />
+        <path d="m16 8-12 13M9 15h6" />
+    </>,
+
     music: (
         <>
             <path d="M9 18V5l12-2v13" />
