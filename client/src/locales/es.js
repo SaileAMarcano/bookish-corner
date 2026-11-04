@@ -1,5 +1,16 @@
 // Textos en español de la app. Cada clave tiene que existir también en en.js.
 const es = {
+    exploreArt: {
+        "noFollowed": "Todavía no sigues ninguna etiqueta.",
+        "tagLead": "Explora etiquetas de tus temas, géneros y lecturas favoritas para descubrir conversaciones afines.",
+        "exploreTags": "Explorar etiquetas",
+        "hideTags": "Ocultar etiquetas",
+        "searchTags": "Busca etiquetas…",
+        "tagResults": "Etiquetas que coinciden",
+        "noTags": "Todavía no hay etiquetas aquí",
+        "createTagHint": "Añade una etiqueta a una publicación para empezar una conversación.",
+        "discoverPeople": "Descubrir lectoras"
+    },
     discoverySearch: {
         "title": "Encuentra tu próxima conexión",
         "placeholder": "Busca libros, personas o autores…",
@@ -17,6 +28,13 @@ const es = {
         },
         "keepOpen": "Añade libros, sigue personas o abre varios resultados. Haz clic fuera de este panel para cerrar la búsqueda.",
         "adding": "Añadiendo…",
+        "addBook": "Añadir {{title}} a tu biblioteca",
+        "openBook": "Abrir {{title}}",
+        "bookCount_one": "{{count}} libro",
+        "bookCount_other": "{{count}} libros",
+        "loadedBooks_one": "{{count}} libro cargado",
+        "loadedBooks_other": "{{count}} libros cargados",
+        "sortDefault": "Orden original",
         "author": "Autor",
         "authorBooks": "Libros de {{name}}",
         "openBooks": "Ver libros de este autor",

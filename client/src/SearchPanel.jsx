@@ -13,10 +13,9 @@ import { searchBookKey } from './searchUtils';
 
 const TYPES = ['books', 'people', 'authors'];
 
-function SearchPanel({ q, books, onAdded, onChange, onClose }) {
+function SearchPanel({ q, books, onAdded, onChange, onClose, type = 'books', onTypeChange }) {
     const { t, i18n } = useTranslation();
     const panelRef = useRef(null);
-    const [type, setType] = useState('books');
     const [data, setData] = useState({ key: '' });
     const [retry, setRetry] = useState(0);
     const term = q.trim();
@@ -64,7 +63,7 @@ function SearchPanel({ q, books, onAdded, onChange, onClose }) {
                     <input type="search" autoFocus maxLength={120} value={q} onChange={(event) => onChange(event.target.value)} placeholder={t('discoverySearch.placeholder')} aria-label={t('discoverySearch.placeholder')} autoComplete="off" />
                 </form>
                 <div className="discovery-search-types" role="group" aria-label={t('discoverySearch.typeLabel')}>
-                    {TYPES.map((category) => <button key={category} type="button" className={type === category ? 'active' : ''} onClick={() => setType(category)} aria-pressed={type === category}>
+                    {TYPES.map((category) => <button key={category} type="button" className={type === category ? 'active' : ''} onClick={() => onTypeChange(category)} aria-pressed={type === category}>
                         <Icon name={{ books: 'library', people: 'following', authors: 'feather' }[category]} size={16} />{t(`discoverySearch.types.${category}`)}
                     </button>)}
                 </div>
@@ -75,7 +74,10 @@ function SearchPanel({ q, books, onAdded, onChange, onClose }) {
                 {term.length >= 2 && current?.error && <Notice message={current.error} onRetry={() => setRetry((value) => value + 1)} />}
                 {term.length >= 2 && current && !current.error && <>
                     {!current.items.length && <EmptyState compact kind={type === 'people' ? 'readers' : 'books'} title={t(`discoverySearch.empty.${type}`)} />}
-                    {type === 'books' && current.items.map((book) => <SearchBookResult key={searchBookKey(book)} book={book} books={books} onAdded={onAdded} />)}
+                    {type === 'books' && current.items.length > 0 && <>
+                        <p className="discovery-book-count">{t('discoverySearch.bookCount', { count: current.items.length })}</p>
+                        <div className="discovery-book-grid">{current.items.map((book) => <SearchBookResult key={searchBookKey(book)} book={book} books={books} onAdded={onAdded} />)}</div>
+                    </>}
                     {type === 'people' && current.items.map((person) => <SearchPersonResult key={person.id} person={person} onChange={changePerson} />)}
                     {type === 'authors' && current.items.map((author) => <Link key={author.name} className="discovery-author-result discovery-result-row" to={`/author/${encodeURIComponent(author.name)}`}>
                         <span className="discovery-author-icon"><Icon name="feather" size={22} /></span>

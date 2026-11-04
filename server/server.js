@@ -176,6 +176,16 @@ const WORK_GENRES = `
     )
 `;
 
+const BOOK_GENRES = `
+    ${WORK_GENRES.trim()},
+    book_genre AS (
+        SELECT w.id AS work_id, COALESCE(wg.genre, w.genre) AS genre
+        FROM works w
+        LEFT JOIN work_genre wg ON wg.work_id = w.id
+        WHERE COALESCE(wg.genre, w.genre) IS NOT NULL
+    )
+`;
+
 app.get('/api/books', async (req, res) => {
     const books = await query(`
         SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, ${TRANSLATED_DESCRIPTION} AS description,
@@ -1104,9 +1114,9 @@ app.get('/api/tags/followed', requireAuth, async (req, res) => {
 
 app.get('/api/genres', requireAuth, async (req, res) => {
     const counts = await query(`
-        ${WORK_GENRES}
+        ${BOOK_GENRES}
         SELECT genre, COUNT(*) AS book_count
-        FROM work_genre
+        FROM book_genre
         GROUP BY genre
     `);
 
@@ -1124,15 +1134,15 @@ app.get('/api/genres/:slug', requireAuth, async (req, res) => {
     }
 
     const books = await query(`
-        ${WORK_GENRES}
+        ${BOOK_GENRES}
         SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
                COUNT(ub.id) AS readers,
                ROUND(AVG(ub.rating) FILTER (WHERE ub.rating > 0), 1) AS average_rating
-        FROM work_genre wg
-        JOIN works w ON w.id = wg.work_id
-        JOIN user_books ub ON ub.work_id = w.id
+        FROM book_genre bg
+        JOIN works w ON w.id = bg.work_id
+        LEFT JOIN user_books ub ON ub.work_id = w.id
         ${JOIN_TRANSLATION} = $2
-        WHERE wg.genre = $1
+        WHERE bg.genre = $1
         GROUP BY w.id, t.title
         ORDER BY readers DESC, title
         LIMIT 60

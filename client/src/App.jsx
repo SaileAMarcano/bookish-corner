@@ -87,6 +87,7 @@ function App() {
   const [searchParams] = useSearchParams();
   const [q, setQ] = useState(() => searchParams.get('q') || '');
   const [searchOpen, setSearchOpen] = useState(() => Boolean(searchParams.get('q')));
+  const [searchType, setSearchType] = useState('books');
 
   const loadUserBooks = () => {
     const version = ++booksLoadVersion.current;
@@ -356,7 +357,7 @@ function App() {
           <Notice message={booksError} onRetry={retryBooks} />
         )}
 
-        {searchOpen && <SearchPanel q={q} books={books} onAdded={loadUserBooks} onChange={handleSearch} onClose={closeSearch} />}
+        {searchOpen && <SearchPanel q={q} type={searchType} onTypeChange={setSearchType} books={books} onAdded={loadUserBooks} onChange={handleSearch} onClose={closeSearch} />}
 
         <Routes>
           <Route
@@ -389,7 +390,7 @@ function App() {
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
-          <Route path="/explore" element={<ExplorePage currentUser={currentUser} searchTerm={q} onSearch={handleSearch} onOpenSearch={() => setSearchOpen(true)} searchOpen={searchOpen} />} />
+          <Route path="/explore" element={<ExplorePage currentUser={currentUser} searchTerm={q} onSearch={handleSearch} onOpenSearch={() => setSearchOpen(true)} searchOpen={searchOpen} onDiscoverPeople={() => { setSearchType('people'); setQ(''); setSearchOpen(true); }} />} />
           <Route path="/reviews" element={<ReviewsPage books={books} booksStatus={booksStatus} onLibraryChange={loadUserBooks} />} />
           <Route path="/tags" element={<Navigate to="/explore#tags" replace />} />
           <Route path="/genres" element={<Navigate to="/explore#genres" replace />} />

@@ -3,10 +3,11 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import Notice from './Notice';
 import EmptyState from './EmptyState';
+import Icon from './Icon';
 import { apiFetch } from "./api";
 import { getAvatarSrc } from "./utils";
 
-function SimilarReaders({ username }) {
+function SimilarReaders({ username, onDiscover }) {
     const { t } = useTranslation();
     const [readers, setReaders] = useState(null);
     const [error, setError] = useState('');
@@ -45,15 +46,13 @@ function SimilarReaders({ username }) {
             .finally(() => setPending(false));
     };
 
-    if (readers === null) return null;
-
     return (
         <section className="profile-side-card">
             <h3 className="display profile-side-title">{t('similar.title')}</h3>
 
-            {readers.length === 0 && !error && <EmptyState compact kind="readers" title={t('similar.empty')} description={t('explorePage.readerHint')} />}
+            {readers?.length === 0 && !error && <EmptyState compact kind="readers" title={t('similar.empty')} description={t('explorePage.readerHint')} />}
 
-            {readers.map((reader) => (
+            {readers?.map((reader) => (
                 <div key={reader.id} className="similar-row">
                     <img className="search-avatar" src={getAvatarSrc(reader.avatarUrl)} alt="" />
 
@@ -72,6 +71,8 @@ function SimilarReaders({ username }) {
                 </div>
             ))}
 
+            {readers === null && <p role="status">{t('tagged.loading')}</p>}
+            {onDiscover && <button type="button" className="explore-text-link" onClick={onDiscover}>{t('exploreArt.discoverPeople')}<Icon name="arrowRight" size={17} /></button>}
             {error && <Notice message={error} onRetry={() => setRetry((value) => value + 1)} />}
         </section>
     );

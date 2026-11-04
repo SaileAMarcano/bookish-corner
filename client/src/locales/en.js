@@ -1,5 +1,16 @@
 // English texts of the app. Every key here must also exist in es.js.
 const en = {
+    exploreArt: {
+        "noFollowed": "You are not following any tags yet.",
+        "tagLead": "Explore tags for your favorite topics, genres and books to find conversations you connect with.",
+        "exploreTags": "Explore tags",
+        "hideTags": "Hide tags",
+        "searchTags": "Search tags…",
+        "tagResults": "Matching tags",
+        "noTags": "No tags here yet",
+        "createTagHint": "Add a tag to a post to start a new conversation.",
+        "discoverPeople": "Discover readers"
+    },
     discoverySearch: {
         "title": "Find your next connection",
         "placeholder": "Search books, people or authors…",
@@ -17,6 +28,13 @@ const en = {
         },
         "keepOpen": "Add books, follow people or open several results. Click outside this panel to close the search.",
         "adding": "Adding…",
+        "addBook": "Add {{title}} to your library",
+        "openBook": "Open {{title}}",
+        "bookCount_one": "{{count}} book",
+        "bookCount_other": "{{count}} books",
+        "loadedBooks_one": "{{count}} book loaded",
+        "loadedBooks_other": "{{count}} books loaded",
+        "sortDefault": "Original order",
         "author": "Author",
         "authorBooks": "Books by {{name}}",
         "openBooks": "See books by this author",
