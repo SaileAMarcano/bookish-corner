@@ -7,6 +7,7 @@ import ProfilePage from './ProfilePage';
 import EditProfile from './EditProfile';
 import AuthPage from './AuthPage';
 import Landing from './Landing';
+import BetaPage from './BetaPage';
 import AboutPage from './AboutPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
@@ -22,6 +23,7 @@ import AchievementsPage from './AchievementsPage';
 import AdminPage from './AdminPage';
 import AdminSummary from './AdminSummary';
 import AdminInvites from './AdminInvites';
+import AdminApplications from './AdminApplications';
 import AdminCatalog from './AdminCatalog';
 import AdminActivity from './AdminActivity';
 import AdminModeration from './AdminModeration';
@@ -267,7 +269,9 @@ function App() {
   if (!currentUser) {
     return (
       <Routes>
-        <Route path="/" element={<Landing />} />
+        <Route path="/" element={<BetaPage />} />
+        <Route path="/beta" element={<BetaPage />} />
+        <Route path="/home" element={<Landing />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/features" element={<FeaturesPages />} />
         <Route path="/login" element={<AuthPage key="login" mode="login" onLogin={handleLogin} />} />
@@ -406,6 +410,7 @@ function App() {
               <Route path="/admin/moderation" element={<AdminModeration onResolved={loadModerationCount} />} />
               <Route path="/admin/people" element={<AdminPage currentUser={currentUser} />} />
               <Route path="/admin/invites" element={<AdminInvites currentUser={currentUser} />} />
+              <Route path="/admin/applications" element={<AdminApplications currentUser={currentUser} />} />
               <Route path="/admin/activity" element={<AdminActivity />} />
             </>
           )}

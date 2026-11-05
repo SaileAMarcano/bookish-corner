@@ -207,6 +207,23 @@ const ICONS = {
         </>
     ),
 
+    instagram: (
+        <>
+            <rect x="4" y="4" width="16" height="16" rx="4.5" />
+            <circle cx="12" cy="12" r="3.6" />
+            <path d="M16.6 7.4h.01" />
+        </>
+    ),
+
+    discord: (
+        <>
+            <path d="M8.5 7c2.3-.8 4.7-.8 7 0 1.7 2.3 2.6 5 2.7 8-1.3 1-2.7 1.7-4.2 2.1l-.9-1.5" />
+            <path d="M8.5 7C6.8 9.3 5.9 12 5.8 15c1.3 1 2.7 1.7 4.2 2.1l.9-1.5" />
+            <path d="M8.8 15.4c2.1.9 4.3.9 6.4 0" />
+            <path d="M10 12.3h.01M14 12.3h.01" />
+        </>
+    ),
+
     bell: (
         <>
             <path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15z" />
@@ -227,4 +244,4 @@ function Icon({ name, size = 17 }) {
     );
 }
 
-export default Icon
+export default Icon

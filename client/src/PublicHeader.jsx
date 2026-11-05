@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const PUBLIC_LINKS = [
-    { to: '/', label: 'public.home' },
-    { to: '/about', label: 'public.about' },
-    { to: '/features', label: 'public.features' },
+    { to: '/home', label: 'public.home', hidden: true },
+    { to: '/about', label: 'public.about', hidden: true },
+    { to: '/features', label: 'public.features', hidden: true },
 ];
+
+const VISIBLE_LINKS = PUBLIC_LINKS.filter((link) => !link.hidden);
+const SHOW_SIGNUP = false;
 
 function PublicHeader() {
     const { t } = useTranslation();
@@ -18,18 +21,20 @@ function PublicHeader() {
                 <span className="display public-brand-name">A Library of Us</span>
             </Link>
 
-            <nav className="public-nav">
-                {PUBLIC_LINKS.map((link) => (
-                    <NavLink key={link.to} to={link.to} end className="public-nav-link">
-                        {t(link.label)}
-                    </NavLink>
-                ))}
-            </nav>
+            {VISIBLE_LINKS.length > 0 && (
+                <nav className="public-nav">
+                    {VISIBLE_LINKS.map((link) => (
+                        <NavLink key={link.to} to={link.to} end className="public-nav-link">
+                            {t(link.label)}
+                        </NavLink>
+                    ))}
+                </nav>
+            )}
 
             <div className="public-actions">
                 <LanguageSwitcher />
                 <Link to="/login" className="public-login">{t('public.login')}</Link>
-                <Link to="/signup" className="public-signup">{t('public.signup')}</Link>
+                {SHOW_SIGNUP && <Link to="/signup" className="public-signup">{t('public.signup')}</Link>}
             </div>
         </header>
     );

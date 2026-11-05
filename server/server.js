@@ -28,6 +28,7 @@ app.use(helmet({
         directives: {
             imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
             frameSrc: ['https://open.spotify.com'],
+            connectSrc: ["'self'", 'https://api.web3forms.com'],
         },
     },
 }));
@@ -97,6 +98,15 @@ const apiLimiter = rateLimit({
     handler: (req, res) => res.status(429).json({ error: msg(req, 'tooManyRequests') }),
 });
 app.use('/api', apiLimiter);
+
+const applyLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 5,
+    skipFailedRequests: true,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: (req, res) => res.status(429).json({ error: msg(req, 'betaTooManyApplications') }),
+});
 
 const PORT = process.env.PORT || 3000;
 function requireAuth(req, res, next) {
@@ -2040,6 +2050,177 @@ app.delete('/api/admin/invites/:id', requireStaff('admin'), async (req, res) => 
     }
     await logAction(req, 'invite_deleted', invite.note);
     res.json(invite);
+});
+
+const BETA_TRACKING = ['goodreads', 'storygraph', 'mistbook', 'notes', 'instagram', 'none'];
+const BETA_FOUND_VIA = ['instagram', 'dm', 'friend', 'discord', 'other'];
+const BETA_STATUSES = ['new', 'invited', 'declined'];
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function cleanText(value, max) {
+    return typeof value === 'string' ? value.trim().slice(0, max) : '';
+}
+
+function pickList(value, allowed) {
+    return Array.isArray(value) ? [...new Set(value.filter((item) => allowed.includes(item)))] : [];
+}
+
+app.post('/api/beta-applications', applyLimiter, async (req, res) => {
+    if (cleanText(req.body.website, 200)) {
+        return res.status(201).json({ ok: true });
+    }
+
+    const name = cleanText(req.body.name, 80);
+    const email = cleanText(req.body.email, 160).toLowerCase();
+    const age = Number(req.body.age);
+    const social = cleanText(req.body.social, 60) || null;
+    const appLanguage = LANGUAGES.includes(req.body.appLanguage) ? req.body.appLanguage : null;
+    const genres = pickList(req.body.genres, GENRES);
+    const tracking = pickList(req.body.tracking, BETA_TRACKING);
+    const foundVia = BETA_FOUND_VIA.includes(req.body.foundVia) ? req.body.foundVia : null;
+    const phrase = cleanText(req.body.phrase, 140);
+    const confirmed = req.body.isAdult === true && req.body.willGiveFeedback === true && req.body.acceptsEmail === true;
+
+    if (Number.isInteger(age) && age < 18) {
+        return res.status(400).json({ error: msg(req, 'betaTooYoung') });
+    }
+    if (!name || !EMAIL_PATTERN.test(email) || !Number.isInteger(age) || age > 120 || !appLanguage || genres.length === 0 || phrase.length < 5 || !confirmed) {
+        return res.status(400).json({ error: msg(req, 'betaFieldsInvalid') });
+    }
+
+    try {
+        await query(`
+            INSERT INTO beta_applications (name, email, age, social, app_language, genres, tracking, found_via, phrase)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `, [name, email, age, social, appLanguage, genres, tracking, foundVia, phrase]);
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(409).json({ error: msg(req, 'betaAlreadyApplied') });
+        }
+        throw error;
+    }
+
+    res.status(201).json({ ok: true });
+});
+
+const APPLICATION_FIELDS = `
+    a.id, a.name, a.email, a.age, a.social, a.app_language, a.genres, a.tracking, a.found_via, a.phrase,
+    a.status, a.created_at, a.reviewed_at,
+    reviewer.username AS reviewed_by,
+    i.id AS invite_id, i.status AS invite_status, i.used_at AS invite_used_at,
+    CASE WHEN i.status = 'approved' AND i.used_at IS NULL AND ${INVITE_EXPIRES} > now() THEN i.code END AS invite_code
+`;
+
+const APPLICATION_JOINS = `
+    LEFT JOIN users reviewer ON reviewer.id = a.reviewed_by
+    LEFT JOIN invites i ON i.id = a.invite_id
+`;
+
+async function findApplication(id) {
+    const [application] = await query(`SELECT ${APPLICATION_FIELDS} FROM beta_applications a ${APPLICATION_JOINS} WHERE a.id = $1`, [id]);
+    return application;
+}
+
+app.get('/api/admin/beta-applications', requireStaff('moderator'), async (req, res) => {
+    const status = BETA_STATUSES.includes(req.query.status) ? req.query.status : 'new';
+
+    const applications = await query(`
+        SELECT ${APPLICATION_FIELDS}
+        FROM beta_applications a
+        ${APPLICATION_JOINS}
+        WHERE a.status = $1
+        ORDER BY a.created_at ${status === 'new' ? 'ASC' : 'DESC'}
+        LIMIT 200
+    `, [status]);
+
+    const [counts] = await query(`
+        SELECT
+            COUNT(*) FILTER (WHERE status = 'new') AS new,
+            COUNT(*) FILTER (WHERE status = 'invited') AS invited,
+            COUNT(*) FILTER (WHERE status = 'declined') AS declined
+        FROM beta_applications
+    `);
+
+    res.json({ applications, counts });
+});
+
+app.post('/api/admin/beta-applications/:id/invite', requireStaff('moderator'), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) {
+        return res.status(404).json({ error: msg(req, 'applicationNotFound') });
+    }
+
+    const isAdmin = req.staffRole === 'admin';
+    const client = await pool.connect();
+    let application;
+
+    try {
+        await client.query('BEGIN');
+
+        const found = await client.query(
+            "SELECT id, name, email FROM beta_applications WHERE id = $1 AND status <> 'invited' FOR UPDATE",
+            [id]
+        );
+        application = found.rows[0];
+
+        if (!application) {
+            await client.query('ROLLBACK');
+            return res.status(404).json({ error: msg(req, 'applicationNotFound') });
+        }
+
+        const note = `${application.name} · ${application.email}`.slice(0, 80);
+        const created = await client.query(`
+            INSERT INTO invites (code, note, created_by, status, reviewed_by, reviewed_at)
+            VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING id
+        `, [
+            crypto.randomBytes(16).toString('base64url'),
+            note,
+            req.session.user.id,
+            isAdmin ? 'approved' : 'pending',
+            isAdmin ? req.session.user.id : null,
+            isAdmin ? new Date() : null,
+        ]);
+
+        await client.query(`
+            UPDATE beta_applications
+            SET status = 'invited', invite_id = $1, reviewed_by = $2, reviewed_at = now()
+            WHERE id = $3
+        `, [created.rows[0].id, req.session.user.id, id]);
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+
+    await logAction(req, 'application_invited', application.name);
+    res.status(201).json(await findApplication(id));
+});
+
+app.patch('/api/admin/beta-applications/:id', requireStaff('moderator'), async (req, res) => {
+    const id = Number(req.params.id);
+    const status = req.body.status === 'declined' ? 'declined' : req.body.status === 'new' ? 'new' : null;
+
+    if (!Number.isInteger(id) || !status) {
+        return res.status(404).json({ error: msg(req, 'applicationNotFound') });
+    }
+
+    const [updated] = await query(`
+        UPDATE beta_applications
+        SET status = $1, reviewed_by = $2, reviewed_at = now()
+        WHERE id = $3 AND status <> 'invited' AND status <> $1
+        RETURNING id, name
+    `, [status, req.session.user.id, id]);
+
+    if (!updated) {
+        return res.status(404).json({ error: msg(req, 'applicationNotFound') });
+    }
+
+    await logAction(req, status === 'declined' ? 'application_declined' : 'application_restored', updated.name);
+    res.json(await findApplication(id));
 });
 
 app.get('/api/admin/summary', requireStaff('moderator'), async (req, res) => {
