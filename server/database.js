@@ -13,7 +13,13 @@ const caFile = process.env.DATABASE_CA;
 const ssl = caFile ? { ca: fs.readFileSync(path.join(__dirname, caFile), 'utf8') } : false;
 
 // A pool keeps a few connections open and reuses them.
-const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl });
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl,
+    connectionTimeoutMillis: 10000,
+    query_timeout: 20000,
+    keepAlive: true,
+});
 
 const toCamel = (text) => text.replace(/_([a-z0-9])/g, (match, letter) => letter.toUpperCase());
 

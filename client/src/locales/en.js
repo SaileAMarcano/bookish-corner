@@ -110,6 +110,7 @@ const en = {
     },
     errors: {
         network: "We couldn't reach A Library of Us. Please check your connection.",
+        timeout: 'The connection took too long. Please try again in a moment.',
         generic: 'Something went wrong. Please try again.',
         crashTitle: 'This page closed unexpectedly',
         crashText: 'Something failed while showing it. Your books and data are safe.',
@@ -591,6 +592,7 @@ const en = {
             acceptsEmail: 'You can email me about the beta.',
         },
         send: 'Send my application',
+        slow: 'This is taking a little longer than usual. Please wait a few seconds without closing the page…',
         sending: 'Sending…',
         note: 'We read every application. If you’re chosen, you’ll get a personal invitation link by email.',
         errors: {

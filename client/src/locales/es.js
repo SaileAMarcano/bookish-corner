@@ -110,6 +110,7 @@ const es = {
     },
     errors: {
         network: 'No pudimos conectar con A Library of Us. Revisa tu conexión.',
+        timeout: 'La conexión tardó demasiado. Inténtalo de nuevo en un momento.',
         generic: 'Algo salió mal. Inténtalo de nuevo.',
         crashTitle: 'Esta página se cerró de golpe',
         crashText: 'Algo falló al mostrarla. Tus libros y tus datos están a salvo.',
@@ -591,6 +592,7 @@ const es = {
             acceptsEmail: 'Pueden escribirme por correo sobre la beta.',
         },
         send: 'Enviar mi postulación',
+        slow: 'Está tardando un poco más de lo normal. Espera unos segundos sin cerrar la página…',
         sending: 'Enviando…',
         note: 'Leemos cada postulación. Si te elegimos, te llegará a tu correo un enlace de invitación personal.',
         errors: {

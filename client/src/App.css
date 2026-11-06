@@ -10848,14 +10848,39 @@ a.discovery-result-meta:hover { color: var(--rose-ink); text-decoration: underli
   animation: apply-twinkle 2.4s var(--twinkle-delay) ease-in-out infinite;
 }
 
-.apply-shelf-case {
-  fill: #E9DCCB;
-  stroke: var(--logo-ink);
-  stroke-width: 2;
+.apply-shelf-wood {
+  fill: #8A5A3C;
+}
+
+.apply-shelf-wood-dark {
+  fill: #6B432C;
+}
+
+.apply-shelf-wood-light {
+  fill: #A9784F;
 }
 
 .apply-shelf-back {
-  fill: #F3EADC;
+  fill: #EBDCC7;
+}
+
+.apply-shelf-grain {
+  fill: none;
+  stroke: #8A5A3C;
+  stroke-opacity: 0.16;
+  stroke-width: 1;
+}
+
+.apply-shelf-shadow {
+  fill: #6B432C;
+  fill-opacity: 0.16;
+}
+
+.apply-shelf-edge {
+  fill: none;
+  stroke: #6B432C;
+  stroke-opacity: 0.55;
+  stroke-width: 1;
 }
 
 .apply-shelf-band {
@@ -10895,10 +10920,6 @@ a.discovery-result-meta:hover { color: var(--rose-ink); text-decoration: underli
 .apply-shelf-quill {
   transform-origin: 250px 166px;
   animation: apply-quill 3s ease-in-out infinite;
-}
-
-.apply-shelf-sill {
-  fill: var(--logo-ink);
 }
 
 .apply-facts {
@@ -11507,4 +11528,11 @@ a.discovery-result-meta:hover { color: var(--rose-ink); text-decoration: underli
   .apply-card-star:nth-child(-n+16) {
     display: none;
   }
+}
+
+.apply-slow {
+  margin: 12px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+  text-align: center;
 }

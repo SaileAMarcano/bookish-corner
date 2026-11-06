@@ -37,8 +37,16 @@ function BetaShelf({ filled = false }) {
                 />
             ))}
 
-            <rect className="apply-shelf-case" x="20" y="88" width="260" height="122" rx="6" />
-            <rect className="apply-shelf-back" x="30" y="94" width="240" height="108" rx="3" />
+            <path className="apply-shelf-wood" d="M134 82V72a16 16 0 0 1 32 0v10Z" />
+            <path className="apply-tone-gold" d={STAR_PATH} transform="translate(150 72) scale(.6)" />
+            <rect className="apply-shelf-wood-dark" x="10" y="80" width="280" height="7" rx="2" />
+            <rect className="apply-shelf-wood" x="16" y="87" width="268" height="8" />
+            <rect className="apply-shelf-wood" x="16" y="95" width="12" height="107" />
+            <rect className="apply-shelf-wood" x="272" y="95" width="12" height="107" />
+            <rect className="apply-shelf-back" x="28" y="95" width="244" height="107" />
+            <path className="apply-shelf-grain" d="M68 95v107M108 95v107M148 95v107M188 95v107M228 95v107" />
+            <rect className="apply-shelf-shadow" x="28" y="95" width="244" height="6" />
+            <path className="apply-shelf-edge" d="M28 95v107M272 95v107M16 95h268" />
 
             {BOOKS.map((book) => (
                 <g key={book.x}>
@@ -71,7 +79,12 @@ function BetaShelf({ filled = false }) {
                 <path className="apply-shelf-band-light" d="M251 165l24-52" />
             </g>
 
-            <rect className="apply-shelf-sill" x="14" y="208" width="272" height="10" rx="3" />
+            <rect className="apply-shelf-wood-light" x="12" y="202" width="276" height="5" rx="1.5" />
+            <rect className="apply-shelf-wood" x="16" y="207" width="268" height="12" />
+            <path className="apply-shelf-edge" d="M28 213h244" />
+            <rect className="apply-shelf-wood-dark" x="12" y="219" width="276" height="5" rx="2" />
+            <rect className="apply-shelf-wood-dark" x="22" y="224" width="12" height="7" rx="1.5" />
+            <rect className="apply-shelf-wood-dark" x="266" y="224" width="12" height="7" rx="1.5" />
         </svg>
     );
 }

@@ -43,6 +43,8 @@ const EMPTY_FORM = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const SEND_TIMEOUT = 60000;
+const SLOW_AFTER = 6000;
 
 function toggle(list, value) {
     return list.includes(value) ? list.filter((item) => item !== value) : [...list, value];
@@ -101,6 +103,7 @@ function BetaPage() {
     const [form, setForm] = useState(EMPTY_FORM);
     const [error, setError] = useState('');
     const [isSending, setIsSending] = useState(false);
+    const [isSlow, setIsSlow] = useState(false);
     const [sent, setSent] = useState(null);
 
     const update = (field, value) => {
@@ -118,9 +121,12 @@ function BetaPage() {
         }
 
         setIsSending(true);
+        const slowTimer = setTimeout(() => setIsSlow(true), SLOW_AFTER);
+
         apiFetch('/api/beta-applications', {
             method: 'POST',
             body: { ...form, age: Number(form.age) },
+            timeout: SEND_TIMEOUT,
         })
             .then(() => {
                 notifyByEmail(form, t);
@@ -128,7 +134,11 @@ function BetaPage() {
                 window.scrollTo({ top: document.getElementById('apply-form').offsetTop - 24, behavior: 'smooth' });
             })
             .catch((err) => setError(err.message))
-            .finally(() => setIsSending(false));
+            .finally(() => {
+                clearTimeout(slowTimer);
+                setIsSlow(false);
+                setIsSending(false);
+            });
     };
 
     const required = <span className="apply-required" aria-hidden="true">*</span>;
@@ -293,6 +303,7 @@ function BetaPage() {
                                             <Icon name="arrowRight" size={18} />
                                         </button>
                                     </div>
+                                    {isSlow && <p className="apply-slow" role="status">{t('beta.slow')}</p>}
                                     <p className="apply-error" role="alert">{error}</p>
                                     <p className="apply-note">{t('beta.note')}</p>
                                 </form>
