@@ -30,6 +30,12 @@ function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
     const [unknownYear, setUnknownYear] = useState(book.status === 'finished' && book.readYear == null);
     const [finishedOn, setFinishedOn] = useState(book.status === 'finished' ? book.finishedOn || '' : '');
     const [exactDate, setExactDate] = useState(book.status === 'finished' && Boolean(book.finishedOn));
+    const savedFields = useRef({
+        status, rating, review, reviewIsSpoiler: Boolean(review.trim()) && reviewIsSpoiler,
+        genre: genre || null, currentPage: toNumber(currentPage), totalPages: toNumber(totalPages),
+        currentChapter: toNumber(currentChapter), readYear: unknownYear ? null : Number(readYear),
+        finishedOn: exactDate ? finishedOn : null,
+    });
     const [commentCount, setCommentCount] = useState(book.commentCount || 0);
     const [isSaving, setIsSaving] = useState(false);
     const [saved, setSaved] = useState(false);
@@ -127,7 +133,7 @@ function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
         setError('');
         setSaved(false);
 
-        const body = {
+        const fields = {
             status,
             rating,
             review,
@@ -139,12 +145,20 @@ function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
         };
 
         if (status === 'finished') {
-            body.readYear = unknownYear ? null : Number(readYear);
-            body.finishedOn = !unknownYear && exactDate ? finishedOn : null;
+            fields.readYear = unknownYear ? null : Number(readYear);
+            fields.finishedOn = !unknownYear && exactDate ? finishedOn : null;
         }
 
+        const finishing = status === 'finished' && status !== savedFields.current.status;
+        const body = Object.fromEntries(Object.entries(fields).filter(([field, value]) =>
+            value !== savedFields.current[field] || (finishing && ['readYear', 'finishedOn'].includes(field))
+        ));
+
         try {
-            await apiFetch(`/api/user-books/${book.id}`, { method: 'PATCH', body });
+            if (Object.keys(body).length) {
+                await apiFetch(`/api/user-books/${book.id}`, { method: 'PATCH', body });
+                savedFields.current = fields;
+            }
             await onUpdate();
             setSaved(true);
         } catch (err) {

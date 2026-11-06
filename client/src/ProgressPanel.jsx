@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import Notice from './Notice';
@@ -13,6 +13,9 @@ function ProgressPanel({ book, onSaved }) {
     const [currentPage, setCurrentPage] = useState(book.currentPage ?? '');
     const [totalPages, setTotalPages] = useState(book.totalPages ?? '');
     const [note, setNote] = useState(book.progressNote || '');
+    const savedFields = useRef({
+        currentPage: toNumber(currentPage), totalPages: toNumber(totalPages), progressNote: note.trim(),
+    });
     const [isSaving, setIsSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState('');
@@ -30,15 +33,15 @@ function ProgressPanel({ book, onSaved }) {
         setSaved(false);
         setError('');
 
-        apiFetch(`/api/user-books/${book.id}`, {
-            method: 'PATCH',
-            body: {
-                currentPage: toNumber(currentPage),
-                totalPages: toNumber(totalPages),
-                progressNote: note,
-            },
-        })
+        const fields = { currentPage: toNumber(currentPage), totalPages: toNumber(totalPages), progressNote: note.trim() };
+        const body = Object.fromEntries(Object.entries(fields).filter(([field, value]) => value !== savedFields.current[field]));
+        const request = Object.keys(body).length
+            ? apiFetch(`/api/user-books/${book.id}`, { method: 'PATCH', body })
+            : Promise.resolve();
+
+        request
             .then(() => {
+                savedFields.current = fields;
                 setSaved(true);
                 onSaved();
             })

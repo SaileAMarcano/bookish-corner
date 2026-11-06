@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import Icon from './Icon';
@@ -32,6 +32,8 @@ function AuthPage({ mode, onLogin }) {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const location = useLocation();
+    const [registered, setRegistered] = useState(false);
     const [searchParams] = useSearchParams();
     const invite = searchParams.get('invite') || '';
 
@@ -41,6 +43,7 @@ function AuthPage({ mode, onLogin }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (registered || isSubmitting) return;
         setError('');
         setIsSubmitting(true);
 
@@ -50,7 +53,10 @@ function AuthPage({ mode, onLogin }) {
             : Promise.resolve();
 
         register
-            .then(() => apiFetch('/api/login', { method: 'POST', body: { email: cleanEmail, password } }))
+            .then(() => {
+                if (isSignup) setRegistered(true);
+                return apiFetch('/api/login', { method: 'POST', body: { email: cleanEmail, password } });
+            })
             .then((user) => onLogin(user))
             .catch((er) => {
                 setError(er.message);
@@ -77,6 +83,7 @@ function AuthPage({ mode, onLogin }) {
                     <Icon name={text.subtitleIcon} size={14} />
                 </p>
 
+                {registered && error && <Link to="/login" state={location.state}>{t('auth.login.title')}</Link>}
                 {isSignup && invite && <p className="access-invite">{t('auth.invited')}</p>}
 
                 <form className="access-form" onSubmit={handleSubmit}>
@@ -157,13 +164,13 @@ function AuthPage({ mode, onLogin }) {
                     )}
 
                     {error && <p className="access-error">{error}</p>}
-                    <button type="submit" className="access-submit" disabled={isSubmitting || (isSignup && !passwordOk)}>
+                    <button type="submit" className="access-submit" disabled={isSubmitting || registered || (isSignup && !passwordOk)}>
                         {isSubmitting ? t(`auth.${mode}.busy`) : t(`auth.${mode}.button`)}
                     </button>
                 </form>
 
                 <p className="access-switch">
-                    {t(`auth.${mode}.switchText`)} <Link to={text.switchTo}>{t(`auth.${mode}.switchLink`)}</Link>
+                    {t(`auth.${mode}.switchText`)} <Link to={text.switchTo} state={location.state}>{t(`auth.${mode}.switchLink`)}</Link>
                 </p>
             </div>
         </div>

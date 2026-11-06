@@ -35,7 +35,6 @@ import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
-import BookModal from './BookModal';
 import Notice from './Notice';
 import Welcome from './Welcome';
 import SearchPanel from './SearchPanel';
@@ -43,10 +42,6 @@ import SearchBox from './SearchBox';
 import ThemePicker from './ThemePicker';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
-
-const SEASON_FAVICONS = {
-  grimm: '/seasons/grimm/favicon.png',
-};
 
 function applyUserLanguage(user) {
   if (user.language && user.language !== i18n.language) {
@@ -68,6 +63,7 @@ function App() {
   const [booksError, setBooksError] = useState('');
   const [toast, setToast] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
+  const userLoadVersion = useRef(0);
   const [userStatus, setUserStatus] = useState('loading');
   const [userError, setUserError] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
@@ -80,11 +76,10 @@ function App() {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
-  const seasonTheme = currentUser?.seasonTheme || 'classic';
+  const seasonTheme = currentUser?.seasonTheme === 'christmas' ? 'christmas' : 'classic';
 
   useEffect(() => {
     document.documentElement.dataset.season = seasonTheme;
-    document.querySelector('link[rel="icon"]').href = SEASON_FAVICONS[seasonTheme] || '/logo-mark.png';
   }, [seasonTheme]);
 
   const [searchParams] = useSearchParams();
@@ -112,10 +107,12 @@ function App() {
     loadUserBooks();
   }
 
+  const userId = currentUser?.id;
+  const userLanguage = currentUser?.language;
+
   useEffect(() => {
-    if (!currentUser) return;
-    loadUserBooks();
-  }, [currentUser]);
+    if (userId) loadUserBooks();
+  }, [userId, userLanguage]);
 
   useEffect(() => {
     if (!toast) return;
@@ -124,13 +121,16 @@ function App() {
   }, [toast]);
 
   const loadCurrentUser = () => {
+    const version = ++userLoadVersion.current;
     apiFetch('/api/me')
       .then((user) => {
+        if (version !== userLoadVersion.current) return;
         applyUserLanguage(user);
         setCurrentUser(user);
         setUserStatus('ready');
       })
       .catch((error) => {
+        if (version !== userLoadVersion.current) return;
         if (error.status === 401) {
           setCurrentUser(null);
           setUserStatus('ready');
@@ -152,6 +152,8 @@ function App() {
 
   const menuRef = useRef(null);
   const location = useLocation();
+  const path = location.pathname.replace(/\/+$/, '') || '/';
+  const isPublicPage = ['/', '/beta', '/home', '/about', '/features', '/login', '/signup'].includes(path);
   useEffect(() => {
     if (!showUserMenu) return;
 
@@ -211,6 +213,10 @@ function App() {
   const handleLogout = () => {
     apiFetch('/api/logout', { method: 'POST' })
       .then(() => {
+        userLoadVersion.current++;
+        booksLoadVersion.current++;
+        setBooks([]);
+        setBooksStatus('loading');
         setCurrentUser(null);
         setQ('');
         setSearchOpen(false);
@@ -220,9 +226,12 @@ function App() {
   };
 
   const handleLogin = (user) => {
+    userLoadVersion.current++;
     applyUserLanguage(user);
     setCurrentUser(user);
-    navigate('/');
+    setUserStatus('ready');
+    const next = location.state?.next;
+    navigate(typeof next === 'string' && /^\/(?![/\\])/.test(next) ? next : '/', { replace: true });
   };
 
   const handleLanguageChange = (language) => {
@@ -255,11 +264,11 @@ function App() {
 
   const closeSearch = () => setSearchOpen(false);
 
-  if (userStatus === 'loading') {
+  if (userStatus === 'loading' && (!isPublicPage || path === '/')) {
     return <div className="app-status">{t('app.opening')}</div>;
   }
 
-  if (userStatus === 'error') {
+  if (userStatus === 'error' && !isPublicPage) {
     return (
       <div className="app-status">
         <Notice message={userError} onRetry={retryUser} />
@@ -277,7 +286,7 @@ function App() {
         <Route path="/features" element={<FeaturesPages />} />
         <Route path="/login" element={<AuthPage key="login" mode="login" onLogin={handleLogin} />} />
         <Route path="/signup" element={<AuthPage key="signup" mode="signup" onLogin={handleLogin} />} />
-        <Route path="*" element={<Navigate to="/" />} />
+        <Route path="*" element={<Navigate to="/login" replace state={{ next: location.pathname + location.search + location.hash }} />} />
       </Routes>
     );
   }
@@ -341,7 +350,7 @@ function App() {
                       {theme === 'dark' ? t('app.lightMode') : t('app.darkMode')}
                     </button>
                   </div>
-                  <ThemePicker current={seasonTheme} unlocked={currentUser.unlockedThemes || ['classic']} onChange={handleSeasonThemeChange} />
+                  <ThemePicker current={seasonTheme} onChange={handleSeasonThemeChange} />
                   <Link
                     to="/profile/edit"
                     className="ghost-button"

@@ -176,7 +176,7 @@ function AdminApplications({ currentUser }) {
                                 </dl>
 
                                 <div className="application-actions">
-                                    {application.status !== 'invited' && (
+                                    {(application.status !== 'invited' || ['expired', 'rejected'].includes(state)) && (
                                         <button type="button" className="invite-create" disabled={busy} onClick={() => handleInvite(application)}>
                                             <Icon name="mail" size={14} />
                                             {isAdmin ? t('applications.invite') : t('applications.requestInvite')}

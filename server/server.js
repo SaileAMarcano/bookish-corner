@@ -1,6 +1,6 @@
 const express = require('express');
-const { query, pool } = require('./database');
-const { descriptionFrom } = require('./openLibrary');
+const { query, pool, withTransaction } = require('./database');
+const { descriptionFrom, coverUrl } = require('./openLibrary');
 const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage, uploadCover, deleteCover } = require('./storage');
 const { LANGUAGES, languageOf, msg } = require('./messages');
 const { syncMilestones } = require('./milestones');
@@ -471,30 +471,50 @@ app.post('/api/user-books', requireAuth, async (req, res) => {
 });
 
 app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
-    const { openLibraryKey, title, author, coverImage } = req.body;
-
-    if (!openLibraryKey || !title) {
+    const { openLibraryKey } = req.body;
+    if (typeof openLibraryKey !== 'string' || !/^\/works\/OL[0-9]+W$/.test(openLibraryKey)) {
         return res.status(400).json({ error: msg(req, 'searchDataRequired') });
     }
 
     let [book] = await query('SELECT * FROM works WHERE open_library_key = $1', [openLibraryKey]);
 
     if (!book) {
-        let description = null;
-
+        let work;
+        let author = 'Unknown author';
+        let description;
         try {
-            const workResponse = await fetch(`https://openlibrary.org${openLibraryKey}.json`);
-            const work = await workResponse.json();
+            const response = await fetch(new URL(`${openLibraryKey}.json`, 'https://openlibrary.org'), {
+                redirect: 'error',
+                signal: AbortSignal.timeout(5000),
+            });
+            if (!response.ok) throw new Error(`Open Library returned ${response.status}`);
+            work = await response.json();
+            if (typeof work.title !== 'string' || !work.title.trim()) throw new Error('Missing work title');
             description = descriptionFrom(work);
+            const authorKey = work.authors?.[0]?.author?.key;
+            if (typeof authorKey === 'string' && /^\/authors\/OL[0-9]+A$/.test(authorKey)) {
+                const response = await fetch(new URL(`${authorKey}.json`, 'https://openlibrary.org'), {
+                    redirect: 'error',
+                    signal: AbortSignal.timeout(3000),
+                }).catch(() => null);
+                if (response?.ok) {
+                    const data = await response.json().catch(() => null);
+                    if (typeof data?.name === 'string' && data.name.trim()) author = data.name;
+                }
+            }
         } catch (error) {
-            console.error('Could not load description', error);
+            console.error('Could not import Open Library work', error);
+            return res.status(502).json({ error: msg(req, 'searchUnavailable') });
         }
 
         [book] = await query(`
             INSERT INTO works (title, author, description, cover_image, open_library_key)
             VALUES ($1, $2, $3, $4, $5)
+            ON CONFLICT (open_library_key) DO NOTHING
             RETURNING *
-        `, [title, author || 'Unknown author', description, coverImage || null, openLibraryKey]);
+        `, [work.title, author, description, coverUrl(work.covers?.[0]), openLibraryKey]);
+        if (!book) [book] = await query('SELECT * FROM works WHERE open_library_key = $1', [openLibraryKey]);
+        if (!book) return res.status(404).json({ error: msg(req, 'bookNotFound') });
     }
 
     try {
@@ -554,11 +574,11 @@ const keepOrSet = (value, current) => (value === undefined ? current : value);
 const REVIEW_MAX_LENGTH = 5000;
 const PROGRESS_NOTE_MAX_LENGTH = 280;
 
-app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
+app.patch('/api/user-books/:id', requireAuth, async (req, res) => withTransaction(async (query) => {
     const { id } = req.params;
     const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, progressNote, reviewIsSpoiler } = req.body;
 
-    const [userBook] = await query("SELECT *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on FROM user_books WHERE id = $1", [id]);
+    const [userBook] = await query("SELECT *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on FROM user_books WHERE id = $1 FOR UPDATE", [id]);
     if (!userBook) {
         return res.status(404).json({ error: msg(req, 'notFound') });
     }
@@ -652,8 +672,10 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => {
         RETURNING *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on
     `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote, dates.readYear, dates.finishedOn, newReviewIsSpoiler]);
 
-    res.json(updated);
-});
+    return updated;
+}).then((updated) => {
+    if (!res.headersSent) res.json(updated);
+}));
 
 app.delete('/api/user-books/:id', requireAuth, async (req, res) => {
     const { id } = req.params;
@@ -949,6 +971,10 @@ app.get('/api/posts', requireAuth, async (req, res) => {
 const FEED_TABS = ['for-you', 'following', 'recent'];
 const FEED_PAGE_SIZE = 20;
 
+function parsePage(value = '0') {
+    return typeof value === 'string' && /^\d{1,4}$/.test(value) && Number(value) <= 500 ? Number(value) : null;
+}
+
 const ACTIVITY_DATE = `CASE WHEN ub.status = 'finished' THEN COALESCE(ub.finished_at, ub.created_at)
                             ELSE COALESCE(ub.last_read_at, ub.started_at, ub.created_at) END`;
 
@@ -989,7 +1015,8 @@ async function findActivity(req, ids) {
 app.get('/api/feed', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
     const tab = FEED_TABS.includes(req.query.tab) ? req.query.tab : 'for-you';
-    const page = Math.max(0, parseInt(req.query.page, 10) || 0);
+    const page = parsePage(req.query.page);
+    if (page === null) return res.status(400).json({ error: msg(req, 'invalidRequest') });
     const onlyFollowed = tab === 'following' ? 'WHERE i.from_followed' : '';
 
     const items = await query(`
@@ -1047,7 +1074,7 @@ const REVIEW_PAGE_SIZE = 24;
 app.get('/api/reviews', requireAuth, async (req, res) => {
     const { scope = 'all', order = 'recent', page = '0', q = '' } = req.query;
     if (!['all', 'following'].includes(scope) || !['recent', 'popular'].includes(order)
-        || typeof page !== 'string' || !/^\d{1,4}$/.test(page) || Number(page) > 500
+        || parsePage(page) === null
         || typeof q !== 'string' || q.length > 120) {
         return res.status(400).json({ error: msg(req, 'reviewFiltersInvalid') });
     }
@@ -1092,10 +1119,14 @@ app.get('/api/tags', requireAuth, async (req, res) => {
                (SELECT COUNT(*) FROM post_tags pt WHERE pt.tag_id = tg.id)
              + (SELECT COUNT(*) FROM user_book_tags ut WHERE ut.tag_id = tg.id) AS uses
         FROM tags tg
-        WHERE tg.slug LIKE $1 OR tg.slug LIKE $2
+        WHERE (tg.slug LIKE $1 OR tg.slug LIKE $2)
+          AND (EXISTS (SELECT 1 FROM post_tags pt WHERE pt.tag_id = tg.id)
+            OR EXISTS (SELECT 1 FROM user_book_tags ut WHERE ut.tag_id = tg.id)
+            OR EXISTS (SELECT 1 FROM list_tags lt JOIN lists l ON l.id = lt.list_id
+                       WHERE lt.tag_id = tg.id AND (l.is_public OR l.user_id = $3)))
         ORDER BY uses DESC, tg.name
         LIMIT 8
-    `, [slug + '%', '%-' + slug + '%']);
+    `, [slug + '%', '%-' + slug + '%', req.session.user.id]);
 
     res.json(tags);
 });
@@ -1165,7 +1196,11 @@ app.get('/api/genres/:slug', requireAuth, async (req, res) => {
 });
 
 app.get('/api/tagged/:slug', requireAuth, async (req, res) => {
-    const [tag] = await query('SELECT id, name, slug FROM tags WHERE slug = $1', [slugify(req.params.slug)]);
+    const [tag] = await query(`SELECT tg.id, tg.name, tg.slug FROM tags tg WHERE tg.slug = $1
+        AND (EXISTS (SELECT 1 FROM post_tags pt WHERE pt.tag_id = tg.id)
+          OR EXISTS (SELECT 1 FROM user_book_tags ut WHERE ut.tag_id = tg.id)
+          OR EXISTS (SELECT 1 FROM list_tags lt JOIN lists l ON l.id = lt.list_id
+                     WHERE lt.tag_id = tg.id AND (l.is_public OR l.user_id = $2)))`, [slugify(req.params.slug), req.session.user.id]);
     if (!tag) {
         return res.status(404).json({ error: msg(req, 'tagNotFound') });
     }
@@ -2073,10 +2108,11 @@ app.post('/api/register', authLimiter, async (req, res) => {
     if (process.env.SIGNUP_OPEN !== 'true' && !invite) {
         return res.status(403).json({ error: msg(req, 'signupClosed') });
     }
-    const { username, email, password } = req.body;
+    const { username, password } = req.body;
+    const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
     const language = LANGUAGES.includes(req.body.language) ? req.body.language : 'en';
 
-    if (!username || !email || !password) {
+    if (typeof username !== 'string' || !EMAIL_PATTERN.test(email) || !password) {
         return res.status(400).json({ error: msg(req, 'registerFieldsRequired') });
     }
     if (!USERNAME_PATTERN.test(username)) {
@@ -2099,8 +2135,10 @@ app.post('/api/register', authLimiter, async (req, res) => {
             const claimed = await client.query(
                 `UPDATE invites i SET used_at = now()
                  WHERE i.code = $1 AND i.used_at IS NULL AND i.status = 'approved' AND ${INVITE_EXPIRES} > now()
+                   AND NOT EXISTS (SELECT 1 FROM beta_applications a
+                                   WHERE a.invite_id = i.id AND lower(a.email) <> lower($2))
                  RETURNING i.code`,
-                [invite]
+                [invite, email]
             );
             if (claimed.rowCount === 0) {
                 await client.query('ROLLBACK');
@@ -2201,21 +2239,10 @@ app.patch('/api/me/theme', requireAuth, async (req, res) => {
     res.json({ theme });
 });
 
-const SEASON_THEMES = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
-const FREE_SEASON_THEMES = ['classic', 'christmas', 'valentine'];
-const PAID_SEASON_THEMES = ['sage', 'lavender', 'amber', 'teal'];
+const SEASON_THEMES = ['classic', 'christmas'];
 
 function hasPlus(user) {
     return user.staffRole === 'admin' || (user.plusUntil !== null && user.plusUntil > new Date());
-}
-
-async function findUnlockedThemes(user) {
-    if (user.staffRole === 'admin') return SEASON_THEMES;
-    if (['moderator', 'designer'].includes(user.staffRole)) return [...FREE_SEASON_THEMES, ...PAID_SEASON_THEMES];
-    if (hasPlus(user)) return [...FREE_SEASON_THEMES, ...PAID_SEASON_THEMES];
-
-    const rows = await query('SELECT theme FROM theme_unlocks WHERE user_id = $1', [user.id]);
-    return [...FREE_SEASON_THEMES, ...rows.map((row) => row.theme)];
 }
 
 async function findMe(userId) {
@@ -2229,9 +2256,8 @@ async function findMe(userId) {
 
     if (!user) return null;
 
-    const unlockedThemes = await findUnlockedThemes(user);
-    const seasonTheme = unlockedThemes.includes(user.seasonTheme) ? user.seasonTheme : 'classic';
-    return { ...user, seasonTheme, isPlus: hasPlus(user), unlockedThemes };
+    const seasonTheme = SEASON_THEMES.includes(user.seasonTheme) ? user.seasonTheme : 'classic';
+    return { ...user, seasonTheme, isPlus: hasPlus(user), unlockedThemes: SEASON_THEMES };
 }
 
 app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
@@ -2241,13 +2267,7 @@ app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
         return res.status(400).json({ error: msg(req, 'seasonThemeInvalid') });
     }
 
-    const me = await findMe(req.session.user.id);
-
-    if (!me.unlockedThemes.includes(seasonTheme)) {
-        return res.status(403).json({ error: msg(req, 'themeLocked') });
-    }
-
-    await query('UPDATE users SET season_theme = $1 WHERE id = $2', [seasonTheme, me.id]);
+    await query('UPDATE users SET season_theme = $1 WHERE id = $2', [seasonTheme, req.session.user.id]);
     res.json({ seasonTheme });
 });
 
@@ -2466,7 +2486,7 @@ app.post('/api/admin/beta-applications/:id/invite', requireStaff('moderator'), a
         await client.query('BEGIN');
 
         const found = await client.query(
-            "SELECT id, name, email FROM beta_applications WHERE id = $1 AND status <> 'invited' FOR UPDATE",
+            'SELECT id, name, email, invite_id FROM beta_applications WHERE id = $1 FOR UPDATE',
             [id]
         );
         application = found.rows[0];
@@ -2474,6 +2494,19 @@ app.post('/api/admin/beta-applications/:id/invite', requireStaff('moderator'), a
         if (!application) {
             await client.query('ROLLBACK');
             return res.status(404).json({ error: msg(req, 'applicationNotFound') });
+        }
+
+        if (application.invite_id) {
+            const revoked = await client.query(`
+                UPDATE invites i SET status = 'rejected'
+                WHERE i.id = $1 AND i.used_at IS NULL
+                  AND (i.status = 'rejected' OR (i.status = 'approved' AND ${INVITE_EXPIRES} <= now()))
+                RETURNING id
+            `, [application.invite_id]);
+            if (!revoked.rowCount) {
+                await client.query('ROLLBACK');
+                return res.status(409).json({ error: msg(req, 'inviteInvalid') });
+            }
         }
 
         const note = `${application.name} · ${application.email}`.slice(0, 80);
@@ -2595,7 +2628,8 @@ const NOTIFICATIONS_PAGE_SIZE = 20;
 
 app.get('/api/notifications', requireAuth, async (req, res) => {
     const unreadOnly = req.query.filter === 'unread';
-    const page = Math.max(Number(req.query.page) || 0, 0);
+    const page = parsePage(req.query.page);
+    if (page === null) return res.status(400).json({ error: msg(req, 'invalidRequest') });
 
     const rows = await query(`
         SELECT n.id, n.type, n.read_at, n.created_at, n.post_id, n.work_id, n.list_id,
@@ -2895,7 +2929,7 @@ function bookFormProblem(book) {
     return null;
 }
 
-async function saveTranslations(workId, book) {
+async function saveTranslations(query, workId, book) {
     for (const language of TRANSLATION_LANGUAGES) {
         const translation = book.translations[language];
 
@@ -2920,8 +2954,7 @@ async function isbnUsedElsewhere(isbn, workId) {
     return Boolean(edition) && edition.workId !== workId;
 }
 
-async function saveIsbn(workId, book) {
-    if (!book.isbn) return;
+async function saveIsbn(query, workId, book) {
 
     const [edition] = await query(
         'SELECT id FROM editions WHERE work_id = $1 ORDER BY isbn_13 IS NULL, id LIMIT 1',
@@ -2930,7 +2963,7 @@ async function saveIsbn(workId, book) {
 
     if (edition) {
         await query('UPDATE editions SET isbn_13 = $1 WHERE id = $2', [book.isbn, edition.id]);
-    } else {
+    } else if (book.isbn) {
         await query(
             'INSERT INTO editions (work_id, title, language, isbn_13, published_year) VALUES ($1, $2, $3, $4, $5)',
             [workId, book.title, book.language, book.isbn, book.year]
@@ -2996,14 +3029,20 @@ app.post('/api/editor/books', requireStaff('editor'), upload.single('cover'), as
 
     const coverImage = req.file ? await uploadCover(req.file) : null;
 
-    const [work] = await query(`
-        INSERT INTO works (title, author, description, cover_image, first_published_year, language, genre, added_by)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        RETURNING id
-    `, [book.title, book.author, book.description, coverImage, book.year, book.language, book.genre, req.session.user.id]);
+    const work = await withTransaction(async (query) => {
+        const [work] = await query(`
+            INSERT INTO works (title, author, description, cover_image, first_published_year, language, genre, added_by)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING id
+        `, [book.title, book.author, book.description, coverImage, book.year, book.language, book.genre, req.session.user.id]);
 
-    await saveTranslations(work.id, book);
-    await saveIsbn(work.id, book);
+        await saveTranslations(query, work.id, book);
+        await saveIsbn(query, work.id, book);
+        return work;
+    }).catch(async (error) => {
+        if (coverImage) await deleteCover(coverImage);
+        throw error;
+    });
     await markRequestAdded(req.body.requestId, work.id, req.session.user.id);
     await logAction(req, 'book_added', book.title);
     res.status(201).json(work);
@@ -3031,15 +3070,20 @@ app.patch('/api/editor/books/:id', requireStaff('editor'), upload.single('cover'
 
     const coverImage = req.file ? await uploadCover(req.file) : current.coverImage;
 
-    await query(`
-        UPDATE works
-        SET title = $1, author = $2, description = $3, cover_image = $4,
-            first_published_year = $5, language = $6, genre = $7, updated_at = now()
-        WHERE id = $8
-    `, [book.title, book.author, book.description, coverImage, book.year, book.language, book.genre, id]);
+    await withTransaction(async (query) => {
+        await query(`
+            UPDATE works
+            SET title = $1, author = $2, description = $3, cover_image = $4,
+                first_published_year = $5, language = $6, genre = $7, updated_at = now()
+            WHERE id = $8
+        `, [book.title, book.author, book.description, coverImage, book.year, book.language, book.genre, id]);
 
-    await saveTranslations(id, book);
-    await saveIsbn(id, book);
+        await saveTranslations(query, id, book);
+        await saveIsbn(query, id, book);
+    }).catch(async (error) => {
+        if (req.file) await deleteCover(coverImage);
+        throw error;
+    });
 
     if (req.file) {
         await deleteCover(current.coverImage);
@@ -3135,7 +3179,8 @@ app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => 
     const [book] = await query(`
         SELECT title, cover_image,
                (SELECT COUNT(*) FROM user_books WHERE work_id = $1)
-             + (SELECT COUNT(*) FROM post_books WHERE work_id = $1) AS uses
+             + (SELECT COUNT(*) FROM post_books WHERE work_id = $1)
+             + (SELECT COUNT(*) FROM list_books WHERE work_id = $1) AS uses
         FROM works
         WHERE id = $1
     `, [id]);
@@ -3147,7 +3192,12 @@ app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => 
         return res.status(409).json({ error: msg(req, 'bookInUse') });
     }
 
-    await query('DELETE FROM works WHERE id = $1', [id]);
+    try {
+        await query('DELETE FROM works WHERE id = $1', [id]);
+    } catch (error) {
+        if (error.code === '23503') return res.status(409).json({ error: msg(req, 'bookInUse') });
+        throw error;
+    }
     await deleteCover(book.coverImage);
     await logAction(req, 'book_deleted', book.title);
     res.json({ id });
@@ -3176,12 +3226,28 @@ app.get('/api/profile', requireAuth, async (req, res) => {
 
 const READER_TYPES = ['first-time', 'casual', 'avid'];
 
+function socialUrl(value, domain) {
+    if (value === undefined) return null;
+    if (typeof value !== 'string' || value.length > 200) return false;
+    if (!value.trim()) return '';
+    try {
+        const url = new URL(value.trim());
+        if (url.protocol !== 'https:' || url.username || url.password || url.port) return false;
+        return [domain, `www.${domain}`, `m.${domain}`, `vm.${domain}`, `vt.${domain}`].includes(url.hostname) ? url.href : false;
+    } catch {
+        return false;
+    }
+}
+
 app.patch('/api/profile', requireAuth, upload.single('avatar'), async (req, res) => {
     const { readerType } = req.body;
     const bio = req.body.bio?.slice(0, 160);
     const location = req.body.location?.slice(0, 60);
-    const instagramUrl = req.body.instagramUrl?.slice(0, 200);
-    const tiktokUrl = req.body.tiktokUrl?.slice(0, 200);
+    const instagramUrl = socialUrl(req.body.instagramUrl, 'instagram.com');
+    const tiktokUrl = socialUrl(req.body.tiktokUrl, 'tiktok.com');
+    if (instagramUrl === false || tiktokUrl === false) {
+        return res.status(400).json({ error: msg(req, 'socialUrlInvalid') });
+    }
     if (readerType !== undefined && !READER_TYPES.includes(readerType)) {
         return res.status(400).json({ error: msg(req, 'readerTypeInvalid') });
     }

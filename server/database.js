@@ -36,4 +36,22 @@ async function query(text, params) {
     return result.rows.map(camelRow);
 }
 
-module.exports = { pool, query };
+async function withTransaction(run) {
+    const client = await pool.connect();
+    try {
+        await client.query('BEGIN');
+        const value = await run(async (text, params) => {
+            const result = await client.query(text, params);
+            return result.rows.map(camelRow);
+        });
+        await client.query('COMMIT');
+        return value;
+    } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+    } finally {
+        client.release();
+    }
+}
+
+module.exports = { pool, query, withTransaction };

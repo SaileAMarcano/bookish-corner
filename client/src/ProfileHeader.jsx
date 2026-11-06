@@ -4,6 +4,17 @@ import Icon from './Icon';
 import { ProfileBadge } from './MilestoneSeal';
 import { getAvatarSrc, parseDbDate } from './utils';
 
+function validSocialUrl(value, domain) {
+    if (!value) return false;
+    try {
+        const url = new URL(value);
+        return url.protocol === 'https:' && !url.username && !url.password && !url.port
+            && [domain, `www.${domain}`, `m.${domain}`, `vm.${domain}`, `vt.${domain}`].includes(url.hostname);
+    } catch {
+        return false;
+    }
+}
+
 function ProfileHeader({ profile, onShowFollows, children }) {
     const { t, i18n } = useTranslation();
     const [copied, setCopied] = useState(false);
@@ -69,13 +80,13 @@ function ProfileHeader({ profile, onShowFollows, children }) {
                             {t('profileHeader.joined', { date: joined })}
                         </span>
 
-                        {profile.instagramUrl && (
+                        {validSocialUrl(profile.instagramUrl, 'instagram.com') && (
                             <a className="profile-meta-item profile-meta-link" href={profile.instagramUrl} target="_blank" rel="noopener noreferrer">
                                 Instagram
                             </a>
                         )}
 
-                        {profile.tiktokUrl && (
+                        {validSocialUrl(profile.tiktokUrl, 'tiktok.com') && (
                             <a className="profile-meta-item profile-meta-link" href={profile.tiktokUrl} target="_blank" rel="noopener noreferrer">
                                 TikTok
                             </a>

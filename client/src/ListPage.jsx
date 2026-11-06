@@ -33,7 +33,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                 if (ignore) return;
                 setList(data);
                 setError('');
-                return apiFetch(`/api/users/${encodeURIComponent(data.username)}/lists`);
+                return apiFetch(`/api/users/${encodeURIComponent(data.username)}/lists`).catch(() => []);
             })
             .then((others) => {
                 if (!ignore && others) {
@@ -41,7 +41,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                 }
             })
             .catch((err) => {
-                if (!ignore) setError(err.message);
+                if (!ignore) setError({ id, message: err.message });
             });
 
         return () => {
@@ -91,15 +91,15 @@ function ListPage({ currentUser, books, onLibraryChange }) {
             .catch((err) => setActionError(err.message));
     };
 
-    if (error) {
+    if (error?.id === id) {
         return (
             <main className="page list-page">
-                <Notice message={error} />
+                <Notice message={error.message} />
             </main>
         );
     }
 
-    if (!list) {
+    if (!list || list.id !== Number(id)) {
         return (
             <main className="page list-page">
                 <div className="section-label">{t('listPage.loading')}</div>

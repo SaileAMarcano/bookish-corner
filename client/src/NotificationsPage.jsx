@@ -62,7 +62,7 @@ function NotificationsPage() {
             .then(() => {
                 const now = new Date().toISOString();
                 setItems((list) => (tab === 'unread' ? [] : list.map((item) => ({ ...item, readAt: item.readAt || now }))));
-                setHasMore(false);
+                if (tab === 'unread') setHasMore(false);
                 announceChange();
             })
             .catch((err) => setError(err.message));

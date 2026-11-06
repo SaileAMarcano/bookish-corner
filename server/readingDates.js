@@ -5,7 +5,7 @@ function resolveReadingDates(book, changes, now = new Date()) {
     const currentYear = latest.getUTCFullYear();
     const today = latest.toISOString().slice(0, 10);
     const finishing = changes.status === 'finished' && book.status !== 'finished';
-    let readYear = finishing ? currentYear : book.readYear ?? null;
+    let readYear = finishing ? now.getUTCFullYear() : book.readYear ?? null;
     let finishedOn = finishing ? null : book.finishedOn ?? null;
 
     if (yearGiven) {
