@@ -1,7 +1,7 @@
 import Icon from './Icon';
 
 function EmptyState({ title, description, kind = 'books', compact = false, children }) {
-    const icon = { books: 'library', favorites: 'favorites', writing: 'feather', soon: 'moon', readers: 'following' }[kind] || 'library';
+    const icon = { books: 'library', favorites: 'favorites', writing: 'feather', soon: 'moon', readers: 'following', lists: 'lists' }[kind] || 'library';
 
     return (
         <div className={`brand-empty ${compact ? 'brand-empty-compact' : ''}`}>

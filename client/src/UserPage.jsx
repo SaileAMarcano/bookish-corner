@@ -12,6 +12,7 @@ import ProfileBooks from './ProfileBooks';
 import FollowList from './FollowList';
 import ProfileAbout from './ProfileAbout';
 import ProfileSide from './ProfileSide';
+import ProfileLists from './ProfileLists';
 import { apiFetch } from './api';
 import { pinnedFirst } from './utils';
 
@@ -117,7 +118,7 @@ function UserPage({ currentUser }) {
             );
         }
         if (activeTab === 'lists') {
-            return <div className="card profile-empty"><EmptyState kind="soon" compact title={t('profile.comingSoon')} /></div>;
+            return <ProfileLists username={profile.username} name={name} />;
         }
         if (activeTab === 'about') {
             return <ProfileAbout profile={profile} />;

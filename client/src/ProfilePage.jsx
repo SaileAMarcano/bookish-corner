@@ -16,6 +16,7 @@ import ProfileAbout from './ProfileAbout';
 import ProfileSide from './ProfileSide';
 import Icon from './Icon';
 import EmptyState from './EmptyState';
+import ProfileLists from './ProfileLists';
 
 
 function FavoriteCard({ book, onToggleFavorite }) {
@@ -237,6 +238,10 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     ))}
                 </div>
             );
+        }
+
+        if (activeTab === 'lists') {
+            return <ProfileLists username={profile.username} />;
         }
 
         if (activeTab === 'following') {
