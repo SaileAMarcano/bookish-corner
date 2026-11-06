@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PostCard from './PostCard';
+import ListCard from './ListCard';
 import BookCover from './BookCover';
 import Notice from './Notice';
 import ReportButton from './ReportButton';
@@ -47,6 +48,13 @@ function TaggedPage({ currentUser }) {
         }));
     };
 
+    const handleListChange = (listId, changes) => {
+        setData((current) => ({
+            ...current,
+            lists: current.lists.map((list) => (list.id === listId ? { ...list, ...changes } : list)),
+        }));
+    };
+
     const handleFollow = () => {
         setFollowError('');
         apiFetch(`/api/tags/${data.tag.slug}/follow`, { method: data.tag.isFollowing ? 'DELETE' : 'POST' })
@@ -85,7 +93,9 @@ function TaggedPage({ currentUser }) {
                     <div className="tagged-kicker">{t('tagged.kicker')}</div>
                     <h1 className="display tagged-title">#{data.tag.name}</h1>
                     <p className="tagged-count">
-                        {t('tagged.postCount', { count: data.posts.length })} · {t('tagged.followers', { count: data.tag.followerCount })}
+                        {t('tagged.postCount', { count: data.posts.length })}
+                        {data.lists.length > 0 && ` · ${t('tagged.listCount', { count: data.lists.length })}`}
+                        {' · '}{t('tagged.followers', { count: data.tag.followerCount })}
                     </p>
                 </div>
 
@@ -102,6 +112,15 @@ function TaggedPage({ currentUser }) {
             </div>
 
             {followError && <Notice message={followError} />}
+
+            {data.lists.length > 0 && (
+                <section className="tagged-lists" aria-labelledby="tagged-lists-heading">
+                    <h2 className="display tagged-box-title" id="tagged-lists-heading">{t('tagged.lists', { tag: data.tag.name })}</h2>
+                    <div className="list-grid">
+                        {data.lists.map((list) => <ListCard key={list.id} list={list} onChange={handleListChange} />)}
+                    </div>
+                </section>
+            )}
 
             <div className="tagged-layout">
                 <div className="post-list tagged-posts">

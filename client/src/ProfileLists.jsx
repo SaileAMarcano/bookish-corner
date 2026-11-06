@@ -5,6 +5,7 @@ import Notice from './Notice';
 import EmptyState from './EmptyState';
 import ListCard from './ListCard';
 import ListForm from './ListForm';
+import ListInspiration from './ListInspiration';
 import Icon from './Icon';
 
 const SORTERS = {
@@ -138,6 +139,7 @@ function ProfileLists({ username, name }) {
                     </EmptyState>
                     {form}
                 </div>
+                {isMine && !showSaved && <ListInspiration />}
             </>
         );
     }

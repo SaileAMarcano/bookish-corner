@@ -6,6 +6,8 @@ import StarRating from './StarRating';
 import EmptyState from './EmptyState';
 import ListCard from './ListCard';
 import ListForm from './ListForm';
+import ListComments from './ListComments';
+import ReportButton from './ReportButton';
 import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
@@ -199,6 +201,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                                 </button>
                             </>
                         )}
+                        {!isMine && <ReportButton targetType="list" targetId={list.id} />}
                     </div>
 
                     {confirmDelete && (
@@ -284,6 +287,18 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                         })}
                     </ol>
                 )}
+            </section>
+
+            <section className="card book-section list-page-comments">
+                <h2 className="display book-section-title">
+                    {t('listPage.conversation')} <span className="follow-count">{list.commentCount}</span>
+                </h2>
+                <ListComments
+                    listId={list.id}
+                    ownerId={list.userId}
+                    currentUserId={currentUser.id}
+                    onCountChange={(count) => setList((current) => ({ ...current, commentCount: count }))}
+                />
             </section>
 
             {moreLists.length > 0 && (

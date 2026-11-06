@@ -1199,8 +1199,14 @@ app.get('/api/tagged/:slug', requireAuth, async (req, res) => {
         LIMIT 5
     `, [tag.id, languageOf(req)]);
 
+    const lists = await findLists(
+        req,
+        'l.is_public AND EXISTS (SELECT 1 FROM list_tags x WHERE x.list_id = l.id AND x.tag_id = $1)',
+        tag.id
+    );
+
     const follow = await followState(req, tag.id);
-    res.json({ tag: { id: tag.id, name: tag.name, slug: tag.slug, ...follow }, posts, relatedTags, books });
+    res.json({ tag: { id: tag.id, name: tag.name, slug: tag.slug, ...follow }, posts, lists, relatedTags, books });
 });
 
 async function followState(req, tagId) {
@@ -1560,7 +1566,7 @@ async function saveListLinks(client, listId, list) {
     }
 }
 
-async function findLists(req, condition, value) {
+async function findLists(req, condition, value, tail = 'ORDER BY l.updated_at DESC') {
     return query(`
         SELECT l.id, l.title, l.description, l.is_public, l.created_at, l.updated_at,
                u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
@@ -1595,7 +1601,7 @@ async function findLists(req, condition, value) {
         FROM lists l
         JOIN users u ON u.id = l.user_id
         WHERE ${condition} AND (l.is_public OR l.user_id = $2)
-        ORDER BY l.updated_at DESC
+        ${tail}
     `, [value, req.session.user.id, languageOf(req)]);
 }
 
@@ -1789,12 +1795,96 @@ app.delete('/api/lists/:id/save', requireAuth, async (req, res) => {
     res.json({ hasSaved: false });
 });
 
+app.get('/api/popular-lists', requireAuth, async (req, res) => {
+    res.json(await findLists(
+        req,
+        'l.is_public AND l.user_id <> $1 AND EXISTS (SELECT 1 FROM list_books x WHERE x.list_id = l.id)',
+        req.session.user.id,
+        'ORDER BY like_count DESC, l.updated_at DESC LIMIT 6'
+    ));
+});
+
 app.get('/api/saved-lists', requireAuth, async (req, res) => {
     res.json(await findLists(
         req,
         'EXISTS (SELECT 1 FROM saved_lists s WHERE s.list_id = l.id AND s.user_id = $1)',
         req.session.user.id
     ));
+});
+
+app.get('/api/lists/:id/comments', requireAuth, async (req, res) => {
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+
+    const comments = await query(`
+        SELECT ${POST_COMMENT_FIELDS}
+        FROM list_comments c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.list_id = $1
+        ORDER BY c.created_at
+    `, [list.id]);
+
+    res.json(comments);
+});
+
+app.post('/api/lists/:id/comments', requireAuth, async (req, res) => {
+    const text = req.body.text?.trim() || '';
+
+    if (text === '') {
+        return res.status(400).json({ error: msg(req, 'commentEmpty') });
+    }
+    if (text.length > COMMENT_MAX_LENGTH) {
+        return res.status(400).json({ error: msg(req, 'commentTooLong') });
+    }
+
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+
+    const [created] = await query(
+        'INSERT INTO list_comments (user_id, list_id, text) VALUES ($1, $2, $3) RETURNING id',
+        [req.session.user.id, list.id, text]
+    );
+
+    await notify(list.userId, req.session.user.id, 'list_comment', { listId: list.id, listCommentId: created.id });
+
+    const [comment] = await query(`
+        SELECT ${POST_COMMENT_FIELDS}
+        FROM list_comments c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.id = $1
+    `, [created.id]);
+
+    res.status(201).json(comment);
+});
+
+app.delete('/api/list-comments/:id', requireAuth, async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0 || id > MAX_ID) {
+        return res.status(404).json({ error: msg(req, 'commentNotFound') });
+    }
+
+    const [comment] = await query(`
+        SELECT c.id, c.user_id, l.user_id AS list_owner_id
+        FROM list_comments c
+        JOIN lists l ON l.id = c.list_id
+        WHERE c.id = $1
+    `, [id]);
+
+    if (!comment) {
+        return res.status(404).json({ error: msg(req, 'commentNotFound') });
+    }
+
+    const me = req.session.user.id;
+    if (comment.userId !== me && comment.listOwnerId !== me) {
+        return res.status(403).json({ error: msg(req, 'cannotDeleteComment') });
+    }
+
+    await query('DELETE FROM list_comments WHERE id = $1', [comment.id]);
+    res.json({ message: 'Comment deleted' });
 });
 
 async function userFromUrl(req) {
@@ -2657,7 +2747,7 @@ app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
     res.json({ id });
 });
 
-const REPORT_TYPES = ['post', 'post_comment', 'review', 'review_comment', 'profile', 'tag'];
+const REPORT_TYPES = ['post', 'post_comment', 'review', 'review_comment', 'profile', 'tag', 'list', 'list_comment'];
 const REPORT_REASONS = ['spoiler', 'offensive', 'harassment', 'spam', 'other'];
 const REPORT_ACTIONS = { dismiss: 'dismissed', spoiler: 'spoiler', remove: 'removed' };
 
@@ -2689,6 +2779,16 @@ const REPORT_TARGETS = {
         SELECT t.id, t.name AS text, t.slug, NULL::int AS author_id, NULL AS author
         FROM tags t
         WHERE t.id = $1`,
+    list: `
+        SELECT l.id, l.title AS text, l.description, l.is_public, u.id AS author_id, u.username AS author
+        FROM lists l JOIN users u ON u.id = l.user_id
+        WHERE l.id = $1`,
+    list_comment: `
+        SELECT c.id, c.text, c.list_id, l.title AS list_title, l.is_public, u.id AS author_id, u.username AS author
+        FROM list_comments c
+        JOIN users u ON u.id = c.user_id
+        JOIN lists l ON l.id = c.list_id
+        WHERE c.id = $1`,
 };
 
 async function findReportTarget(type, id) {
@@ -2716,6 +2816,10 @@ async function removeReportedContent(type, target) {
         if (target.avatarUrl) await deleteAvatar(target.avatarUrl);
     } else if (type === 'tag') {
         await query('DELETE FROM tags WHERE id = $1', [target.id]);
+    } else if (type === 'list') {
+        await query('DELETE FROM lists WHERE id = $1', [target.id]);
+    } else if (type === 'list_comment') {
+        await query('DELETE FROM list_comments WHERE id = $1', [target.id]);
     }
 }
 
@@ -2729,7 +2833,7 @@ app.post('/api/reports', requireAuth, async (req, res) => {
     }
 
     const target = await findReportTarget(targetType, targetId);
-    if (!target) {
+    if (!target || target.isPublic === false) {
         return res.status(404).json({ error: msg(req, 'notFound') });
     }
     if (target.authorId === req.session.user.id) {

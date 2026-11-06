@@ -5,7 +5,7 @@ import Notice from './Notice';
 import { apiFetch } from './api';
 import { timeAgo } from './utils';
 
-const FILTERS = ['all', 'post', 'post_comment', 'review', 'review_comment', 'profile', 'tag'];
+const FILTERS = ['all', 'post', 'post_comment', 'review', 'review_comment', 'profile', 'tag', 'list', 'list_comment'];
 
 function groupKey(group) {
     return `${group.targetType}-${group.targetId}`;
@@ -15,6 +15,8 @@ function targetLink(group) {
     const { target, targetType } = group;
     if (!target) return null;
     if (targetType === 'tag') return `/tagged/${target.slug}`;
+    if (targetType === 'list') return `/lists/${target.id}`;
+    if (targetType === 'list_comment') return `/lists/${target.listId}`;
     if (targetType === 'review' || targetType === 'review_comment') return `/book/${target.workId}`;
     return `/u/${target.author}`;
 }
@@ -54,8 +56,10 @@ function ReportReview({ group, onResolved }) {
                 <div className="moderation-content">
                     {targetType === 'profile' && target.displayName && <strong>{target.displayName}</strong>}
                     {target.bookTitle && <span className="search-author">{t('moderation.onBook', { title: target.bookTitle })}</span>}
+                    {target.listTitle && <span className="search-author">{t('moderation.onList', { title: target.listTitle })}</span>}
                     {target.text && <p>{target.text}</p>}
                     {targetType === 'profile' && target.aboutMe && <p>{target.aboutMe}</p>}
+                    {targetType === 'list' && target.description && <p>{target.description}</p>}
                     {target.imageUrl && <img src={target.imageUrl} alt="" className="moderation-image" />}
                     {target.isSpoiler && <span className="invite-badge">{t('moderation.alreadySpoiler')}</span>}
                     {link && <Link to={link} className="moderation-link">{t('moderation.openInApp')}</Link>}

@@ -14206,3 +14206,31 @@ a.discovery-result-meta:hover {
 .list-hero-toggle.active svg {
   fill: currentColor;
 }
+
+.list-page-comments {
+  margin-top: 20px;
+}
+
+.list-comments {
+  margin-top: 4px;
+  padding: 0;
+  border-top: none;
+}
+
+.list-inspiration {
+  margin-top: 28px;
+}
+
+.list-inspiration-text {
+  margin: 4px 0 16px;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.tagged-lists {
+  margin-bottom: 24px;
+}
+
+.tagged-lists .tagged-box-title {
+  margin-bottom: 14px;
+}
