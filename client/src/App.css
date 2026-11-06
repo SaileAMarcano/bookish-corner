@@ -13883,3 +13883,276 @@ a.discovery-result-meta:hover {
   background: var(--error-soft);
   color: var(--error);
 }
+
+.list-page {
+  max-width: 980px;
+}
+
+.list-hero {
+  display: flex;
+  gap: 30px;
+  margin-bottom: 20px;
+  padding: 26px 30px;
+}
+
+.list-hero-fan {
+  flex-shrink: 0;
+  width: 280px;
+  height: 210px;
+  border-radius: var(--radius);
+}
+
+.list-hero-fan .list-card-cover {
+  width: 96px;
+}
+
+.list-hero-fan .list-card-cover-wrap {
+  margin: 0 -20px -16px;
+}
+
+.list-hero-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.list-hero-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.list-hero-title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+.list-hero-description {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+}
+
+.list-hero-owner {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.list-hero-owner>span {
+  display: flex;
+  flex-direction: column;
+}
+
+.list-hero-owner-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.list-hero-owner:hover .list-hero-owner-name {
+  color: var(--rose-ink);
+}
+
+.list-hero-owner-meta {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.list-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.list-hero-actions .invite-action {
+  min-height: 36px;
+}
+
+.list-hero-delete:hover {
+  border-color: var(--error);
+  color: var(--error);
+}
+
+.list-page-books {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list-page-book {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 18px 0;
+}
+
+.list-page-book+.list-page-book {
+  border-top: 1px solid var(--surface-2);
+}
+
+.list-page-number {
+  flex-shrink: 0;
+  width: 26px;
+  padding-top: 4px;
+  color: var(--rose-ink);
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.list-page-cover-link {
+  flex-shrink: 0;
+  text-decoration: none;
+}
+
+.list-page-cover {
+  display: flex;
+  width: 76px;
+  aspect-ratio: 2 / 3;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  box-shadow: 0 6px 14px rgba(46, 41, 37, 0.16);
+}
+
+.list-page-cover.cover-fabric {
+  gap: 4px;
+  padding: 14px 7px 10px;
+}
+
+.list-page-cover.cover-fabric::before {
+  inset: 5px;
+}
+
+.list-page-cover .cover-fabric-title {
+  font-size: 12px;
+  line-clamp: 3;
+  -webkit-line-clamp: 3;
+}
+
+.list-page-cover .cover-fabric-author {
+  display: none;
+}
+
+.list-page-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+}
+
+.list-page-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.25;
+}
+
+.list-page-title a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.list-page-title a:hover {
+  color: var(--rose-ink);
+}
+
+.list-page-author {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.list-page-rating {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.list-page-days {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--sage-text);
+  font-size: 13px;
+}
+
+.list-page-note {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 10px 14px;
+  border-left: 3px solid var(--rose);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  background: var(--rose-soft);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.list-page-note svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--rose-ink);
+}
+
+.list-page-action {
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.list-page-want {
+  min-height: 38px;
+  padding: 0 16px;
+  font-size: 13px;
+}
+
+.list-page-more {
+  margin-top: 28px;
+}
+
+@media (max-width: 760px) {
+  .list-hero {
+    flex-direction: column;
+    gap: 18px;
+    padding: 20px;
+  }
+
+  .list-hero-fan {
+    width: 100%;
+    height: 170px;
+  }
+
+  .list-hero-fan .list-card-cover {
+    width: 80px;
+  }
+
+  .list-page-book {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .list-page-action {
+    width: 100%;
+    padding-left: 42px;
+  }
+}
+
+.list-page .post-page-back {
+  align-self: flex-start;
+}

@@ -1598,10 +1598,17 @@ async function findLists(req, condition, value) {
 
 async function findListBooks(req, listId) {
     return query(`
-        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image, lb.note, lb.position
+        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image, lb.note, lb.position,
+               (SELECT ROUND(AVG(ub.rating), 1) FROM user_books ub WHERE ub.work_id = w.id AND ub.rating > 0) AS average_rating,
+               (SELECT COUNT(*) FROM user_books ub WHERE ub.work_id = w.id AND ub.rating > 0) AS rating_count,
+               CASE WHEN owner_ub.status = 'finished' AND owner_ub.started_at IS NOT NULL AND owner_ub.finished_at >= owner_ub.started_at
+                    THEN GREATEST(1, CEIL(EXTRACT(EPOCH FROM owner_ub.finished_at - owner_ub.started_at) / 86400))::int
+               END AS days_to_finish
         FROM list_books lb
+        JOIN lists l ON l.id = lb.list_id
         JOIN works w ON w.id = lb.work_id
         ${JOIN_TRANSLATION} = $2
+        LEFT JOIN user_books owner_ub ON owner_ub.user_id = l.user_id AND owner_ub.work_id = w.id
         WHERE lb.list_id = $1
         ORDER BY lb.position
     `, [listId, languageOf(req)]);

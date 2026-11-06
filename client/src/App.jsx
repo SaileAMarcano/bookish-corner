@@ -30,6 +30,7 @@ import AdminModeration from './AdminModeration';
 import NotificationBell from './NotificationBell';
 import NotificationsPage from './NotificationsPage';
 import PostPage from './PostPage';
+import ListPage from './ListPage';
 import MilestoneCelebration from './MilestoneCelebration';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
@@ -393,6 +394,7 @@ function App() {
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />
+          <Route path="/lists/:id" element={<ListPage currentUser={currentUser} books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
           <Route path="/explore" element={<ExplorePage currentUser={currentUser} searchTerm={q} onSearch={handleSearch} onOpenSearch={() => setSearchOpen(true)} searchOpen={searchOpen} onDiscoverPeople={() => { setSearchType('people'); setQ(''); setSearchOpen(true); }} />} />
           <Route path="/reviews" element={<ReviewsPage books={books} booksStatus={booksStatus} onLibraryChange={loadUserBooks} />} />
