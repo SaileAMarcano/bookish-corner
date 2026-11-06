@@ -1497,6 +1497,229 @@ app.delete('/api/post-comments/:id', requireAuth, async (req, res) => {
     res.json({ message: 'Comment deleted' });
 });
 
+const LIST_TITLE_MAX = 80;
+const LIST_DESCRIPTION_MAX = 500;
+const LIST_NOTE_MAX = 280;
+const LIST_MAX_BOOKS = 100;
+const MAX_ID = 2147483647;
+
+function parseListBooks(value) {
+    const list = Array.isArray(value) ? value : [];
+    const books = [];
+    const seen = new Set();
+
+    for (const item of list) {
+        const id = Number(item?.id);
+        if (!Number.isInteger(id) || id <= 0 || id > MAX_ID || seen.has(id)) continue;
+
+        seen.add(id);
+        books.push({ id, note: String(item.note ?? '').trim() || null });
+    }
+
+    return books;
+}
+
+function readListForm(req) {
+    return {
+        title: String(req.body.title ?? '').trim(),
+        description: String(req.body.description ?? '').trim() || null,
+        isPublic: req.body.isPublic !== false,
+        books: parseListBooks(req.body.books),
+        tags: parseTags(Array.isArray(req.body.tags) ? req.body.tags : []),
+    };
+}
+
+function listProblem(list) {
+    if (list.title === '') return 'listTitleRequired';
+    if (list.title.length > LIST_TITLE_MAX) return 'listTitleTooLong';
+    if (list.description && list.description.length > LIST_DESCRIPTION_MAX) return 'listDescriptionTooLong';
+    if (list.books.length > LIST_MAX_BOOKS) return 'listTooManyBooks';
+    if (list.books.some((book) => book.note && book.note.length > LIST_NOTE_MAX)) return 'listNoteTooLong';
+    if (list.tags.length > TAGS_MAX) return 'tooManyTags';
+    if (list.tags.some((tag) => tag.name.length > TAG_MAX_LENGTH)) return 'tagTooLong';
+    return null;
+}
+
+async function saveListLinks(client, listId, list) {
+    for (let i = 0; i < list.books.length; i++) {
+        await client.query(
+            'INSERT INTO list_books (list_id, work_id, position, note) VALUES ($1, $2, $3, $4)',
+            [listId, list.books[i].id, i, list.books[i].note]
+        );
+    }
+
+    const tagIds = await findOrCreateTags(client, list.tags);
+    for (let i = 0; i < tagIds.length; i++) {
+        await client.query(
+            'INSERT INTO list_tags (list_id, tag_id, position) VALUES ($1, $2, $3)',
+            [listId, tagIds[i], i]
+        );
+    }
+}
+
+async function findLists(req, condition, value) {
+    return query(`
+        SELECT l.id, l.title, l.description, l.is_public, l.created_at, l.updated_at,
+               u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               (SELECT COUNT(*) FROM list_books lb WHERE lb.list_id = l.id) AS book_count,
+               (SELECT COUNT(*) FROM list_likes ll WHERE ll.list_id = l.id) AS like_count,
+               (SELECT COUNT(*) FROM list_comments lc WHERE lc.list_id = l.id) AS comment_count,
+               EXISTS (SELECT 1 FROM list_likes ll WHERE ll.list_id = l.id AND ll.user_id = $2) AS has_liked,
+               EXISTS (SELECT 1 FROM saved_lists sl WHERE sl.list_id = l.id AND sl.user_id = $2) AS has_saved,
+               COALESCE((
+                   SELECT json_agg(json_build_object(
+                              'id', first.id,
+                              'title', first.title,
+                              'author', first.author,
+                              'coverImage', first.cover_image
+                          ) ORDER BY first.position)
+                   FROM (
+                       SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image, lb.position
+                       FROM list_books lb
+                       JOIN works w ON w.id = lb.work_id
+                       ${JOIN_TRANSLATION} = $3
+                       WHERE lb.list_id = l.id
+                       ORDER BY lb.position
+                       LIMIT 4
+                   ) first
+               ), '[]') AS preview,
+               COALESCE((
+                   SELECT json_agg(json_build_object('name', tg.name, 'slug', tg.slug) ORDER BY lt.position)
+                   FROM list_tags lt
+                   JOIN tags tg ON tg.id = lt.tag_id
+                   WHERE lt.list_id = l.id
+               ), '[]') AS tags
+        FROM lists l
+        JOIN users u ON u.id = l.user_id
+        WHERE ${condition} AND (l.is_public OR l.user_id = $2)
+        ORDER BY l.updated_at DESC
+    `, [value, req.session.user.id, languageOf(req)]);
+}
+
+async function findListBooks(req, listId) {
+    return query(`
+        SELECT w.id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image, lb.note, lb.position
+        FROM list_books lb
+        JOIN works w ON w.id = lb.work_id
+        ${JOIN_TRANSLATION} = $2
+        WHERE lb.list_id = $1
+        ORDER BY lb.position
+    `, [listId, languageOf(req)]);
+}
+
+async function listFromUrl(req) {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id) || id <= 0 || id > MAX_ID) return undefined;
+
+    const [list] = await query('SELECT id, user_id, is_public FROM lists WHERE id = $1', [id]);
+    if (!list) return undefined;
+    if (!list.isPublic && list.userId !== req.session.user.id) return undefined;
+    return list;
+}
+
+app.post('/api/lists', requireAuth, async (req, res) => {
+    const list = readListForm(req);
+    const problem = listProblem(list);
+    if (problem) {
+        return res.status(400).json({ error: msg(req, problem) });
+    }
+
+    const client = await pool.connect();
+    let listId;
+
+    try {
+        await client.query('BEGIN');
+
+        const result = await client.query(
+            'INSERT INTO lists (user_id, title, description, is_public) VALUES ($1, $2, $3, $4) RETURNING id',
+            [req.session.user.id, list.title, list.description, list.isPublic]
+        );
+        listId = result.rows[0].id;
+        await saveListLinks(client, listId, list);
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        if (error.code === '23503') {
+            return res.status(404).json({ error: msg(req, 'bookNotFound') });
+        }
+        throw error;
+    } finally {
+        client.release();
+    }
+
+    const [created] = await findLists(req, 'l.id = $1', listId);
+    res.status(201).json(created);
+});
+
+app.get('/api/lists/:id', requireAuth, async (req, res) => {
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+
+    const [fullList] = await findLists(req, 'l.id = $1', list.id);
+    const books = await findListBooks(req, list.id);
+    res.json({ ...fullList, books });
+});
+
+app.patch('/api/lists/:id', requireAuth, async (req, res) => {
+    const current = await listFromUrl(req);
+    if (!current) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+    if (current.userId !== req.session.user.id) {
+        return res.status(403).json({ error: msg(req, 'cannotEditList') });
+    }
+
+    const list = readListForm(req);
+    const problem = listProblem(list);
+    if (problem) {
+        return res.status(400).json({ error: msg(req, problem) });
+    }
+
+    const client = await pool.connect();
+
+    try {
+        await client.query('BEGIN');
+
+        await client.query(
+            'UPDATE lists SET title = $1, description = $2, is_public = $3, updated_at = now() WHERE id = $4',
+            [list.title, list.description, list.isPublic, current.id]
+        );
+        await client.query('DELETE FROM list_books WHERE list_id = $1', [current.id]);
+        await client.query('DELETE FROM list_tags WHERE list_id = $1', [current.id]);
+        await saveListLinks(client, current.id, list);
+
+        await client.query('COMMIT');
+    } catch (error) {
+        await client.query('ROLLBACK');
+        if (error.code === '23503') {
+            return res.status(404).json({ error: msg(req, 'bookNotFound') });
+        }
+        throw error;
+    } finally {
+        client.release();
+    }
+
+    const [updated] = await findLists(req, 'l.id = $1', current.id);
+    const books = await findListBooks(req, current.id);
+    res.json({ ...updated, books });
+});
+
+app.delete('/api/lists/:id', requireAuth, async (req, res) => {
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+    if (list.userId !== req.session.user.id) {
+        return res.status(403).json({ error: msg(req, 'cannotDeleteList') });
+    }
+
+    await query('DELETE FROM lists WHERE id = $1', [list.id]);
+    res.json({ message: 'List deleted' });
+});
+
 async function userFromUrl(req) {
     const [user] = await query('SELECT id FROM users WHERE username = $1', [req.params.username]);
     return user;
@@ -1639,6 +1862,14 @@ app.get('/api/users/:username/books', requireAuth, async (req, res) => {
         return res.status(404).json({ error: msg(req, 'userNotFound') });
     }
     res.json(await findUserBooks(req, user.id));
+});
+
+app.get('/api/users/:username/lists', requireAuth, async (req, res) => {
+    const user = await userFromUrl(req);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'useNotFound') });
+    }
+    res.json(await findLists(req, 'l.user_id = $1', user.id));
 });
 
 const SIMILAR_LIMIT = 3;
