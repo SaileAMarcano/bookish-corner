@@ -21,12 +21,16 @@ function ProfileLists({ username, name }) {
     const [formOpen, setFormOpen] = useState(false);
     const [editing, setEditing] = useState(null);
     const [actionError, setActionError] = useState('');
+    const [view, setView] = useState('mine');
     const isMine = !name;
+    const showSaved = isMine && view === 'saved';
 
     useEffect(() => {
         let ignore = false;
 
-        apiFetch(`/api/users/${encodeURIComponent(username)}/lists`)
+        const url = view === 'saved' ? '/api/saved-lists' : `/api/users/${encodeURIComponent(username)}/lists`;
+
+        apiFetch(url)
             .then((data) => {
                 if (ignore) return;
                 setLists(data);
@@ -39,7 +43,18 @@ function ProfileLists({ username, name }) {
         return () => {
             ignore = true;
         };
-    }, [username, i18n.language, attempt]);
+    }, [username, i18n.language, attempt, view]);
+
+    const switchView = (next) => {
+        if (next === view) return;
+        setLists(null);
+        setActionError('');
+        setView(next);
+    };
+
+    const handleChange = (listId, changes) => {
+        setLists((current) => current.map((list) => (list.id === listId ? { ...list, ...changes } : list)));
+    };
 
     const closeForm = () => {
         setFormOpen(false);
@@ -70,7 +85,23 @@ function ProfileLists({ username, name }) {
             .catch((err) => setActionError(err.message));
     };
 
-    const newButton = isMine && (
+    const viewTabs = isMine && (
+        <div className="profile-tabs home-tabs list-views">
+            {['mine', 'saved'].map((option) => (
+                <button
+                    key={option}
+                    type="button"
+                    className={`profile-tab ${view === option ? 'active' : ''}`}
+                    onClick={() => switchView(option)}
+                    aria-pressed={view === option}
+                >
+                    {t(`lists.views.${option}`)}
+                </button>
+            ))}
+        </div>
+    );
+
+    const newButton = isMine && !showSaved && (
         <button type="button" className="invite-create profile-lists-new" onClick={() => setFormOpen(true)}>
             <Icon name="lists" size={16} />
             {t('lists.newList')}
@@ -84,22 +115,30 @@ function ProfileLists({ username, name }) {
     }
 
     if (!lists) {
-        return <div className="card profile-empty">{t('lists.loading')}</div>;
+        return (
+            <>
+                {viewTabs}
+                <div className="card profile-empty">{t('lists.loading')}</div>
+            </>
+        );
     }
 
     if (lists.length === 0) {
         return (
-            <div className="card profile-empty">
-                <EmptyState
-                    compact
-                    kind="lists"
-                    title={name ? t('lists.emptyOther', { name }) : t('lists.emptyMine')}
-                    description={name ? null : t('lists.emptyMineText')}
-                >
-                    {newButton}
-                </EmptyState>
-                {form}
-            </div>
+            <>
+                {viewTabs}
+                <div className="card profile-empty">
+                    <EmptyState
+                        compact
+                        kind={showSaved ? 'bookmark' : 'lists'}
+                        title={showSaved ? t('lists.emptySaved') : name ? t('lists.emptyOther', { name }) : t('lists.emptyMine')}
+                        description={showSaved ? t('lists.emptySavedText') : name ? null : t('lists.emptyMineText')}
+                    >
+                        {newButton}
+                    </EmptyState>
+                    {form}
+                </div>
+            </>
         );
     }
 
@@ -107,9 +146,11 @@ function ProfileLists({ username, name }) {
 
     return (
         <section className="profile-lists" aria-labelledby="profile-lists-heading">
+            {viewTabs}
+
             <div className="profile-lists-head">
                 <h2 className="display profile-lists-title" id="profile-lists-heading">
-                    {t('lists.title')} <span>{lists.length}</span>
+                    {showSaved ? t('lists.views.saved') : t('lists.title')} <span>{lists.length}</span>
                 </h2>
                 <div className="profile-lists-tools">
                     {newButton}
@@ -126,8 +167,9 @@ function ProfileLists({ username, name }) {
                     <ListCard
                         key={list.id}
                         list={list}
-                        onEdit={isMine ? handleEdit : undefined}
-                        onDelete={isMine ? handleDelete : undefined}
+                        onChange={handleChange}
+                        onEdit={isMine && !showSaved ? handleEdit : undefined}
+                        onDelete={isMine && !showSaved ? handleDelete : undefined}
                     />
                 ))}
             </div>

@@ -496,6 +496,8 @@ const en = {
             review_comment: 'commented on your review of "{{title}}".',
             follow: 'started following you.',
             book_added: 'The book you asked for, "{{title}}", is now in the library.',
+            list_like: 'liked your list “{{title}}”.',
+            list_comment: 'commented on your list “{{title}}”.',
         },
     },
     postPage: {
@@ -973,6 +975,12 @@ const en = {
         delete: 'Delete list',
         confirmDelete: 'Delete “{{title}}”? This can’t be undone.',
         confirmYes: 'Delete',
+        views: {
+            mine: 'My lists',
+            saved: 'Saved',
+        },
+        emptySaved: 'You have not saved any lists yet',
+        emptySavedText: 'Tap the bookmark on a list to keep it here.',
         form: {
             newTitle: 'New list',
             name: 'Title',

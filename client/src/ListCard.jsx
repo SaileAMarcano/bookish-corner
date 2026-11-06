@@ -3,12 +3,22 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import Icon from './Icon';
+import { apiFetch } from './api';
 
-function ListCard({ list, onEdit, onDelete }) {
+function ListCard({ list, onChange, onEdit, onDelete }) {
     const { t } = useTranslation();
     const [confirmDelete, setConfirmDelete] = useState(false);
+    const [busy, setBusy] = useState(false);
     const middle = (list.preview.length - 1) / 2;
     const link = `/lists/${list.id}`;
+
+    const toggle = (action, isOn) => {
+        setBusy(true);
+        apiFetch(`/api/lists/${list.id}/${action}`, { method: isOn ? 'DELETE' : 'POST' })
+            .then((changes) => onChange(list.id, changes))
+            .catch(() => {})
+            .finally(() => setBusy(false));
+    };
 
     return (
         <article className="card list-card">
@@ -81,16 +91,33 @@ function ListCard({ list, onEdit, onDelete }) {
                 )}
 
                 <footer className="list-card-foot">
-                    <span className="list-card-stat">
+                    <button
+                        type="button"
+                        className={`list-card-stat list-card-toggle ${list.hasLiked ? 'active' : ''}`}
+                        onClick={() => toggle('like', list.hasLiked)}
+                        aria-pressed={list.hasLiked}
+                        disabled={busy}
+                    >
                         <Icon name="sparkle" size={15} />
                         <span aria-hidden="true">{list.likeCount}</span>
                         <span className="sr-only">{t('lists.likeCount', { count: list.likeCount })}</span>
-                    </span>
+                    </button>
                     <span className="list-card-stat">
                         <Icon name="comment" size={15} />
                         <span aria-hidden="true">{list.commentCount}</span>
                         <span className="sr-only">{t('lists.commentCount', { count: list.commentCount })}</span>
                     </span>
+                    <button
+                        type="button"
+                        className={`list-card-stat list-card-toggle list-card-save ${list.hasSaved ? 'active' : ''}`}
+                        onClick={() => toggle('save', list.hasSaved)}
+                        aria-pressed={list.hasSaved}
+                        aria-label={list.hasSaved ? t('posts.saved') : t('posts.save')}
+                        title={list.hasSaved ? t('posts.saved') : t('posts.save')}
+                        disabled={busy}
+                    >
+                        <Icon name="bookmark" size={15} />
+                    </button>
                 </footer>
             </div>
         </article>

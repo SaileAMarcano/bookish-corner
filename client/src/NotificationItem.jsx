@@ -6,6 +6,7 @@ function notificationLink(notification) {
     const { type } = notification;
     if (type === 'post_like' || type === 'post_comment') return `/post/${notification.postId}`;
     if (type === 'follow') return `/u/${notification.actorUsername}`;
+    if (type === 'list_like' || type === 'list_comment') return `/lists/${notification.listId}`;
     return `/book/${notification.workId}`;
 }
 
@@ -27,7 +28,7 @@ function NotificationItem({ notification, showDetail = false, onOpen }) {
             <span className="notification-body">
                 <span>
                     {notification.actorName && <strong>{notification.actorName} </strong>}
-                    {t(`notifications.types.${notification.type}`, { title: notification.bookTitle })}
+                    {t(`notifications.types.${notification.type}`, { title: notification.listTitle || notification.bookTitle })}
                 </span>
                 {showDetail && detail && (
                     <span className="notification-detail">

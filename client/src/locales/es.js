@@ -496,6 +496,8 @@ const es = {
             review_comment: 'comentó tu reseña de «{{title}}».',
             follow: 'empezó a seguirte.',
             book_added: 'El libro que pediste, «{{title}}», ya está en la biblioteca.',
+            list_like: 'le dio me gusta a tu lista «{{title}}».',
+            list_comment: 'comentó tu lista «{{title}}».',
         },
     },
     postPage: {
@@ -973,6 +975,12 @@ const es = {
         delete: 'Borrar lista',
         confirmDelete: '¿Borrar «{{title}}»? No se puede deshacer.',
         confirmYes: 'Borrar',
+        views: {
+            mine: 'Mis listas',
+            saved: 'Guardadas',
+        },
+        emptySaved: 'Todavía no has guardado listas',
+        emptySavedText: 'Toca el marcapáginas de una lista para tenerla aquí.',
         form: {
             newTitle: 'Nueva lista',
             name: 'Título',

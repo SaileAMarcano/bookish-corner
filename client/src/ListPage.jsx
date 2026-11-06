@@ -68,6 +68,17 @@ function ListPage({ currentUser, books, onLibraryChange }) {
             .catch((err) => setActionError(err.message));
     };
 
+    const handleToggle = (action, isOn) => {
+        setActionError('');
+        apiFetch(`/api/lists/${list.id}/${action}`, { method: isOn ? 'DELETE' : 'POST' })
+            .then((changes) => setList((current) => ({ ...current, ...changes })))
+            .catch((err) => setActionError(err.message));
+    };
+
+    const handleMoreChange = (listId, changes) => {
+        setMoreLists((current) => current.map((item) => (item.id === listId ? { ...item, ...changes } : item)));
+    };
+
     const handleSaved = (saved) => {
         setList(saved);
         setEditing(false);
@@ -154,6 +165,24 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                     )}
 
                     <div className="list-hero-actions">
+                        <button
+                            type="button"
+                            className={`invite-action list-hero-toggle ${list.hasLiked ? 'active' : ''}`}
+                            onClick={() => handleToggle('like', list.hasLiked)}
+                            aria-pressed={list.hasLiked}
+                        >
+                            <Icon name="sparkle" size={15} />
+                            {t('posts.like')} ({list.likeCount})
+                        </button>
+                        <button
+                            type="button"
+                            className={`invite-action list-hero-toggle ${list.hasSaved ? 'active' : ''}`}
+                            onClick={() => handleToggle('save', list.hasSaved)}
+                            aria-pressed={list.hasSaved}
+                        >
+                            <Icon name="bookmark" size={15} />
+                            {list.hasSaved ? t('posts.saved') : t('posts.save')}
+                        </button>
                         <button type="button" className="invite-action" onClick={handleCopy}>
                             <Icon name={copied ? 'check' : 'share'} size={15} />
                             {copied ? t('listPage.copied') : t('listPage.copyLink')}
@@ -261,7 +290,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                 <section className="list-page-more">
                     <h2 className="display book-section-title">{t('listPage.moreFrom', { name: list.displayName })}</h2>
                     <div className="list-grid">
-                        {moreLists.map((item) => <ListCard key={item.id} list={item} />)}
+                        {moreLists.map((item) => <ListCard key={item.id} list={item} onChange={handleMoreChange} />)}
                     </div>
                 </section>
             )}

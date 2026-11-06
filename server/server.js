@@ -144,8 +144,8 @@ async function notify(userId, actorId, type, refs = {}) {
     if (userId === actorId) return;
 
     await query(`
-        INSERT INTO notifications (user_id, actor_id, type, post_id, post_comment_id, user_book_id, comment_id, work_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+        INSERT INTO notifications (user_id, actor_id, type, post_id, post_comment_id, user_book_id, comment_id, work_id, list_id, list_comment_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
     `, [
         userId,
         actorId,
@@ -155,6 +155,8 @@ async function notify(userId, actorId, type, refs = {}) {
         refs.userBookId ?? null,
         refs.commentId ?? null,
         refs.workId ?? null,
+        refs.listId ?? null,
+        refs.listCommentId ?? null,
     ]);
 }
 
@@ -164,7 +166,8 @@ async function unnotify(userId, actorId, type, refs = {}) {
         WHERE user_id = $1 AND actor_id = $2 AND type = $3
           AND post_id IS NOT DISTINCT FROM $4
           AND user_book_id IS NOT DISTINCT FROM $5
-    `, [userId, actorId, type, refs.postId ?? null, refs.userBookId ?? null]);
+          AND list_id IS NOT DISTINCT FROM $6
+    `, [userId, actorId, type, refs.postId ?? null, refs.userBookId ?? null, refs.listId ?? null]);
 }
 
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
@@ -1727,6 +1730,73 @@ app.delete('/api/lists/:id', requireAuth, async (req, res) => {
     res.json({ message: 'List deleted' });
 });
 
+async function listLikeState(req, listId) {
+    const [state] = await query(`
+        SELECT (SELECT COUNT(*) FROM list_likes WHERE list_id = $1) AS like_count,
+               EXISTS (SELECT 1 FROM list_likes WHERE list_id = $1 AND user_id = $2) AS has_liked
+    `, [listId, req.session.user.id]);
+    return state;
+}
+
+app.post('/api/lists/:id/like', requireAuth, async (req, res) => {
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+
+    const [liked] = await query(
+        'INSERT INTO list_likes (user_id, list_id) VALUES ($1, $2) ON CONFLICT DO NOTHING RETURNING list_id',
+        [req.session.user.id, list.id]
+    );
+
+    if (liked) {
+        await notify(list.userId, req.session.user.id, 'list_like', { listId: list.id });
+    }
+    res.json(await listLikeState(req, list.id));
+});
+
+app.delete('/api/lists/:id/like', requireAuth, async (req, res) => {
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+
+    await query('DELETE FROM list_likes WHERE user_id = $1 AND list_id = $2', [req.session.user.id, list.id]);
+    await unnotify(list.userId, req.session.user.id, 'list_like', { listId: list.id });
+    res.json(await listLikeState(req, list.id));
+});
+
+app.post('/api/lists/:id/save', requireAuth, async (req, res) => {
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+
+    await query(
+        'INSERT INTO saved_lists (user_id, list_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+        [req.session.user.id, list.id]
+    );
+    res.json({ hasSaved: true });
+});
+
+app.delete('/api/lists/:id/save', requireAuth, async (req, res) => {
+    const list = await listFromUrl(req);
+    if (!list) {
+        return res.status(404).json({ error: msg(req, 'listNotFound') });
+    }
+
+    await query('DELETE FROM saved_lists WHERE user_id = $1 AND list_id = $2', [req.session.user.id, list.id]);
+    res.json({ hasSaved: false });
+});
+
+app.get('/api/saved-lists', requireAuth, async (req, res) => {
+    res.json(await findLists(
+        req,
+        'EXISTS (SELECT 1 FROM saved_lists s WHERE s.list_id = l.id AND s.user_id = $1)',
+        req.session.user.id
+    ));
+});
+
 async function userFromUrl(req) {
     const [user] = await query('SELECT id FROM users WHERE username = $1', [req.params.username]);
     return user;
@@ -2528,7 +2598,8 @@ app.get('/api/notifications', requireAuth, async (req, res) => {
     const page = Math.max(Number(req.query.page) || 0, 0);
 
     const rows = await query(`
-        SELECT n.id, n.type, n.read_at, n.created_at, n.post_id, n.work_id,
+        SELECT n.id, n.type, n.read_at, n.created_at, n.post_id, n.work_id, n.list_id,
+               nl.title AS list_title,
                u.username AS actor_username, COALESCE(u.display_name, u.username) AS actor_name,
                u.avatar_url AS actor_avatar, u.bio AS actor_bio,
                ${TRANSLATED_TITLE} AS book_title,
@@ -2539,6 +2610,7 @@ app.get('/api/notifications', requireAuth, async (req, res) => {
         ${JOIN_TRANSLATION} = $2
         LEFT JOIN post_comments pc ON pc.id = n.post_comment_id
         LEFT JOIN comments c ON c.id = n.comment_id
+        LEFT JOIN lists nl ON nl.id = n.list_id
         WHERE n.user_id = $1 AND (NOT $3 OR n.read_at IS NULL)
         ORDER BY n.created_at DESC, n.id DESC
         LIMIT $4 OFFSET $5

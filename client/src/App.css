@@ -14156,3 +14156,53 @@ a.discovery-result-meta:hover {
 .list-page .post-page-back {
   align-self: flex-start;
 }
+
+.list-views {
+  margin-bottom: 16px;
+}
+
+.list-card-toggle {
+  padding: 4px 6px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.list-card-toggle:hover:not(:disabled) {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.list-card-toggle.active {
+  color: var(--rose-ink);
+}
+
+.list-card-toggle.active svg {
+  fill: currentColor;
+}
+
+.list-card-toggle:disabled {
+  cursor: wait;
+}
+
+.list-card-save {
+  margin-left: auto;
+}
+
+.list-card-foot {
+  align-items: center;
+  gap: 8px;
+}
+
+.list-hero-toggle.active {
+  border-color: var(--rose-deep);
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.list-hero-toggle.active svg {
+  fill: currentColor;
+}
