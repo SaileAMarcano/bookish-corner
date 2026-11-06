@@ -1,20 +1,22 @@
 import { useState, useEffect, useRef, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import TagInput from './TagInput';
+import ListBooksEditor from './ListBooksEditor';
 import Icon from './Icon';
 import { apiFetch } from './api';
 
 const TITLE_MAX = 80;
 const DESCRIPTION_MAX = 500;
 
-function ListForm({ onClose, onSaved }) {
+function ListForm({ list, onClose, onSaved }) {
     const { t } = useTranslation();
     const formId = useId();
     const dialogRef = useRef(null);
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [isPublic, setIsPublic] = useState(true);
-    const [tags, setTags] = useState([]);
+    const [title, setTitle] = useState(list?.title ?? '');
+    const [description, setDescription] = useState(list?.description ?? '');
+    const [isPublic, setIsPublic] = useState(list?.isPublic ?? true);
+    const [tags, setTags] = useState(list ? list.tags.map((tag) => tag.name) : []);
+    const [books, setBooks] = useState(list ? list.books.map((book) => ({ ...book, note: book.note ?? '' })) : []);
     const [status, setStatus] = useState('idle');
     const [error, setError] = useState('');
 
@@ -28,7 +30,12 @@ function ListForm({ onClose, onSaved }) {
         setError('');
         setStatus('saving');
 
-        apiFetch('/api/lists', { method: 'POST', body: { title, description, isPublic, tags, books: [] } })
+        const body = { title, description, isPublic, tags, books: books.map((book) => ({ id: book.id, note: book.note })) };
+        const request = list
+            ? apiFetch(`/api/lists/${list.id}`, { method: 'PATCH', body })
+            : apiFetch('/api/lists', { method: 'POST', body });
+
+        request
             .then((saved) => onSaved(saved))
             .catch((err) => {
                 setError(err.message);
@@ -39,7 +46,7 @@ function ListForm({ onClose, onSaved }) {
     return (
         <dialog ref={dialogRef} className="card report-dialog list-form-dialog" aria-labelledby={`${formId}-heading`} onClose={onClose}>
             <form className="report-form" onSubmit={handleSubmit}>
-                <h2 id={`${formId}-heading`} className="display report-title">{t('lists.form.newTitle')}</h2>
+                <h2 id={`${formId}-heading`} className="display report-title">{list ? t('lists.form.editTitle') : t('lists.form.newTitle')}</h2>
 
                 <div className="edit-field">
                     <label className="edit-label" htmlFor={`${formId}-title`}>{t('lists.form.name')}</label>
@@ -67,6 +74,11 @@ function ListForm({ onClose, onSaved }) {
                         rows={3}
                     />
                     <span className="edit-counter">{description.length}/{DESCRIPTION_MAX}</span>
+                </div>
+
+                <div className="edit-field">
+                    <span className="edit-label">{t('lists.form.books')}</span>
+                    <ListBooksEditor books={books} onChange={setBooks} />
                 </div>
 
                 <fieldset className="list-form-privacy">
@@ -103,7 +115,7 @@ function ListForm({ onClose, onSaved }) {
                         {t('common.cancel')}
                     </button>
                     <button type="submit" className="invite-create" disabled={title.trim() === '' || status === 'saving'}>
-                        {status === 'saving' ? t('lists.form.saving') : t('lists.form.create')}
+                        {status === 'saving' ? t('lists.form.saving') : list ? t('lists.form.save') : t('lists.form.create')}
                     </button>
                 </div>
             </form>

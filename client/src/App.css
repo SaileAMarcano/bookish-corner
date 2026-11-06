@@ -13727,3 +13727,159 @@ a.discovery-result-meta:hover {
     flex-wrap: wrap;
   }
 }
+
+.list-card-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.list-card-head .list-card-title {
+  flex: 1;
+  min-width: 0;
+  padding-top: 8px;
+}
+
+.list-card-head .post-edit,
+.list-card-head .post-delete {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+
+.list-card-confirm {
+  margin-bottom: 0;
+}
+
+.list-form-dialog {
+  width: min(600px, calc(100vw - 32px));
+}
+
+.list-books-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-books-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: var(--text-2);
+}
+
+.list-books-search svg {
+  position: absolute;
+  left: 14px;
+  pointer-events: none;
+}
+
+.list-books-search .edit-input {
+  padding-left: 40px;
+}
+
+.list-books-results {
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.list-book-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.list-book-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.list-book-row.dragging {
+  opacity: 0.45;
+}
+
+.list-book-grip {
+  display: inline-flex;
+  flex-shrink: 0;
+  color: var(--text-2);
+  cursor: grab;
+  transform: rotate(90deg);
+}
+
+.list-book-number {
+  flex-shrink: 0;
+  width: 20px;
+  color: var(--rose-ink);
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.list-book-info {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.list-book-info .post-picker-title,
+.list-book-info .post-picker-author {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list-book-note {
+  margin-top: 4px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.list-book-actions {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.list-book-move {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 26px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+}
+
+.list-book-move:hover:not(:disabled) {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.list-book-move:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.list-book-move.up svg {
+  transform: rotate(180deg);
+}
+
+.list-book-move.remove:hover {
+  background: var(--error-soft);
+  color: var(--error);
+}

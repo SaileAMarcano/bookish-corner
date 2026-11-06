@@ -308,7 +308,7 @@ app.get('/api/search-books', async (req, res) => {
     const limit = asked >= 1 && asked <= SEARCH_LIMIT ? asked : SEARCH_LIMIT;
     const results = await searchCatalog(q, language, limit);
 
-    if (results.length >= limit) {
+    if (results.length >= limit || req.query.source === 'catalog') {
         return res.json(results);
     }
 

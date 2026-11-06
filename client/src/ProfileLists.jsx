@@ -19,6 +19,8 @@ function ProfileLists({ username, name }) {
     const [sortBy, setSortBy] = useState('recent');
     const [attempt, setAttempt] = useState(0);
     const [formOpen, setFormOpen] = useState(false);
+    const [editing, setEditing] = useState(null);
+    const [actionError, setActionError] = useState('');
     const isMine = !name;
 
     useEffect(() => {
@@ -39,9 +41,33 @@ function ProfileLists({ username, name }) {
         };
     }, [username, i18n.language, attempt]);
 
-    const handleSaved = (saved) => {
-        setLists((current) => [saved, ...current]);
+    const closeForm = () => {
         setFormOpen(false);
+        setEditing(null);
+    };
+
+    const handleSaved = (saved) => {
+        setLists((current) => (editing
+            ? current.map((list) => (list.id === saved.id ? saved : list))
+            : [saved, ...current]));
+        closeForm();
+    };
+
+    const handleEdit = (list) => {
+        setActionError('');
+        apiFetch(`/api/lists/${list.id}`)
+            .then((full) => {
+                setEditing(full);
+                setFormOpen(true);
+            })
+            .catch((err) => setActionError(err.message));
+    };
+
+    const handleDelete = (list) => {
+        setActionError('');
+        apiFetch(`/api/lists/${list.id}`, { method: 'DELETE' })
+            .then(() => setLists((current) => current.filter((item) => item.id !== list.id)))
+            .catch((err) => setActionError(err.message));
     };
 
     const newButton = isMine && (
@@ -51,7 +77,7 @@ function ProfileLists({ username, name }) {
         </button>
     );
 
-    const form = formOpen && <ListForm onClose={() => setFormOpen(false)} onSaved={handleSaved} />;
+    const form = formOpen && <ListForm list={editing} onClose={closeForm} onSaved={handleSaved} />;
 
     if (error) {
         return <Notice message={error} onRetry={() => setAttempt((count) => count + 1)} />;
@@ -93,9 +119,17 @@ function ProfileLists({ username, name }) {
                     </select>
                 </div>
             </div>
+            {actionError && <Notice message={actionError} />}
 
             <div className="list-grid">
-                {shown.map((list) => <ListCard key={list.id} list={list} />)}
+                {shown.map((list) => (
+                    <ListCard
+                        key={list.id}
+                        list={list}
+                        onEdit={isMine ? handleEdit : undefined}
+                        onDelete={isMine ? handleDelete : undefined}
+                    />
+                ))}
             </div>
 
             {form}

@@ -1,10 +1,12 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import BookCover from './BookCover';
 import Icon from './Icon';
 
-function ListCard({ list }) {
+function ListCard({ list, onEdit, onDelete }) {
     const { t } = useTranslation();
+    const [confirmDelete, setConfirmDelete] = useState(false);
     const middle = (list.preview.length - 1) / 2;
     const link = `/lists/${list.id}`;
 
@@ -27,9 +29,36 @@ function ListCard({ list }) {
             </Link>
 
             <div className="list-card-body">
-                <h3 className="display list-card-title">
-                    <Link to={link}>{list.title}</Link>
-                </h3>
+                <div className="list-card-head">
+                    <h3 className="display list-card-title">
+                        <Link to={link}>{list.title}</Link>
+                    </h3>
+
+                    {onEdit && (
+                        <button type="button" className="post-edit" onClick={() => onEdit(list)} aria-label={t('lists.edit')} title={t('lists.edit')}>
+                            <Icon name="pencil" />
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button type="button" className="post-delete" onClick={() => setConfirmDelete(true)} aria-label={t('lists.delete')} title={t('lists.delete')}>
+                            <Icon name="trash" />
+                        </button>
+                    )}
+                </div>
+
+                {confirmDelete && (
+                    <div className="post-confirm list-card-confirm" role="alert">
+                        <p>{t('lists.confirmDelete', { title: list.title })}</p>
+                        <div className="post-confirm-actions">
+                            <button type="button" className="post-confirm-cancel" onClick={() => setConfirmDelete(false)}>
+                                {t('common.cancel')}
+                            </button>
+                            <button type="button" className="post-confirm-delete" onClick={() => onDelete(list)}>
+                                {t('lists.confirmYes')}
+                            </button>
+                        </div>
+                    </div>
+                )}
 
                 <p className="list-card-meta">
                     {t('lists.bookCount', { count: list.bookCount })}
