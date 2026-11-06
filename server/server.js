@@ -1867,7 +1867,7 @@ app.get('/api/users/:username/books', requireAuth, async (req, res) => {
 app.get('/api/users/:username/lists', requireAuth, async (req, res) => {
     const user = await userFromUrl(req);
     if (!user) {
-        return res.status(404).json({ error: msg(req, 'useNotFound') });
+        return res.status(404).json({ error: msg(req, 'userNotFound') });
     }
     res.json(await findLists(req, 'l.user_id = $1', user.id));
 });
