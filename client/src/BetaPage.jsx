@@ -66,25 +66,29 @@ function problemOf(form) {
 function notifyByEmail(form, t) {
     if (!WEB3FORMS_KEY || WEB3FORMS_KEY.startsWith('PEGA_AQUI')) return;
 
-    const list = (values, prefix) => values.map((value) => t(`${prefix}.${value}`, { lng: 'es' })).join(', ') || '—';
+    const list = (values, prefix) => values.map((value) => t(`${prefix}.${value}`, { lng: 'es' })).join(' · ') || '—';
+    const name = form.name.trim();
+    const social = form.social.trim();
+    const handle = social && !social.startsWith('@') ? `@${social}` : social;
 
     fetch('https://api.web3forms.com/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
             access_key: WEB3FORMS_KEY,
-            subject: `Nueva postulación a la beta: ${form.name.trim()}`,
-            from_name: 'A Library of Us',
+            subject: `✨ Nueva postulación a la beta: ${name} (${form.age} años)`,
+            from_name: 'A Library of Us · Beta',
             replyto: form.email.trim(),
-            Nombre: form.name.trim(),
-            Correo: form.email.trim(),
-            Edad: form.age,
-            'Instagram o TikTok': form.social.trim() || '—',
-            'Idioma de la app': form.appLanguage === 'es' ? 'Español' : 'English',
-            Géneros: list(form.genres, 'genres'),
-            'Dónde lleva sus lecturas': list(form.tracking, 'beta.tracking'),
-            'Cómo nos conoció': form.foundVia ? t(`beta.foundVia.${form.foundVia}`, { lng: 'es' }) : '—',
-            Frase: form.phrase.trim(),
+            '🪶 Su frase': `“${form.phrase.trim()}”`,
+            '📖 Nombre': name,
+            '✉️ Correo': form.email.trim(),
+            '🎂 Edad': `${form.age} años`,
+            '📱 Instagram o TikTok': handle || 'No lo dejó',
+            '🌐 Idioma de la app': form.appLanguage === 'es' ? 'Español' : 'English',
+            '📚 Géneros que más lee': list(form.genres, 'genres'),
+            '🗂️ Dónde lleva sus lecturas': list(form.tracking, 'beta.tracking'),
+            '💌 Cómo nos conoció': form.foundVia ? t(`beta.foundVia.${form.foundVia}`, { lng: 'es' }) : '—',
+            '⭐ Para invitarla': `${window.location.origin}/admin/applications`,
         }),
     }).catch(() => { });
 }

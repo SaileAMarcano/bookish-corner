@@ -529,7 +529,7 @@ const es = {
         word2: 'Gente amable',
         word3: 'Días más bonitos',
         discord: 'Únete a nuestro Discord',
-        credit: 'Hecho por Suukibo',
+        credit: 'Hecho por Grimm',
     },
     landing: {
         eyebrow: 'Un rincón acogedor para lectores',

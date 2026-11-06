@@ -529,7 +529,7 @@ const en = {
         word2: 'Kind people',
         word3: 'Brighter days',
         discord: 'Join our Discord',
-        credit: 'Built by Suukibo',
+        credit: 'Built by Grimm',
     },
     landing: {
         eyebrow: 'A cozy corner for readers',
