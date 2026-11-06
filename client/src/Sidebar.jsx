@@ -31,11 +31,7 @@ const ADMIN_ITEMS = [
     { to: '/admin/activity', label: 'nav.adminActivity', icon: 'clock', roles: ['admin', 'moderator'] },
 ];
 
-const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'valentine', 'sage', 'lavender', 'amber', 'teal', 'grimm'];
-
-const SEASON_MARKS = {
-    grimm: '/seasons/grimm/favicon.png',
-};
+const SEASON_ILLUSTRATIONS = ['classic', 'christmas'];
 
 function isActive(item, location) {
     const [path, query] = item.to.split('?');
@@ -76,7 +72,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
     const settingsActive = location.pathname === '/profile/edit';
     const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(staffRole));
     const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
-    const mark = SEASON_MARKS[seasonTheme] || '/logo-mark.png';
+    const mark = '/logo-mark.png';
 
     useEffect(() => {
         closeMenus(navRef.current);

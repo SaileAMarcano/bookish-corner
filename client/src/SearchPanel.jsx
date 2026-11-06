@@ -34,21 +34,19 @@ function SearchPanel({ q, books, onAdded, onChange, onClose, type = 'books', onT
 
     useEffect(() => {
         if (term.length < 2) return;
-        let ignore = false;
+        const controller = new AbortController();
         const endpoints = { books: '/api/search-books', people: '/api/users', authors: '/api/search-authors' };
         const timer = setTimeout(() => {
-            for (const [category, endpoint] of Object.entries(endpoints)) {
-                apiFetch(`${endpoint}?q=${encodeURIComponent(term)}`)
-                    .then((items) => {
-                        if (!ignore) setData((previous) => ({ ...(previous.key === key ? previous : { key }), [category]: { items, error: '' } }));
-                    })
-                    .catch((error) => {
-                        if (!ignore) setData((previous) => ({ ...(previous.key === key ? previous : { key }), [category]: { items: [], error: error.message } }));
-                    });
-            }
+            apiFetch(`${endpoints[type]}?q=${encodeURIComponent(term)}`, { signal: controller.signal })
+                .then((items) => {
+                    if (!controller.signal.aborted) setData({ key, [type]: { items, error: '' } });
+                })
+                .catch((error) => {
+                    if (!controller.signal.aborted) setData({ key, [type]: { items: [], error: error.message } });
+                });
         }, 350);
-        return () => { ignore = true; clearTimeout(timer); };
-    }, [term, key, retry]);
+        return () => { controller.abort(); clearTimeout(timer); };
+    }, [term, key, type, retry]);
 
     const changePerson = (id, following) => setData((previous) => previous.key !== key ? previous : {
         ...previous, people: { ...previous.people, items: previous.people.items.map((person) => person.id === id ? { ...person, isFollowing: following } : person) },

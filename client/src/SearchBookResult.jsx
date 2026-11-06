@@ -25,7 +25,7 @@ function SearchBookResult({ book, books, onAdded }) {
         try {
             const result = book.bookId
                 ? await apiFetch('/api/user-books', { method: 'POST', body: { bookId: book.bookId } })
-                : await apiFetch('/api/user-books/from-search', { method: 'POST', body: { openLibraryKey: book.openLibraryKey, title: book.title, author: book.author, coverImage: book.coverImage } });
+                : await apiFetch('/api/user-books/from-search', { method: 'POST', body: { openLibraryKey: book.openLibraryKey } });
             setAdded(true);
             setAddedId(result.book?.id || result.bookId || book.bookId);
             await onAdded();
