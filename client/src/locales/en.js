@@ -1253,6 +1253,13 @@ const en = {
         { text: 'A room without books is like a body without a soul.', author: 'Cicero' },
         { text: 'Books are the treasured wealth of the world.', author: 'Henry David Thoreau' },
     ],
+        tour: {
+        count: 'Step {{current}} of {{total}}',
+        skip: 'Skip tour',
+        back: 'Back',
+        next: 'Next',
+        finish: 'Finish',
+    },
 };
 
 export default en;

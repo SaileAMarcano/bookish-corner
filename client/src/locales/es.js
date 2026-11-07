@@ -1253,6 +1253,13 @@ const es = {
         { text: 'Una habitación sin libros es como un cuerpo sin alma.', author: 'Cicerón' },
         { text: 'Los libros son la riqueza más preciada del mundo.', author: 'Henry David Thoreau' },
     ],
+        tour: {
+        count: 'Paso {{current}} de {{total}}',
+        skip: 'Saltar tour',
+        back: 'Anterior',
+        next: 'Siguiente',
+        finish: 'Terminar',
+    },
 };
 
 export default es;
