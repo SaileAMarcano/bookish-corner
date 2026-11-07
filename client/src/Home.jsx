@@ -108,6 +108,10 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
     };
 
     const handlePostCreated = (post) => {
+        if (feedTab !== 'recent') {
+            setFeedTab('recent');
+            return;
+        }
         setFeed((current) => [{ type: 'post', ...post }, ...(current || [])]);
     };
 

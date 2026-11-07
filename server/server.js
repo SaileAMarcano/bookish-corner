@@ -1017,7 +1017,11 @@ app.get('/api/feed', requireAuth, async (req, res) => {
     const tab = FEED_TABS.includes(req.query.tab) ? req.query.tab : 'for-you';
     const page = parsePage(req.query.page);
     if (page === null) return res.status(400).json({ error: msg(req, 'invalidRequest') });
-    const onlyFollowed = tab === 'following' ? 'WHERE i.from_followed' : '';
+    const feedFilter = {
+        'for-you': 'WHERE i.user_id <> $1',
+        following: 'WHERE i.from_followed',
+        recent: '',
+    }[tab];
 
     const items = await query(`
         WITH items AS (
@@ -1040,14 +1044,14 @@ app.get('/api/feed', requireAuth, async (req, res) => {
         ),
         marked AS (
             SELECT items.*,
-                   (items.user_id = $1 OR EXISTS (
+                   EXISTS (
                        SELECT 1 FROM follows f WHERE f.follower_id = $1 AND f.following_id = items.user_id
-                   )) AS from_followed
+                   ) AS from_followed
             FROM items
         )
         SELECT i.type, i.id
         FROM marked i
-        ${onlyFollowed}
+        ${feedFilter}
         ORDER BY ${FEED_ORDER[tab]}, i.id DESC
         LIMIT $2 OFFSET $3
     `, [userId, FEED_PAGE_SIZE, page * FEED_PAGE_SIZE]);
