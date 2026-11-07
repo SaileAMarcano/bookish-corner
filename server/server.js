@@ -2342,7 +2342,7 @@ function hasPlus(user) {
 async function findMe(userId) {
     const [user] = await query(
         `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
-            season_theme, plus_until, staff_role, gender_identity,
+            season_theme, plus_until, staff_role, gender_identity, tour_seen_at,
             COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
         [userId]
@@ -2363,6 +2363,17 @@ app.patch('/api/me/season-theme', requireAuth, async (req, res) => {
 
     await query('UPDATE users SET season_theme = $1 WHERE id = $2', [seasonTheme, req.session.user.id]);
     res.json({ seasonTheme });
+});
+
+app.patch('/api/me/tour', requireAuth, async (req, res) => {
+    const seen = req.body.seen === true;
+
+    const [user] = await query(
+        'UPDATE users SET tour_seen_at = CASE WHEN $1::boolean THEN now() ELSE NULL END WHERE id = $2 RETURNING tour_seen_at',
+        [seen, req.session.user.id]
+    );
+
+    res.json({ tourSeenAt: user.tourSeenAt });
 });
 
 const INVITE_DAYS = 14;
