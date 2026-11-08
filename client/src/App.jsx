@@ -88,6 +88,16 @@ function App() {
     document.documentElement.dataset.season = seasonTheme;
   }, [seasonTheme]);
 
+  const reduceMotion = Boolean(currentUser?.reduceMotion);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      document.documentElement.dataset.motion = 'reduce';
+    } else {
+      delete document.documentElement.dataset.motion;
+    }
+  }, [reduceMotion]);
+
   const [searchParams] = useSearchParams();
   const [q, setQ] = useState(() => searchParams.get('q') || '');
   const [searchOpen, setSearchOpen] = useState(() => Boolean(searchParams.get('q')));
@@ -263,6 +273,16 @@ function App() {
       });
   };
 
+  const handleReduceMotionToggle = () => {
+    const next = !reduceMotion;
+    setCurrentUser((user) => ({ ...user, reduceMotion: next }));
+    apiFetch('/api/me/reduce-motion', { method: 'PATCH', body: { reduceMotion: next }})
+      .catch((error) => {
+        setCurrentUser((user) => ({ ...user, reduceMotion: !next }));
+        setToast(error.message);
+      });
+  };
+
   const handleSearch = (term) => {
     setQ(term);
     setSearchOpen(true);
@@ -320,7 +340,7 @@ function App() {
   return (
     <div className="app-shell">
 
-      {seasonTheme === 'christmas' && (
+      {seasonTheme === 'christmas' && !reduceMotion && (
         <video className="season-snow" autoPlay loop muted playsInline aria-hidden="true">
           <source src="/seasons/christmas/snow.webm" type="video/webm" />
           <source src="/seasons/christmas/snow.mp4" type="video/mp4" />
@@ -457,7 +477,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
-          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} />} />
+          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} reduceMotion={reduceMotion} onReduceMotionToggle={handleReduceMotionToggle} />} />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />

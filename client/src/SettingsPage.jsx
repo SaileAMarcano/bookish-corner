@@ -7,6 +7,7 @@ import { getAvatarSrc } from './utils';
 const SECTIONS =[
     { id: 'profile', icon: 'about' },
     { id: 'appearance', icon: 'sparkle' },
+    { id: 'accessibility', icon: 'eye' },
 ];
 
 const SEASON_THEMES = [
@@ -45,7 +46,7 @@ function SettingRow({ label, hint, children }) {
     );
 }
 
-function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeasonThemeChange, onLanguageChange }) {
+function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeasonThemeChange, onLanguageChange, reduceMotion, onReduceMotionToggle }) {
     const { t } = useTranslation();
 
     return (
@@ -131,6 +132,22 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                         </SettingRow>
                     </SettingsSection>
                 </div>
+
+                    <SettingsSection id="accessibility" icon="eye">
+                        <SettingRow label={t('settings.accessibility.reduceMotion')} hint={t('settings.accessibility.reduceMotionHint')}>
+                            <button
+                                type="button"
+                                className="settings-switch"
+                                role="switch"
+                                aria-checked={reduceMotion}
+                                aria-label={t('settings.accessibility.reduceMotion')}
+                                onClick={onReduceMotionToggle}
+                            >
+                                <span className="settings-switch-thumb"></span>
+                            </button>
+                        </SettingRow>
+                    </SettingsSection>
+
             </div>
         </main>
     );

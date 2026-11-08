@@ -536,6 +536,12 @@ const en = {
             language: 'Language',
             languageHint: 'Menus and texts across the app will use this language.',
         },
+        accessibility: {
+            title: 'Accessibility',
+            subtitle: 'Adjust the app so it feels comfortable for you.',
+            reduceMotion: 'Reduce motion',
+            reduceMotionHint: 'Turns off transitions, the Christmas snow and celebration effects. If your device already asks for less motion, we always respect it.',
+        },
     },
     themes: {
         title: 'Theme',

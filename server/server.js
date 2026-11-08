@@ -2342,7 +2342,7 @@ function hasPlus(user) {
 async function findMe(userId) {
     const [user] = await query(
         `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
-            season_theme, plus_until, staff_role, gender_identity, tour_seen_at,
+            season_theme, plus_until, staff_role, gender_identity, tour_seen_at, reduce_motion,
             COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
         [userId]
@@ -2374,6 +2374,13 @@ app.patch('/api/me/tour', requireAuth, async (req, res) => {
     );
 
     res.json({ tourSeenAt: user.tourSeenAt });
+});
+
+app.patch('/api/me/reduce-motion', requireAuth, async (req, res) => {
+    const reduceMotion = req.body.reduceMotion === true;
+
+    await query('UPDATE users SET reduce_motion = $1 WHERE id = $2', [reduceMotion, req.session.user.id]);
+    res.json({ reduceMotion });
 });
 
 const INVITE_DAYS = 14;

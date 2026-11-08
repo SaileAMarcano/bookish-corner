@@ -56,7 +56,7 @@ function Tour({ steps, showWelcome, onClose }) {
             return undefined;
         }
 
-        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches || document.documentElement.dataset.motion === 'reduce';
         findTarget(step.target)?.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
 
         const frame = requestAnimationFrame(measure);
