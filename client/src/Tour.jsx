@@ -1,4 +1,4 @@
-import { usestate, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import Icon from './Icon';
@@ -35,8 +35,9 @@ function cardPosition(rect) {
     return null;
 }
 
-function Tour({ steps, onClose }) {
+function Tour({ steps, showWelcome, onClose }) {
     const { t } = useTranslation();
+    const [started, setStarted] = useState(!showWelcome);
     const [index, setIndex] = useState(0);
     const [rect, setRect] = useState(null);
     const cardRef = useRef(null);
@@ -50,22 +51,27 @@ function Tour({ steps, onClose }) {
     }, [step.target]);
 
     useEffect(() => {
+        if (!started) {
+            cardRef.current?.focus();
+            return undefined;
+        }
+
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         findTarget(step.target)?.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
 
         const frame = requestAnimationFrame(measure);
-        const timer = setTimeout(measure, 450);
+        const timer = setInterval(measure, 400);
         window.addEventListener('resize', measure);
         window.addEventListener('scroll', measure, true);
         cardRef.current?.focus();
 
         return () => {
             cancelAnimationFrame(frame);
-            clearTimeout(timer);
+            clearInterval(timer);
             window.removeEventListener('resize', measure);
             window.removeEventListener('scroll', measure, true);
         };
-    }, [measure, step.target]);
+    }, [measure, step.target, started]);
 
     const goNext = () => {
         if (isLast) {
@@ -83,9 +89,9 @@ function Tour({ steps, onClose }) {
         if (e.key === 'Escape') {
             e.preventDefault();
             onClose('skipped');
-        } else if (e.key === 'ArrowRight') {
+        } else if (e.key === 'ArrowRight' && started) {
             goNext();
-        } else if (e.key === 'ArrowLeft') {
+        } else if (e.key === 'ArrowLeft' && started) {
             goBack();
         } else if (e.key === 'Tab') {
             const buttons = [...cardRef.current.querySelectorAll('button')];
@@ -101,6 +107,38 @@ function Tour({ steps, onClose }) {
             }
         }
     };
+
+    if (!started) {
+        return createPortal(
+            <div className="tour">
+                <div className="tour-backdrop" />
+                <div
+                    ref={cardRef}
+                    className="tour-card centered tour-welcome"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="tour-title"
+                    aria-describedby="tour-text"
+                    tabIndex={-1}
+                    onKeyDown={handleKeyDown}
+                >
+                    <span className="tour-count">{t('tour.welcome.kicker')}</span>
+                    <h2 id="tour-title" className="display tour-title">{t('tour.welcome.title')}</h2>
+                    <p id="tour-text" className="tour-text">{t('tour.welcome.text')}</p>
+                    <div className="tour-actions tour-welcome-actions">
+                        <button type="button" className="ghost-button tour-back" onClick={() => onClose('skipped')}>
+                            {t('tour.welcome.later')}
+                        </button>
+                        <button type="button" className="edit-save tour-next" onClick={() => setStarted(true)}>
+                            {t('tour.welcome.start')}
+                            <Icon name="arrowRight" size={15} />
+                        </button>
+                    </div>
+                </div>
+            </div>,
+            document.body
+        );
+    }
 
     const position = cardPosition(rect);
     let placement = '';

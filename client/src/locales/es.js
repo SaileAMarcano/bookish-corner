@@ -138,6 +138,7 @@ const es = {
         seeAll: 'Ver todos los resultados de "{{q}}"',
         accountMenu: 'Menú de la cuenta',
         editProfile: 'Editar perfil',
+        replayTour: 'Ver el tour otra vez',
         logout: 'Cerrar sesión',
     },
     nav: {
@@ -1259,6 +1260,13 @@ const es = {
         back: 'Anterior',
         next: 'Siguiente',
         finish: 'Terminar',
+        welcome: {
+            kicker: 'Te damos la bienvenida',
+            title: '¿Te mostramos cómo funciona A Library of Us?',
+            text: 'En ocho pasos cortos te enseñamos dónde está todo. Puedes volver a verlo cuando quieras desde el menú de tu cuenta.',
+            start: 'Empezar',
+            later: 'Ahora no',
+        },
                 steps: {
             feed: { title: 'Tu inicio', text: 'Para ti muestra lo que la comunidad está leyendo y compartiendo, Siguiendo muestra a las personas que sigues y Recientes muestra todo lo nuevo, también tus publicaciones.' },
             composer: { title: 'Comparte una publicación', text: 'Escribe qué estás leyendo o pensando. Puedes añadir hasta cuatro libros, una imagen, una canción de Spotify y un aviso de spoiler.' },

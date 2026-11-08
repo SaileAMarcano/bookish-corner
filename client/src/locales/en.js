@@ -138,6 +138,7 @@ const en = {
         seeAll: 'See all results for "{{q}}"',
         accountMenu: 'Account menu',
         editProfile: 'Edit profile',
+        replayTour: 'Watch the tour again',
         logout: 'Log out',
     },
     nav: {
@@ -1259,6 +1260,13 @@ const en = {
         back: 'Back',
         next: 'Next',
         finish: 'Finish',
+        welcome: {
+            kicker: 'Welcome',
+            title: 'Want a quick tour of A Library of Us?',
+            text: 'In eight short steps we show you where everything is. You can watch it again anytime from your account menu.',
+            start: 'Start the tour',
+            later: 'Not now',
+        },
             steps: {
             feed: { title: 'Your home feed', text: 'For you shows what the community is reading and sharing, Following shows the people you follow, and Recent shows everything new, including your own posts.' },
             composer: { title: 'Share a post', text: 'Write what you are reading or thinking. You can add up to four books, an image, a song from Spotify and a spoiler warning.' },

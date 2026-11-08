@@ -66,6 +66,7 @@ function App() {
   const [booksError, setBooksError] = useState('');
   const [toast, setToast] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
+  const [tourReplay, setTourReplay] = useState(false);
   const userLoadVersion = useRef(0);
   const [userStatus, setUserStatus] = useState('loading');
   const [userError, setUserError] = useState('');
@@ -268,9 +269,19 @@ function App() {
   const closeSearch = () => setSearchOpen(false);
 
   const handleTourClose = () => {
+    setTourReplay(false);
     setCurrentUser((user) => ({ ...user, tourSeenAt: new Date().toISOString() }));
     apiFetch('/api/me/tour', { method: 'PATCH', body: { seen: true } })
       .catch((error) => setToast(error.message));
+  };
+
+  const handleTourReplay = () => {
+    setShowUserMenu(false);
+    setTourReplay(true);
+    setCurrentUser((user) => ({ ...user, tourSeenAt: null }));
+    apiFetch('/api/me/tour', { method: 'PATCH', body: { seen: false } })
+      .catch((error) => setToast(error.message));
+    navigate('/');
   };
 
   if (userStatus === 'loading' && (!isPublicPage || path === '/')) {
@@ -370,6 +381,9 @@ function App() {
                   >
                     {t('app.editProfile')}
                   </Link>
+                  <button className="ghost-button" onClick={handleTourReplay}>
+                    {t('app.replayTour')}
+                  </button>
                   <button className="ghost-button" onClick={handleLogout}>
                     {t('app.logout')}
                   </button>
@@ -453,6 +467,8 @@ function App() {
     
       {!currentUser.tourSeenAt && location.pathname === '/' && (
         <Tour
+          key={tourReplay ? 'replay' : 'first'}
+          showWelcome={!tourReplay}
           steps={TOUR_STEPS.map((key) => ({ target: key, title: t(`tour.steps.${key}.title`), text: t(`tour.steps.${key}.text`) }))}
           onClose={handleTourClose}
         />

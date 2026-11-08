@@ -14221,6 +14221,7 @@ a.discovery-result-meta:hover {
   .tour-card {
     animation: none;
   }
+}
 
 .topbar-preferences {
   display: flex;
@@ -14233,5 +14234,9 @@ a.discovery-result-meta:hover {
     display: none;
   }
 }
+
+.tour-welcome-actions {
+  justify-content: flex-end;
+  margin-top: 6px;
 }
 
