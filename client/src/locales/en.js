@@ -515,6 +515,28 @@ const en = {
     postPage: {
         back: 'Back',
     },
+    settings: {
+        title: 'Settings',
+        index: 'Settings sections',
+        profile: {
+            title: 'Profile',
+            subtitle: 'Your name, photo, bio and everything people see on your profile.',
+        },
+        appearance: {
+            title: 'Appearance',
+            subtitle: 'Choose how A Library of Us looks for you.',
+            season: 'Seasonal theme',
+            seasonHint: 'Changes the colors, the sidebar illustration and the little details of the app.',
+            themes: {
+                classic: 'Warm paper and rose, all year long.',
+                christmas: 'Snow, deep reds and a cozy winter corner.',
+            },
+            dark: 'Dark mode',
+            darkHint: 'Easier on the eyes at night.',
+            language: 'Language',
+            languageHint: 'Menus and texts across the app will use this language.',
+        },
+    },
     themes: {
         title: 'Theme',
         classic: 'Classic',

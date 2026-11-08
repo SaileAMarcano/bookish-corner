@@ -70,7 +70,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
     const location = useLocation();
     const { t } = useTranslation();
     const navRef = useRef(null);
-    const settingsActive = location.pathname === '/profile/edit';
+    const settingsActive = location.pathname === '/settings';
     const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(staffRole));
     const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
     const mark = '/logo-mark.png';
@@ -153,7 +153,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
 
             <hr className="sidebar-divider" />
             <Link
-                to="/profile/edit"
+                to="/settings"
                 className={`sidebar-link sidebar-settings ${settingsActive ? 'active' : ''}`}
                 aria-label={t('nav.settings')}
                 aria-current={settingsActive ? 'page' : undefined}

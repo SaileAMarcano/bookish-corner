@@ -5,6 +5,7 @@ import './App.css'
 import Home from './Home';
 import ProfilePage from './ProfilePage';
 import EditProfile from './EditProfile';
+import SettingsPage from './SettingsPage';
 import AuthPage from './AuthPage';
 import Landing from './Landing';
 import BetaPage from './BetaPage';
@@ -426,6 +427,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
+          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguafeChange} />} />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />

@@ -14240,3 +14240,258 @@ a.discovery-result-meta:hover {
   margin-top: 6px;
 }
 
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  align-items: start;
+  gap: 24px;
+}
+
+.settings-index {
+  position: sticky;
+  top: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+}
+
+.settings-index-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.settings-index-link:hover {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.settings-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 30px;
+  scroll-margin-top: 90px;
+}
+
+.settings-section-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.settings-section-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius);
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.settings-section-title {
+  margin: 0;
+  font-size: 22px;
+}
+
+.settings-section-sub {
+  margin: 3px 0 0;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.settings-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.settings-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.settings-profile-text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.settings-profile-name {
+  font-weight: 600;
+}
+
+.settings-profile-user {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.settings-profile-edit {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+}
+
+.settings-block {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--surface-2);
+}
+
+.settings-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-row-label {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-row-hint {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.settings-row-control {
+  flex-shrink: 0;
+}
+
+.settings-themes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
+}
+
+.settings-theme {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 10px 14px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.settings-theme:hover {
+  border-color: var(--rose);
+}
+
+.settings-theme.active {
+  border-color: var(--rose-deep);
+  box-shadow: 0 0 0 1px var(--rose-deep);
+}
+
+.settings-theme:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 2px;
+}
+
+.settings-theme-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 120px;
+  margin-bottom: 6px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+}
+
+.settings-theme-preview-classic {
+  background: #F4EDE0;
+}
+
+.settings-theme-preview-christmas {
+  background: #2A1E1C;
+}
+
+.settings-theme-preview img {
+  max-width: 80%;
+  max-height: 104px;
+  object-fit: contain;
+}
+
+.settings-theme-name {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.settings-theme-name svg {
+  color: var(--rose-ink);
+}
+
+.settings-theme-desc {
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+@media (max-width: 860px) {
+  .settings-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .settings-index {
+    position: static;
+    flex-direction: row;
+    overflow-x: auto;
+  }
+
+  .settings-index-link {
+    flex-shrink: 0;
+  }
+
+  .settings-section {
+    padding: 20px;
+  }
+
+  .settings-profile {
+    flex-wrap: wrap;
+  }
+
+  .settings-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+}

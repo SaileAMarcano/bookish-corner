@@ -515,6 +515,28 @@ const es = {
     postPage: {
         back: 'Volver',
     },
+    settings: {
+        title: 'Configuración',
+        index: 'Secciones de configuración',
+        profile: {
+            title: 'Perfil',
+            subtitle: 'Tu nombre, tu foto, tu bio y todo lo que la gente ve en tu perfil.',
+        },
+        appearance: {
+            title: 'Apariencia',
+            subtitle: 'Elige cómo se ve A Library of Us para ti.',
+            season: 'Tema de temporada',
+            seasonHint: 'Cambia los colores, la ilustración de la barra lateral y los pequeños detalles de la app.',
+            themes: {
+                classic: 'Papel cálido y rosa, todo el año.',
+                christmas: 'Nieve, rojos profundos y un rincón acogedor de invierno.',
+            },
+            dark: 'Modo oscuro',
+            darkHint: 'Más cómodo para leer de noche.',
+            language: 'Idioma',
+            languageHint: 'Los menús y textos de la app usarán este idioma.',
+        },
+    },
     themes: {
         title: 'Tema',
         classic: 'Clásico',
