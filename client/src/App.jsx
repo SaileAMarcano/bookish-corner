@@ -32,6 +32,7 @@ import NotificationsPage from './NotificationsPage';
 import PostPage from './PostPage';
 import ListPage from './ListPage';
 import MilestoneCelebration from './MilestoneCelebration';
+import Tour from './Tour';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
@@ -42,6 +43,8 @@ import SearchBox from './SearchBox';
 import ThemePicker from './ThemePicker';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
+
+const TOUR_STEPS = ['feed', 'composer', 'library', 'lists', 'search', 'bell', 'account', 'preferences'];
 
 function applyUserLanguage(user) {
   if (user.language && user.language !== i18n.language) {
@@ -264,6 +267,12 @@ function App() {
 
   const closeSearch = () => setSearchOpen(false);
 
+  const handleTourClose = () => {
+    setCurrentUser((user) => ({ ...user, tourSeenAt: new Date().toISOString() }));
+    apiFetch('/api/me/tour', { method: 'PATCH', body: { seen: true } })
+      .catch((error) => setToast(error.message));
+  };
+
   if (userStatus === 'loading' && (!isPublicPage || path === '/')) {
     return <div className="app-status">{t('app.opening')}</div>;
   }
@@ -317,14 +326,16 @@ function App() {
           />
 
           <div className="topbar-actions">
-            <LanguageSwitcher onChange={handleLanguageChange} />
-            <button type="button" className="theme-switch" role="switch" aria-checked={theme === 'dark'} aria-label={t('app.darkMode')} onClick={handleThemeToggle}>
-              <Icon name="sun" size={16} />
-              <span className='theme-switch-track'>
-                <span className="theme-switch-thumb"></span>
-              </span>
-              <Icon name="moon" size={16} />
-            </button>
+            <div className="topbar-preferences" data-tour="preferences">
+              <LanguageSwitcher onChange={handleLanguageChange} />
+              <button type="button" className="theme-switch" role="switch" aria-checked={theme === 'dark'} aria-label={t('app.darkMode')} onClick={handleThemeToggle}>
+                <Icon name="sun" size={16} />
+                <span className='theme-switch-track'>
+                  <span className="theme-switch-thumb"></span>
+                </span>
+                <Icon name="moon" size={16} />
+              </button>
+            </div>
 
             <NotificationBell />
 
@@ -332,6 +343,7 @@ function App() {
               <button
                 type="button"
                 className="header-user"
+                data-tour="account"
                 onClick={() => setShowUserMenu(!showUserMenu)}
                 aria-expanded={showUserMenu}
                 aria-label={t('app.accountMenu')}>
@@ -438,6 +450,13 @@ function App() {
       )}
 
       <MilestoneCelebration currentUser={currentUser} books={books} />
+    
+      {!currentUser.tourSeenAt && location.pathname === '/' && (
+        <Tour
+          steps={TOUR_STEPS.map((key) => ({ target: key, title: t(`tour.steps.${key}.title`), text: t(`tour.steps.${key}.text`) }))}
+          onClose={handleTourClose}
+        />
+      )}
     </div>
   )
 }

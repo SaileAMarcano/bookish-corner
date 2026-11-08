@@ -4,7 +4,7 @@ import Icon from './Icon';
 function SearchBox({ q, onChange, onOpen, open, variant = 'topbar' }) {
     const { t } = useTranslation();
     return (
-        <div className={variant === 'explore' ? 'explore-search-box' : 'search-box'} data-search-trigger>
+        <div className={variant === 'explore' ? 'explore-search-box' : 'search-box'} data-search-trigger data-tour={variant === 'explore' ? undefined : 'search'}>
             <form className={variant === 'explore' ? 'explore-search-form' : 'topbar-search'} role="search" onSubmit={(event) => { event.preventDefault(); onOpen(); }}>
                 <Icon name="search" size={18} />
                 <input

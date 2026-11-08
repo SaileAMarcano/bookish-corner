@@ -78,6 +78,7 @@ function NotificationBell() {
             <button
                 type="button"
                 className={`bell-button ${isOpen ? 'open' : ''}`}
+                data-tour="bell"
                 onClick={handleToggle}
                 aria-expanded={isOpen}
                 aria-label={count > 0 ? t('notifications.bellUnread', { count }) : t('notifications.bell')}

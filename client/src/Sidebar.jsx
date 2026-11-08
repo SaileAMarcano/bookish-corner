@@ -5,9 +5,10 @@ import Icon from './Icon';
 
 const NAV_ITEMS = [
     { to: '/', label: 'nav.home', icon: 'home' },
-    { to: '/library', label: 'nav.library', icon: 'library' },
+    { to: '/library', label: 'nav.library', icon: 'library', tour: 'library' },
     {
         key: 'profile',
+        tour: 'lists',
         label: 'nav.profile',
         icon: 'about',
         children: [
@@ -110,6 +111,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
                 key={item.to}
                 to={item.to}
                 className={`sidebar-link ${active ? 'active' : ''} ${nested ? 'sidebar-sublink' : ''}`}
+                data-tour={item.tour}
                 aria-label={t(item.label)}
                 aria-current={active ? (location.pathname === item.to.split('?')[0] ? 'page' : 'location') : undefined}
                 onClick={() => closeMenus(navRef.current)}
@@ -135,6 +137,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
                     <details className="sidebar-nav-group" name="sidebar-navigation" key={item.key}>
                         <summary
                             className={`sidebar-link ${isGroupActive(item, location) ? 'active' : ''}`}
+                               data-tour={item.tour} 
                             aria-label={t(item.label)}
                         >
                             <Icon name={item.icon} size={20} />

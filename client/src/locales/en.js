@@ -1259,6 +1259,16 @@ const en = {
         back: 'Back',
         next: 'Next',
         finish: 'Finish',
+            steps: {
+            feed: { title: 'Your home feed', text: 'For you shows what the community is reading and sharing, Following shows the people you follow, and Recent shows everything new, including your own posts.' },
+            composer: { title: 'Share a post', text: 'Write what you are reading or thinking. You can add up to four books, an image, a song from Spotify and a spoiler warning.' },
+            library: { title: 'Your library', text: 'Keep every book here: want to read, reading, read, paused or did not finish. Update your progress and add a note as you go.' },
+            lists: { title: 'Lists', text: 'Open your profile menu to find Lists. Gather books around any idea, put them in order, add notes and save lists from other readers.' },
+            search: { title: 'Search', text: 'Look for books, readers and lists from any page.' },
+            bell: { title: 'Notifications', text: 'Likes, comments and new followers show up here.' },
+            account: { title: 'Your account', text: 'Edit your profile, change your seasonal theme or log out from this menu.' },
+            preferences: { title: 'Language and theme', text: 'Switch between English and Spanish, and between light and dark mode. On your phone you will find both in the account menu.' },
+        },
     },
 };
 

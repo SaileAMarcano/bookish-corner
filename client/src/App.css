@@ -14221,4 +14221,17 @@ a.discovery-result-meta:hover {
   .tour-card {
     animation: none;
   }
+
+.topbar-preferences {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
+
+@media (max-width: 860px) {
+  .topbar-preferences {
+    display: none;
+  }
+}
+}
+

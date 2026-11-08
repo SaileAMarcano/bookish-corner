@@ -169,7 +169,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                 <section className="post-list home-feed">
                     <PostComposer books={books} onCreated={handlePostCreated} />
 
-                    <div className="profile-tabs home-tabs">
+                    <div className="profile-tabs home-tabs" data-tour="feed">
                         {FEED_TABS.map((tab) => (
                             <button
                                 key={tab}

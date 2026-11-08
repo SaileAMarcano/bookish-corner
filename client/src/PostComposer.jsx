@@ -128,7 +128,7 @@ function PostComposer({ books, onCreated, post, onSaved, onCancel }) {
     };
 
     return (
-        <form className={`card post-composer ${isEditing ? 'post-composer-editing' : ''}`} onSubmit={handleSubmit}>
+        <form className={`card post-composer ${isEditing ? 'post-composer-editing' : ''}`} onSubmit={handleSubmit}  data-tour={isEditing ? undefined : 'composer'}>
             <textarea
                 className="post-composer-text"
                 value={text}

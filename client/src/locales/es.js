@@ -1259,6 +1259,16 @@ const es = {
         back: 'Anterior',
         next: 'Siguiente',
         finish: 'Terminar',
+                steps: {
+            feed: { title: 'Tu inicio', text: 'Para ti muestra lo que la comunidad está leyendo y compartiendo, Siguiendo muestra a las personas que sigues y Recientes muestra todo lo nuevo, también tus publicaciones.' },
+            composer: { title: 'Comparte una publicación', text: 'Escribe qué estás leyendo o pensando. Puedes añadir hasta cuatro libros, una imagen, una canción de Spotify y un aviso de spoiler.' },
+            library: { title: 'Tu biblioteca', text: 'Guarda aquí todos tus libros: quiero leer, leyendo, leído, en pausa o abandonado. Actualiza tu progreso y añade una nota cuando quieras.' },
+            lists: { title: 'Listas', text: 'Abre el menú de tu perfil para encontrar Listas. Reúne libros alrededor de cualquier idea, ordénalos, añade notas y guarda listas de otras lectoras.' },
+            search: { title: 'Buscador', text: 'Busca libros, personas y listas desde cualquier página.' },
+            bell: { title: 'Notificaciones', text: 'Aquí te avisamos de los me gusta, los comentarios y las personas que empiezan a seguirte.' },
+            account: { title: 'Tu cuenta', text: 'Desde este menú editas tu perfil, cambias el tema de temporada o cierras sesión.' },
+            preferences: { title: 'Idioma y tema', text: 'Cambia entre inglés y español, y entre el modo claro y el oscuro. En el celular los encuentras en el menú de tu cuenta.' },
+        },
     },
 };
 
