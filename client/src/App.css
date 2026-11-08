@@ -14495,3 +14495,53 @@ a.discovery-result-meta:hover {
     gap: 12px;
   }
 }
+
+.header-menu-admin {
+  display: none;
+}
+
+.header-manu-admin > summary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  list-style: none;
+}
+
+.header-menu-admin > summary::-webkit-details-marker {
+  display: none;
+}
+
+.header-menu-admin[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+.header-menu-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+}
+
+.header-menu-admin-Link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.header-menu-admin-link:hover {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+@media (max-width: 860px) {
+  .header-menu-admin {
+    display: block;
+  }
+}

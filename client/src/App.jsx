@@ -41,7 +41,7 @@ import Notice from './Notice';
 import Welcome from './Welcome';
 import SearchPanel from './SearchPanel';
 import SearchBox from './SearchBox';
-import ThemePicker from './ThemePicker';
+import { ADMIN_ITEMS } from './adminNav';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 
@@ -82,6 +82,7 @@ function App() {
   }, [theme]);
 
   const seasonTheme = currentUser?.seasonTheme === 'christmas' ? 'christmas' : 'classic';
+  const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(currentUser?.staffRole));
 
   useEffect(() => {
     document.documentElement.dataset.season = seasonTheme;
@@ -374,7 +375,7 @@ function App() {
                       {theme === 'dark' ? t('app.lightMode') : t('app.darkMode')}
                     </button>
                   </div>
-                  <ThemePicker current={seasonTheme} onChange={handleSeasonThemeChange} />
+
                   <Link
                     to="/profile/edit"
                     className="ghost-button"
@@ -382,6 +383,35 @@ function App() {
                   >
                     {t('app.editProfile')}
                   </Link>
+                  <Link
+                    to="/settings"
+                    className="ghost-button"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    {t('nav.settings')}
+                  </Link>
+                  {adminItems.length > 0 && (
+                    <details className="header-menu-admin">
+                      <summary className="ghost-button">
+                        {t('nav.adminSection')}
+                        <Icon name="chevronDown" size={14} />
+                      </summary>
+                      <div className="header-menu-admin-list">
+                        {adminItems.map((item) => (
+                          <Link
+                            key={item.to}
+                            to={item.to}
+                            className="header-menu-admin-link"
+                            onClick={() => setShowUserMenu(false)}
+                          >
+                            <Icon name={item.icon} size={15} />
+                            {t(item.label)}
+                          </Link>
+                        ))}
+                      </div>
+                    </details>
+                  )}
+
                   <button className="ghost-button" onClick={handleTourReplay}>
                     {t('app.replayTour')}
                   </button>
@@ -427,7 +457,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
-          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguafeChange} />} />
+          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} />} />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />

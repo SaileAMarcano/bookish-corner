@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
+import { ADMIN_ITEMS } from './adminNav';
 
 const NAV_ITEMS = [
     { to: '/', label: 'nav.home', icon: 'home' },
@@ -20,16 +21,6 @@ const NAV_ITEMS = [
     },
     { to: '/explore', label: 'nav.explore', icon: 'search' },
     { to: '/reviews', label: 'nav.reviews', icon: 'feather' },
-];
-
-const ADMIN_ITEMS = [
-    { to: '/admin', label: 'nav.adminSummary', icon: 'genres', roles: ['admin', 'moderator'] },
-    { to: '/admin/moderation', label: 'nav.adminModeration', icon: 'flag', roles: ['admin', 'moderator'] },
-    { to: '/admin/people', label: 'nav.adminPeople', icon: 'following', roles: ['admin', 'moderator'] },
-    { to: '/admin/applications', label: 'nav.adminApplications', icon: 'feather', roles: ['admin', 'moderator'] },
-    { to: '/admin/invites', label: 'nav.adminInvites', icon: 'mail', roles: ['admin', 'moderator'] },
-    { to: '/admin/catalog', label: 'nav.adminCatalog', icon: 'library', roles: ['admin', 'editor'] },
-    { to: '/admin/activity', label: 'nav.adminActivity', icon: 'clock', roles: ['admin', 'moderator'] },
 ];
 
 const SEASON_ILLUSTRATIONS = ['classic', 'christmas'];
