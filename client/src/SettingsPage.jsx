@@ -12,6 +12,8 @@ const SECTIONS =[
     { id: 'account', icon: 'lock' },
 ];
 
+const COLOR_VISIONS = ['default', 'red-green', 'blue-yellow'];
+
 const SEASON_THEMES = [
     { id: 'classic', image: '/sidebar-illustration.png' },
     { id: 'christmas', image: '/seasons/christmas/sidebar.png' },
@@ -48,7 +50,7 @@ function SettingRow({ label, hint, children }) {
     );
 }
 
-function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeasonThemeChange, onLanguageChange, reduceMotion, onReduceMotionToggle, onLogout, onDeleted }) {
+function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeasonThemeChange, onLanguageChange, reduceMotion, onReduceMotionToggle, colorVision, onColorVisionChange, onLogout, onDeleted }) {
     const { t } = useTranslation();
 
     return (
@@ -147,6 +149,39 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                                 <span className="settings-switch-thumb"></span>
                             </button>
                         </SettingRow>
+
+                        <div className="settings-row settings-block">
+                            <div className="settings-row-text">
+                                <span className="settings-row-label">{t('settings.accessibility.colorVision')}</span>
+                                <span className="settings-row-hint">{t('settings.accessibility.colorVisionHint')}</span>
+                            </div>
+
+                            <div className="settings-visions" role="radiogroup" aria-label={t('settings.accessibility.colorVision')}>
+                                {COLOR_VISIONS.map((option) => (
+                                    <button
+                                        key={option}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={colorVision === option}
+                                        className={`settings-theme settings-vision ${colorVision === option ? 'active' : ''}`}
+                                        onClick={() => onColorVisionChange(option)}
+                                    >
+                                        <span className={`settings-vision-swatches settings-vision-${option}`} aria-hidden="true">
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                            <span></span>
+                                        </span>
+                                        <span className="settings-theme-name">
+                                            {t(`settings.accessibility.visions.${option}.name`)}
+                                            {colorVision === option && <Icon name="check" size={15} />}
+                                        </span>
+                                        <span className="settings-theme-desc">{t(`settings.accessibility.visions.${option}.text`)}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </SettingsSection>
 
                     <SettingsSection id="account" icon="lock">

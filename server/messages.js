@@ -103,6 +103,7 @@ const MESSAGES = {
         deleteUsernameMismatch: 'The username you typed does not match your account.',
         deletePasswordWrong: 'That password is not correct.',
         deleteLastAdmin: 'You are the only admin. Give the admin role to someone else before deleting your account.',
+        colorVisionInvalid: 'Choose a valid color vision option.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -206,6 +207,7 @@ const MESSAGES = {
         deleteUsernameMismatch: 'El usuario que escribiste no coincide con tu cuenta.',
         deletePasswordWrong: 'Esa contraseña no es correcta.',
         deleteLastAdmin: 'Eres la única persona admin. Dale el rol de admin a alguien más antes de eliminar tu cuenta.',
+        colorVisionInvalid: 'Elige una opción de visión del color válida.',
     },
 };
 

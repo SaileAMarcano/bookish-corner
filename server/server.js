@@ -2342,7 +2342,7 @@ function hasPlus(user) {
 async function findMe(userId) {
     const [user] = await query(
         `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
-            season_theme, plus_until, staff_role, gender_identity, tour_seen_at, reduce_motion,
+            season_theme, plus_until, staff_role, gender_identity, tour_seen_at, reduce_motion, color_vision,
             COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
         [userId]
@@ -2381,6 +2381,19 @@ app.patch('/api/me/reduce-motion', requireAuth, async (req, res) => {
 
     await query('UPDATE users SET reduce_motion = $1 WHERE id = $2', [reduceMotion, req.session.user.id]);
     res.json({ reduceMotion });
+});
+
+const COLOR_VISIONS = ['default', 'red-green', 'blue-yellow'];
+
+app.patch('/api/me/color-vision', requireAuth, async (req, res) => {
+    const { colorVision } = req.body;
+
+    if (!COLOR_VISIONS.includes(colorVision)) {
+        return res.status(400).json({ error: msg(req, 'colorVisionInvalid') });
+    }
+
+    await query('UPDATE users SET color_vision = $1 WHERE id = $2', [colorVision, req.session.user.id]);
+    res.json({ colorVision });
 });
 
 

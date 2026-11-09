@@ -98,6 +98,16 @@ function App() {
     }
   }, [reduceMotion]);
 
+  const colorVision = currentUser?.colorVision || 'default';
+
+  useEffect(() => {
+    if (colorVision === 'default') {
+      delete document.documentElement.dataset.vision;
+    } else {
+      document.documentElement.dataset.vision = colorVision;
+    }
+  }, [colorVision]);
+
   const [searchParams] = useSearchParams();
   const [q, setQ] = useState(() => searchParams.get('q') || '');
   const [searchOpen, setSearchOpen] = useState(() => Boolean(searchParams.get('q')));
@@ -281,6 +291,16 @@ function App() {
     apiFetch('/api/me/reduce-motion', { method: 'PATCH', body: { reduceMotion: next }})
       .catch((error) => {
         setCurrentUser((user) => ({ ...user, reduceMotion: !next }));
+        setToast(error.message);
+      });
+  };
+
+  const handleColorVisionChange = (next) => {
+    const previous = colorVision;
+    setCurrentUser((user) => ({ ...user, colorVision: next }));
+    apiFetch('/api/me/color-vision', { method: 'PATCH', body: { colorVision: next } })
+      .catch((error) => {
+        setCurrentUser((user) => ({ ...user, colorVision: previous }));
         setToast(error.message);
       });
   };
@@ -479,7 +499,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
-          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} reduceMotion={reduceMotion} onReduceMotionToggle={handleReduceMotionToggle}  onLogout={handleLogout} onDeleted={clearSession} />} />
+          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} reduceMotion={reduceMotion} onReduceMotionToggle={handleReduceMotionToggle} colorVision={colorVision} onColorVisionChange={handleColorVisionChange} onLogout={handleLogout} onDeleted={clearSession} />} />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />

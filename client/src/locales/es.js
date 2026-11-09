@@ -541,6 +541,13 @@ const es = {
             subtitle: 'Ajusta la app para que te resulte cómoda.',
             reduceMotion: 'Reducir animaciones',
             reduceMotionHint: 'Quita las transiciones, la nieve de Navidad y los efectos de celebración. Si tu dispositivo ya pide menos movimiento, lo respetamos siempre.',
+            colorVision: 'Visión del color',
+            colorVisionHint: 'Cambia los colores de los estados de lectura, las barras de progreso y los avisos para que se distingan bien, y añade un pequeño símbolo a cada estado.',
+            visions: {
+                default: { name: 'Estándar', text: 'Los colores de siempre de la app.' },
+                'red-green': { name: 'Rojo–verde', text: 'Para protanopia y deuteranopia. Usa azul, naranja y amarillo en lugar de rojo y verde.' },
+                'blue-yellow': { name: 'Azul–amarillo', text: 'Para tritanopia. Usa rojo, verde y magenta en lugar de azul y amarillo.' },
+            },
         },
         account: {
             title: 'Cuenta',
