@@ -542,7 +542,7 @@ const en = {
             reduceMotion: 'Reduce motion',
             reduceMotionHint: 'Turns off transitions, the Christmas snow and celebration effects. If your device already asks for less motion, we always respect it.',
             colorVision: 'Color vision',
-            colorVisionHint: 'Changes the colors of reading statuses, progress bars and warnings so they are easy to tell apart, and adds a small symbol to each status.',
+            colorVisionHint: 'Changes the colors of the whole app so they are easy to tell apart, and adds a small symbol to each reading status.',
             visions: {
                 default: { name: 'Standard', text: 'The usual colors of the app.' },
                 'red-green': { name: 'Red–green', text: 'For protanopia and deuteranopia. Uses blue, orange and yellow instead of red and green.' },
