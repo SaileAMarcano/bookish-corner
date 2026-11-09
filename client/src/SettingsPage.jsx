@@ -15,7 +15,7 @@ const SECTIONS =[
 const COLOR_VISIONS = ['default', 'red-green', 'blue-yellow'];
 
 const SEASON_THEMES = [
-    { id: 'classic', image: '/sidebar-illustration.png' },
+    { id: 'classic', image: '/seasons/classic/sidebar.png' },
     { id: 'christmas', image: '/seasons/christmas/sidebar.png' },
 ]
 

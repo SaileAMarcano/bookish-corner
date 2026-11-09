@@ -9617,25 +9617,24 @@ a.search-title:hover {
 }
 
 .year-shelf-spine {
+  position: relative;
   display: flex;
-  flex: 0 0 44px;
+  flex: 0 0 var(--spine-width);
   align-items: center;
   justify-content: center;
-  width: 44px;
+  width: var(--spine-width);
   height: var(--spine-height);
-  box-sizing: border-box;
-  padding: 12px 8px;
-  border: 1px solid #ffffff25;
-  border-radius: 4px 5px 2px 2px;
-  background: repeating-linear-gradient(90deg, transparent 0 3px, #ffffff08 3px 4px), var(--spine-color);
-  box-shadow: inset 3px 0 #00000020, inset -2px 0 #ffffff12;
-  color: #fff3da;
+  border-radius: 7px 8px 6px 7px;
+  color: #2e241f;
   text-decoration: none;
+  transform-origin: bottom right;
+  transition: translate 160ms ease;
 }
 
 .year-shelf-spine span {
+  position: relative;
   overflow: hidden;
-  max-height: 100%;
+  max-height: 53%;
   font-family: 'Fraunces', serif;
   font-size: 13px;
   text-overflow: ellipsis;
@@ -9643,8 +9642,16 @@ a.search-title:hover {
   writing-mode: vertical-rl;
 }
 
-.year-shelf-spine:hover {
-  filter: brightness(1.12);
+.year-shelf-spine[data-lean] {
+  z-index: 1;
+  margin-right: 5px;
+  rotate: 6deg;
+}
+
+.year-shelf-spine:hover,
+.year-shelf-spine:focus-visible {
+  z-index: 2;
+  translate: 0 var(--spine-lift, -4px);
 }
 
 .year-shelf-spine:focus-visible,
@@ -14828,4 +14835,225 @@ a.discovery-result-meta:hover {
 
 .settings-row.settings-block {
   align-items: stretch;
+}
+
+.year-shelf-stage {
+  --shelf-tone-0: var(--sage);
+  --shelf-tone-1: var(--lavender);
+  --shelf-tone-2: var(--rose);
+  --shelf-tone-3: color-mix(in srgb, var(--lavender) 65%, #537184);
+  --shelf-tone-4: var(--clay);
+  --shelf-tone-5: var(--amber);
+  --shelf-wood: #ad8064;
+  --shelf-edge: #55372a;
+  --shelf-bracket-inset: clamp(16px, 4%, 40px);
+  --spine-width: 44px;
+  isolation: isolate;
+  min-height: 216px;
+  padding-bottom: 27px;
+}
+
+:root[data-theme="dark"] .year-shelf-stage {
+  --shelf-wood: #976d54;
+  --shelf-edge: #39251d;
+}
+
+:root[data-vision="red-green"] .year-shelf-stage {
+  --shelf-tone-0: color-mix(in srgb, var(--lavender) 55%, #eee7dd);
+  --shelf-tone-1: var(--lavender);
+  --shelf-tone-2: color-mix(in srgb, var(--amber) 65%, #f6e5c3);
+  --shelf-tone-3: color-mix(in srgb, var(--lavender) 60%, #344d69);
+  --shelf-tone-4: color-mix(in srgb, var(--amber) 55%, #60422d);
+  --shelf-tone-5: var(--amber);
+}
+
+:root[data-vision="blue-yellow"] .year-shelf-stage {
+  --shelf-tone-0: var(--sage);
+  --shelf-tone-1: color-mix(in srgb, var(--rose) 60%, #715560);
+  --shelf-tone-2: var(--rose);
+  --shelf-tone-3: color-mix(in srgb, var(--sage) 60%, #3e625e);
+  --shelf-tone-4: var(--clay);
+  --shelf-tone-5: color-mix(in srgb, var(--clay) 60%, var(--rose));
+}
+
+.year-shelf-stage::before {
+  position: absolute;
+  inset: auto 0 0;
+  height: 16px;
+  background:
+    linear-gradient(var(--shelf-wood), var(--shelf-wood)) left calc(var(--shelf-bracket-inset) + 2px) top / 8px 14px no-repeat,
+    linear-gradient(var(--shelf-wood), var(--shelf-wood)) right calc(var(--shelf-bracket-inset) + 2px) top / 8px 14px no-repeat,
+    linear-gradient(var(--shelf-edge), var(--shelf-edge)) left var(--shelf-bracket-inset) top / 12px 16px no-repeat,
+    linear-gradient(var(--shelf-edge), var(--shelf-edge)) right var(--shelf-bracket-inset) top / 12px 16px no-repeat;
+  pointer-events: none;
+  content: '';
+}
+
+.year-shelf-stage::after {
+  bottom: 14px;
+  box-sizing: border-box;
+  height: 13px;
+  border: 2px solid var(--shelf-edge);
+  border-radius: 3px 2px 4px 3px;
+  background: var(--shelf-wood);
+  box-shadow: inset 0 -2px #55372a33;
+  pointer-events: none;
+}
+
+.year-shelf-spine,
+.year-shelf-stack svg {
+  --spine-color: color-mix(in srgb, var(--spine-tone) 56%, #f6eddd);
+  --spine-accent: color-mix(in srgb, var(--spine-tone) 87%, #f6eddd);
+  --spine-detail: color-mix(in srgb, var(--spine-tone) 22%, #fff8e9);
+  --spine-line: color-mix(in srgb, var(--spine-tone) 15%, #34251e);
+}
+
+.year-shelf-spine-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.year-shelf-spine-art > * {
+  stroke-width: 2.5px;
+  vector-effect: non-scaling-stroke;
+}
+
+.year-shelf-stack {
+  display: flex;
+  flex: 0 0 100px;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 8px;
+  pointer-events: none;
+}
+
+.year-shelf-stack svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+.year-shelf-stack svg:first-child {
+  width: 79%;
+}
+
+.year-shelf-stack svg:nth-child(2) {
+  width: 92%;
+  margin-left: 7%;
+}
+
+.year-shelf-stack svg + svg {
+  margin-top: -3px;
+}
+
+@media (max-width: 860px) {
+  .year-shelf-stage {
+    --spine-width: 36px;
+  }
+
+  .year-shelf-stack {
+    flex-basis: 82px;
+  }
+}
+
+:root[data-motion="reduce"] .year-shelf-spine {
+  --spine-lift: 0px;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .year-shelf-spine {
+    --spine-lift: 0px;
+    transition: none;
+  }
+}
+
+.year-shelf-stage .year-shelf-spine {
+  --spine-height: 168px;
+}
+
+@media (max-width: 860px) {
+  .year-shelf-stage .year-shelf-spine {
+    --spine-height: 150px;
+  }
+}
+
+.year-shelf-pile {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
+  margin: 0 6px;
+}
+
+.year-shelf-flat {
+  --spine-color: color-mix(in srgb, var(--spine-tone) 56%, #f6eddd);
+  --spine-accent: color-mix(in srgb, var(--spine-tone) 87%, #f6eddd);
+  --spine-detail: color-mix(in srgb, var(--spine-tone) 22%, #fff8e9);
+  --spine-line: color-mix(in srgb, var(--spine-tone) 15%, #34251e);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 168px;
+  height: 44px;
+  box-sizing: border-box;
+  padding: 0 34px;
+  color: #2e241f;
+  text-decoration: none;
+  transition: translate 160ms ease;
+}
+
+.year-shelf-flat + .year-shelf-flat {
+  margin-top: -2px;
+}
+
+.year-shelf-flat:nth-child(1) {
+  margin-left: 10px;
+}
+
+.year-shelf-flat:nth-child(3) {
+  margin-left: 5px;
+}
+
+.year-shelf-flat span {
+  position: relative;
+  overflow: hidden;
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.year-shelf-flat:hover,
+.year-shelf-flat:focus-visible {
+  z-index: 2;
+  translate: var(--flat-shift, 4px) 0;
+}
+
+.year-shelf-flat:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 2px;
+}
+
+@media (max-width: 860px) {
+  .year-shelf-flat {
+    width: 150px;
+    height: 36px;
+  }
+}
+
+:root[data-motion="reduce"] .year-shelf-flat {
+  --flat-shift: 0px;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .year-shelf-flat {
+    --flat-shift: 0px;
+    transition: none;
+  }
 }
