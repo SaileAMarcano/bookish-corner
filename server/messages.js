@@ -100,6 +100,9 @@ const MESSAGES = {
         listNoteTooLong: 'Each note can have up to 280 characters',
         invalidRequest: 'We could not read what you sent',
         serverError: 'Something went wrong on our side. Please try again.',
+        deleteUsernameMismatch: 'The username you typed does not match your account.',
+        deletePasswordWrong: 'That password is not correct.',
+        deleteLastAdmin: 'You are the only admin. Give the admin role to someone else before deleting your account.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -200,6 +203,9 @@ const MESSAGES = {
         listTooManyBooks: 'Una lista puede tener hasta 100 libros',
         listNoteTooLong: 'Cada nota puede tener hasta 280 caracteres',
         serverError: 'Algo salió mal de nuestro lado. Inténtalo de nuevo.',
+        deleteUsernameMismatch: 'El usuario que escribiste no coincide con tu cuenta.',
+        deletePasswordWrong: 'Esa contraseña no es correcta.',
+        deleteLastAdmin: 'Eres la única persona admin. Dale el rol de admin a alguien más antes de eliminar tu cuenta.',
     },
 };
 

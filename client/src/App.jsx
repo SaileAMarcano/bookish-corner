@@ -226,18 +226,20 @@ function App() {
       .catch((error) => setToast(error.message));
   };
 
+    const clearSession = () => {
+    userLoadVersion.current++;
+    booksLoadVersion.current++;
+    setBooks([]);
+    setBooksStatus('loading');
+    setCurrentUser(null);
+    setQ('');
+    setSearchOpen(false);
+    navigate('/');
+  };
+
   const handleLogout = () => {
     apiFetch('/api/logout', { method: 'POST' })
-      .then(() => {
-        userLoadVersion.current++;
-        booksLoadVersion.current++;
-        setBooks([]);
-        setBooksStatus('loading');
-        setCurrentUser(null);
-        setQ('');
-        setSearchOpen(false);
-        navigate('/');
-      })
+      .then(clearSession)
       .catch((error) => setToast(error.message));
   };
 
@@ -477,7 +479,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
-          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} reduceMotion={reduceMotion} onReduceMotionToggle={handleReduceMotionToggle} />} />
+          <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} reduceMotion={reduceMotion} onReduceMotionToggle={handleReduceMotionToggle}  onLogout={handleLogout} onDeleted={clearSession} />} />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />

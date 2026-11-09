@@ -2,12 +2,14 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import Icon from './Icon';
+import DeleteAccount from './DeleteAccount';
 import { getAvatarSrc } from './utils';
 
 const SECTIONS =[
     { id: 'profile', icon: 'about' },
     { id: 'appearance', icon: 'sparkle' },
     { id: 'accessibility', icon: 'eye' },
+    { id: 'account', icon: 'lock' },
 ];
 
 const SEASON_THEMES = [
@@ -46,7 +48,7 @@ function SettingRow({ label, hint, children }) {
     );
 }
 
-function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeasonThemeChange, onLanguageChange, reduceMotion, onReduceMotionToggle }) {
+function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeasonThemeChange, onLanguageChange, reduceMotion, onReduceMotionToggle, onLogout, onDeleted }) {
     const { t } = useTranslation();
 
     return (
@@ -146,6 +148,19 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                             </button>
                         </SettingRow>
                     </SettingsSection>
+
+                    <SettingsSection id="account" icon="lock">
+                        <SettingRow label={t('settings.account.email')} hint={currentUser.email} />
+
+                        <SettingRow label={t('settings.account.logout')} hint={t('settings.account.logoutHint')}>
+                            <button type="button" className="ghost-button" onClick={onLogout}>
+                                {t('app.logout')}
+                            </button>
+                        </SettingRow>
+
+                        <DeleteAccount username={currentUser.username} onDeleted={onDeleted} />
+                    </SettingsSection>
+
                 </div>
             </div>
         </main>

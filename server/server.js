@@ -2383,6 +2383,47 @@ app.patch('/api/me/reduce-motion', requireAuth, async (req, res) => {
     res.json({ reduceMotion });
 });
 
+
+app.delete('/api/me', requireAuth, async (req, res) => {
+    const { username, password } = req.body;
+    const userId = req.session.user.id;
+
+    const [user] = await query('SELECT username, password_hash, avatar_url, staff_role FROM users WHERE id = $1', [userId]);
+    if (!user) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+
+    if (typeof username !== 'string' || username.trim().toLowerCase() !== user.username.toLowerCase()) {
+        return res.status(400).json({ error: msg(req, 'deleteUsernameMismatch') });
+    }
+
+    if (typeof password !== 'string' || !(await bcrypt.compare(password, user.passwordHash))) {
+        return res.status(401).json({ error: msg(req, 'deletePasswordWrong') });
+    }
+
+    if (user.staffRole === 'admin') {
+        const [{ count }] = await query("SELECT COUNT(*) AS count FROM users WHERE staff_role = 'admin'");
+        if (count <= 1) {
+            return res.status(400).json({ error: msg(req, 'deleteLastAdmin') });
+        }
+    }
+
+    const images = await query('SELECT image_url FROM posts WHERE user_id = $1 AND image_url IS NOT NULL', [userId]);
+
+    await query('DELETE FROM users WHERE id = $1', [userId]);
+    await query("DELETE FROM session WHERE sess -> 'user' ->> 'id' = $1", [String(userId)]);
+
+    await Promise.allSettled([
+        user.avatarUrl ? deleteAvatar(user.avatarUrl) : null,
+        ...images.map((image) => deletePostImage(image.imageUrl)),
+    ]);
+
+    req.session.destroy(() => {
+        res.clearCookie('connect.sid');
+        res.json({ deleted: true });
+    });
+});
+
 const INVITE_DAYS = 14;
 const INVITE_EXPIRES = `COALESCE(i.reviewed_at, i.created_at) + make_interval(days => ${INVITE_DAYS})`;
 
