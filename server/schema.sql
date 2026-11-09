@@ -25,7 +25,7 @@ CREATE TABLE users(
     is_admin        BOOLEAN NOT NULL DEFAULT false,
     gender_identity TEXT CHECK (gender_identity IN ('woman', 'man', 'nonbinary', 'unspecified')),
     staff_role      TEXT CHECK (staff_role IN ('admin', 'editor', 'moderator', 'designer')),
-    tour_seen_at    TIMESTAMPTZ
+    tour_seen_at    TIMESTAMPTZ,
     reduce_motion   BOOLEAN NOT NULL DEFAULT false
 );
 

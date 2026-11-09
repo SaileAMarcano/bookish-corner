@@ -131,7 +131,6 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                             <LanguageSwitcher onChange={onLanguageChange} />
                         </SettingRow>
                     </SettingsSection>
-                </div>
 
                     <SettingsSection id="accessibility" icon="eye">
                         <SettingRow label={t('settings.accessibility.reduceMotion')} hint={t('settings.accessibility.reduceMotionHint')}>
@@ -147,7 +146,7 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                             </button>
                         </SettingRow>
                     </SettingsSection>
-
+                </div>
             </div>
         </main>
     );
