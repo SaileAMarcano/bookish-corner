@@ -2437,6 +2437,41 @@ app.delete('/api/me', requireAuth, async (req, res) => {
     });
 });
 
+
+const SUPPORT_KINDS = ['problem', 'idea', 'account', 'other'];
+const SUPPORT_PER_HOUR = 5;
+
+app.post('/api/support', requireAuth, async (req, res) => {
+    const { kind, message, page } = req.body;
+    const text = typeof message === 'string' ? message.trim() : '';
+    const userId = req.session.user.id;
+
+    if (!SUPPORT_KINDS.includes(kind)) {
+        return res.status(400).json({ error: msg(req, 'supportKindInvalid') });
+    }
+
+    if (text.length < 10 || text.length > 2000) {
+        return res.status(400).json({ error: msg(req, 'supportMessageLength') });
+    }
+
+    const [{ count }] = await query(
+        "SELECT COUNT(*) AS count FROM support_requests WHERE user_id = $1 AND created_at > now() - interval '1 hour'",
+        [userId]
+    );
+    if (count >= SUPPORT_PER_HOUR) {
+        return res.status(429).json({ error: msg(req, 'supportTooMany') });
+    }
+
+    const pageUrl = typeof page === 'string' && page.startsWith('/') ? page.slice(0, 300) : null;
+    const userAgent = String(req.get('user-agent') || '').slice(0, 300) || null;
+
+    await query(
+        'INSERT INTO support_requests (user_id, kind, message, page_url, user_agent) VALUES ($1, $2, $3, $4, $5)',
+        [userId, kind, text, pageUrl, userAgent]
+    );
+    res.status(201).json({ sent: true });
+});
+
 const INVITE_DAYS = 14;
 const INVITE_EXPIRES = `COALESCE(i.reviewed_at, i.created_at) + make_interval(days => ${INVITE_DAYS})`;
 

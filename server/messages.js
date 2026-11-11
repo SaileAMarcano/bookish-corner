@@ -104,6 +104,9 @@ const MESSAGES = {
         deletePasswordWrong: 'That password is not correct.',
         deleteLastAdmin: 'You are the only admin. Give the admin role to someone else before deleting your account.',
         colorVisionInvalid: 'Choose a valid color vision option.',
+        supportKindInvalid: 'Choose what your message is about.',
+        supportMessageLength: 'Write between 10 and 2000 characters.',
+        supportTooMany: 'You have sent several messages in the last hour. Please wait a little before sending another one.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -208,6 +211,9 @@ const MESSAGES = {
         deletePasswordWrong: 'Esa contraseña no es correcta.',
         deleteLastAdmin: 'Eres la única persona admin. Dale el rol de admin a alguien más antes de eliminar tu cuenta.',
         colorVisionInvalid: 'Elige una opción de visión del color válida.',
+        supportKindInvalid: 'Elige de qué trata tu mensaje.',
+        supportMessageLength: 'Escribe entre 10 y 2000 caracteres.',
+        supportTooMany: 'Enviaste varios mensajes en la última hora. Espera un poco antes de enviar otro.',
     },
 };
 

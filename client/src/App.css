@@ -15057,3 +15057,203 @@ a.discovery-result-meta:hover {
     transition: none;
   }
 }
+
+
+.help-page .edit-head {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.help-subtitle {
+  margin: 6px 0 0;
+  color: var(--text-2);
+  font-size: 15px;
+}
+
+.help-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 560px;
+  margin-bottom: 24px;
+  color: var(--text-2);
+}
+
+.help-search svg {
+  position: absolute;
+  left: 14px;
+  pointer-events: none;
+}
+
+.help-search .edit-input {
+  padding-left: 40px;
+}
+
+.help-sections {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(420px, 1fr));
+  align-items: start;
+  gap: 20px;
+}
+
+.help-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 24px 26px;
+}
+
+.help-section .settings-section-head {
+  align-items: center;
+}
+
+.help-questions {
+  display: flex;
+  flex-direction: column;
+}
+
+.help-question {
+  border-top: 1px solid var(--surface-2);
+}
+
+.help-question > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 48px;
+  padding: 10px 0;
+  font-size: 15px;
+  font-weight: 600;
+  list-style: none;
+  cursor: pointer;
+}
+
+.help-question > summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-question > summary svg {
+  flex-shrink: 0;
+  color: var(--text-2);
+  transition: transform 0.2s ease;
+}
+
+.help-question[open] > summary svg {
+  transform: rotate(180deg);
+}
+
+.help-question > summary:hover {
+  color: var(--rose-ink);
+}
+
+.help-question > summary:focus-visible {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 2px;
+}
+
+.help-question p {
+  margin: 0 0 14px;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.help-empty {
+  padding: 24px;
+  color: var(--text-2);
+}
+
+@media (max-width: 860px) {
+  .help-sections {
+    grid-template-columns: 1fr;
+  }
+
+  .help-section {
+    padding: 20px;
+  }
+}
+
+
+.help-contact {
+  max-width: 760px;
+  margin-top: 28px;
+  scroll-margin-top: 90px;
+}
+
+.help-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.help-contact-kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 10px;
+  padding: 0;
+  border: none;
+}
+
+.help-contact-kinds legend {
+  margin-bottom: 8px;
+}
+
+.help-contact-kind {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--surface-2);
+  border-radius: 999px;
+  background: var(--bg);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.help-contact-kind input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.help-contact-kind.active {
+  border-color: var(--rose-deep);
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  font-weight: 600;
+}
+
+.help-contact-kind:has(input:focus-visible) {
+  outline: 2px solid var(--rose-deep);
+  outline-offset: 2px;
+}
+
+.help-contact-message {
+  min-height: 120px;
+  resize: vertical;
+  font: inherit;
+}
+
+.help-contact-send {
+  align-self: flex-start;
+  margin-top: 6px;
+}
+
+.help-contact-sent {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--sage-soft);
+  color: var(--sage-text);
+}
+
+.help-contact-sent p {
+  flex: 1;
+  min-width: 200px;
+  margin: 0;
+}

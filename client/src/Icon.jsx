@@ -230,6 +230,14 @@ const ICONS = {
             <path d="M10 20.5a2 2 0 0 0 4 0" />
         </>
     ),
+    
+    help: (
+        <>
+            <circle cx="12" cy="12" r="8.5" />
+            <path d="M9.6 9.4a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2.2-2.4 3.7" />
+            <path d="M12 16.8h.01" />
+        </>
+    ),
 
 };
 
@@ -244,4 +252,4 @@ function Icon({ name, size = 17 }) {
     );
 }
 
-export default Icon
+export default Icon

@@ -6,6 +6,7 @@ import Home from './Home';
 import ProfilePage from './ProfilePage';
 import EditProfile from './EditProfile';
 import SettingsPage from './SettingsPage';
+import HelpPage from './HelpPage';
 import AuthPage from './AuthPage';
 import Landing from './Landing';
 import BetaPage from './BetaPage';
@@ -425,6 +426,7 @@ function App() {
                   >
                     {t('app.editProfile')}
                   </Link>
+
                   <Link
                     to="/settings"
                     className="ghost-button"
@@ -432,6 +434,15 @@ function App() {
                   >
                     {t('nav.settings')}
                   </Link>
+                  <Link
+                    to="/help"
+                    state={{ from: location.pathname + location.search }}
+                    className="ghost-button"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    {t('nav.help')}
+                  </Link>
+
                   {adminItems.length > 0 && (
                     <details className="header-menu-admin">
                       <summary className="ghost-button">
@@ -499,6 +510,7 @@ function App() {
             path="/profile/edit"
             element={<EditProfile onSaved={loadCurrentUser} />}
           />
+          <Route path="/help" element={<HelpPage />} />
           <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} reduceMotion={reduceMotion} onReduceMotionToggle={handleReduceMotionToggle} colorVision={colorVision} onColorVisionChange={handleColorVisionChange} onLogout={handleLogout} onDeleted={clearSession} />} />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />

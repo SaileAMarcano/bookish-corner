@@ -351,6 +351,20 @@ CREATE TABLE list_comments (
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
+CREATE TABLE support_requests (
+    id          INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id     INTEGER REFERENCES users (id) ON DELETE SET NULL,
+    kind        TEXT NOT NULL CHECK (kind IN ('problem', 'idea', 'account', 'other')),
+    message     TEXT NOT NULL CHECK (length(trim(message)) BETWEEN 10 AND 2000),
+    page_url    TEXT,
+    user_agent  TEXT,
+    status      TEXT NOT NULL DEFAULT 'open' CHECK (status IN ('open', 'resolved')),
+    staff_note  TEXT CHECK (length(staff_note) <= 500),
+    resolved_by INTEGER REFERENCES users (id) ON DELETE SET NULL,
+    resolved_at TIMESTAMPTZ,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE notifications (
     id              INTEGER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     user_id         INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
@@ -391,6 +405,7 @@ CREATE INDEX list_books_work_idx ON list_books (work_id);
 CREATE INDEX list_tags_tag_idx ON list_tags (tag_id);
 CREATE INDEX list_likes_list_idx ON list_likes (list_id);
 CREATE INDEX list_comments_list_idx ON list_comments (list_id);
+CREATE INDEX support_requests_status_idx ON support_requests (status, created_at DESC);
 
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE works ENABLE ROW LEVEL SECURITY;
@@ -425,3 +440,4 @@ ALTER TABLE list_tags ENABLE ROW LEVEL SECURITY;
 ALTER TABLE list_likes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE saved_lists ENABLE ROW LEVEL SECURITY;
 ALTER TABLE list_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE support_requests ENABLE ROW LEVEL SECURITY;

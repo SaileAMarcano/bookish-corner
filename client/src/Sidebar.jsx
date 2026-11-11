@@ -62,6 +62,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
     const { t } = useTranslation();
     const navRef = useRef(null);
     const settingsActive = location.pathname === '/settings';
+    const helpActive = location.pathname === '/help';
     const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(staffRole));
     const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
     const mark = '/logo-mark.png';
@@ -151,6 +152,16 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
             >
                 <Icon name="settings" size={20} />
                 <span className="sidebar-label">{t('nav.settings')}</span>
+            </Link>
+            <Link
+                to="/help"
+                state={{ from: location.pathname + location.search }}
+                className={`sidebar-link sidebar-settings ${helpActive ? 'active' : ''}`}
+                aria-label={t('nav.help')}
+                aria-current={helpActive ? 'page' : undefined}
+            >
+                <Icon name="help" size={20} />
+                <span className="sidebar-label">{t('nav.help')}</span>
             </Link>
 
             {adminItems.length > 0 && (
