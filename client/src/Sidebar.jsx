@@ -57,7 +57,7 @@ function closeMenus(container, restoreFocus = false) {
     });
 }
 
-function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0 }) {
+function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0, supportCount = 0 }) {
     const location = useLocation();
     const { t } = useTranslation();
     const navRef = useRef(null);
@@ -96,7 +96,8 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
     function renderLink(item, nested = false) {
         const active = isActive(item, location);
         const count = item.to === '/library' ? readingCount
-            : item.to === '/admin/moderation' ? moderationCount : 0;
+            : item.to === '/admin/moderation' ? moderationCount
+            : item.to === '/admin/support' ? supportCount : 0;
 
         return (
             <Link

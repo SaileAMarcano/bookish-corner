@@ -15257,3 +15257,133 @@ a.discovery-result-meta:hover {
   min-width: 200px;
   margin: 0;
 }
+
+
+.support-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.support-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.support-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px 0;
+}
+
+.support-item + .support-item {
+  border-top: 1px solid var(--surface-2);
+}
+
+.support-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.support-kind {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.support-kind-problem {
+  background: var(--error-soft);
+  color: var(--error);
+}
+
+.support-kind-idea {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.support-kind-account {
+  background: var(--sage-soft);
+  color: var(--sage-text);
+}
+
+.support-kind-other {
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+}
+
+.support-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.support-user:hover {
+  color: var(--rose-ink);
+}
+
+.support-deleted {
+  color: var(--text-2);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.support-time {
+  margin-left: auto;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.support-message {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.support-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+.support-meta div {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+}
+
+.support-meta dt {
+  font-weight: 600;
+}
+
+.support-meta dd {
+  overflow: hidden;
+  max-width: 420px;
+  margin: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.support-note {
+  font: inherit;
+  font-size: 14px;
+  resize: vertical;
+}
+
+.support-actions {
+  display: flex;
+  justify-content: flex-end;
+}

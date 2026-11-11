@@ -2472,6 +2472,56 @@ app.post('/api/support', requireAuth, async (req, res) => {
     res.status(201).json({ sent: true });
 });
 
+
+app.get('/api/admin/support/count', requireStaff('moderator'), async (req, res) => {
+    const [row] = await query("SELECT COUNT(*) AS count FROM support_requests WHERE status = 'open'");
+    res.json(row);
+});
+
+app.get('/api/admin/support', requireStaff('moderator'), async (req, res) => {
+    const status = req.query.status === 'resolved' ? 'resolved' : 'open';
+    const kind = SUPPORT_KINDS.includes(req.query.kind) ? req.query.kind : null;
+
+    const requests = await query(`
+        SELECT s.id, s.kind, s.message, s.page_url, s.user_agent, s.status, s.staff_note, s.created_at, s.resolved_at,
+               u.username, u.display_name, u.avatar_url, r.username AS resolved_by_username
+        FROM support_requests s
+        LEFT JOIN users u ON u.id = s.user_id
+        LEFT JOIN users r ON r.id = s.resolved_by
+        WHERE s.status = $1 AND ($2::text IS NULL OR s.kind = $2)
+        ORDER BY s.created_at ${status === 'open' ? 'ASC' : 'DESC'}
+        LIMIT 100
+    `, [status, kind]);
+    res.json(requests);
+});
+
+app.patch('/api/admin/support/:id', requireStaff('moderator'), async (req, res) => {
+    const id = Number(req.params.id);
+    const { status } = req.body;
+    const note = typeof req.body.note === 'string' ? req.body.note.trim().slice(0, 500) : '';
+
+    if (!Number.isInteger(id) || !['open', 'resolved'].includes(status)) {
+        return res.status(400).json({ error: msg(req, 'supportUpdateInvalid') });
+    }
+
+    const [updated] = await query(`
+        UPDATE support_requests
+        SET status = $1::text,
+            staff_note = COALESCE(NULLIF($2, ''), staff_note),
+            resolved_by = CASE WHEN $1::text = 'resolved' THEN $3::integer END,
+            resolved_at = CASE WHEN $1::text = 'resolved' THEN now() END
+        WHERE id = $4
+        RETURNING id, message
+    `, [status, note, req.session.user.id, id]);
+
+    if (!updated) {
+        return res.status(404).json({ error: msg(req, 'notFound') });
+    }
+
+    await logAction(req, status === 'resolved' ? 'support_resolved' : 'support_reopened', updated.message.slice(0, 60));
+    res.json({ status });
+});
+
 const INVITE_DAYS = 14;
 const INVITE_EXPIRES = `COALESCE(i.reviewed_at, i.created_at) + make_interval(days => ${INVITE_DAYS})`;
 

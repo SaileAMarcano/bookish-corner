@@ -7,6 +7,7 @@ import ProfilePage from './ProfilePage';
 import EditProfile from './EditProfile';
 import SettingsPage from './SettingsPage';
 import HelpPage from './HelpPage';
+import AdminSupport from './AdminSupport';
 import AuthPage from './AuthPage';
 import Landing from './Landing';
 import BetaPage from './BetaPage';
@@ -74,6 +75,7 @@ function App() {
   const [userError, setUserError] = useState('');
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [moderationCount, setModerationCount] = useState(0);
+  const [supportCount, setSupportCount] = useState(0);
   const navigate = useNavigate();
 
   const theme = themeOf(currentUser);
@@ -215,8 +217,17 @@ function App() {
       .catch(() => { });
   };
 
+    const loadSupportCount = () => {
+    apiFetch('/api/admin/support/count')
+      .then((data) => setSupportCount(data.count))
+      .catch(() => { });
+  };
+
   useEffect(() => {
-    if (canModerate) loadModerationCount();
+    if (canModerate) {
+      loadModerationCount();
+      loadSupportCount();
+    }
   }, [canModerate, location.pathname]);
 
   const handleLike = (userBookId, alreadyLiked) => {
@@ -370,7 +381,7 @@ function App() {
         </video>
       )}
 
-      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} staffRole={currentUser.staffRole} moderationCount={moderationCount} />
+      <Sidebar readingCount={books.filter((book) => book.status === 'reading').length} seasonTheme={seasonTheme} staffRole={currentUser.staffRole} moderationCount={moderationCount} supportCount={supportCount} />
 
       <div className="app-main">
         <header className="topbar">
@@ -531,6 +542,7 @@ function App() {
             <>
               <Route path="/admin" element={<AdminSummary currentUser={currentUser} />} />
               <Route path="/admin/moderation" element={<AdminModeration onResolved={loadModerationCount} />} />
+              <Route path="/admin/support" element={<AdminSupport onChanged={loadSupportCount} />} />
               <Route path="/admin/people" element={<AdminPage currentUser={currentUser} />} />
               <Route path="/admin/invites" element={<AdminInvites currentUser={currentUser} />} />
               <Route path="/admin/applications" element={<AdminApplications currentUser={currentUser} />} />
