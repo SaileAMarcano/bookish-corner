@@ -4,6 +4,7 @@ import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
 import { formatDate } from './utils';
+import LoadingState from './LoadingState';
 
 const TABS = ['new', 'invited', 'declined'];
 
@@ -127,7 +128,7 @@ function AdminApplications({ currentUser }) {
             {message && <p className="admin-message" role="status">{message}</p>}
 
             {!data ? (
-                !error && <p className="tags-empty">{t('admin.loading')}</p>
+                !error && <LoadingState compact label={t('admin.loading')} />
             ) : data.applications.length === 0 ? (
                 <section className="card admin-box">
                     <p className="tags-empty">{t(`applications.empty.${tab}`)}</p>

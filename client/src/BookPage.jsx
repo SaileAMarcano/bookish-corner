@@ -11,12 +11,18 @@ import StarRating from './StarRating';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { getAvatarSrc, genreLabel, pageSummary, slugify, timeAgo } from './utils';
+import LoadingState from './LoadingState';
 
 function BookPage({ books, onLibraryChange }) {
     const { id } = useParams();
     const { t, i18n } = useTranslation();
     const [book, setBook] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
     const [actionError, setActionError] = useState('');
     const [showReading, setShowReading] = useState(false);
     const [openComments, setOpenComments] = useState(null);
@@ -46,7 +52,7 @@ function BookPage({ books, onLibraryChange }) {
         return () => {
             ignore = true;
         };
-    }, [id, i18n.language]);
+    }, [id, i18n.language, retry]);
 
     const handleAdd = (status) => {
         setActionError('');
@@ -80,7 +86,7 @@ function BookPage({ books, onLibraryChange }) {
     if (error) {
         return (
             <main className="page">
-                <Notice message={error} />
+                <Notice message={error} onRetry={tryAgain} />
             </main>
         );
     }
@@ -88,7 +94,7 @@ function BookPage({ books, onLibraryChange }) {
     if (!book) {
         return (
             <main className="page">
-                <div className="section-label">{t('bookPage.loading')}</div>
+                <LoadingState label={t('bookPage.loading')} />
             </main>
         );
     }

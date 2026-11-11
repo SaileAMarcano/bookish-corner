@@ -7,12 +7,18 @@ import BookCover from './BookCover';
 import Notice from './Notice';
 import ReportButton from './ReportButton';
 import { apiFetch } from './api';
+import LoadingState from './LoadingState';
 
 function TaggedPage({ currentUser }) {
     const { slug } = useParams();
     const { t, i18n } = useTranslation();
     const [data, setData] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
     const [followError, setFollowError] = useState('');
 
     useEffect(() => {
@@ -32,7 +38,7 @@ function TaggedPage({ currentUser }) {
         return () => {
             ignore = true;
         };
-    }, [slug, i18n.language]);
+    }, [slug, i18n.language, retry]);
 
     const handlePostChange = (postId, changes) => {
         setData((current) => ({
@@ -73,7 +79,7 @@ function TaggedPage({ currentUser }) {
                         <h1 className="display tagged-title">#{slug}</h1>
                     </div>
                 </div>
-                <Notice message={error} />
+                <Notice message={error} onRetry={tryAgain} />
             </main>
         );
     }
@@ -81,7 +87,7 @@ function TaggedPage({ currentUser }) {
     if (!data) {
         return (
             <main className="page tagged-page">
-                <div className="section-label">{t('tagged.loading')}</div>
+                <LoadingState label={t('tagged.loading')} />
             </main>
         );
     }

@@ -35,7 +35,7 @@ function LibraryTile({ book, isSelected, onEdit, onChoose }) {
     return (
         <article className={`library-grid-tile ${isSelected ? 'selected' : ''}`}>
             <div className="library-grid-cover-wrap">
-                <Link to={`/book/${book.bookId}`} className="library-grid-cover-link" aria-label={book.title}>
+                <Link to={`/book/${book.bookId}`} className="library-grid-cover-link" tabIndex={-1} aria-hidden="true">
                     <BookCover
                         src={book.coverImage}
                         className="library-grid-cover"

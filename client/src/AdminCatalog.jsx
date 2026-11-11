@@ -7,6 +7,7 @@ import BookCover from './BookCover';
 import BookEditorForm from './BookEditorForm';
 import BookRequestsCard from './BookRequestsCard';
 import { apiFetch } from './api';
+import LoadingState from './LoadingState';
 
 function AdminCatalog() {
     const { t } = useTranslation();
@@ -127,7 +128,7 @@ function AdminCatalog() {
                         {error && <Notice message={error} />}
 
                         {!books ? (
-                            <p className="tags-empty">{t('admin.loading')}</p>
+                            <LoadingState compact label={t('admin.loading')} />
                         ) : books.length === 0 ? (
                             <p className="tags-empty">{t('catalog.empty')}</p>
                         ) : (

@@ -15,15 +15,19 @@
   --ink: #2E2925;
   --text-2: #6F675E;
   --rose: #C496A1;
-  --rose-deep: #B07E8A;
+  --rose-deep: #875261;
   --rose-ink: #864B5C;
+  --rose-hover: #B98593;
+  --on-rose: #2E2925;
+  --on-rose-deep: #FAF5EB;
+  --rose-deep-hover: #74444F;
   --sage: #919D85;
   --lavender: #8E88A3;
   --clay: #8A4F35;
   --clay-soft: #EBD3C4;
-  --amber: #7D6229;
+  --amber: #735A25;
   --amber-soft: #EFE0BC;
-  --sage-text: #5C6950;
+  --sage-text: #5A6650;
   --sage-soft: #DCE2D3;
   --error: #9B4A3D;
   --error-soft: #F0DCD6;
@@ -49,8 +53,12 @@
   --ink: #F1E8D6;
   --text-2: #B5A88C;
   --rose: #C48C9B;
-  --rose-deep: #B27A8A;
+  --rose-deep: #BA8492;
   --rose-ink: #F0BFCB;
+  --rose-hover: #B27A8A;
+  --on-rose: #1D1916;
+  --on-rose-deep: #1D1916;
+  --rose-deep-hover: #C48C9B;
   --rose-soft: #47303A;
   --sage: #8E9B82;
   --lavender: #A49EBB;
@@ -71,6 +79,10 @@
   --rose: #A23E4D;
   --rose-deep: #8C2F39;
   --rose-ink: #7A2530;
+  --rose-hover: #8C2F39;
+  --on-rose: #FFFFFF;
+  --on-rose-deep: #FFFFFF;
+  --rose-deep-hover: #7A2530;
   --rose-soft: #F3DCDC;
   --snow: rgb(162 62 77 / 10%);
 }
@@ -79,6 +91,10 @@
   --rose: #C24850;
   --rose-deep: #A83A42;
   --rose-ink: #F28B8B;
+  --rose-hover: #A83A42;
+  --on-rose: #FFFFFF;
+  --on-rose-deep: #FFFFFF;
+  --rose-deep-hover: #8E2F36;
   --rose-soft: #5A2A2E;
   --snow: rgb(255 255 255 / 9%);
 }
@@ -2385,8 +2401,12 @@ html {
   --ink: #2E2925;
   --text-2: #6F675E;
   --rose: #C496A1;
-  --rose-deep: #B07E8A;
+  --rose-deep: #875261;
+  --rose-hover: #B98593;
+  --on-rose: #2E2925;
   --rose-ink: #864B5C;
+  --on-rose-deep: #FAF5EB;
+  --rose-deep-hover: #74444F;
   --rose-soft: #F2DEDB;
   --error: #9B4A3D;
   --error-soft: #F0DCD6;
@@ -14715,6 +14735,10 @@ a.discovery-result-meta:hover {
   --rose: #3E7CB1;
   --rose-deep: #2F6696;
   --rose-ink: #1F4E79;
+  --rose-hover: #2F6696;
+  --on-rose: #FFFFFF;
+  --on-rose-deep: #FFFFFF;
+  --rose-deep-hover: #1F4E79;
   --rose-soft: #DCE8F4;
   --sage: #E69F00;
   --sage-text: #8A5A00;
@@ -14734,6 +14758,10 @@ a.discovery-result-meta:hover {
   --rose: #6FA6DA;
   --rose-deep: #5A92C8;
   --rose-ink: #A9CDF2;
+  --rose-hover: #5A92C8;
+  --on-rose: #1D1916;
+  --on-rose-deep: #1D1916;
+  --rose-deep-hover: #6FA6DA;
   --rose-soft: #1F3347;
   --sage: #F2B544;
   --sage-text: #F6C979;
@@ -14753,6 +14781,10 @@ a.discovery-result-meta:hover {
   --rose: #B3261E;
   --rose-deep: #961E17;
   --rose-ink: #7D1912;
+  --rose-hover: #961E17;
+  --on-rose: #FFFFFF;
+  --on-rose-deep: #FFFFFF;
+  --rose-deep-hover: #7D1912;
   --rose-soft: #F6D8D4;
   --sage: #2E7D32;
   --sage-text: #1B5E20;
@@ -14768,6 +14800,10 @@ a.discovery-result-meta:hover {
   --rose: #E5675C;
   --rose-deep: #CF5248;
   --rose-ink: #F4A39B;
+  --rose-hover: #CF5248;
+  --on-rose: #1D1916;
+  --on-rose-deep: #1D1916;
+  --rose-deep-hover: #E5675C;
   --rose-soft: #4A2220;
   --sage: #81C784;
   --sage-text: #A5D6A7;
@@ -15386,4 +15422,236 @@ a.discovery-result-meta:hover {
 .support-actions {
   display: flex;
   justify-content: flex-end;
+}
+.first-book {
+  width: min(720px, calc(100% - 32px));
+  overflow-y: auto;
+}
+
+.first-book>header {
+  align-items: flex-start;
+}
+
+.first-book-kicker {
+  display: block;
+  margin-bottom: 4px;
+  color: var(--rose-ink);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+}
+
+.first-book .discovery-search {
+  flex: none;
+}
+
+.first-book-content {
+  min-height: 120px;
+  margin-top: 22px;
+}
+
+.first-book-label {
+  margin: 0 0 12px;
+}
+
+.first-book-grid {
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+  gap: 22px 16px;
+}
+
+.first-book-empty {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.first-book-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.first-book-done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 0 4px;
+  text-align: center;
+}
+
+.first-book-done>p:not(.first-book-done-title) {
+  max-width: 420px;
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.first-book-done-icon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  background: var(--sage-soft);
+  color: var(--sage-text);
+}
+
+.first-book-done-title {
+  margin: 0 0 8px;
+  font-size: 1.4rem;
+}
+
+.first-book-done .first-book-actions {
+  justify-content: center;
+  margin-top: 22px;
+}
+
+@media (max-width: 680px) {
+  .first-book {
+    padding: 20px 16px;
+  }
+
+  .first-book-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px 10px;
+  }
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 220px;
+  color: var(--text-2);
+  font-size: 13px;
+  text-align: center;
+}
+
+.loading-state-compact {
+  flex-direction: row;
+  justify-content: flex-start;
+  gap: 12px;
+  min-height: 40px;
+}
+
+.loading-books {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 34px;
+}
+
+.loading-state-compact .loading-books {
+  height: 22px;
+  gap: 3px;
+}
+
+.loading-books span {
+  width: 9px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--rose);
+  transform-origin: bottom center;
+  animation: loading-book 1.2s ease-in-out infinite;
+}
+
+.loading-state-compact .loading-books span {
+  width: 6px;
+}
+
+.loading-books span:nth-child(2) {
+  height: 82%;
+  background: var(--sage);
+  animation-delay: 0.15s;
+}
+
+.loading-books span:nth-child(3) {
+  height: 92%;
+  background: var(--amber);
+  animation-delay: 0.3s;
+}
+
+@keyframes loading-book {
+  0%,
+  100% {
+    transform: scaleY(1);
+  }
+
+  50% {
+    transform: scaleY(0.62);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-books span {
+    animation: none;
+  }
+}
+
+.comment-button,
+.modal-close:hover,
+.profile-edit,
+.edit-card-icon,
+.edit-save,
+.access-submit,
+.access-rule.passed .access-rule-box,
+.public-signup,
+.language-option.active,
+.post-composer-send,
+.post-comment-send,
+a.post-tag:hover,
+.post-tag.active,
+.tag-follow,
+.achievement-badge-button[aria-pressed="true"],
+.library-tools .book-filter-chip.active {
+  color: var(--on-rose);
+}
+
+.profile-edit:hover,
+.edit-save:hover,
+.access-submit:hover:not(:disabled),
+.public-signup:hover,
+.post-composer-send:hover,
+.post-comment-send:hover,
+.tag-follow:hover {
+  background: var(--rose-hover);
+  color: var(--on-rose);
+}
+
+.continue-button,
+.reading-add,
+.modal-primary,
+.review-save,
+.comment-send,
+.welcome-option.selected .welcome-option-icon,
+.quick-add,
+.invite-create {
+  color: var(--on-rose-deep);
+}
+
+.continue-button:hover,
+.reading-add:hover,
+.modal-primary:hover:not(:disabled),
+.review-save:hover:not(:disabled),
+.comment-send:hover,
+.quick-add:hover,
+.invite-create:hover {
+  background: var(--rose-deep-hover);
+  color: var(--on-rose-deep);
+}
+
+.book-filter-count {
+  opacity: 1;
+}
+
+.sidebar-link.active {
+  color: var(--rose-ink);
 }

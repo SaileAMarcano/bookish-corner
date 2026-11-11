@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { timeAgo } from './utils';
+import LoadingState from './LoadingState';
 
 const FILTERS = ['all', 'post', 'post_comment', 'review', 'review_comment', 'profile', 'tag', 'list', 'list_comment'];
 
@@ -164,7 +165,7 @@ function AdminModeration({ onResolved }) {
                 </div>
 
                 {!groups ? (
-                    !error && <p className="tags-empty">{t('admin.loading')}</p>
+                    !error && <LoadingState compact label={t('admin.loading')} />
                 ) : groups.length === 0 ? (
                     <p className="tags-empty">{t('moderation.empty')}</p>
                 ) : (

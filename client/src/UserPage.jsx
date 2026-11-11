@@ -15,6 +15,7 @@ import ProfileSide from './ProfileSide';
 import ProfileLists from './ProfileLists';
 import { apiFetch } from './api';
 import { pinnedFirst } from './utils';
+import LoadingState from './LoadingState';
 
 const TABS = [...PROFILE_TABS, 'following'];
 
@@ -26,6 +27,11 @@ function UserPage({ currentUser }) {
     const [posts, setPosts] = useState(null);
     const [books, setBooks] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
     const [actionError, setActionError] = useState('');
 
     const activeTab = TABS.includes(searchParams.get('tab')) ? searchParams.get('tab') : 'posts';
@@ -49,7 +55,7 @@ function UserPage({ currentUser }) {
         return () => {
             ignore = true;
         };
-    }, [base, i18n.language]);
+    }, [base, i18n.language, retry]);
 
     const handleFollow = () => {
         setActionError('');
@@ -73,7 +79,7 @@ function UserPage({ currentUser }) {
     if (error) {
         return (
             <main className="page">
-                <Notice message={error} />
+                <Notice message={error} onRetry={tryAgain} />
             </main>
         );
     }
@@ -81,7 +87,7 @@ function UserPage({ currentUser }) {
     if (!profile) {
         return (
             <main className="page">
-                <div className="section-label">{t('profile.loading')}</div>
+                <LoadingState label={t('profile.loading')} />
             </main>
         );
     }

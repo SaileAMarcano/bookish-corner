@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import { apiFetch } from './api';
+import LoadingState from './LoadingState';
 
 const TEAM_ROLES = ['admin', 'editor', 'moderator', 'designer'];
 
@@ -47,7 +48,7 @@ function AdminSummary({ currentUser }) {
             {error && <Notice message={error} />}
 
             {!summary ? (
-                !error && <p className="tags-empty">{t('admin.loading')}</p>
+                !error && <LoadingState compact label={t('admin.loading')} />
             ) : (
                 <>
                     <div className="admin-stats">

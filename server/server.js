@@ -210,6 +210,20 @@ app.get('/api/books', async (req, res) => {
     res.json(books);
 });
 
+app.get('/api/books/popular', requireAuth, async (req, res) => {
+    const books = await query(`
+        SELECT w.id AS book_id, w.open_library_key, ${TRANSLATED_TITLE} AS title, w.author,
+               w.first_published_year AS year, w.cover_image
+        FROM works w
+        ${JOIN_TRANSLATION} = $1
+        LEFT JOIN (SELECT work_id, COUNT(*) AS readers FROM user_books GROUP BY work_id) r ON r.work_id = w.id
+        WHERE w.cover_image IS NOT NULL
+        ORDER BY COALESCE(r.readers, 0) DESC, w.id DESC
+        LIMIT 6
+    `, [languageOf(req)]);
+    res.json(books);
+});
+
 app.get('/api/books/:id', requireAuth, async (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) {

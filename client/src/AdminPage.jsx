@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
+import LoadingState from './LoadingState';
 
 const ROLE_OPTIONS = ['none', 'editor', 'moderator', 'designer'];
 
@@ -72,7 +73,7 @@ function AdminPage({ currentUser }) {
                 {message && <p className="admin-message" role="status">{message}</p>}
 
                 {!people ? (
-                    <p className="tags-empty">{t('admin.loading')}</p>
+                    <LoadingState compact label={t('admin.loading')} />
                 ) : people.length === 0 ? (
                     <p className="tags-empty">{t('admin.empty')}</p>
                 ) : (

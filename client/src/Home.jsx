@@ -12,6 +12,7 @@ import PostComposer from './PostComposer';
 import PostCard from './PostCard';
 import ActivityCard from './ActivityCard';
 import HomeSide from './HomeSide';
+import LoadingState from './LoadingState';
 
 const FEED_TABS = ['for-you', 'following', 'recent'];
 
@@ -186,7 +187,7 @@ function Home({ books, currentUser, onUpdate, booksStatus }) {
                     {feedError && <Notice message={feedError} onRetry={() => setReloadCount((count) => count + 1)} />}
 
                     {!feedError && feed === null && (
-                        <div className="card profile-empty">{t('posts.loading')}</div>
+                        <div className="card profile-empty"><LoadingState compact label={t('posts.loading')} /></div>
                     )}
 
                     {feed && feed.length === 0 && (

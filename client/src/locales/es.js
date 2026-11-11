@@ -142,6 +142,7 @@ const es = {
         logout: 'Cerrar sesión',
     },
     nav: {
+        sidebar: 'Menú principal',
         home: 'Inicio',
         reading: 'Leyendo ahora',
         library: 'Biblioteca',
@@ -517,6 +518,7 @@ const es = {
         },
     },
     postPage: {
+        title: 'Publicación',
         back: 'Volver',
     },
     help: {
@@ -1407,6 +1409,20 @@ const es = {
         { text: 'Una habitación sin libros es como un cuerpo sin alma.', author: 'Cicerón' },
         { text: 'Los libros son la riqueza más preciada del mundo.', author: 'Henry David Thoreau' },
     ],
+    firstBook: {
+        kicker: 'Una última cosa',
+        title: 'Añade tu primer libro',
+        text: 'Busca un libro que estés leyendo ahora o uno que quieras leer. Te estará esperando en tu Biblioteca.',
+        placeholder: 'Busca por título o autor',
+        popular: 'Populares en A Library of Us',
+        results: 'Resultados',
+        noResults: 'No encontramos ese libro. Prueba con otro título o con el nombre del autor.',
+        later: 'Más tarde',
+        doneTitle: '¡Tu estantería ya tiene su primer libro!',
+        doneText: '{{title}} ya está en tu Biblioteca. Allí puedes cambiar su estado y tu progreso.',
+        addAnother: 'Añadir otro libro',
+        goToLibrary: 'Ir a mi Biblioteca',
+    },
         tour: {
         count: 'Paso {{current}} de {{total}}',
         skip: 'Saltar tour',

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import NotificationItem from './NotificationItem';
 import { apiFetch } from './api';
+import LoadingState from './LoadingState';
 
 const CHECK_EVERY = 60 * 1000;
 const RECENT_COUNT = 5;
@@ -92,7 +93,7 @@ function NotificationBell() {
                     <h2 className="display bell-title">{t('notifications.recent')}</h2>
 
                     {!items ? (
-                        <p className="tags-empty">{t('admin.loading')}</p>
+                        <LoadingState compact label={t('admin.loading')} />
                     ) : items.length === 0 ? (
                         <p className="tags-empty">{t('notifications.empty')}</p>
                     ) : (

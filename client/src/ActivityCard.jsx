@@ -52,7 +52,7 @@ function ActivityCard({ activity, currentUserId, onChange }) {
             </div>
 
             <div className="activity-book">
-                <Link to={bookLink} className="activity-cover-link">
+                <Link to={bookLink} className="activity-cover-link" tabIndex={-1} aria-hidden="true">
                     <BookCover src={activity.coverImage} className="activity-cover" />
                 </Link>
 

@@ -4,6 +4,7 @@ import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
 import { formatDate } from './utils';
+import LoadingState from './LoadingState';
 
 function inviteLink(code) {
     return `${window.location.origin}/signup?invite=${code}`;
@@ -156,7 +157,7 @@ function AdminInvites({ currentUser }) {
                 <h2 className="section-label">{t('invites.recentTitle')}</h2>
 
                 {!data ? (
-                    !error && <p className="tags-empty">{t('admin.loading')}</p>
+                    !error && <LoadingState compact label={t('admin.loading')} />
                 ) : data.invites.length === 0 ? (
                     <p className="tags-empty">{t('invites.empty')}</p>
                 ) : (

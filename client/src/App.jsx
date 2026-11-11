@@ -36,6 +36,7 @@ import PostPage from './PostPage';
 import ListPage from './ListPage';
 import MilestoneCelebration from './MilestoneCelebration';
 import Tour from './Tour';
+import FirstBook from './FirstBook';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
@@ -70,6 +71,7 @@ function App() {
   const [toast, setToast] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [tourReplay, setTourReplay] = useState(false);
+  const [showFirstBook, setShowFirstBook] = useState(false);
   const userLoadVersion = useRef(0);
   const [userStatus, setUserStatus] = useState('loading');
   const [userError, setUserError] = useState('');
@@ -324,8 +326,11 @@ function App() {
 
   const closeSearch = () => setSearchOpen(false);
 
-  const handleTourClose = () => {
+  const handleTourClose = (reason) => {
     setTourReplay(false);
+    if (reason === 'finished' && booksStatus === 'ready' && books.length === 0) {
+      setShowFirstBook(true);
+    }
     setCurrentUser((user) => ({ ...user, tourSeenAt: new Date().toISOString() }));
     apiFetch('/api/me/tour', { method: 'PATCH', body: { seen: true } })
       .catch((error) => setToast(error.message));
@@ -570,6 +575,10 @@ function App() {
           steps={TOUR_STEPS.map((key) => ({ target: key, title: t(`tour.steps.${key}.title`), text: t(`tour.steps.${key}.text`) }))}
           onClose={handleTourClose}
         />
+      )}
+
+      {showFirstBook && (
+        <FirstBook books={books} onAdded={loadUserBooks} onClose={() => setShowFirstBook(false)} />
       )}
     </div>
   )

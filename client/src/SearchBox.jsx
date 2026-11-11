@@ -5,10 +5,11 @@ function SearchBox({ q, onChange, onOpen, open, variant = 'topbar' }) {
     const { t } = useTranslation();
     return (
         <div className={variant === 'explore' ? 'explore-search-box' : 'search-box'} data-search-trigger data-tour={variant === 'explore' ? undefined : 'search'}>
-            <form className={variant === 'explore' ? 'explore-search-form' : 'topbar-search'} role="search" onSubmit={(event) => { event.preventDefault(); onOpen(); }}>
+            <form className={variant === 'explore' ? 'explore-search-form' : 'topbar-search'} role="search" aria-label={variant === 'explore' ? t('nav.explore') : t('discoverySearch.title')} onSubmit={(event) => { event.preventDefault(); onOpen(); }}>
                 <Icon name="search" size={18} />
                 <input
                     type="search"
+                    role="combobox"
                     maxLength={120}
                     placeholder={t('discoverySearch.placeholder')}
                     aria-label={t('discoverySearch.placeholder')}

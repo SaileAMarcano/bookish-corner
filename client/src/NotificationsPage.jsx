@@ -4,6 +4,7 @@ import Notice from './Notice';
 import NotificationItem from './NotificationItem';
 import { apiFetch } from './api';
 import { parseDbDate } from './utils';
+import LoadingState from './LoadingState';
 
 const TABS = ['all', 'unread'];
 const DAYS = ['today', 'yesterday', 'earlier'];
@@ -30,6 +31,11 @@ function NotificationsPage() {
     const [items, setItems] = useState(null);
     const [hasMore, setHasMore] = useState(false);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
 
     useEffect(() => {
         let ignore = false;
@@ -48,7 +54,7 @@ function NotificationsPage() {
         return () => {
             ignore = true;
         };
-    }, [tab, page]);
+    }, [tab, page, retry]);
 
     const handleTab = (next) => {
         setItems(null);
@@ -104,10 +110,10 @@ function NotificationsPage() {
                 ))}
             </div>
 
-            {error && <Notice message={error} />}
+            {error && <Notice message={error} onRetry={tryAgain} />}
 
             {!items ? (
-                !error && <p className="tags-empty">{t('admin.loading')}</p>
+                !error && <LoadingState compact label={t('admin.loading')} />
             ) : items.length === 0 ? (
                 <div className="card profile-empty">
                     {tab === 'unread' ? t('notifications.emptyUnread') : t('notifications.empty')}

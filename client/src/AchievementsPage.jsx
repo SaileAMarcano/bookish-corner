@@ -8,6 +8,7 @@ import { achievementLevel } from './achievementUtils';
 import MilestoneSeal, { ProfileBadge } from './MilestoneSeal';
 import { apiFetch } from './api';
 import { getAvatarSrc, parseDbDate } from './utils';
+import LoadingState from './LoadingState';
 
 function MilestoneCard({ milestone, onChooseBadge }) {
     const { t, i18n } = useTranslation();
@@ -62,6 +63,11 @@ function AchievementsPage({ currentUser }) {
     const { t } = useTranslation();
     const [milestones, setMilestones] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
     const [badgeError, setBadgeError] = useState('');
 
     useEffect(() => {
@@ -78,7 +84,7 @@ function AchievementsPage({ currentUser }) {
         return () => {
             ignore = true;
         };
-    }, [currentUser.username]);
+    }, [currentUser.username, retry]);
 
     const handleChooseBadge = (key) => {
         setBadgeError('');
@@ -94,7 +100,7 @@ function AchievementsPage({ currentUser }) {
     if (error) {
         return (
             <main className="page">
-                <Notice message={error} />
+                <Notice message={error} onRetry={tryAgain} />
             </main>
         );
     }
@@ -102,7 +108,7 @@ function AchievementsPage({ currentUser }) {
     if (!milestones) {
         return (
             <main className="page">
-                <div className="section-label">{t('milestones.loading')}</div>
+                <LoadingState label={t('milestones.loading')} />
             </main>
         );
     }

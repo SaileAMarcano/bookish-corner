@@ -5,6 +5,7 @@ import PostCard from './PostCard';
 import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
+import LoadingState from './LoadingState';
 
 function PostPage({ currentUser, books }) {
     const { id } = useParams();
@@ -12,6 +13,11 @@ function PostPage({ currentUser, books }) {
     const { t } = useTranslation();
     const [post, setPost] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
 
     useEffect(() => {
         let ignore = false;
@@ -27,7 +33,7 @@ function PostPage({ currentUser, books }) {
         return () => {
             ignore = true;
         };
-    }, [id]);
+    }, [id, retry]);
 
     const handleChange = (postId, changes) => {
         setPost((current) => ({ ...current, ...changes }));
@@ -35,13 +41,14 @@ function PostPage({ currentUser, books }) {
 
     return (
         <main className="page post-page">
+            <h1 className="sr-only">{t('postPage.title')}</h1>
             <button type="button" className="ghost-button post-page-back" onClick={() => navigate(-1)}>
                 <Icon name="arrowLeft" size={14} />
                 {t('postPage.back')}
             </button>
 
-            {error && <Notice message={error} />}
-            {!post && !error && <p className="tags-empty">{t('admin.loading')}</p>}
+            {error && <Notice message={error} onRetry={tryAgain} />}
+            {!post && !error && <LoadingState compact label={t('admin.loading')} />}
 
             {post && (
                 <PostCard

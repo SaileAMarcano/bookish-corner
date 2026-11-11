@@ -5,12 +5,18 @@ import BookCover from './BookCover';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { genreLabel } from './utils';
+import LoadingState from './LoadingState';
 
 function GenrePage() {
     const { slug } = useParams();
     const { t, i18n } = useTranslation();
     const [data, setData] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
 
     useEffect(() => {
         let ignore = false;
@@ -30,12 +36,12 @@ function GenrePage() {
         return () => {
             ignore = true;
         };
-    }, [slug, i18n.language]);
+    }, [slug, i18n.language, retry]);
 
     if (error) {
         return (
             <main className="page tagged-page">
-                <Notice message={error} />
+                <Notice message={error} onRetry={tryAgain} />
                 <Link to="/explore#genres" className="genre-all">{t('genrePage.allGenres')}</Link>
             </main>
         );
@@ -44,7 +50,7 @@ function GenrePage() {
     if (!data) {
         return (
             <main className="page tagged-page">
-                <div className="section-label">{t('tagged.loading')}</div>
+                <LoadingState label={t('tagged.loading')} />
             </main>
         );
     }

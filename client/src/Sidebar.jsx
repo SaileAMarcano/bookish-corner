@@ -106,18 +106,19 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
                 className={`sidebar-link ${active ? 'active' : ''} ${nested ? 'sidebar-sublink' : ''}`}
                 data-tour={item.tour}
                 aria-label={t(item.label)}
+                aria-describedby={count > 0 ? `sidebar-count-${item.to.replace(/\W/g, '')}` : undefined}
                 aria-current={active ? (location.pathname === item.to.split('?')[0] ? 'page' : 'location') : undefined}
                 onClick={() => closeMenus(navRef.current)}
             >
                 <Icon name={item.icon} size={nested ? 18 : 20} />
                 <span className="sidebar-label">{t(item.label)}</span>
-                {count > 0 && <span className="sidebar-badge">{count}</span>}
+                {count > 0 && <span className="sidebar-badge" id={`sidebar-count-${item.to.replace(/\W/g, '')}`} aria-hidden="true">{count}</span>}
             </Link>
         );
     }
 
     return (
-        <aside className="sidebar">
+        <aside className="sidebar" aria-label={t('nav.sidebar')}>
             <Link to="/" className="sidebar-logo" aria-label="A Library of Us">
                 <img className="sidebar-logo-image" src={illustration} alt="" />
                 <img className="sidebar-logo-mark" src={mark} alt="" />

@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { timeAgo } from './utils';
+import LoadingState from './LoadingState';
 
 const INVITE_ACTIONS = ['invite_created', 'invite_requested', 'invite_approved', 'invite_rejected', 'invite_deleted'];
 const ROLE_ACTIONS = ['role_given', 'role_removed'];
@@ -60,7 +61,7 @@ function AdminActivity() {
                 </div>
 
                 {!actions ? (
-                    !error && <p className="tags-empty">{t('admin.loading')}</p>
+                    !error && <LoadingState compact label={t('admin.loading')} />
                 ) : actions.length === 0 ? (
                     <p className="tags-empty">{t('staffActivity.empty')}</p>
                 ) : (

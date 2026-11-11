@@ -17,6 +17,7 @@ import ProfileSide from './ProfileSide';
 import Icon from './Icon';
 import EmptyState from './EmptyState';
 import ProfileLists from './ProfileLists';
+import LoadingState from './LoadingState';
 
 
 function FavoriteCard({ book, onToggleFavorite }) {
@@ -112,7 +113,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
     if (!profile) {
         return (
             <main className="page">
-                <div className="section-label">{t('profile.loading')}</div>
+                <LoadingState label={t('profile.loading')} />
             </main>
         );
     }
@@ -217,7 +218,7 @@ function ProfilePage({ books, onLike, onUpdate, onToggleFavorite }) {
                     {postsError && <Notice message={postsError} onRetry={loadPosts} />}
 
                     {!postsError && posts === null && (
-                        <div className="card profile-empty">{t('posts.loading')}</div>
+                        <div className="card profile-empty"><LoadingState compact label={t('posts.loading')} /></div>
                     )}
 
                     {posts && posts.length === 0 && (

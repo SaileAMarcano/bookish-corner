@@ -12,6 +12,7 @@ import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
+import LoadingState from './LoadingState';
 
 const MORE_LISTS = 3;
 
@@ -22,6 +23,11 @@ function ListPage({ currentUser, books, onLibraryChange }) {
     const [list, setList] = useState(null);
     const [moreLists, setMoreLists] = useState([]);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
     const [actionError, setActionError] = useState('');
     const [editing, setEditing] = useState(false);
     const [confirmDelete, setConfirmDelete] = useState(false);
@@ -49,7 +55,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
         return () => {
             ignore = true;
         };
-    }, [id, i18n.language]);
+    }, [id, i18n.language, retry]);
 
     useEffect(() => {
         if (!copied) return;
@@ -96,7 +102,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
     if (error?.id === id) {
         return (
             <main className="page list-page">
-                <Notice message={error.message} />
+                <Notice message={error.message} onRetry={tryAgain} />
             </main>
         );
     }
@@ -104,7 +110,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
     if (!list || list.id !== Number(id)) {
         return (
             <main className="page list-page">
-                <div className="section-label">{t('listPage.loading')}</div>
+                <LoadingState label={t('listPage.loading')} />
             </main>
         );
     }

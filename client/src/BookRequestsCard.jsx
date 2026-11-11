@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
+import LoadingState from './LoadingState';
 
 function BookRequestsCard({ version, onComplete }) {
     const { t } = useTranslation();
@@ -38,7 +39,7 @@ function BookRequestsCard({ version, onComplete }) {
             {error && <Notice message={error} />}
 
             {!requests ? (
-                <p className="tags-empty">{t('admin.loading')}</p>
+                <LoadingState compact label={t('admin.loading')} />
             ) : requests.length === 0 ? (
                 <p className="tags-empty">{t('catalog.requestsEmpty')}</p>
             ) : (

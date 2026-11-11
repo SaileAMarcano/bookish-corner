@@ -18,7 +18,7 @@ function ProfileSide({ books, isMe }) {
 
             <section className="profile-side-card">
                 <div className="profile-side-head">
-                    <h3 className="display profile-side-title">{t('profileSide.readingNow')}</h3>
+                    <h2 className="display profile-side-title">{t('profileSide.readingNow')}</h2>
                     {isMe && (
                         <Link to="/library" className="profile-side-more" aria-label={t('profileSide.seeReading')}>
                             <Icon name="chevronRight" size={18} />
@@ -33,7 +33,7 @@ function ProfileSide({ books, isMe }) {
 
                     return (
                         <div key={book.id} className="side-book">
-                            <Link to={`/book/${book.bookId}`} className="side-book-cover">
+                            <Link to={`/book/${book.bookId}`} className="side-book-cover" tabIndex={-1} aria-hidden="true">
                                 <BookCover src={book.coverImage} className="side-book-image" />
                             </Link>
 
@@ -62,7 +62,7 @@ function ProfileSide({ books, isMe }) {
 
             <section className="profile-side-card">
                 <div className="profile-side-head">
-                    <h3 className="display profile-side-title">{t('profileSide.favorites')}</h3>
+                    <h2 className="display profile-side-title">{t('profileSide.favorites')}</h2>
                     {favorites.length > 0 && (
                         <Link to="?tab=favorites" className="profile-side-more" aria-label={t('profileSide.seeFavorites')}>
                             <Icon name="chevronRight" size={18} />

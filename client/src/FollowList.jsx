@@ -4,11 +4,17 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
+import LoadingState from './LoadingState';
 
 function FollowList({ username, name }) {
     const { t } = useTranslation();
     const [lists, setLists] = useState(null);
     const [error, setError] = useState('');
+    const [retry, setRetry] = useState(0);
+    const tryAgain = () => {
+        setError('');
+        setRetry((value) => value + 1);
+    };
     const [actionError, setActionError] = useState('');
 
     const base = `/api/users/${encodeURIComponent(username)}`;
@@ -27,7 +33,7 @@ function FollowList({ username, name }) {
         return () => {
             ignore = true;
         };
-    }, [base]);
+    }, [base, retry]);
 
     const handleFollow = (person) => {
         setActionError('');
@@ -43,11 +49,11 @@ function FollowList({ username, name }) {
     };
 
     if (error) {
-        return <Notice message={error} />;
+        return <Notice message={error} onRetry={tryAgain} />;
     }
 
     if (!lists) {
-        return <div className="card profile-empty">{t('follows.loading')}</div>;
+        return <div className="card profile-empty"><LoadingState compact label={t('follows.loading')} /></div>;
     }
 
     const renderList = (title, people, emptyText) => (

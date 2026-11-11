@@ -142,6 +142,7 @@ const en = {
         logout: 'Log out',
     },
     nav: {
+        sidebar: 'Main menu',
         home: 'Home',
         reading: 'Currently Reading',
         library: 'Library',
@@ -517,6 +518,7 @@ const en = {
         },
     },
     postPage: {
+        title: 'Post',
         back: 'Back',
     },
     help: {
@@ -1407,6 +1409,20 @@ const en = {
         { text: 'A room without books is like a body without a soul.', author: 'Cicero' },
         { text: 'Books are the treasured wealth of the world.', author: 'Henry David Thoreau' },
     ],
+    firstBook: {
+        kicker: 'One last thing',
+        title: 'Add your first book',
+        text: 'Search for a book you are reading now or one you want to read. It will be waiting for you in your Library.',
+        placeholder: 'Search by title or author',
+        popular: 'Popular in A Library of Us',
+        results: 'Results',
+        noResults: 'We could not find that book. Try another title or the author\'s name.',
+        later: 'Maybe later',
+        doneTitle: 'Your shelf has its first book!',
+        doneText: '{{title}} is now in your Library. You can change its status and progress there.',
+        addAnother: 'Add another book',
+        goToLibrary: 'Go to my Library',
+    },
         tour: {
         count: 'Step {{current}} of {{total}}',
         skip: 'Skip tour',

@@ -7,6 +7,7 @@ import ListCard from './ListCard';
 import ListForm from './ListForm';
 import ListInspiration from './ListInspiration';
 import Icon from './Icon';
+import LoadingState from './LoadingState';
 
 const SORTERS = {
     recent: (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt),
@@ -119,7 +120,7 @@ function ProfileLists({ username, name }) {
         return (
             <>
                 {viewTabs}
-                <div className="card profile-empty">{t('lists.loading')}</div>
+                <div className="card profile-empty"><LoadingState compact label={t('lists.loading')} /></div>
             </>
         );
     }

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
+import LoadingState from './LoadingState';
 
 const STATUSES = ['open', 'resolved'];
 const KINDS = ['all', 'problem', 'idea', 'account', 'other'];
@@ -173,7 +174,7 @@ function AdminSupport({ onChanged }) {
                 </div>
 
                 {!requests ? (
-                    !error && <p className="tags-empty">{t('admin.loading')}</p>
+                    !error && <LoadingState compact label={t('admin.loading')} />
                 ) : requests.length === 0 ? (
                     <p className="tags-empty">{t(`support.empty.${status}`)}</p>
                 ) : (
