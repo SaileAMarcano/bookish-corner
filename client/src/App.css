@@ -9314,6 +9314,8 @@ a.search-title:hover {
 
 .library-grid-cover-link {
   display: block;
+  color: inherit;
+  text-decoration: none;
   aspect-ratio: 2 / 3;
   overflow: hidden;
   border-radius: 5px 10px 10px 5px;
@@ -9355,7 +9357,8 @@ a.search-title:hover {
   margin: 0;
   font-size: 20px;
   line-height: 1.1;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  hyphens: auto;
 }
 
 .library-grid-caption a {
@@ -9501,6 +9504,10 @@ a.search-title:hover {
   .library-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 20px 12px;
+  }
+
+  .library-grid-caption h3 {
+    font-size: 17px;
   }
 }
 
@@ -14527,7 +14534,7 @@ a.discovery-result-meta:hover {
   display: none;
 }
 
-.header-manu-admin > summary {
+.header-menu-admin > summary {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14550,7 +14557,7 @@ a.discovery-result-meta:hover {
   margin-top: 6px;
 }
 
-.header-menu-admin-Link {
+.header-menu-admin-link {
   display: flex;
   align-items: center;
   gap: 10px;
