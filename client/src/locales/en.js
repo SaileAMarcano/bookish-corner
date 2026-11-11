@@ -967,6 +967,13 @@ const en = {
     stars: {
         outOf: '{{value}} out of 5 stars',
         rate: 'Rate {{value}} out of 5',
+        labels: {
+            1: 'Not for me',
+            2: 'It was okay',
+            3: 'Good',
+            4: 'Great!',
+            5: 'Loved it!',
+        },
     },
     modal: {
         containsSpoilers: 'Contains spoilers',

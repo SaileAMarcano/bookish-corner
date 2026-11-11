@@ -967,6 +967,13 @@ const es = {
     stars: {
         outOf: '{{value}} de 5 estrellas',
         rate: 'Calificar con {{value}} de 5',
+        labels: {
+            1: 'No es para mí',
+            2: 'Estuvo bien',
+            3: 'Bueno',
+            4: '¡Muy bueno!',
+            5: '¡Me encantó!',
+        },
     },
     modal: {
         containsSpoilers: 'Contiene spoilers',
