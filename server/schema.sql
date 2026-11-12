@@ -28,7 +28,8 @@ CREATE TABLE users(
     tour_seen_at    TIMESTAMPTZ,
     reduce_motion   BOOLEAN NOT NULL DEFAULT false,
     color_vision    TEXT NOT NULL DEFAULT 'default' CHECK (color_vision IN ('default', 'red-green', 'blue-yellow')),
-    terms_accepted_at TIMESTAMPTZ
+    terms_accepted_at TIMESTAMPTZ,
+    google_id       TEXT UNIQUE
 );
 
 CREATE TABLE works (

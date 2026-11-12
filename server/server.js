@@ -2377,6 +2377,73 @@ app.post('/api/password/reset', authLimiter, async (req, res) => {
     res.json({ ok: true });
 });
 
+const GOOGLE_REDIRECT_URI = `${isProduction ? 'https://alibraryofus.com' : 'http://localhost:3000'}/api/auth/google/callback`;
+
+app.get('/api/auth/google', (req, res) => {
+    const state = crypto.randomBytes(16).toString('hex');
+    req.session.googleState = state;
+
+    const params = new URLSearchParams({
+        client_id: process.env.GOOGLE_CLIENT_ID,
+        redirect_uri: GOOGLE_REDIRECT_URI,
+        response_type: 'code',
+        scope: 'openid email profile',
+        state,
+        prompt: 'select_account',
+    });
+
+    res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${params}`);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+    const { code, state } = req.query;
+    const expectedState = req.session.googleState;
+    delete req.session.googleState;
+
+    if (!code || !expectedState || state !== expectedState) {
+        return res.redirect(`${APP_URL}/login?google=failed`);
+    }
+
+    const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+            code,
+            client_id: process.env.GOOGLE_CLIENT_ID,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET,
+            redirect_uri: GOOGLE_REDIRECT_URI,
+            grant_type: 'authorization_code',
+        }),
+    });
+
+    if (!tokenResponse.ok) {
+        return res.redirect(`${APP_URL}/login?google=failed`);
+    }
+
+    const { id_token: idToken } = await tokenResponse.json();
+    const profile = JSON.parse(Buffer.from(idToken.split('.')[1], 'base64url').toString());
+
+    if (profile.aud !== process.env.GOOGLE_CLIENT_ID || !profile.email_verified) {
+        return res.redirect(`${APP_URL}/login?google=failed`);
+    }
+
+    let [user] = await query('SELECT id, username, email FROM users WHERE google_id = $1', [profile.sub]);
+
+    if (!user) {
+        [user] = await query(
+            'UPDATE users SET google_id = $1 WHERE lower(email) = lower($2) AND google_id IS NULL RETURNING id, username, email',
+            [profile.sub, profile.email]
+        );
+    }
+
+    if (!user) {
+        return res.redirect(`${APP_URL}/login?google=noAccount`);
+    }
+
+    req.session.user = { id: user.id, username: user.username, email: user.email };
+    res.redirect(`${APP_URL}/`);
+});
+
 app.get('/api/me', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: msg(req, 'notLoggedIn') });
