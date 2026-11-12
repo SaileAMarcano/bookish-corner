@@ -48,8 +48,15 @@ function isGroupActive(item, location) {
     return item.children.some((child) => isActive(child, location));
 }
 
-function closeMenus(container, restoreFocus = false) {
-    container?.querySelectorAll('.sidebar-nav-group[open]').forEach((group) => {
+const FLYOUT_QUERY = '(max-width: 1400px)';
+
+function closeMenus(container, restoreFocus = false, target = null) {
+    const selector = window.matchMedia(FLYOUT_QUERY).matches
+        ? '.sidebar-nav-group[open], .sidebar-admin[open]'
+        : '.sidebar-nav-group[open]';
+
+    container?.querySelectorAll(selector).forEach((group) => {
+        if (target && group.contains(target)) return;
         if (restoreFocus && group.contains(document.activeElement)) {
             group.querySelector('summary')?.focus();
         }
@@ -73,9 +80,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
 
     useEffect(() => {
         function handlePointerDown(event) {
-            if (!navRef.current?.contains(event.target)) {
-                closeMenus(navRef.current);
-            }
+            closeMenus(navRef.current, false, event.target);
         }
 
         function handleKeyDown(event) {
@@ -118,7 +123,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
     }
 
     return (
-        <aside className="sidebar" aria-label={t('nav.sidebar')}>
+        <aside className="sidebar" aria-label={t('nav.sidebar')} ref={navRef}>
             <Link to="/" className="sidebar-logo" aria-label="A Library of Us">
                 <img className="sidebar-logo-image" src={illustration} alt="" />
                 <img className="sidebar-logo-mark" src={mark} alt="" />
@@ -126,7 +131,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
                 <span className="sidebar-tagline">{t('nav.tagline')}</span>
             </Link>
 
-            <nav className="sidebar-nav" ref={navRef}>
+            <nav className="sidebar-nav">
                 {NAV_ITEMS.map((item) => item.children ? (
                     <details className="sidebar-nav-group" name="sidebar-navigation" key={item.key}>
                         <summary
