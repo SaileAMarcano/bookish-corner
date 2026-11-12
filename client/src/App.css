@@ -15797,3 +15797,31 @@ a.post-tag:hover,
 :root[data-motion="reduce"] .star-halo {
   display: none;
 }
+
+
+.access-forgot {
+  align-self: flex-end;
+  margin-top: -8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--rose-deep);
+  text-decoration: none;
+}
+
+.access-forgot:hover {
+  text-decoration: underline;
+}
+
+.access-done {
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.access-page .access-subtitle {
+  text-align: center;
+}

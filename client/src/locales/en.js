@@ -842,11 +842,33 @@ const en = {
         passwordPlaceholder: 'Your password',
         showPassword: 'Show password',
         hidePassword: 'Hide password',
+        forgotLink: 'Forgot your password?',
         rulesTitle: 'Your password must have:',
         rules: {
             length: 'At least 8 characters',
             number: 'A number',
             letter: 'A letter',
+        },
+    },
+    password: {
+        forgot: {
+            title: 'Forgot your password?',
+            subtitle: "Tell us your email and we'll send you a link to choose a new one.",
+            button: 'Send link',
+            busy: 'Sending...',
+            done: "If there's an account with {{email}}, we just sent it a link. It works for 1 hour. Check your spam folder too.",
+            switchLink: 'Back to log in',
+        },
+        reset: {
+            title: 'Choose a new password',
+            subtitle: "You'll use it the next time you log in.",
+            label: 'New password',
+            button: 'Save password',
+            busy: 'Saving...',
+            done: 'All set! Your password has changed. Log in with the new one.',
+            login: 'Log in',
+            noToken: 'This link is incomplete. Copy the whole link from the email or ask for a new one.',
+            switchLink: 'Ask for a new link',
         },
     },
     welcome: {

@@ -110,6 +110,7 @@ const MESSAGES = {
         supportUpdateInvalid: 'Choose a valid status for this message.',
         emailInvalid: 'Enter a valid email.',
         resetTooMany: 'You asked for several links in the last hour. Check your inbox (and spam folder) or wait a little.',
+        resetLinkInvalid: 'This link is not valid or has expired. Ask for a new one.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -218,8 +219,9 @@ const MESSAGES = {
         supportMessageLength: 'Escribe entre 10 y 2000 caracteres.',
         supportTooMany: 'Enviaste varios mensajes en la última hora. Espera un poco antes de enviar otro.',
         supportUpdateInvalid: 'Elige un estado válido para este mensaje.',
-        semailInvalid: 'Escribe un correo válido.',
+        emailInvalid: 'Escribe un correo válido.',
         resetTooMany: 'Pediste varios enlaces en la última hora. Revisa tu correo (también la carpeta de spam) o espera un poco.',
+        resetLinkInvalid: 'Este enlace no es válido o ya caducó. Pide uno nuevo.',
     },
 };
 

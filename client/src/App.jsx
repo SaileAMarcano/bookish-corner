@@ -9,6 +9,7 @@ import SettingsPage from './SettingsPage';
 import HelpPage from './HelpPage';
 import AdminSupport from './AdminSupport';
 import AuthPage from './AuthPage';
+import PasswordPage from './PasswordPage';
 import Landing from './Landing';
 import BetaPage from './BetaPage';
 import AboutPage from './AboutPage';
@@ -344,6 +345,10 @@ function App() {
       .catch((error) => setToast(error.message));
     navigate('/');
   };
+
+  if (path === '/forgot-password' || path === '/reset-password') {
+    return <PasswordPage key={path} mode={path === '/forgot-password' ? 'forgot' : 'reset'} />;
+  }
 
   if (userStatus === 'loading' && (!isPublicPage || path === '/')) {
     return <div className="app-status">{t('app.opening')}</div>;

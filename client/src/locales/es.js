@@ -842,11 +842,33 @@ const es = {
         passwordPlaceholder: 'Tu contraseña',
         showPassword: 'Mostrar contraseña',
         hidePassword: 'Ocultar contraseña',
+        forgotLink: '¿Olvidaste tu contraseña?',
         rulesTitle: 'Tu contraseña debe tener:',
         rules: {
             length: 'Al menos 8 caracteres',
             number: 'Un número',
             letter: 'Una letra',
+        },
+    },
+    password: {
+        forgot: {
+            title: '¿Olvidaste tu contraseña?',
+            subtitle: 'Escribe tu correo y te enviaremos un enlace para elegir una nueva.',
+            button: 'Enviar enlace',
+            busy: 'Enviando...',
+            done: 'Si hay una cuenta con {{email}}, acabamos de enviarle un enlace. Funciona durante 1 hora. Revisa también la carpeta de spam.',
+            switchLink: 'Volver a iniciar sesión',
+        },
+        reset: {
+            title: 'Elige una contraseña nueva',
+            subtitle: 'La usarás la próxima vez que inicies sesión.',
+            label: 'Contraseña nueva',
+            button: 'Guardar contraseña',
+            busy: 'Guardando...',
+            done: '¡Listo! Tu contraseña cambió. Inicia sesión con la nueva.',
+            login: 'Iniciar sesión',
+            noToken: 'Este enlace está incompleto. Copia el enlace entero del correo o pide uno nuevo.',
+            switchLink: 'Pedir un enlace nuevo',
         },
     },
     welcome: {

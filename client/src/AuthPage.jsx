@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import Icon from './Icon';
 import { apiFetch } from './api';
+import { PASSWORD_RULES } from './passwordRules';
 
 const MODES = {
     login: {
@@ -17,12 +18,6 @@ const MODES = {
         switchTo: '/login',
     },
 };
-
-const PASSWORD_RULES = [
-    { label: 'auth.rules.length', test: (p) => p.length >= 8 },
-    { label: 'auth.rules.number', test: (p) => /\d/.test(p) },
-    { label: 'auth.rules.letter', test: (p) => /[a-z]/i.test(p) },
-];
 
 function AuthPage({ mode, onLogin }) {
     const { t, i18n } = useTranslation();
@@ -161,6 +156,10 @@ function AuthPage({ mode, onLogin }) {
                                 })}
                             </ul>
                         </div>
+                    )}
+
+                    {!isSignup && (
+                        <Link to="/forgot-password" className="access-forgot">{t('auth.forgotLink')}</Link>
                     )}
 
                     {error && <p className="access-error">{error}</p>}

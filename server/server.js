@@ -2347,6 +2347,32 @@ app.post('/api/password/forgot', resetLimiter, async (req, res) => {
     res.json({ ok: true });
 });
 
+app.post('/api/password/reset', authLimiter, async (req, res) => {
+    const token = typeof req.body.token === 'string' ? req.body.token : '';
+    const { password } = req.body;
+
+    const problem = passwordProblem(password);
+    if (problem) {
+        return res.status(400).json({ error: msg(req, problem) });
+    }
+
+    const [reset] = await query(
+        'DELETE FROM password_resets WHERE token_hash = $1 RETURNING user_id, expires_at > now() AS is_valid',
+        [hashToken(token)]
+    );
+
+    if (!reset || !reset.isValid) {
+        return res.status(400).json({ error: msg(req, 'resetLinkInvalid') });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    await query('UPDATE users SET password_hash = $1 WHERE id = $2', [passwordHash, reset.userId]);
+    await query("DELETE FROM session WHERE sess -> 'user' ->> 'id' = $1", [String(reset.userId)]);
+
+    res.json({ ok: true });
+});
+
 app.get('/api/me', async (req, res) => {
     if (!req.session.user) {
         return res.status(401).json({ error: msg(req, 'notLoggedIn') });
