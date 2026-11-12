@@ -9,6 +9,7 @@ import SettingsPage from './SettingsPage';
 import HelpPage from './HelpPage';
 import AdminSupport from './AdminSupport';
 import AuthPage from './AuthPage';
+import GoogleSignupPage from './GoogleSignupPage';
 import PasswordPage from './PasswordPage';
 import LegalPage from './LegalPage';
 import { LEGAL_PAGES } from './legalTexts';
@@ -378,6 +379,7 @@ function App() {
         <Route path="/features" element={<FeaturesPages />} />
         <Route path="/login" element={<AuthPage key="login" mode="login" onLogin={handleLogin} />} />
         <Route path="/signup" element={<AuthPage key="signup" mode="signup" onLogin={handleLogin} />} />
+        <Route path="/signup/google" element={<GoogleSignupPage onLogin={handleLogin} />} />
         <Route path="*" element={<Navigate to="/login" replace state={{ next: location.pathname + location.search + location.hash }} />} />
       </Routes>
     );

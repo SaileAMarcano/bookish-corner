@@ -15969,3 +15969,73 @@ a.post-tag:hover,
     font-size: 26px;
   }
 }
+
+
+.access-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 14px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.access-divider::before,
+.access-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--surface-2);
+}
+
+.access-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: #fff;
+  color: #3c4043;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.access-google:hover:not(:disabled) {
+  border-color: var(--rose-deep);
+}
+
+.access-google:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.access-google-hint {
+  display: block;
+  margin-top: 8px;
+  text-align: center;
+}
+
+.access-google-account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.access-google-account svg {
+  flex-shrink: 0;
+}
+
+.access-google-error {
+  margin-bottom: 16px;
+}

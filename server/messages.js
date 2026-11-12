@@ -112,6 +112,7 @@ const MESSAGES = {
         resetTooMany: 'You asked for several links in the last hour. Check your inbox (and spam folder) or wait a little.',
         resetLinkInvalid: 'This link is not valid or has expired. Ask for a new one.',
         termsRequired: 'Please accept the terms and the privacy policy to create your account.',
+        googleSignupExpired: 'Your Google sign-up expired. Please try again.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -146,7 +147,7 @@ const MESSAGES = {
         userTaken: 'Ese nombre de usuario o correo ya está en uso',
         loginFieldsRequired: 'El correo y la contraseña son obligatorios',
         invalidLogin: 'Correo o contraseña incorrectos',
-        readerTypeInvalid: 'Elige uno de los tipos de lector',
+        readerTypeInvalid: 'Elige una de las opciones de forma de leer',
         languageInvalid: 'Elige inglés o español',
         themeInvalid: 'Elige el modo claro u oscuro',
         seasonThemeInvalid: 'Ese tema no existe',
@@ -172,7 +173,7 @@ const MESSAGES = {
         genreNotFound: 'Este género no existe',
         invalidGenre: 'Elige un género de la lista',
         invalidStatus: 'Elige un estado de lectura de la lista',
-        userNotFound: "Este lector@ no existe",
+        userNotFound: 'Este perfil no existe',
         cannotFollowSelf: 'No puedes seguirte a ti misma',
         reviewTooLong: 'Una reseña puede tener hasta 5000 caracteres',
         progressNoteTooLong: 'Una nota puede tener hasta 280 caracteres',
@@ -224,6 +225,7 @@ const MESSAGES = {
         resetTooMany: 'Pediste varios enlaces en la última hora. Revisa tu correo (también la carpeta de spam) o espera un poco.',
         resetLinkInvalid: 'Este enlace no es válido o ya caducó. Pide uno nuevo.',
         termsRequired: 'Acepta los términos y la política de privacidad para crear tu cuenta.',
+        googleSignupExpired: 'El registro con Google caducó. Vuelve a intentarlo.',
     },
 };
 

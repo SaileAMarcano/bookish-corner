@@ -848,12 +848,26 @@ const en = {
         termsBefore: 'I accept the',
         termsAnd: 'and the',
         termsAfter: ', and I authorize the processing of my data.',
+        or: 'or',
+        google: {
+            button: 'Continue with Google',
+            acceptFirst: 'Check the box above to continue with Google.',
+            failed: "We couldn't sign you in with Google. Please try again.",
+            noAccount: "There's no account with that Google email. If you have an invitation, create your account from your invitation link.",
+        },
         rulesTitle: 'Your password must have:',
         rules: {
             length: 'At least 8 characters',
             number: 'A number',
             letter: 'A letter',
         },
+    },
+    googleSignup: {
+        title: 'Choose your username',
+        subtitle: 'One last step to create your account with Google.',
+        button: 'Create my account',
+        busy: 'Creating your account...',
+        backToSignup: 'Back to sign up',
     },
     password: {
         forgot: {

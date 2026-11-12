@@ -2219,6 +2219,36 @@ const passwordProblem = (password) => {
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_.]{3,30}$/;
 
+async function createAccount({ username, email, passwordHash, language, invite, googleId = null }) {
+    return withTransaction(async (tx) => {
+        if (invite) {
+            const claimed = await tx(
+                `UPDATE invites i SET used_at = now()
+                 WHERE i.code = $1 AND i.used_at IS NULL AND i.status = 'approved' AND ${INVITE_EXPIRES} > now()
+                   AND NOT EXISTS (SELECT 1 FROM beta_applications a
+                                   WHERE a.invite_id = i.id AND lower(a.email) <> lower($2))
+                 RETURNING i.code`,
+                [invite, email]
+            );
+            if (claimed.length === 0) {
+                return null;
+            }
+        }
+
+        const [user] = await tx(
+            `INSERT INTO users (username, email, password_hash, language, terms_accepted_at, google_id)
+             VALUES ($1, $2, $3, $4, now(), $5) RETURNING id, username, email`,
+            [username, email, passwordHash, language, googleId]
+        );
+
+        if (invite) {
+            await tx('UPDATE invites SET used_by = $1 WHERE code = $2', [user.id, invite]);
+        }
+
+        return user;
+    });
+}
+
 app.post('/api/register', authLimiter, async (req, res) => {
     const invite = typeof req.body.invite === 'string' ? req.body.invite.trim() : '';
 
@@ -2247,47 +2277,19 @@ app.post('/api/register', authLimiter, async (req, res) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const client = await pool.connect();
-
-    try {
-        await client.query('BEGIN');
-
-        if (invite) {
-            const claimed = await client.query(
-                `UPDATE invites i SET used_at = now()
-                 WHERE i.code = $1 AND i.used_at IS NULL AND i.status = 'approved' AND ${INVITE_EXPIRES} > now()
-                   AND NOT EXISTS (SELECT 1 FROM beta_applications a
-                                   WHERE a.invite_id = i.id AND lower(a.email) <> lower($2))
-                 RETURNING i.code`,
-                [invite, email]
-            );
-            if (claimed.rowCount === 0) {
-                await client.query('ROLLBACK');
-                return res.status(403).json({ error: msg(req, 'inviteInvalid') });
-            }
+        try {
+        const user = await createAccount({ username, email, passwordHash, language, invite });
+        if (!user) {
+            return res.status(403).json({ error: msg(req, 'inviteInvalid') });
         }
-
-        const result = await client.query(
-            'INSERT INTO users (username, email, password_hash, language, terms_accepted_at) VALUES ($1, $2, $3, $4, now()) RETURNING id, username, email',
-            [username, email, passwordHash, language]
-        );
-        const user = result.rows[0];
-
-        if (invite) {
-            await client.query('UPDATE invites SET used_by = $1 WHERE code = $2', [user.id, invite]);
-        }
-
-        await client.query('COMMIT');
         res.status(201).json(user);
     } catch (error) {
-        await client.query('ROLLBACK');
         if (error.code === '23505') {
             return res.status(400).json({ error: msg(req, 'userTaken') });
         }
         throw error;
-    } finally {
-        client.release();
     }
+
 });
 
 app.post('/api/login', loginLimiter, async (req, res) => {
@@ -2382,6 +2384,9 @@ const GOOGLE_REDIRECT_URI = `${isProduction ? 'https://alibraryofus.com' : 'http
 app.get('/api/auth/google', (req, res) => {
     const state = crypto.randomBytes(16).toString('hex');
     req.session.googleState = state;
+    req.session.googleSignup = req.query.terms === '1'
+        ? { invite: typeof req.query.invite === 'string' ? req.query.invite : '' }
+        : null;
 
     const params = new URLSearchParams({
         client_id: process.env.GOOGLE_CLIENT_ID,
@@ -2399,6 +2404,8 @@ app.get('/api/auth/google/callback', async (req, res) => {
     const { code, state } = req.query;
     const expectedState = req.session.googleState;
     delete req.session.googleState;
+    const signup = req.session.googleSignup;
+    delete req.session.googleSignup;
 
     if (!code || !expectedState || state !== expectedState) {
         return res.redirect(`${APP_URL}/login?google=failed`);
@@ -2437,11 +2444,64 @@ app.get('/api/auth/google/callback', async (req, res) => {
     }
 
     if (!user) {
-        return res.redirect(`${APP_URL}/login?google=noAccount`);
+        if (!signup || (process.env.SIGNUP_OPEN !== 'true' && !signup.invite)) {
+            return res.redirect(`${APP_URL}/login?google=noAccount`);
+        }
+
+        req.session.googlePending = { sub: profile.sub, email: profile.email, name: profile.name || '', invite: signup.invite };
+        return res.redirect(`${APP_URL}/signup/google`);
     }
 
     req.session.user = { id: user.id, username: user.username, email: user.email };
     res.redirect(`${APP_URL}/`);
+});
+
+app.get('/api/auth/google/pending', (req, res) => {
+    const pending = req.session.googlePending;
+
+    if (!pending) {
+        return res.status(404).json({ error: msg(req, 'googleSignupExpired') });
+    }
+
+    res.json({ email: pending.email, name: pending.name });
+});
+
+app.post('/api/auth/google/complete', authLimiter, async (req, res) => {
+    const pending = req.session.googlePending;
+    const username = typeof req.body.username === 'string' ? req.body.username.trim() : '';
+    const language = LANGUAGES.includes(req.body.language) ? req.body.language : 'en';
+
+    if (!pending) {
+        return res.status(400).json({ error: msg(req, 'googleSignupExpired') });
+    }
+    if (!USERNAME_PATTERN.test(username)) {
+        return res.status(400).json({ error: msg(req, 'usernameInvalid') });
+    }
+
+    const passwordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+
+    try {
+        const user = await createAccount({
+            username,
+            email: pending.email,
+            passwordHash,
+            language,
+            invite: pending.invite,
+            googleId: pending.sub,
+        });
+        if (!user) {
+            return res.status(403).json({ error: msg(req, 'inviteInvalid') });
+        }
+
+        delete req.session.googlePending;
+        req.session.user = { id: user.id, username: user.username, email: user.email };
+        res.status(201).json(await findMe(user.id));
+    } catch (error) {
+        if (error.code === '23505') {
+            return res.status(400).json({ error: msg(req, 'userTaken') });
+        }
+        throw error;
+    }
 });
 
 app.get('/api/me', async (req, res) => {

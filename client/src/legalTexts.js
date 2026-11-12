@@ -181,12 +181,12 @@ If we change these terms, we'll tell you in the app or by email before they appl
         privacy: {
             title: "Política de privacidad y tratamiento de datos personales",
             body: `## 1. Quién es responsable de tus datos
-A Library of Us es una plataforma para registrar lecturas y compartir con otras lectoras y lectores. La responsable del tratamiento de tus datos es **Saile Adriana Marcano Mejias**, que opera A Library of Us desde Bogotá, Colombia.
+A Library of Us es una plataforma para registrar lecturas y compartir con otras personas que leen. La responsable del tratamiento de tus datos es **Saile Adriana Marcano Mejias**, que opera A Library of Us desde Bogotá, Colombia.
 **Contacto:** admin@alibraryofus.com
 
 ## 2. Qué datos guardamos
 - **Tu cuenta:** nombre de usuario, correo y contraseña. La contraseña se guarda cifrada: ni el equipo puede verla.
-- **Tu perfil (lo que tú decidas añadir):** nombre visible, foto, biografía, "sobre mí", cita favorita, ubicación, enlaces a Instagram o TikTok, meta de lectura y tipo de lector.
+- **Tu perfil (lo que tú decidas añadir):** nombre visible, foto, biografía, "sobre mí", cita favorita, ubicación, enlaces a Instagram o TikTok, meta de lectura y forma de leer.
 - **Tu actividad:** libros de tu biblioteca y su estado, progreso, fechas, calificaciones, reseñas, publicaciones e imágenes, comentarios, me gusta, listas, etiquetas, a quién sigues y quién te sigue, y logros.
 - **Tus preferencias:** idioma, modo claro u oscuro, tema y opciones de accesibilidad.
 - **Lo que nos envías:** mensajes de soporte (con la página desde donde escribes y el tipo de navegador, para entender el problema) y reportes.

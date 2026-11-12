@@ -3,7 +3,8 @@ import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import Icon from './Icon';
-import { apiFetch } from './api';
+import GoogleMark from './GoogleMark';
+import { apiFetch, API_URL } from './api';
 import { PASSWORD_RULES } from './passwordRules';
 
 const MODES = {
@@ -32,10 +33,16 @@ function AuthPage({ mode, onLogin }) {
     const [acceptsTerms, setAcceptsTerms] = useState(false);
     const [searchParams] = useSearchParams();
     const invite = searchParams.get('invite') || '';
+    const googleError = searchParams.get('google');
 
     const text = MODES[mode];
     const isSignup = mode === 'signup';
     const passwordOk = PASSWORD_RULES.every((rule) => rule.test(password));
+
+    const handleGoogle = () => {
+        const params = new URLSearchParams(isSignup ? { terms: '1', invite } : {});
+        window.location.assign(`${API_URL}/api/auth/google?${params}`);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -81,6 +88,7 @@ function AuthPage({ mode, onLogin }) {
 
                 {registered && error && <Link to="/login" state={location.state}>{t('auth.login.title')}</Link>}
                 {isSignup && invite && <p className="access-invite">{t('auth.invited')}</p>}
+                {['failed', 'noAccount'].includes(googleError) && <p className="access-error access-google-error">{t(`auth.google.${googleError}`)}</p>}
 
                 <form className="access-form" onSubmit={handleSubmit}>
                     {isSignup && (
@@ -181,6 +189,14 @@ function AuthPage({ mode, onLogin }) {
                         {isSubmitting ? t(`auth.${mode}.busy`) : t(`auth.${mode}.button`)}
                     </button>
                 </form>
+
+                <div className="access-divider">{t('auth.or')}</div>
+
+                <button type="button" className="access-google" disabled={isSignup && !acceptsTerms} onClick={handleGoogle}>
+                    <GoogleMark />
+                    {t('auth.google.button')}
+                </button>
+                {isSignup && !acceptsTerms && <span className="access-hint access-google-hint">{t('auth.google.acceptFirst')}</span>}
 
                 <p className="access-switch">
                     {t(`auth.${mode}.switchText`)} <Link to={text.switchTo} state={location.state}>{t(`auth.${mode}.switchLink`)}</Link>
