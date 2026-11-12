@@ -839,6 +839,8 @@ const es = {
         usernameHint: 'Letras, números, puntos o guiones bajos. Sin espacios ni @.',
         email: 'Correo electrónico',
         emailPlaceholder: 'tu@ejemplo.com',
+        loginId: 'Correo o nombre de usuario',
+        loginIdPlaceholder: 'tu@ejemplo.com o tu usuario',
         password: 'Contraseña',
         passwordPlaceholderNew: 'Crea una contraseña',
         passwordPlaceholder: 'Tu contraseña',

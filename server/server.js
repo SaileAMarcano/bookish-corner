@@ -2293,16 +2293,20 @@ app.post('/api/register', authLimiter, async (req, res) => {
 });
 
 app.post('/api/login', loginLimiter, async (req, res) => {
-    const { email, password } = req.body;
+    const login = typeof req.body.email === 'string' ? req.body.email.trim() : '';
+    const { password } = req.body;
 
-    if (!email || !password) {
+    if (!login || !password) {
         return res.status(400).json({ error: msg(req, 'loginFieldsRequired') });
     }
 
     const [user] = await query(
         `SELECT id, username, email, password_hash, avatar_url, display_name, reading_goal, reader_type, language, theme
-         FROM users WHERE email = $1`,
-        [email]
+         FROM users
+         WHERE lower(email) = lower($1) OR lower(username) = lower($1)
+         ORDER BY username = $1 DESC
+         LIMIT 1`,
+        [login]
     );
 
     if (!user) {

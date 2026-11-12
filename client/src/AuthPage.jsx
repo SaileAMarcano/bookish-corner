@@ -111,14 +111,14 @@ function AuthPage({ mode, onLogin }) {
                     )}
 
                     <label className="access-field">
-                        <span className="access-label">{t('auth.email')}</span>
+                        <span className="access-label">{t(isSignup ? 'auth.email' : 'auth.loginId')}</span>
                         <span className="access-input-wrap">
-                            <Icon name="mail" size={18} />
+                            <Icon name={isSignup ? 'mail' : 'about'} size={18} />
                             <input
                                 className="access-input"
-                                type="email"
-                                placeholder={t('auth.emailPlaceholder')}
-                                autoComplete="email"
+                                type={isSignup ? 'email' : 'text'}
+                                placeholder={t(isSignup ? 'auth.emailPlaceholder' : 'auth.loginIdPlaceholder')}
+                                autoComplete={isSignup ? 'email' : 'username'}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                             />

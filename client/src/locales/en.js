@@ -839,6 +839,8 @@ const en = {
         usernameHint: 'Letters, numbers, dots or underscores. No spaces or @.',
         email: 'Email',
         emailPlaceholder: 'you@example.com',
+        loginId: 'Email or username',
+        loginIdPlaceholder: 'you@example.com or your username',
         password: 'Password',
         passwordPlaceholderNew: 'Create a password',
         passwordPlaceholder: 'Your password',
