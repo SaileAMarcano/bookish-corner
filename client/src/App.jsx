@@ -10,6 +10,8 @@ import HelpPage from './HelpPage';
 import AdminSupport from './AdminSupport';
 import AuthPage from './AuthPage';
 import PasswordPage from './PasswordPage';
+import LegalPage from './LegalPage';
+import { LEGAL_PAGES } from './legalTexts';
 import Landing from './Landing';
 import BetaPage from './BetaPage';
 import AboutPage from './AboutPage';
@@ -348,6 +350,10 @@ function App() {
 
   if (path === '/forgot-password' || path === '/reset-password') {
     return <PasswordPage key={path} mode={path === '/forgot-password' ? 'forgot' : 'reset'} />;
+  }
+
+  if (LEGAL_PAGES[path]) {
+    return <LegalPage doc={LEGAL_PAGES[path]} signedIn={Boolean(currentUser)} />;
   }
 
   if (userStatus === 'loading' && (!isPublicPage || path === '/')) {

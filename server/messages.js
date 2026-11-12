@@ -111,6 +111,7 @@ const MESSAGES = {
         emailInvalid: 'Enter a valid email.',
         resetTooMany: 'You asked for several links in the last hour. Check your inbox (and spam folder) or wait a little.',
         resetLinkInvalid: 'This link is not valid or has expired. Ask for a new one.',
+        termsRequired: 'Please accept the terms and the privacy policy to create your account.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -222,6 +223,7 @@ const MESSAGES = {
         emailInvalid: 'Escribe un correo válido.',
         resetTooMany: 'Pediste varios enlaces en la última hora. Revisa tu correo (también la carpeta de spam) o espera un poco.',
         resetLinkInvalid: 'Este enlace no es válido o ya caducó. Pide uno nuevo.',
+        termsRequired: 'Acepta los términos y la política de privacidad para crear tu cuenta.',
     },
 };
 

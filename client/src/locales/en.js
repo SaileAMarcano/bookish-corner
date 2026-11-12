@@ -524,6 +524,7 @@ const en = {
     help: {
         title: 'Help',
         subtitle: 'Answers to the most common questions about A Library of Us.',
+        legal: 'Guidelines and legal:',
         search: 'Search help…',
         noResults: 'We could not find anything with those words. Try something shorter.',
         contact: {
@@ -757,6 +758,7 @@ const en = {
         slow: 'This is taking a little longer than usual. Please wait a few seconds without closing the page…',
         sending: 'Sending…',
         note: 'We read every application. If you’re chosen, you’ll get a personal invitation link by email.',
+        privacyNote: 'By sending this form, you agree that we keep this information to run the beta, as explained in our',
         errors: {
             name: 'Enter your name.',
             email: 'Enter a valid email.',
@@ -843,6 +845,9 @@ const en = {
         showPassword: 'Show password',
         hidePassword: 'Hide password',
         forgotLink: 'Forgot your password?',
+        termsBefore: 'I accept the',
+        termsAnd: 'and the',
+        termsAfter: ', and I authorize the processing of my data.',
         rulesTitle: 'Your password must have:',
         rules: {
             length: 'At least 8 characters',
@@ -870,6 +875,14 @@ const en = {
             noToken: 'This link is incomplete. Copy the whole link from the email or ask for a new one.',
             switchLink: 'Ask for a new link',
         },
+    },
+    legal: {
+        nav: 'Legal',
+        guidelines: 'Community guidelines',
+        privacy: 'Privacy policy',
+        terms: 'Terms of service',
+        updated: 'Last updated: {{date}}',
+        backToApp: 'Back to the app',
     },
     welcome: {
         hello: 'Welcome, {{name}}!',

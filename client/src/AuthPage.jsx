@@ -29,6 +29,7 @@ function AuthPage({ mode, onLogin }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const location = useLocation();
     const [registered, setRegistered] = useState(false);
+    const [acceptsTerms, setAcceptsTerms] = useState(false);
     const [searchParams] = useSearchParams();
     const invite = searchParams.get('invite') || '';
 
@@ -44,7 +45,7 @@ function AuthPage({ mode, onLogin }) {
 
         const cleanEmail = email.trim();
         const register = isSignup
-            ? apiFetch('/api/register', { method: 'POST', body: { username: username.trim(), email: cleanEmail, password, language: i18n.language, invite } })
+            ? apiFetch('/api/register', { method: 'POST', body: { username: username.trim(), email: cleanEmail, password, language: i18n.language, invite, acceptTerms: acceptsTerms } })
             : Promise.resolve();
 
         register
@@ -158,12 +159,25 @@ function AuthPage({ mode, onLogin }) {
                         </div>
                     )}
 
+                    {isSignup && (
+                        <label className="access-terms">
+                            <input type="checkbox" checked={acceptsTerms} onChange={(e) => setAcceptsTerms(e.target.checked)} />
+                            <span>
+                                {t('auth.termsBefore')}{' '}
+                                <Link to="/terms" target="_blank" rel="noopener noreferrer">{t('legal.terms')}</Link>{' '}
+                                {t('auth.termsAnd')}{' '}
+                                <Link to="/privacy" target="_blank" rel="noopener noreferrer">{t('legal.privacy')}</Link>
+                                {t('auth.termsAfter')}
+                            </span>
+                        </label>
+                    )}
+
                     {!isSignup && (
                         <Link to="/forgot-password" className="access-forgot">{t('auth.forgotLink')}</Link>
                     )}
 
                     {error && <p className="access-error">{error}</p>}
-                    <button type="submit" className="access-submit" disabled={isSubmitting || registered || (isSignup && !passwordOk)}>
+                    <button type="submit" className="access-submit" disabled={isSubmitting || registered || (isSignup && (!passwordOk || !acceptsTerms))}>
                         {isSubmitting ? t(`auth.${mode}.busy`) : t(`auth.${mode}.button`)}
                     </button>
                 </form>

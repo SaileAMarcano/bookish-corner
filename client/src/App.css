@@ -15826,3 +15826,146 @@ a.post-tag:hover,
 .access-page .access-subtitle {
   text-align: center;
 }
+
+.legal-page {
+  width: 100%;
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 32px 16px max(170px, 12vw);
+}
+
+.legal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.legal-tab {
+  padding: 8px 14px;
+  border: 1px solid var(--surface-2);
+  border-radius: 999px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.legal-tab:hover {
+  border-color: var(--rose-deep);
+  color: var(--rose-deep);
+}
+
+.legal-tab.active {
+  border-color: var(--rose-deep);
+  background: var(--rose-deep);
+  color: var(--on-rose-deep);
+}
+
+.legal-card {
+  padding: 36px 40px;
+  color: var(--ink);
+  font-size: 15px;
+  line-height: 1.65;
+}
+
+.legal-title {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.2;
+}
+
+.legal-updated {
+  margin: 6px 0 24px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.legal-heading {
+  margin: 28px 0 8px;
+  font-size: 20px;
+}
+
+.legal-card p {
+  margin: 0 0 10px;
+}
+
+.legal-card ul,
+.legal-card ol {
+  margin: 0 0 14px;
+  padding-left: 22px;
+}
+
+.legal-card li {
+  margin-bottom: 6px;
+}
+
+.legal-card strong {
+  font-weight: 700;
+}
+
+.public-footer-legal {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 18px;
+  margin-top: 4px;
+}
+
+.public-footer-legal a {
+  color: var(--rose-ink);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+.public-footer-legal a:hover {
+  text-decoration: underline;
+}
+
+.access-terms {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.access-terms input {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  accent-color: var(--rose-deep);
+}
+
+.access-terms a {
+  color: var(--rose-deep);
+  font-weight: 600;
+}
+
+.apply-note a {
+  color: var(--rose-deep);
+  font-weight: 600;
+}
+
+.help-legal {
+  margin: 24px 0;
+  color: var(--text-2);
+  font-size: 14px;
+}
+
+.help-legal a {
+  color: var(--rose-deep);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .legal-card {
+    padding: 24px 20px;
+  }
+
+  .legal-title {
+    font-size: 26px;
+  }
+}

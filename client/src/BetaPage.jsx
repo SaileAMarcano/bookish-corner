@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import PublicHeader from './PublicHeader';
 import PublicFooter from './PublicFooter';
@@ -310,6 +311,10 @@ function BetaPage() {
                                     {isSlow && <p className="apply-slow" role="status">{t('beta.slow')}</p>}
                                     <p className="apply-error" role="alert">{error}</p>
                                     <p className="apply-note">{t('beta.note')}</p>
+                                    <p className="apply-note">
+                                        {t('beta.privacyNote')}{' '}
+                                        <Link to="/privacy">{t('legal.privacy')}</Link>.
+                                    </p>
                                 </form>
                             )}
                         </div>

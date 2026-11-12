@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import { BETA_LINKS } from './betaConfig';
@@ -31,6 +32,12 @@ function PublicFooter() {
                     </a>
                 </li>
             </ul>
+
+            <nav className="public-footer-legal" aria-label={t('legal.nav')}>
+                <Link to="/guidelines">{t('legal.guidelines')}</Link>
+                <Link to="/privacy">{t('legal.privacy')}</Link>
+                <Link to="/terms">{t('legal.terms')}</Link>
+            </nav>
 
             <p className="public-footer-credit">{t('footer.credit')}</p>
         </footer>

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import SupportForm from './SupportForm';
@@ -82,6 +83,15 @@ function HelpPage() {
                     ))}
                 </div>
             )}
+
+            <p className="help-legal">
+                {t('help.legal')}{' '}
+                <Link to="/guidelines">{t('legal.guidelines')}</Link>
+                {' · '}
+                <Link to="/privacy">{t('legal.privacy')}</Link>
+                {' · '}
+                <Link to="/terms">{t('legal.terms')}</Link>
+            </p>
 
         <SupportForm />
         </main>

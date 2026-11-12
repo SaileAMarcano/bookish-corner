@@ -27,7 +27,8 @@ CREATE TABLE users(
     staff_role      TEXT CHECK (staff_role IN ('admin', 'editor', 'moderator', 'designer')),
     tour_seen_at    TIMESTAMPTZ,
     reduce_motion   BOOLEAN NOT NULL DEFAULT false,
-    color_vision    TEXT NOT NULL DEFAULT 'default' CHECK (color_vision IN ('default', 'red-green', 'blue-yellow'))
+    color_vision    TEXT NOT NULL DEFAULT 'default' CHECK (color_vision IN ('default', 'red-green', 'blue-yellow')),
+    terms_accepted_at TIMESTAMPTZ
 );
 
 CREATE TABLE works (

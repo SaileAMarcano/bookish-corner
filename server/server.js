@@ -2241,6 +2241,10 @@ app.post('/api/register', authLimiter, async (req, res) => {
         return res.status(400).json({ error: msg(req, problem) });
     }
 
+    if (req.body.acceptTerms !== true) {
+        return res.status(400).json({ error: msg(req, 'termsRequired') });
+    }
+
     const passwordHash = await bcrypt.hash(password, 10);
 
     const client = await pool.connect();
@@ -2264,7 +2268,7 @@ app.post('/api/register', authLimiter, async (req, res) => {
         }
 
         const result = await client.query(
-            'INSERT INTO users (username, email, password_hash, language) VALUES ($1, $2, $3, $4) RETURNING id, username, email',
+            'INSERT INTO users (username, email, password_hash, language, terms_accepted_at) VALUES ($1, $2, $3, $4, now()) RETURNING id, username, email',
             [username, email, passwordHash, language]
         );
         const user = result.rows[0];

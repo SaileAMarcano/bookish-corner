@@ -11,7 +11,7 @@ const PUBLIC_LINKS = [
 const VISIBLE_LINKS = PUBLIC_LINKS.filter((link) => !link.hidden);
 const SHOW_SIGNUP = false;
 
-function PublicHeader() {
+function PublicHeader({ signedIn = false }) {
     const { t } = useTranslation();
 
     return (
@@ -33,7 +33,9 @@ function PublicHeader() {
 
             <div className="public-actions">
                 <LanguageSwitcher />
-                <Link to="/login" className="public-login">{t('public.login')}</Link>
+                <Link to={signedIn ? '/' : '/login'} className="public-login">
+                    {signedIn ? t('legal.backToApp') : t('public.login')}
+                </Link>
                 {SHOW_SIGNUP && <Link to="/signup" className="public-signup">{t('public.signup')}</Link>}
             </div>
         </header>
