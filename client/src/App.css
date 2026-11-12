@@ -15713,16 +15713,6 @@ a.post-tag:hover,
   animation: star-ring 0.55s ease-out both;
 }
 
-.star-sparkle {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  width: 9px;
-  height: 9px;
-  fill: var(--star-fill);
-  pointer-events: none;
-  animation: star-sparkle 0.9s calc(var(--pop-delay) + 0.2s) ease-out both;
-}
 
 @keyframes star-pop {
   0% {
@@ -15777,22 +15767,6 @@ a.post-tag:hover,
   }
 }
 
-@keyframes star-sparkle {
-  0% {
-    opacity: 0;
-    transform: scale(0) rotate(0deg);
-  }
-
-  40% {
-    opacity: 1;
-    transform: scale(1.2) rotate(45deg);
-  }
-
-  100% {
-    opacity: 0;
-    transform: scale(0.4) rotate(90deg);
-  }
-}
 
 @keyframes star-label-in {
   0% {
@@ -15814,14 +15788,12 @@ a.post-tag:hover,
   }
 
   .star-ring,
-  .star-halo,
-  .star-sparkle {
+  .star-halo {
     display: none;
   }
 }
 
 :root[data-motion="reduce"] .star-ring,
-:root[data-motion="reduce"] .star-halo,
-:root[data-motion="reduce"] .star-sparkle {
+:root[data-motion="reduce"] .star-halo {
   display: none;
 }

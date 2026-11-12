@@ -12,14 +12,6 @@ function StarShape({ size }) {
     );
 }
 
-function Sparkle() {
-    return (
-        <svg className="star-sparkle" viewBox="0 0 10 10" aria-hidden="true">
-            <path d="M5 0Q5.6 4.4 10 5Q5.6 5.6 5 10Q4.4 5.6 0 5Q4.4 4.4 5 0Z" />
-        </svg>
-    );
-}
-
 function StarRating({ value, onChange, size = 26 }) {
     const { t } = useTranslation();
     const [hovered, setHovered] = useState(0);
@@ -64,7 +56,6 @@ function StarRating({ value, onChange, size = 26 }) {
                             <span className="star-fill" style={{ width: `${fill}%` }}>
                                 <StarShape size={size} />
                             </span>
-                            {pops && fill === 100 && <Sparkle />}
                         </span>
 
                         {onChange && (

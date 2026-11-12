@@ -5,6 +5,7 @@ const { uploadAvatar, deleteAvatar, uploadPostImage, deletePostImage, uploadCove
 const { LANGUAGES, languageOf, msg } = require('./messages');
 const { syncMilestones } = require('./milestones');
 const { resolveReadingDates } = require('./readingDates');
+const { sendResetEmail } = require('./mailer');
 const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -106,6 +107,14 @@ const applyLimiter = rateLimit({
     standardHeaders: 'draft-8',
     legacyHeaders: false,
     handler: (req, res) => res.status(429).json({ error: msg(req, 'betaTooManyApplications') }),
+});
+
+const resetLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: 5,
+    standardHeaders: 'draft-8',
+    legacyHeaders: false,
+    handler: (req, res) => res.status(429).json({ error: msg(req, 'resetTooMany') }),
 });
 
 const PORT = process.env.PORT || 3000;
@@ -2307,6 +2316,35 @@ app.post('/api/login', loginLimiter, async (req, res) => {
     };
 
     res.json(await findMe(user.id));
+});
+
+const APP_URL = isProduction ? 'https://alibraryofus.com' : 'http://localhost:5173';
+
+const hashToken = (token) => crypto.createHash('sha256').update(token).digest('hex');
+
+app.post('/api/password/forgot', resetLimiter, async (req, res) => {
+    const email = typeof req.body.email === 'string' ? req.body.email.trim() : '';
+
+    if (!EMAIL_PATTERN.test(email)) {
+        return res.status(400).json({ error: msg(req, 'emailInvalid') });
+    }
+
+    const [user] = await query('SELECT id, email, language FROM users WHERE lower(email) = lower($1)', [email]);
+
+    if (user) {
+        const token = crypto.randomBytes(32).toString('hex');
+
+        await query('DELETE FROM password_resets WHERE user_id = $1', [user.id]);
+        await query(
+            "INSERT INTO password_resets (user_id, token_hash, expires_at) VALUES ($1, $2, now() + interval '1 hour')",
+            [user.id, hashToken(token)]
+        );
+
+        sendResetEmail(user.email, user.language, `${APP_URL}/reset-password?token=${token}`)
+            .catch((error) => console.error('Reset email failed:', error.message));
+    }
+
+    res.json({ ok: true });
 });
 
 app.get('/api/me', async (req, res) => {

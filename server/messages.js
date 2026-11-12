@@ -108,6 +108,8 @@ const MESSAGES = {
         supportMessageLength: 'Write between 10 and 2000 characters.',
         supportTooMany: 'You have sent several messages in the last hour. Please wait a little before sending another one.',
         supportUpdateInvalid: 'Choose a valid status for this message.',
+        emailInvalid: 'Enter a valid email.',
+        resetTooMany: 'You asked for several links in the last hour. Check your inbox (and spam folder) or wait a little.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -216,6 +218,8 @@ const MESSAGES = {
         supportMessageLength: 'Escribe entre 10 y 2000 caracteres.',
         supportTooMany: 'Enviaste varios mensajes en la última hora. Espera un poco antes de enviar otro.',
         supportUpdateInvalid: 'Elige un estado válido para este mensaje.',
+        semailInvalid: 'Escribe un correo válido.',
+        resetTooMany: 'Pediste varios enlaces en la última hora. Revisa tu correo (también la carpeta de spam) o espera un poco.',
     },
 };
 
