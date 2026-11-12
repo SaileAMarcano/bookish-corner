@@ -16039,3 +16039,15 @@ a.post-tag:hover,
 .access-google-error {
   margin-bottom: 16px;
 }
+
+.settings-delete-google {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.settings-delete-google a {
+  color: var(--rose-deep);
+  font-weight: 600;
+}

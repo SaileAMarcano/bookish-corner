@@ -193,7 +193,7 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                             </button>
                         </SettingRow>
 
-                        <DeleteAccount username={currentUser.username} onDeleted={onDeleted} />
+                        <DeleteAccount username={currentUser.username} hasGoogle={currentUser.hasGoogle} onDeleted={onDeleted} />
                     </SettingsSection>
 
                 </div>

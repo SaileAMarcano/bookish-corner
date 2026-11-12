@@ -1,10 +1,11 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
 
-function DeleteAccount({ username, onDeleted }) {
+function DeleteAccount({ username, hasGoogle, onDeleted }) {
     const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [typed, setTyped] = useState('');
@@ -72,6 +73,12 @@ function DeleteAccount({ username, onDeleted }) {
             />
 
             <label className="edit-label" htmlFor="delete-password">{t('settings.account.password')}</label>
+            {hasGoogle && (
+                <p className="settings-delete-google">
+                    {t('settings.account.googlePassword')}{' '}
+                    <Link to="/forgot-password">{t('auth.forgotLink')}</Link>
+                </p>
+            )}
             <input
                 id="delete-password"
                 type="password"

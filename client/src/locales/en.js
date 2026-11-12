@@ -581,7 +581,7 @@ const en = {
             account: {
                 appearance: { q: 'How do I change the theme, dark mode or language?', a: 'In Settings → Appearance. You can also switch dark mode and the language from the top bar.' },
                 accessibility: { q: 'What accessibility options are there?', a: 'In Settings → Accessibility you can reduce motion and choose a color vision mode for red–green or blue–yellow color blindness.' },
-                delete: { q: 'How do I delete my account?', a: 'In Settings → Account → Delete account. You will need to type your username and your password. This deletes everything and cannot be undone.' },
+                delete: { q: 'How do I delete my account?', a: 'In Settings → Account → Delete account. You will need to type your username and your password. If you created your account with Google, first choose a password with “Forgot your password?”. This deletes everything and cannot be undone.' },
                 report: { q: 'How do I report a post, a comment or a profile?', a: 'Use the flag button next to it and choose a reason. The moderation team will review it.' },
             },
             beta: {
@@ -665,6 +665,7 @@ const en = {
             deleteHint: 'Permanently removes your profile, library, posts, reviews, lists and everything else. This cannot be undone.',
             confirmTitle: 'Delete your account for good?',
             confirmText: 'Your profile, library, posts, reviews, lists, comments and likes will be deleted right away. We cannot recover them afterwards.',
+            googlePassword: 'Your account uses Google. To delete it, first choose a password:',
             typeUsername: 'Type your username ({{username}}) to confirm',
             password: 'Your password',
             confirmButton: 'Delete my account',

@@ -581,7 +581,7 @@ const es = {
             account: {
                 appearance: { q: '¿Cómo cambio el tema, el modo oscuro o el idioma?', a: 'En Configuración → Apariencia. El modo oscuro y el idioma también se cambian desde la barra de arriba.' },
                 accessibility: { q: '¿Qué opciones de accesibilidad hay?', a: 'En Configuración → Accesibilidad puedes reducir las animaciones y elegir un modo de visión del color para daltonismo rojo–verde o azul–amarillo.' },
-                delete: { q: '¿Cómo elimino mi cuenta?', a: 'En Configuración → Cuenta → Eliminar cuenta. Tendrás que escribir tu usuario y tu contraseña. Se borra todo y no se puede deshacer.' },
+                delete: { q: '¿Cómo elimino mi cuenta?', a: 'En Configuración → Cuenta → Eliminar cuenta. Tendrás que escribir tu usuario y tu contraseña. Si creaste tu cuenta con Google, primero elige una contraseña con «¿Olvidaste tu contraseña?». Se borra todo y no se puede deshacer.' },
                 report: { q: '¿Cómo reporto una publicación, un comentario o un perfil?', a: 'Usa el botón de la bandera que está al lado y elige un motivo. El equipo de moderación lo revisará.' },
             },
             beta: {
@@ -665,6 +665,7 @@ const es = {
             deleteHint: 'Borra para siempre tu perfil, tu biblioteca, tus publicaciones, reseñas, listas y todo lo demás. No se puede deshacer.',
             confirmTitle: '¿Eliminar tu cuenta para siempre?',
             confirmText: 'Tu perfil, tu biblioteca, tus publicaciones, reseñas, listas, comentarios y me gusta se borrarán en este momento. Después no podremos recuperarlos.',
+            googlePassword: 'Tu cuenta usa Google. Para eliminarla, primero elige una contraseña:',
             typeUsername: 'Escribe tu usuario ({{username}}) para confirmar',
             password: 'Tu contraseña',
             confirmButton: 'Eliminar mi cuenta',
