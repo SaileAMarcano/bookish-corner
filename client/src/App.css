@@ -9702,9 +9702,8 @@ a.search-title:hover {
 
 .year-shelf-object {
   display: block;
-  width: 42px;
+  width: auto;
   height: 64px;
-  color: var(--ink);
 }
 
 .year-shelf-reward-list {
@@ -9726,7 +9725,7 @@ a.search-title:hover {
   background: var(--surface);
 }
 
-.year-shelf-reward-list svg {
+.year-shelf-reward-list img {
   flex-shrink: 0;
 }
 
@@ -9751,7 +9750,7 @@ a.search-title:hover {
   line-height: 1.5;
 }
 
-.year-shelf-locked svg {
+.year-shelf-locked img {
   opacity: 0.4;
   filter: grayscale(1);
 }
