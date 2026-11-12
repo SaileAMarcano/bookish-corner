@@ -2979,12 +2979,10 @@ html {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-end;
   gap: 8px;
-  min-height: max(330px, 24vw);
   margin-top: calc(-1 * max(130px, 9.75vw));
-  padding: 0 20px 34px;
-  background: url('/footer-waves.png') center bottom / cover no-repeat;
+  padding: max(150px, 15vw) 20px 34px;
+  background: #F6E4DD url('/footer-waves.png') center top / 100% auto no-repeat;
   text-align: center;
 }
 

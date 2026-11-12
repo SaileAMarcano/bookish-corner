@@ -39,7 +39,9 @@ function PublicFooter() {
                 <Link to="/terms">{t('legal.terms')}</Link>
             </nav>
 
-            <p className="public-footer-credit">{t('footer.credit')}</p>
+            <p className="public-footer-credit">
+                {t('footer.credit')} <span aria-hidden="true">♡</span>
+            </p>
         </footer>
     );
 }
