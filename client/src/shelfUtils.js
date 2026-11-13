@@ -32,8 +32,8 @@ export function bookItem(book, pose = 'upright', tone = null) {
     return { type: 'book', key: 'book-' + book.id, book, pose, tone };
 }
 
-export function decorationItem(name) {
-    return { type: 'decoration', key: 'decoration-' + name, name };
+export function decorationItem(name, pose = 'upright') {
+    return { type: 'decoration', key: 'decoration-' + name, name, pose };
 }
 
 export function autoItems(books) {
@@ -70,7 +70,7 @@ export function savedItems(books, rows, unlockedNames) {
 
     for (const row of rows) {
         if (row.decoration) {
-            if (unlockedNames.includes(row.decoration)) items.push(decorationItem(row.decoration));
+            if (unlockedNames.includes(row.decoration)) items.push(decorationItem(row.decoration, row.pose));
             continue;
         }
 
@@ -94,7 +94,13 @@ export function groupItems(items) {
 
     for (const item of items) {
         if (item.type === 'decoration') {
-            groups.push(item);
+            const last = groups[groups.length - 1];
+
+            if (item.pose === 'flat' && last && last.type === 'pile' && !last.top) {
+                last.top = item;
+            } else {
+                groups.push(item);
+            }
             continue;
         }
 
@@ -105,7 +111,7 @@ export function groupItems(items) {
             const flat = { ...item, tone, variant: (hash >>> 8) % FLAT_VARIANTS };
             const last = groups[groups.length - 1];
 
-            if (last && last.type === 'pile' && last.items.length < PILE_SIZE) {
+            if (last && last.type === 'pile' && !last.top && last.items.length < PILE_SIZE) {
                 last.items.push(flat);
             } else {
                 groups.push({ type: 'pile', key: 'pile-' + item.key, items: [flat] });
@@ -122,6 +128,24 @@ export function groupItems(items) {
     return groups;
 }
 
+export function canSitOnPile(items, key) {
+    const index = items.findIndex((item) => item.key === key);
+    const previous = items[index - 1];
+    return index > 0 && previous.type === 'book' && previous.pose === 'flat';
+}
+
+function putOnPile(rest, moving, targetKey) {
+    const pile = groupItems(rest).find((group) =>
+        group.type === 'pile' && group.items.some((item) => item.key === targetKey)
+    );
+    const lastKey = pile.items[pile.items.length - 1].key;
+    const next = rest.map((item) => (pile.top && item.key === pile.top.key ? { ...item, pose: 'upright' } : item));
+    const index = next.findIndex((item) => item.key === lastKey);
+
+    next.splice(index + 1, 0, { ...moving, pose: 'flat' });
+    return next;
+}
+
 export function moveItem(items, fromKey, toKey, before) {
     const moving = items.find((item) => item.key === fromKey);
     const rest = items.filter((item) => item.key !== fromKey);
@@ -130,9 +154,15 @@ export function moveItem(items, fromKey, toKey, before) {
     if (!moving || index < 0) return items;
 
     const target = rest[index];
-    const dropped = moving.type === 'book' && target.type === 'book' && target.pose === 'flat'
-        ? { ...moving, pose: 'flat' }
-        : moving;
+    const ontoPile = target.type === 'book' && target.pose === 'flat';
+
+    if (moving.type === 'decoration' && ontoPile) {
+        return putOnPile(rest, moving, target.key);
+    }
+
+    let dropped = moving;
+    if (moving.type === 'book' && ontoPile) dropped = { ...moving, pose: 'flat' };
+    if (moving.type === 'decoration') dropped = { ...moving, pose: 'upright' };
 
     rest.splice(before ? index : index + 1, 0, dropped);
     return rest;
@@ -153,6 +183,6 @@ export function toPayload(items) {
     return items.map((item) =>
         item.type === 'book'
             ? { bookId: item.book.id, pose: item.pose, tone: item.tone }
-            : { decoration: item.name }
+            : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright' }
     );
 }

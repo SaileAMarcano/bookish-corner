@@ -3,7 +3,7 @@ import Notice from './Notice';
 import ShelfDecoration from './ShelfDecoration';
 import { SHELF_POSES, SHELF_TONES } from './shelfUtils';
 
-function ShelfEditor({ item, isFirst, isLast, tray, saving, error, onMoveBy, onPose, onTone, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
 
@@ -52,11 +52,25 @@ function ShelfEditor({ item, isFirst, isLast, tray, saving, error, onMoveBy, onP
                     )}
 
                     {item.type === 'decoration' && (
-                        <div className="year-shelf-editor-row">
-                            <button type="button" className="year-shelf-button" onClick={onRemove}>
-                                {t('library.shelf.removeDecoration')}
-                            </button>
-                        </div>
+                        <>
+                            <div className="year-shelf-editor-row" role="group" aria-label={t('library.shelf.pose')}>
+                                <button type="button" className="year-shelf-button"
+                                    aria-pressed={!(canTop && item.pose === 'flat')} onClick={() => onPose('upright')}>
+                                    {t('library.shelf.decorationPoses.upright')}
+                                </button>
+                                <button type="button" className="year-shelf-button"
+                                    aria-pressed={canTop && item.pose === 'flat'} disabled={!canTop} onClick={() => onPose('flat')}>
+                                    {t('library.shelf.decorationPoses.flat')}
+                                </button>
+                            </div>
+                            {!canTop && <p className="year-shelf-editor-hint">{t('library.shelf.pileHint')}</p>}
+
+                            <div className="year-shelf-editor-row">
+                                <button type="button" className="year-shelf-button" onClick={onRemove}>
+                                    {t('library.shelf.removeDecoration')}
+                                </button>
+                            </div>
+                        </>
                     )}
                 </div>
             ) : (

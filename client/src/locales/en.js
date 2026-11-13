@@ -1334,7 +1334,7 @@ const en = {
             unlocked: 'Unlocked',
             locked: 'Yet to discover',
             organize: 'Organize shelf',
-            editHint: 'Drag a book or a decoration to move it. On a phone, press and hold before dragging. Select one to see its options.',
+            editHint: 'Drag a book or a decoration to move it. Drop a decoration on a pile to place it on top. On a phone, press and hold before dragging. Select one to see its options.',
             selectHint: 'Select a book or a decoration to change it.',
             position: 'Position',
             moveLeft: 'Move left',
@@ -1351,6 +1351,11 @@ const en = {
             addDecoration: 'Add a decoration',
             trayHint: 'Each decoration lives on one shelf: adding it here moves it from the shelf where it was.',
             removeDecoration: 'Remove from this shelf',
+            decorationPoses: {
+                upright: 'On the shelf',
+                flat: 'On top of the pile',
+            },
+            pileHint: 'To place it on top of a pile, move it right after the pile.',
             save: 'Save shelf',
             objects: {
                 candle: 'Candle',

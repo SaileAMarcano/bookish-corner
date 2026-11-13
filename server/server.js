@@ -2217,9 +2217,10 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
             bookIds.push(item.bookId);
             rows.push({ bookId: item.bookId, decoration: null, pose, tone });
         } else if (item && typeof item.decoration === 'string'
-            && Object.hasOwn(SHELF_DECORATIONS, item.decoration) && !decorations.includes(item.decoration)) {
+            && Object.hasOwn(SHELF_DECORATIONS, item.decoration) && !decorations.includes(item.decoration)
+            && ['upright', 'flat'].includes(item.pose ?? 'upright')) {
             decorations.push(item.decoration);
-            rows.push({ bookId: null, decoration: item.decoration, pose: 'upright', tone: null });
+            rows.push({ bookId: null, decoration: item.decoration, pose: item.pose ?? 'upright', tone: null });
         } else {
             return res.status(400).json({ error: msg(req, 'shelfInvalid') });
         }

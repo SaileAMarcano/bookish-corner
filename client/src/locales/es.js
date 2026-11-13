@@ -1334,7 +1334,7 @@ const es = {
             unlocked: 'Desbloqueado',
             locked: 'Por descubrir',
             organize: 'Organizar estante',
-            editHint: 'Arrastra un libro o un adorno para moverlo. En el celular, mantén presionado antes de arrastrar. Selecciona uno para ver sus opciones.',
+            editHint: 'Arrastra un libro o un adorno para moverlo. Suelta un adorno sobre una pila para ponerlo encima. En el celular, mantén presionado antes de arrastrar. Selecciona uno para ver sus opciones.',
             selectHint: 'Selecciona un libro o un adorno para cambiarlo.',
             position: 'Posición',
             moveLeft: 'Mover a la izquierda',
@@ -1351,6 +1351,11 @@ const es = {
             addDecoration: 'Añadir un adorno',
             trayHint: 'Cada adorno vive en un solo estante: si lo añades aquí, se mueve del estante donde estaba.',
             removeDecoration: 'Quitar de este estante',
+            decorationPoses: {
+                upright: 'En la repisa',
+                flat: 'Encima de la pila',
+            },
+            pileHint: 'Para ponerlo encima de una pila, muévelo justo después de la pila.',
             save: 'Guardar estante',
             objects: {
                 candle: 'Vela',

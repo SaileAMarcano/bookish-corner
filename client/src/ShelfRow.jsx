@@ -83,10 +83,11 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
         if (target && stage.contains(target)) {
             if (target.dataset.shelfKey === state.key) return;
             const box = target.getBoundingClientRect();
+            const onto = Boolean(target.dataset.shelfFlat) && state.key.startsWith('decoration-');
             const before = target.dataset.shelfFlat
                 ? state.y < box.top + box.height / 2
                 : state.x < box.left + box.width / 2;
-            next = { key: target.dataset.shelfKey, before };
+            next = { key: target.dataset.shelfKey, before: onto ? false : before, onto };
         } else {
             const others = [...stage.querySelectorAll('[data-shelf-key]')]
                 .filter((node) => node.dataset.shelfKey !== state.key);
@@ -104,7 +105,7 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
         }
 
         const current = dropRef.current;
-        if (!current || current.key !== next.key || current.before !== next.before) {
+        if (!current || current.key !== next.key || current.before !== next.before || current.onto !== next.onto) {
             dropRef.current = next;
             setDrop(next);
         }
@@ -219,7 +220,7 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
                 editing={editing}
                 selected={item.key === selectedKey}
                 offset={drag?.key === item.key ? drag : null}
-                dropSide={drop?.key === item.key ? (drop.before ? 'before' : 'after') : null}
+                dropSide={drop?.key === item.key ? (drop.onto ? 'onto' : drop.before ? 'before' : 'after') : null}
                 onPointerDown={handlePointerDown}
                 onClick={handleClick}
             />
@@ -234,6 +235,7 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
                     if (group.type === 'pile') {
                         return (
                             <div key={group.key} className="year-shelf-pile">
+                                {group.top && <div className="year-shelf-pile-top">{renderItem(group.top)}</div>}
                                 {group.items.map(renderItem)}
                             </div>
                         );

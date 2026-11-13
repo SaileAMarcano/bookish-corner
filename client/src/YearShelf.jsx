@@ -8,7 +8,7 @@ import ShelfRow from './ShelfRow';
 import Notice from './Notice';
 import { apiFetch } from './api';
 import { groupReadBooks } from './libraryUtils';
-import { DECORATIONS, autoItems, decorationItem, moveBy, moveItem, savedItems, toPayload } from './shelfUtils';
+import { DECORATIONS, autoItems, canSitOnPile, decorationItem, moveBy, moveItem, savedItems, toPayload } from './shelfUtils';
 
 function YearShelf({ books, booksStatus, readingGoal, username }) {
     const { t } = useTranslation();
@@ -180,6 +180,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                 item={selectedIndex >= 0 ? items[selectedIndex] : null}
                                 isFirst={selectedIndex === 0}
                                 isLast={selectedIndex === items.length - 1}
+                                canTop={selectedIndex >= 0 && canSitOnPile(items, editing.selectedKey)}
                                 tray={unlocked.filter((name) => !items.some((item) => item.name === name))}
                                 saving={saving}
                                 error={saveError}

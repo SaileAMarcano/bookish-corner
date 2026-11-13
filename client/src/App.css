@@ -16188,6 +16188,22 @@ a.post-tag:hover,
   bottom: -3px;
 }
 
+.year-shelf-editable.drop-onto {
+  outline: 3px dashed var(--rose-ink);
+  outline-offset: 2px;
+}
+
+.year-shelf-pile-top {
+  display: flex;
+  align-self: center;
+  justify-content: center;
+  margin-bottom: -4px;
+}
+
+.year-shelf-pile-top .year-shelf-decoration {
+  margin: 0;
+}
+
 .year-shelf-editor {
   --shelf-tone-0: var(--sage);
   --shelf-tone-1: var(--lavender);
