@@ -2167,6 +2167,115 @@ app.get('/api/users/:username/milestones', requireAuth, async (req, res) => {
     );
 });
 
+const SHELF_DECORATIONS = {
+    candle: 'first-chapter',
+    quill: 'thoughtful-reader',
+    stars: 'bookworm',
+    flowers: 'genre-wanderer',
+    tea: 'goal-reached',
+};
+const SHELF_POSES = ['upright', 'lean', 'flat'];
+const SHELF_TONES = 6;
+const SHELF_MAX_ITEMS = 1000;
+
+async function findShelf(userId) {
+    return query(
+        `SELECT year, user_book_id, decoration, pose, tone
+         FROM shelf_items WHERE user_id = $1 ORDER BY year, position`,
+        [userId]
+    );
+}
+
+app.get('/api/shelf', requireAuth, async (req, res) => {
+    res.json(await findShelf(req.session.user.id));
+});
+
+app.put('/api/shelf/:year', requireAuth, async (req, res) => {
+    const userId = req.session.user.id;
+    const year = Number(req.params.year);
+    const items = req.body.items;
+    const lastYear = new Date().getUTCFullYear() + 1;
+    const validYear = Number.isInteger(year) && (year === 0 || (year >= 1000 && year <= lastYear));
+
+    if (!validYear || !Array.isArray(items) || items.length > SHELF_MAX_ITEMS) {
+        return res.status(400).json({ error: msg(req, 'shelfInvalid') });
+    }
+
+    const bookIds = [];
+    const decorations = [];
+    const rows = [];
+
+    for (const item of items) {
+        if (item && Number.isInteger(item.bookId) && item.bookId > 0) {
+            const pose = item.pose ?? 'upright';
+            const tone = item.tone ?? null;
+            const validTone = tone === null || (Number.isInteger(tone) && tone >= 0 && tone < SHELF_TONES);
+
+            if (!SHELF_POSES.includes(pose) || !validTone || bookIds.includes(item.bookId)) {
+                return res.status(400).json({ error: msg(req, 'shelfInvalid') });
+            }
+            bookIds.push(item.bookId);
+            rows.push({ bookId: item.bookId, decoration: null, pose, tone });
+        } else if (item && typeof item.decoration === 'string'
+            && Object.hasOwn(SHELF_DECORATIONS, item.decoration) && !decorations.includes(item.decoration)) {
+            decorations.push(item.decoration);
+            rows.push({ bookId: null, decoration: item.decoration, pose: 'upright', tone: null });
+        } else {
+            return res.status(400).json({ error: msg(req, 'shelfInvalid') });
+        }
+    }
+
+    if (bookIds.length > 0) {
+        const owned = await query(
+            `SELECT id FROM user_books
+             WHERE user_id = $1 AND status = 'finished' AND id = ANY($2::int[])`,
+            [userId, bookIds]
+        );
+        if (owned.length !== bookIds.length) {
+            return res.status(400).json({ error: msg(req, 'shelfInvalid') });
+        }
+    }
+
+    if (decorations.length > 0) {
+        const milestones = await syncMilestones(userId);
+        const unlocked = decorations.every((decoration) =>
+            milestones.some((milestone) => milestone.key === SHELF_DECORATIONS[decoration] && milestone.achieved)
+        );
+        if (!unlocked) {
+            return res.status(400).json({ error: msg(req, 'milestoneNotReached') });
+        }
+    }
+
+    await withTransaction(async (tx) => {
+        await tx(
+            `DELETE FROM shelf_items
+             WHERE user_id = $1
+               AND (year = $2 OR decoration = ANY($3::text[]) OR user_book_id = ANY($4::int[]))`,
+            [userId, year, decorations, bookIds]
+        );
+
+        if (rows.length > 0) {
+            await tx(
+                `INSERT INTO shelf_items (user_id, year, position, user_book_id, decoration, pose, tone)
+                 SELECT $1, $2, item.position, item.user_book_id, item.decoration, item.pose, item.tone
+                 FROM unnest($3::int[], $4::int[], $5::text[], $6::text[], $7::int[])
+                      AS item(position, user_book_id, decoration, pose, tone)`,
+                [
+                    userId,
+                    year,
+                    rows.map((row, index) => index),
+                    rows.map((row) => row.bookId),
+                    rows.map((row) => row.decoration),
+                    rows.map((row) => row.pose),
+                    rows.map((row) => row.tone),
+                ]
+            );
+        }
+    });
+
+    res.json(await findShelf(userId));
+});
+
 app.post('/api/milestones/seen', requireAuth, async (req, res) => {
     const keys = Array.isArray(req.body.keys) ? req.body.keys.filter((key) => typeof key === 'string') : [];
 

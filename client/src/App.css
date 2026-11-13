@@ -9695,12 +9695,12 @@ a.search-title:hover {
   font-size: 14px;
 }
 
-.year-shelf-decorations {
+.year-shelf-decoration {
+  position: relative;
   display: flex;
+  flex: 0 0 auto;
   align-items: flex-end;
-  gap: 10px;
-  margin-left: auto;
-  padding-left: 24px;
+  margin: 0 5px;
 }
 
 .year-shelf-object {
@@ -16036,7 +16036,6 @@ a.post-tag:hover,
   font-weight: 600;
 }
 
-
 .profile-qr-dialog {
   text-align: center;
 }
@@ -16079,4 +16078,205 @@ a.post-tag:hover,
 .terms-update-logout {
   display: block;
   margin: 14px auto 0;
+}
+
+.year-shelf-organize {
+  margin: 4px 0 10px;
+}
+
+.year-shelf-button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--rose);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--rose-ink);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.year-shelf-button:hover:not(:disabled) {
+  background: var(--rose-soft);
+}
+
+.year-shelf-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.year-shelf-button[aria-pressed="true"],
+.year-shelf-button[aria-pressed="true"]:hover:not(:disabled),
+.year-shelf-save,
+.year-shelf-save:hover:not(:disabled) {
+  background: var(--rose);
+  color: var(--on-rose);
+}
+
+.year-shelf-button:focus-visible,
+.year-shelf-swatch:focus-visible,
+.year-shelf-editable:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 3px;
+}
+
+.year-shelf-editable {
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: grab;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.year-shelf-spine.year-shelf-editable,
+.year-shelf-decoration.year-shelf-editable {
+  padding: 0;
+}
+
+.year-shelf-editable[aria-pressed="true"] {
+  z-index: 3;
+  outline: 3px solid var(--rose-ink);
+  outline-offset: 3px;
+}
+
+.year-shelf-editable.is-dragging {
+  z-index: 5;
+  opacity: 0.85;
+  cursor: grabbing;
+  pointer-events: none;
+  transition: none;
+}
+
+.year-shelf-editable.drop-before::after,
+.year-shelf-editable.drop-after::after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  border-radius: 2px;
+  background: var(--rose-ink);
+  content: '';
+}
+
+.year-shelf-editable.drop-before::after {
+  left: -6px;
+}
+
+.year-shelf-editable.drop-after::after {
+  right: -6px;
+}
+
+.year-shelf-flat.drop-before::after,
+.year-shelf-flat.drop-after::after {
+  top: auto;
+  right: 0;
+  bottom: auto;
+  left: 0;
+  width: auto;
+  height: 4px;
+}
+
+.year-shelf-flat.drop-before::after {
+  top: -3px;
+}
+
+.year-shelf-flat.drop-after::after {
+  bottom: -3px;
+}
+
+.year-shelf-editor {
+  --shelf-tone-0: var(--sage);
+  --shelf-tone-1: var(--lavender);
+  --shelf-tone-2: var(--rose);
+  --shelf-tone-3: color-mix(in srgb, var(--lavender) 65%, #537184);
+  --shelf-tone-4: var(--clay);
+  --shelf-tone-5: var(--amber);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--surface-2);
+}
+
+:root[data-vision="red-green"] .year-shelf-editor {
+  --shelf-tone-0: color-mix(in srgb, var(--lavender) 55%, #eee7dd);
+  --shelf-tone-1: var(--lavender);
+  --shelf-tone-2: color-mix(in srgb, var(--amber) 65%, #f6e5c3);
+  --shelf-tone-3: color-mix(in srgb, var(--lavender) 60%, #344d69);
+  --shelf-tone-4: color-mix(in srgb, var(--amber) 55%, #60422d);
+  --shelf-tone-5: var(--amber);
+}
+
+:root[data-vision="blue-yellow"] .year-shelf-editor {
+  --shelf-tone-0: var(--sage);
+  --shelf-tone-1: color-mix(in srgb, var(--rose) 60%, #715560);
+  --shelf-tone-2: var(--rose);
+  --shelf-tone-3: color-mix(in srgb, var(--sage) 60%, #3e625e);
+  --shelf-tone-4: var(--clay);
+  --shelf-tone-5: color-mix(in srgb, var(--clay) 60%, var(--rose));
+}
+
+.year-shelf-editor-hint {
+  margin: 0;
+  color: var(--text-2);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.year-shelf-editor-item,
+.year-shelf-tray {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.year-shelf-editor-item > strong {
+  font-size: 18px;
+}
+
+.year-shelf-tray > strong {
+  font-size: 14px;
+}
+
+.year-shelf-editor-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.year-shelf-editor-actions {
+  justify-content: flex-end;
+}
+
+.year-shelf-swatch {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--spine-tone) 15%, #34251e);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--spine-tone) 56%, #f6eddd);
+  cursor: pointer;
+}
+
+.year-shelf-swatch[aria-pressed="true"] {
+  outline: 3px solid var(--rose-ink);
+  outline-offset: 3px;
+}
+
+.year-shelf-tray-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+}
+
+.year-shelf-tray-button .year-shelf-object {
+  width: auto;
+  height: 36px;
 }

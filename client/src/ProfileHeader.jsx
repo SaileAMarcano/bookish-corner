@@ -84,7 +84,7 @@ function ProfileHeader({ profile, onShowFollows, children }) {
                     <div className="profile-header-actions">
                         {children}
 
-                    <ProfileShare username={profile.username} />
+                        <ProfileShare username={profile.username} />
                     </div>
 
                     <div className="profile-header-stats">
