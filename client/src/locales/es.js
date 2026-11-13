@@ -1374,6 +1374,11 @@ const es = {
         joined: 'Se unió en {{date}}',
         share: 'Compartir',
         copied: 'Enlace copiado',
+        shareTitle: 'Comparte este perfil',
+        shareLead: 'Escanea el código con la cámara del celular para abrir el perfil.',
+        copyLink: 'Copiar enlace',
+        download: 'Descargar QR',
+        qrAlt: 'Código QR del perfil de @{{username}}',
     },
     userPage: {
         follow: 'Seguir',

@@ -1373,7 +1373,12 @@ const en = {
     profileHeader: {
         joined: 'Joined {{date}}',
         share: 'Share',
-        copied: 'Link copied'
+        copied: 'Link copied',
+        shareTitle: 'Share this profile',
+        shareLead: 'Scan the code with a phone camera to open the profile.',
+        copyLink: 'Copy link',
+        download: 'Download QR',
+        qrAlt: 'QR code for the profile of @{{username}}',
     },
     userPage: {
         follow: 'Follow',

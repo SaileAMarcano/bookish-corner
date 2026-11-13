@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import ProfileShare from './ProfileShare';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import { ProfileBadge } from './MilestoneSeal';
@@ -17,7 +17,6 @@ function validSocialUrl(value, domain) {
 
 function ProfileHeader({ profile, onShowFollows, children }) {
     const { t, i18n } = useTranslation();
-    const [copied, setCopied] = useState(false);
 
     const joined = parseDbDate(profile.createdAt).toLocaleDateString(i18n.language, {
         month: 'long',
@@ -30,19 +29,6 @@ function ProfileHeader({ profile, onShowFollows, children }) {
         { number: profile.followerCount, label: t('userPage.followers'), opensFollows: true },
         { number: profile.followingCount, label: t('userPage.followingCount'), opensFollows: true },
     ];
-
-    // Copies the public link of this profile and says so on the button for 2 seconds.
-    const handleShare = () => {
-        const link = `${window.location.origin}/u/${profile.username}`;
-
-        navigator.clipboard
-            .writeText(link)
-            .then(() => {
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
-            })
-            .catch(() => { });
-    };
 
     return (
         <section className="profile-header">
@@ -98,10 +84,7 @@ function ProfileHeader({ profile, onShowFollows, children }) {
                     <div className="profile-header-actions">
                         {children}
 
-                        <button type="button" className="profile-share" onClick={handleShare}>
-                            <Icon name="share" size={14} />
-                            <span aria-live="polite">{copied ? t('profileHeader.copied') : t('profileHeader.share')}</span>
-                        </button>
+                    <ProfileShare username={profile.username} />
                     </div>
 
                     <div className="profile-header-stats">
