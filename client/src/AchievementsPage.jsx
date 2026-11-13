@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import AchievementConstellation from './AchievementConstellation';
 import EmptyState from './EmptyState';
-import { achievementLevel } from './achievementUtils';
+import { ACHIEVEMENT_TONES, achievementLevel } from './achievementUtils';
 import MilestoneSeal, { ProfileBadge } from './MilestoneSeal';
 import { apiFetch } from './api';
 import { getAvatarSrc, parseDbDate } from './utils';
@@ -15,7 +15,8 @@ function MilestoneCard({ milestone, onChooseBadge }) {
     const locked = !milestone.achieved;
 
     return (
-        <article className={`achievement ${locked ? 'achievement-locked' : ''} ${milestone.claimed ? 'achievement-claimed' : ''}`}>
+        <article className={`achievement ${locked ? 'achievement-locked' : ''} ${milestone.claimed ? 'achievement-claimed' : ''}`}
+            style={{ '--achievement-tone': 'var(--achievement-' + (ACHIEVEMENT_TONES[milestone.key] || 'rose') + ')' }}>
             <MilestoneSeal milestoneKey={milestone.key} locked={locked} level={achievementLevel(milestone)} />
 
             <div className="achievement-info">

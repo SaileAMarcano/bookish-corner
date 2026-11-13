@@ -1,18 +1,18 @@
-export const ACHIEVEMENT_ICONS = {
-    'beta-tester': 'moon',
-    'a-new-reader': 'bookmark',
-    'first-chapter': 'library',
-    'first-review': 'feather',
-    'first-page': 'posts',
-    'keep-turning-pages': 'reading',
-    bookworm: 'library',
-    'thoughtful-reader': 'feather',
-    'book-collector': 'lists',
-    'genre-wanderer': 'genres',
-    'five-stars': 'reviews',
-    'kindred-spirit': 'following',
-    'book-talk': 'comment',
-    'goal-reached': 'sparkle',
+export const ACHIEVEMENT_TONES = {
+    'beta-tester': 'rose',
+    'a-new-reader': 'sage',
+    'first-chapter': 'peach',
+    'first-review': 'lavender',
+    'first-page': 'blush',
+    'keep-turning-pages': 'sage',
+    bookworm: 'peach',
+    'thoughtful-reader': 'lavender',
+    'book-collector': 'blush',
+    'genre-wanderer': 'sage',
+    'five-stars': 'peach',
+    'kindred-spirit': 'lavender',
+    'book-talk': 'blush',
+    'goal-reached': 'sage',
 };
 
 export const CONSTELLATION_POINTS = [

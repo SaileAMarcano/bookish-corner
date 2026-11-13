@@ -9,6 +9,11 @@
   --logo-gold: #E4B766;
   --logo-paper: #FAF4E8;
   --achievement-blue: #4A7180;
+  --achievement-rose: #CA8E99;
+  --achievement-sage: #8E987B;
+  --achievement-lavender: #9089A9;
+  --achievement-blush: #DEB6BD;
+  --achievement-peach: #F0C09B;
   --bg: #F4EDE0;
   --surface: #FAF5EB;
   --surface-2: #E6DDCF;
@@ -6483,8 +6488,6 @@ a.comment-author:hover {
   width: 38px;
   height: 46px;
   margin: 4px 0 2px;
-  --badge-edge: var(--logo-gold);
-  --badge-fill: #F3E2B8;
 }
 
 .milestone-note-title {
@@ -10961,40 +10964,15 @@ a.search-title:hover {
 
 .achievement-mark {
   display: block;
-  color: var(--badge-edge);
-  --badge-edge: var(--amber);
-  --badge-fill: var(--amber-soft);
+  object-fit: contain;
 }
 
 .achievement-mark-dim {
-  --badge-edge: var(--text-2);
-  --badge-fill: var(--surface-2);
+  filter: grayscale(1) opacity(0.5);
 }
 
 .achievement-mark-silver {
-  --badge-edge: var(--logo-paper);
-  --badge-fill: var(--achievement-blue);
-}
-
-.achievement-mark-fill {
-  fill: var(--badge-fill);
-}
-
-.achievement-mark-frame {
-  fill: none;
-  stroke: var(--badge-edge);
-  stroke-width: 1.25;
-}
-
-.achievement-mark-star {
-  fill: var(--badge-edge);
-}
-
-.achievement-mark-gold .achievement-mark-star {
-  fill: var(--logo-gold);
-  stroke: var(--logo-ink);
-  stroke-width: 1;
-  stroke-linejoin: round;
+  filter: grayscale(0.6) opacity(0.85);
 }
 
 .achievement-mark.profile-badge {
@@ -11023,6 +11001,15 @@ a.search-title:hover {
 
 .achievement-cards .achievement-locked {
   opacity: 1;
+}
+
+.achievement-cards .achievement-claimed {
+  border-color: var(--achievement-tone);
+  box-shadow: 0 0 0 1px var(--achievement-tone);
+}
+
+.achievement-cards .achievement .progress-fill {
+  background: color-mix(in srgb, var(--achievement-tone) 72%, var(--logo-ink));
 }
 
 .achievement-level-label {
