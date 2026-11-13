@@ -16075,3 +16075,8 @@ a.post-tag:hover,
   flex-wrap: wrap;
   justify-content: center;
 }
+
+.terms-update-logout {
+  display: block;
+  margin: 14px auto 0;
+}

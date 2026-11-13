@@ -901,6 +901,12 @@ const es = {
         updated: 'Última actualización: {{date}}',
         backToApp: 'Volver a la app',
     },
+    termsUpdate: {
+        title: 'Actualizamos nuestros textos legales',
+        lead: 'A Library of Us ahora tiene Normas de la comunidad, Política de privacidad y Términos y condiciones. Para seguir usando la app, léelos y acéptalos.',
+        button: 'Aceptar y continuar',
+        logout: 'Cerrar sesión',
+    },
     welcome: {
         hello: '¡Te damos la bienvenida, {{name}}!',
         question: '¿Cómo describirías tu forma de leer?',

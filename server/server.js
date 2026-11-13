@@ -2555,7 +2555,7 @@ function hasPlus(user) {
 async function findMe(userId) {
     const [user] = await query(
         `SELECT id, username, email, avatar_url, reading_goal, reader_type, language, theme,
-            season_theme, plus_until, staff_role, gender_identity, tour_seen_at, reduce_motion, color_vision,
+            season_theme, plus_until, staff_role, gender_identity, tour_seen_at, reduce_motion, color_vision, terms_accepted_at,
             google_id IS NOT NULL AS has_google,
             COALESCE(display_name, username) AS display_name
          FROM users WHERE id = $1`,
@@ -2610,6 +2610,18 @@ app.patch('/api/me/color-vision', requireAuth, async (req, res) => {
     res.json({ colorVision });
 });
 
+app.patch('/api/me/terms', requireAuth, async (req, res) => {
+    if (req.body.accept !== true) {
+        return res.status(400).json({ error: msg(req, 'termsRequired') });
+    }
+
+    const [user] = await query(
+        'UPDATE users SET terms_accepted_at = now() WHERE id = $1 RETURNING terms_accepted_at',
+        [req.session.user.id]
+    );
+
+    res.json({ termsAcceptedAt: user.termsAcceptedAt });
+});
 
 app.delete('/api/me', requireAuth, async (req, res) => {
     const { username, password } = req.body;

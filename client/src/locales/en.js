@@ -901,6 +901,12 @@ const en = {
         updated: 'Last updated: {{date}}',
         backToApp: 'Back to the app',
     },
+    termsUpdate: {
+        title: 'We updated our legal texts',
+        lead: 'A Library of Us now has Community guidelines, a Privacy policy and Terms of service. To keep using the app, please read and accept them.',
+        button: 'Accept and continue',
+        logout: 'Log out',
+    },
     welcome: {
         hello: 'Welcome, {{name}}!',
         question: 'How would you describe yourself as a reader?',

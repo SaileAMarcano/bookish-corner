@@ -46,6 +46,7 @@ import { getAvatarSrc } from './utils';
 import Icon from './Icon';
 import Notice from './Notice';
 import Welcome from './Welcome';
+import TermsUpdate from './TermsUpdate';
 import SearchPanel from './SearchPanel';
 import SearchBox from './SearchBox';
 import { ADMIN_ITEMS } from './adminNav';
@@ -382,6 +383,16 @@ function App() {
         <Route path="/signup/google" element={<GoogleSignupPage onLogin={handleLogin} />} />
         <Route path="*" element={<Navigate to="/login" replace state={{ next: location.pathname + location.search + location.hash }} />} />
       </Routes>
+    );
+  }
+
+  if (!currentUser.termsAcceptedAt) {
+    return (
+      <TermsUpdate
+        onAccepted={(termsAcceptedAt) => setCurrentUser((user) => ({ ...user, termsAcceptedAt }))}
+        onLogout={handleLogout}
+        onLanguageChange={handleLanguageChange}
+      />
     );
   }
 
