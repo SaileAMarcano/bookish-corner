@@ -5,6 +5,7 @@ import ShelfDecoration from './ShelfDecoration';
 import SpineFace from './SpineFace';
 import { SPINE_COLORS, isLightColor, useCoverTone } from './shelfSpines';
 import { groupItems } from './shelfUtils';
+import { BASE_WIDTH, bookcaseImage, layoutCases } from './bookcases';
 
 const HOLD_TIME = 280;
 const TOUCH_SLOP = 8;
@@ -24,22 +25,27 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const baseClass = isBook ? (isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration';
     const coverTone = useCoverTone(isBook && item.tone == null ? item.book.coverImage : null);
     const fill = isBook ? SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
+    const size = { '--w': item.w + 'px', '--h': item.h + 'px' };
     const style = isBook
-        ? { '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8', '--book-size': item.size }
-        : {};
+        ? { ...size, '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8', '--book-size': item.size }
+        : size;
     const content = isBook ? (
-        <SpineFace title={item.book.title} cover={item.book.coverImage} motif={item.motif ?? item.look.motif} />
+        <SpineFace title={item.book.title} cover={item.face === 'solid' ? null : item.book.coverImage}
+            solid={item.face === 'solid'} motif={item.motif ?? item.look.motif} />
     ) : (
         <ShelfDecoration name={item.name} />
     );
+    const shared = {
+        'data-thin': (isBook && item.thin) || undefined,
+        'data-lean': (isBook && item.pose === 'lean') || undefined,
+    };
 
     if (editing) {
         const stateClass = (offset ? ' is-dragging' : '') + (dropSide ? ' drop-' + dropSide : '');
 
         return (
-            <button type="button" className={baseClass + ' year-shelf-editable' + stateClass}
-                data-shelf-key={item.key} data-shelf-flat={isFlat || undefined} data-shape={isBook ? item.shape : undefined}
-                data-lean={(isBook && item.pose === 'lean') || undefined}
+            <button type="button" className={baseClass + ' year-shelf-editable' + stateClass} {...shared}
+                data-shelf-key={item.key} data-shelf-flat={isFlat || undefined}
                 style={offset ? { ...style, translate: `${offset.x}px ${offset.y}px` } : style}
                 aria-pressed={selected} aria-label={label}
                 onPointerDown={(event) => onPointerDown(event, item.key)}
@@ -52,19 +58,18 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     }
 
     if (!isBook) {
-        return <span className={baseClass} role="img" aria-label={label}>{content}</span>;
+        return <span className={baseClass} style={style} role="img" aria-label={label}>{content}</span>;
     }
 
     return (
-        <Link to={'/book/' + item.book.bookId} className={baseClass} data-shape={item.shape}
-            data-lean={item.pose === 'lean' || undefined} style={style} title={label} aria-label={label}>
+        <Link to={'/book/' + item.book.bookId} className={baseClass} {...shared}
+            style={style} title={label} aria-label={label}>
             {content}
         </Link>
     );
 }
 
-function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onMove }) {
-    const scrollRef = useRef(null);
+function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editing, selectedKey, onSelect, onMove, onOpen }) {
     const stageRef = useRef(null);
     const dragRef = useRef(null);
     const dropRef = useRef(null);
@@ -74,37 +79,53 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
 
     useEffect(() => () => dragRef.current?.stop(false), []);
 
+    function scrollerOf() {
+        return stageRef.current?.closest('.year-shelf-wall') || stageRef.current;
+    }
+
     function findDrop(state) {
         const stage = stageRef.current;
         if (!stage) return;
 
         const under = document.elementFromPoint(state.x, state.y);
-        const target = under?.closest('[data-shelf-key]');
-        let next;
+        let target = under?.closest('[data-shelf-key]');
+        const rowNode = under?.closest('[data-shelf-row]');
 
-        if (target && stage.contains(target)) {
-            if (target.dataset.shelfKey === state.key) return;
-            const box = target.getBoundingClientRect();
-            const onto = Boolean(target.dataset.shelfFlat) && state.key.startsWith('decoration-');
-            const before = target.dataset.shelfFlat
-                ? state.y < box.top + box.height / 2
-                : state.x < box.left + box.width / 2;
-            next = { key: target.dataset.shelfKey, before: onto ? false : before, onto };
-        } else {
-            const others = [...stage.querySelectorAll('[data-shelf-key]')]
-                .filter((node) => node.dataset.shelfKey !== state.key);
-            if (others.length === 0) return;
-
-            const first = others[0];
-            const last = others[others.length - 1];
-            if (state.x > last.getBoundingClientRect().right) {
-                next = { key: last.dataset.shelfKey, before: false };
-            } else if (state.x < first.getBoundingClientRect().left) {
-                next = { key: first.dataset.shelfKey, before: true };
-            } else {
-                return;
+        if ((!target || !stage.contains(target)) && rowNode && stage.contains(rowNode)) {
+            const row = Number(rowNode.dataset.shelfRow);
+            const current = dropRef.current;
+            if (!current || current.key !== null || current.row !== row) {
+                dropRef.current = { key: null, row };
+                setDrop(dropRef.current);
             }
+            return;
         }
+
+        if (!target || !stage.contains(target)) {
+            let best = Infinity;
+            target = null;
+            for (const node of stage.querySelectorAll('[data-shelf-key]')) {
+                if (node.dataset.shelfKey === state.key) continue;
+                const box = node.getBoundingClientRect();
+                const dx = Math.max(box.left - state.x, 0, state.x - box.right);
+                const dy = Math.max(box.top - state.y, 0, state.y - box.bottom);
+                const distance = dx * dx + dy * dy * 4;
+                if (distance < best) {
+                    best = distance;
+                    target = node;
+                }
+            }
+            if (!target) return;
+        }
+
+        if (target.dataset.shelfKey === state.key) return;
+
+        const box = target.getBoundingClientRect();
+        const onto = Boolean(target.dataset.shelfFlat) && state.key.startsWith('decoration-');
+        const before = target.dataset.shelfFlat
+            ? state.y < box.top + box.height / 2
+            : state.x < box.left + box.width / 2;
+        const next = { key: target.dataset.shelfKey, before: onto ? false : before, onto };
 
         const current = dropRef.current;
         if (!current || current.key !== next.key || current.before !== next.before || current.onto !== next.onto) {
@@ -117,7 +138,7 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
         if (event.pointerType === 'mouse' && event.button !== 0) return;
         dragRef.current?.stop(false);
 
-        const scroller = scrollRef.current;
+        const scroller = scrollerOf();
         const state = {
             key,
             pointerId: event.pointerId,
@@ -196,7 +217,7 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
                 }, 80);
                 setDrag(null);
                 setDrop(null);
-                if (apply && target) onMove(key, target.key, target.before);
+                if (apply && target) onMove(key, target.key, target.before, target.row);
             }
         };
 
@@ -229,22 +250,37 @@ function ShelfRow({ items, label, emptyText, editing, selectedKey, onSelect, onM
         );
     }
 
+    const cases = layoutCases(groupItems(items), bookcase.model, width);
+
+    function handleCaseClick(event) {
+        if (editing || !onOpen || event.target.closest('a, button')) return;
+        onOpen();
+    }
+
     return (
-        <div className="year-shelf-scroll" ref={scrollRef} tabIndex={0} role="region" aria-label={label}>
-            <div className={'year-shelf-stage' + (editing ? ' is-editing' : '')} ref={stageRef}>
-                {items.length === 0 && <p className="year-shelf-empty">{emptyText}</p>}
-                {groupItems(items).map((group) => {
-                    if (group.type === 'pile') {
-                        return (
-                            <div key={group.key} className="year-shelf-pile">
-                                {group.top && <div className="year-shelf-pile-top">{renderItem(group.top)}</div>}
-                                {group.items.map(renderItem)}
-                            </div>
-                        );
-                    }
-                    return renderItem(group);
-                })}
-            </div>
+        <div className={'year-shelf-cases' + (editing ? ' is-editing' : '')} ref={stageRef} role="group" aria-label={label}>
+            {cases.map((rows, index) => (
+                <div key={index} className={'year-shelf-case' + (onOpen && !editing ? ' is-openable' : '')}
+                    style={{ width, height: width * 2, '--k': width / BASE_WIDTH }} onClick={handleCaseClick}>
+                    <img className="year-shelf-case-art" src={bookcaseImage(bookcase)} alt="" draggable="false" />
+                    {rows.map((row, rowIndex) => (
+                        <div key={rowIndex} data-shelf-row={row.index}
+                            className={'year-shelf-case-row' + (drop && drop.key === null && drop.row === row.index ? ' is-drop' : '')}
+                            style={{ top: row.top, left: row.left, width: row.width, height: row.height }}>
+                            {row.groups.map((group) => {
+                                if (group.type !== 'pile') return renderItem(group);
+                                return (
+                                    <div key={group.key} className="year-shelf-pile" style={{ '--w': group.w + 'px' }}>
+                                        {group.top && <div className="year-shelf-pile-top">{renderItem(group.top)}</div>}
+                                        {group.items.map(renderItem)}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
+            ))}
+            {items.length === 0 && <p className="year-shelf-empty">{emptyText}</p>}
         </div>
     );
 }

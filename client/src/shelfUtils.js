@@ -1,4 +1,5 @@
 import { SPINE_COLORS, genreLook } from './shelfSpines';
+import { layoutCases } from './bookcases';
 
 export const DECORATIONS = [
     { name: 'candle', milestone: 'first-chapter' },
@@ -8,6 +9,7 @@ export const DECORATIONS = [
     { name: 'tea', milestone: 'goal-reached' },
 ];
 export const SHELF_POSES = ['upright', 'lean', 'flat'];
+export const SPINE_FACES = ['cover', 'solid'];
 export const SHELF_TONES = SPINE_COLORS.map((color, index) => index);
 
 const BOOK_SIZES = 5;
@@ -27,12 +29,12 @@ function startsPile(index, total) {
     return index % PILE_EVERY === PILE_AT && total - index >= 2;
 }
 
-export function bookItem(book, pose = 'upright', tone = null, motif = null) {
-    return { type: 'book', key: 'book-' + book.id, book, pose, tone, motif };
+export function bookItem(book, pose = 'upright', tone = null, motif = null, face = null, shelf = null) {
+    return { type: 'book', key: 'book-' + book.id, book, pose, tone, motif, face, shelf };
 }
 
-export function decorationItem(name, pose = 'upright') {
-    return { type: 'decoration', key: 'decoration-' + name, name, pose };
+export function decorationItem(name, pose = 'upright', shelf = null) {
+    return { type: 'decoration', key: 'decoration-' + name, name, pose, shelf };
 }
 
 export function autoItems(books) {
@@ -69,14 +71,14 @@ export function savedItems(books, rows, unlockedNames) {
 
     for (const row of rows) {
         if (row.decoration) {
-            if (unlockedNames.includes(row.decoration)) items.push(decorationItem(row.decoration, row.pose));
+            if (unlockedNames.includes(row.decoration)) items.push(decorationItem(row.decoration, row.pose, row.shelf));
             continue;
         }
 
         const book = booksById.get(row.userBookId);
         if (book && !placed.has(book.id)) {
             placed.add(book.id);
-            items.push(bookItem(book, row.pose, row.tone, row.motif));
+            items.push(bookItem(book, row.pose, row.tone, row.motif, row.face, row.shelf));
         }
     }
 
@@ -94,7 +96,7 @@ export function groupItems(items) {
         if (item.type === 'decoration') {
             const last = groups[groups.length - 1];
 
-            if (item.pose === 'flat' && last && last.type === 'pile' && !last.top) {
+            if (item.pose === 'flat' && last && last.type === 'pile' && !last.top && last.shelf === item.shelf) {
                 last.top = item;
             } else {
                 groups.push(item);
@@ -109,10 +111,10 @@ export function groupItems(items) {
             const flat = shaped;
             const last = groups[groups.length - 1];
 
-            if (last && last.type === 'pile' && !last.top && last.items.length < PILE_SIZE) {
+            if (last && last.type === 'pile' && !last.top && last.items.length < PILE_SIZE && last.shelf === item.shelf) {
                 last.items.push(flat);
             } else {
-                groups.push({ type: 'pile', key: 'pile-' + item.key, items: [flat] });
+                groups.push({ type: 'pile', key: 'pile-' + item.key, shelf: item.shelf, items: [flat] });
             }
             continue;
         }
@@ -126,7 +128,7 @@ export function groupItems(items) {
 export function canSitOnPile(items, key) {
     const index = items.findIndex((item) => item.key === key);
     const previous = items[index - 1];
-    return index > 0 && previous.type === 'book' && previous.pose === 'flat';
+    return index > 0 && previous.type === 'book' && previous.pose === 'flat' && previous.shelf === items[index].shelf;
 }
 
 function putOnPile(rest, moving, targetKey) {
@@ -137,7 +139,7 @@ function putOnPile(rest, moving, targetKey) {
     const next = rest.map((item) => (pile.top && item.key === pile.top.key ? { ...item, pose: 'upright' } : item));
     const index = next.findIndex((item) => item.key === lastKey);
 
-    next.splice(index + 1, 0, { ...moving, pose: 'flat' });
+    next.splice(index + 1, 0, { ...moving, pose: 'flat', shelf: pile.shelf });
     return next;
 }
 
@@ -155,9 +157,9 @@ export function moveItem(items, fromKey, toKey, before) {
         return putOnPile(rest, moving, target.key);
     }
 
-    let dropped = moving;
-    if (moving.type === 'book' && ontoPile) dropped = { ...moving, pose: 'flat' };
-    if (moving.type === 'decoration') dropped = { ...moving, pose: 'upright' };
+    let dropped = { ...moving, shelf: target.shelf };
+    if (moving.type === 'book' && ontoPile) dropped.pose = 'flat';
+    if (moving.type === 'decoration') dropped.pose = 'upright';
 
     rest.splice(before ? index : index + 1, 0, dropped);
     return rest;
@@ -170,14 +172,49 @@ export function moveBy(items, key, step) {
     if (index < 0 || target < 0 || target >= items.length) return items;
 
     const next = [...items];
-    [next[index], next[target]] = [next[target], next[index]];
+    [next[index], next[target]] = [next[target], { ...next[index], shelf: next[target].shelf }];
     return next;
+}
+
+export function moveToShelf(items, key, shelf) {
+    const moving = items.find((item) => item.key === key);
+    if (!moving) return items;
+
+    const rest = items.filter((item) => item.key !== key);
+    const dropped = { ...moving, shelf, pose: moving.type === 'decoration' ? 'upright' : moving.pose };
+    let index = rest.length;
+
+    for (let position = rest.length - 1; position >= 0; position--) {
+        if ((rest[position].shelf ?? 0) <= shelf) {
+            index = position + 1;
+            break;
+        }
+        index = position;
+    }
+
+    rest.splice(index, 0, dropped);
+    return rest;
+}
+
+export function pinShelves(items, model) {
+    const shelves = new Map();
+
+    layoutCases(groupItems(items), model).forEach((rows) => {
+        rows.forEach((row) => {
+            row.groups.forEach((group) => {
+                const members = group.type === 'pile' ? [...group.items, ...(group.top ? [group.top] : [])] : [group];
+                members.forEach((member) => shelves.set(member.key, row.index));
+            });
+        });
+    });
+
+    return items.map((item) => ({ ...item, shelf: shelves.get(item.key) ?? item.shelf }));
 }
 
 export function toPayload(items) {
     return items.map((item) =>
         item.type === 'book'
-            ? { bookId: item.book.id, pose: item.pose, tone: item.tone, motif: item.motif }
-            : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright' }
+            ? { bookId: item.book.id, pose: item.pose, tone: item.tone, motif: item.motif, face: item.face, shelf: item.shelf }
+            : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright', shelf: item.shelf }
     );
 }

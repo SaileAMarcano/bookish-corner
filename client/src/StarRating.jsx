@@ -2,12 +2,12 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 const STARS = [1, 2, 3, 4, 5];
-const STAR_PATH = 'M13.9 5.3L15 6.6Q15.9 7.7 17.2 8.2L18.7 8.8Q21.5 9.9 19.9 12.4L19 13.9Q18.3 15 18.2 16.4L18.1 18.1Q17.9 21.1 15 20.4L13.4 19.9Q12 19.6 10.6 19.9L9 20.4Q6.1 21.1 5.9 18.1L5.8 16.4Q5.7 15 5 13.9L4.1 12.4Q2.5 9.9 5.3 8.8L6.8 8.2Q8.1 7.7 9 6.6L10.1 5.3Q12 3 13.9 5.3Z';
+const STAR_PATH = 'M234.29,114.85l-45,38.83L203,211.75a16.4,16.4,0,0,1-24.5,17.82L128,198.49,77.47,229.57A16.4,16.4,0,0,1,53,211.75l13.76-58.07-45-38.83A16.46,16.46,0,0,1,31.08,86l59-4.76,22.76-55.08a16.36,16.36,0,0,1,30.27,0l22.75,55.08,59,4.76a16.46,16.46,0,0,1,9.37,28.86Z';
 
 function StarShape({ size }) {
     return (
-        <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden="true">
-            <path d={STAR_PATH} strokeWidth="2" strokeLinejoin="round" />
+        <svg width={size} height={size} viewBox="-8 -8 272 272" aria-hidden="true">
+            <path d={STAR_PATH} strokeWidth="16" strokeLinejoin="round" />
         </svg>
     );
 }

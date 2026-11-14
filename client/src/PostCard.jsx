@@ -216,7 +216,7 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                     onClick={handleLike}
                     aria-pressed={post.hasLiked}
                 >
-                    <Icon name="sparkle" />
+                    <Icon name="sparkle" filled={post.hasLiked} />
                     {t('posts.like')} ({post.likeCount})
                 </button>
 
@@ -236,7 +236,7 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                     onClick={handleSave}
                     aria-pressed={post.hasSaved}
                 >
-                    <Icon name="bookmark" />
+                    <Icon name="bookmark" filled={post.hasSaved} />
                     {post.hasSaved ? t('posts.saved') : t('posts.save')}
                 </button>
             </footer>

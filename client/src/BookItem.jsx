@@ -21,12 +21,7 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
                         onClick={() => onToggleFavorite(book.id, book.isFavorite)}
                         aria-label={book.isFavorite ? t('book.removeFavorite') : t('book.addFavorite')}
                     >
-                        <svg width="16" height="16" viewBox="0 0 24 24"
-                            fill={book.isFavorite ? 'currentColor' : 'none'}
-                            stroke="currentColor" strokeWidth="2"
-                            strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M12 20s-7-4.4-7-9a4 4 0 0 1 7-2.6A4 4 0 0 1 19 11c0 4.6-7 9-7 9z" />
-                        </svg>
+                        <Icon name="favorites" size={16} filled={book.isFavorite} />
                     </button>
                 )}
 
@@ -35,10 +30,7 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
                         <img className="book-cover book-cover-image" src={book.coverImage} alt={book.title} onError={() => setCoverFailed(true)} />
                     ) : (
                         <div className="book-cover">
-                            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--surface)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M2 5c2-1 5-1.5 8-.5v14c-3-1-6-.5-8 .5V5z"></path>
-                                <path d="M22 5c-2-1-5-1.5-8-.5v14c3-1 6-.5 8 .5V5z"></path>
-                            </svg>
+                            <span className="book-cover-icon"><Icon name="reading" size={30} /></span>
                         </div>
                     )}
                 </Link>
@@ -76,13 +68,7 @@ function BookItem({ book, onLike, onUpdate, onToggleFavorite, readOnly }) {
                         onClick={() => onLike(book.id, book.hasLiked)}
                         style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
                     >
-                        <svg
-                            width="16" height="16" viewBox="0 0 24 24"
-                            fill={book.hasLiked ? 'var(--rose)' : 'none'}
-                            stroke="var(--rose)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-                        >
-                            <path d="M12 20.5C12 20.5 4 15.7 4 9.9 4 7.1 6.1 5 8.8 5c1.6 0 3.1.8 3.9 2.1C13.5 5.8 15 5 16.6 5 19.3 5 21.4 7.1 21.4 9.9 21.4 15.7 12 20.5 12 20.5z"></path>
-                        </svg>
+                        <span className="like-button-icon"><Icon name="favorites" size={16} filled={book.hasLiked} /></span>
                         {book.likeCount}
                     </button>
 

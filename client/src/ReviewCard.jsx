@@ -45,7 +45,7 @@ function ReviewCard({ review, onChange, onEdit }) {
             {error && <Notice message={error} />}
             <footer className="post-actions">
                 <button type="button" className={`post-action ${review.hasLiked ? 'active' : ''}`} aria-pressed={review.hasLiked} onClick={handleLike} disabled={review.isMine || liking}>
-                    <Icon name="sparkle" />{t('posts.like')} ({review.likeCount})
+                    <Icon name="sparkle" filled={review.hasLiked} />{t('posts.like')} ({review.likeCount})
                 </button>
                 <button type="button" className="post-action" aria-expanded={commentsOpen} onClick={() => setCommentsOpen(!commentsOpen)}><Icon name="comment" />{t('book.comments', { count: review.commentCount })}</button>
                 {!review.isMine && <ReportButton targetType="review" targetId={review.id} />}

@@ -2176,12 +2176,19 @@ const SHELF_DECORATIONS = {
 };
 const SHELF_POSES = ['upright', 'lean', 'flat'];
 const SHELF_TONES = 12;
+const SHELF_FACES = ['cover', 'solid'];
+const SHELF_ROWS = 500;
 const SHELF_MOTIFS = ['star', 'heart', 'flower', 'quill', 'key', 'planet', 'moon', 'hourglass', 'leaf', 'bubble'];
 const SHELF_MAX_ITEMS = 1000;
+const SHELF_CASES = {
+    scroll: ['black', 'tan', 'walnut'],
+    gothic: ['oak', 'honey', 'walnut'],
+    floral: ['rose', 'sage', 'night'],
+};
 
 async function findShelf(userId) {
     return query(
-        `SELECT year, user_book_id, decoration, pose, tone, motif
+        `SELECT year, user_book_id, decoration, pose, tone, motif, face, shelf
          FROM shelf_items WHERE user_id = $1 ORDER BY year, position`,
         [userId]
     );
@@ -2191,6 +2198,13 @@ app.get('/api/shelf', requireAuth, async (req, res) => {
     res.json(await findShelf(req.session.user.id));
 });
 
+app.get('/api/shelf-cases', requireAuth, async (req, res) => {
+    res.json(await query(
+        'SELECT year, model, color FROM shelf_cases WHERE user_id = $1 ORDER BY year',
+        [req.session.user.id]
+    ));
+});
+
 app.put('/api/shelf/:year', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
     const year = Number(req.params.year);
@@ -2198,7 +2212,11 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
     const lastYear = new Date().getUTCFullYear() + 1;
     const validYear = Number.isInteger(year) && (year === 0 || (year >= 1000 && year <= lastYear));
 
-    if (!validYear || !Array.isArray(items) || items.length > SHELF_MAX_ITEMS) {
+    const bookcase = req.body.bookcase ?? null;
+    const validBookcase = bookcase === null
+        || (Object.hasOwn(SHELF_CASES, bookcase.model) && SHELF_CASES[bookcase.model].includes(bookcase.color));
+
+    if (!validYear || !validBookcase || !Array.isArray(items) || items.length > SHELF_MAX_ITEMS) {
         return res.status(400).json({ error: msg(req, 'shelfInvalid') });
     }
 
@@ -2207,23 +2225,30 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
     const rows = [];
 
     for (const item of items) {
+        const shelf = item?.shelf ?? null;
+        if (shelf !== null && !(Number.isInteger(shelf) && shelf >= 0 && shelf < SHELF_ROWS)) {
+            return res.status(400).json({ error: msg(req, 'shelfInvalid') });
+        }
+
         if (item && Number.isInteger(item.bookId) && item.bookId > 0) {
             const pose = item.pose ?? 'upright';
             const tone = item.tone ?? null;
             const motif = item.motif ?? null;
+            const face = item.face ?? null;
             const validTone = tone === null || (Number.isInteger(tone) && tone >= 0 && tone < SHELF_TONES);
             const validMotif = motif === null || SHELF_MOTIFS.includes(motif);
+            const validFace = face === null || SHELF_FACES.includes(face);
 
-            if (!SHELF_POSES.includes(pose) || !validTone || !validMotif || bookIds.includes(item.bookId)) {
+            if (!SHELF_POSES.includes(pose) || !validTone || !validMotif || !validFace || bookIds.includes(item.bookId)) {
                 return res.status(400).json({ error: msg(req, 'shelfInvalid') });
             }
             bookIds.push(item.bookId);
-            rows.push({ bookId: item.bookId, decoration: null, pose, tone, motif });
+            rows.push({ bookId: item.bookId, decoration: null, pose, tone, motif, face, shelf });
         } else if (item && typeof item.decoration === 'string'
             && Object.hasOwn(SHELF_DECORATIONS, item.decoration) && !decorations.includes(item.decoration)
             && ['upright', 'flat'].includes(item.pose ?? 'upright')) {
             decorations.push(item.decoration);
-            rows.push({ bookId: null, decoration: item.decoration, pose: item.pose ?? 'upright', tone: null, motif: null });
+            rows.push({ bookId: null, decoration: item.decoration, pose: item.pose ?? 'upright', tone: null, motif: null, face: null, shelf });
         } else {
             return res.status(400).json({ error: msg(req, 'shelfInvalid') });
         }
@@ -2260,10 +2285,10 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
 
         if (rows.length > 0) {
             await tx(
-                `INSERT INTO shelf_items (user_id, year, position, user_book_id, decoration, pose, tone, motif)
-                 SELECT $1, $2, item.position, item.user_book_id, item.decoration, item.pose, item.tone, item.motif
-                 FROM unnest($3::int[], $4::int[], $5::text[], $6::text[], $7::int[], $8::text[])
-                      AS item(position, user_book_id, decoration, pose, tone, motif)`,
+                `INSERT INTO shelf_items (user_id, year, position, user_book_id, decoration, pose, tone, motif, face, shelf)
+                 SELECT $1, $2, item.position, item.user_book_id, item.decoration, item.pose, item.tone, item.motif, item.face, item.shelf
+                 FROM unnest($3::int[], $4::int[], $5::text[], $6::text[], $7::int[], $8::text[], $9::text[], $10::int[])
+                      AS item(position, user_book_id, decoration, pose, tone, motif, face, shelf)`,
                 [
                     userId,
                     year,
@@ -2273,7 +2298,17 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
                     rows.map((row) => row.pose),
                     rows.map((row) => row.tone),
                     rows.map((row) => row.motif),
+                    rows.map((row) => row.face),
+                    rows.map((row) => row.shelf),
                 ]
+            );
+        }
+
+        if (bookcase) {
+            await tx(
+                `INSERT INTO shelf_cases (user_id, year, model, color) VALUES ($1, $2, $3, $4)
+                 ON CONFLICT (user_id, year) DO UPDATE SET model = EXCLUDED.model, color = EXCLUDED.color`,
+                [userId, year, bookcase.model, bookcase.color]
             );
         }
     });

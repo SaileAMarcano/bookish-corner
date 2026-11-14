@@ -98,7 +98,7 @@ function ListCard({ list, onChange, onEdit, onDelete }) {
                         aria-pressed={list.hasLiked}
                         disabled={busy}
                     >
-                        <Icon name="sparkle" size={15} />
+                        <Icon name="sparkle" size={15} filled={list.hasLiked} />
                         <span aria-hidden="true">{list.likeCount}</span>
                         <span className="sr-only">{t('lists.likeCount', { count: list.likeCount })}</span>
                     </button>
@@ -116,7 +116,7 @@ function ListCard({ list, onChange, onEdit, onDelete }) {
                         title={list.hasSaved ? t('posts.saved') : t('posts.save')}
                         disabled={busy}
                     >
-                        <Icon name="bookmark" size={15} />
+                        <Icon name="bookmark" size={15} filled={list.hasSaved} />
                     </button>
                 </footer>
             </div>

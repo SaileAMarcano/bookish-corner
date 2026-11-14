@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { apiFetch } from './api';
 import { getAvatarSrc } from './utils';
 import Notice from './Notice';
+import Icon from './Icon';
 
 const BIO_MAX = 160;
 
@@ -12,9 +13,7 @@ function Section({ title, subtitle, children }) {
         <div className="card edit-card">
             <div className="edit-card-head">
                 <span className="edit-card-icon">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 3l2.3 9.7L24 12l-9.7 2.3L12 24l-2.3-9.7L0 12l9.7-2.3z" />
-                    </svg>
+                    <Icon name="sparkle" size={14} filled />
                 </span>
                 <div>
                     <h2 className="display edit-card-title">{title}</h2>

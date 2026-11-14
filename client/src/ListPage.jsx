@@ -179,7 +179,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                             onClick={() => handleToggle('like', list.hasLiked)}
                             aria-pressed={list.hasLiked}
                         >
-                            <Icon name="sparkle" size={15} />
+                            <Icon name="sparkle" size={15} filled={list.hasLiked} />
                             {t('posts.like')} ({list.likeCount})
                         </button>
                         <button
@@ -188,7 +188,7 @@ function ListPage({ currentUser, books, onLibraryChange }) {
                             onClick={() => handleToggle('save', list.hasSaved)}
                             aria-pressed={list.hasSaved}
                         >
-                            <Icon name="bookmark" size={15} />
+                            <Icon name="bookmark" size={15} filled={list.hasSaved} />
                             {list.hasSaved ? t('posts.saved') : t('posts.save')}
                         </button>
                         <button type="button" className="invite-action" onClick={handleCopy}>

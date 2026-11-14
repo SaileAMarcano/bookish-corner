@@ -9543,7 +9543,7 @@ a.search-title:hover {
 
 .library-year-challenge-status svg {
   flex-shrink: 0;
-  fill: var(--amber-soft);
+  fill: currentColor;
 }
 
 .library-year-challenge-progress {
@@ -16414,6 +16414,7 @@ a.post-tag:hover,
 .year-shelf-spine .spine-cap,
 .year-shelf-flat .spine-cap {
   position: static;
+  color: var(--spine-ink);
   display: grid;
   flex: 0 0 auto;
   place-items: center;
@@ -16472,26 +16473,28 @@ a.post-tag:hover,
   max-width: 100%;
   max-height: 100%;
   box-sizing: border-box;
-  border: 2px solid #2D241F;
-  border-radius: 4px;
-  background: #FAF4E8;
-  color: #2D241F;
+  color: #FAF4E8;
   font-family: 'Fraunces', serif;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 700;
   line-height: 1.05;
   text-overflow: ellipsis;
+  text-shadow:
+    -1.5px -1.5px 0 #2D241F, 0 -1.5px 0 #2D241F, 1.5px -1.5px 0 #2D241F,
+    -1.5px 0 0 #2D241F, 1.5px 0 0 #2D241F,
+    -1.5px 1.5px 0 #2D241F, 0 1.5px 0 #2D241F, 1.5px 1.5px 0 #2D241F,
+    0 0 4px #2D241F;
   white-space: nowrap;
 }
 
 .year-shelf-spine .spine-title {
-  padding: 6px 2px;
+  padding: 4px 3px;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
 }
 
 .year-shelf-flat .spine-title {
-  padding: 2px 6px;
+  padding: 3px 4px;
   writing-mode: horizontal-tb;
   text-align: center;
 }
@@ -16541,6 +16544,7 @@ a.post-tag:hover,
   place-items: center;
   border-radius: 10px;
   background: #8B515E;
+  color: #FAF4E8;
 }
 
 .year-shelf-motif .spine-motif {
@@ -16632,4 +16636,420 @@ a.post-tag:hover,
   .year-shelf-object {
     height: 50px;
   }
+}
+
+.book-cover-icon {
+  display: inline-flex;
+  color: var(--surface);
+}
+
+.like-button-icon {
+  display: inline-flex;
+  color: var(--rose);
+}
+
+.year-shelf-years {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+.year-shelf-years .year-shelf-button {
+  min-height: 36px;
+  border-radius: 999px;
+}
+
+.year-shelf-wall {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  overflow-x: auto;
+  padding: 4px 4px 14px;
+  scroll-snap-type: x mandatory;
+}
+
+.year-shelf-wall > .year-shelf-card {
+  flex: 0 0 auto;
+  width: max-content;
+  min-width: 320px;
+  margin-bottom: 0;
+  scroll-snap-align: start;
+}
+
+.year-shelf-wall .library-year-challenge,
+.year-shelf-wall .year-shelf-editor {
+  max-width: 320px;
+}
+
+.year-shelf-cases {
+  display: flex;
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.year-shelf-case {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.year-shelf-case-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+.year-shelf-case-row {
+  position: absolute;
+  display: flex;
+  align-items: flex-end;
+  gap: calc(2px * var(--k, 1));
+  box-sizing: border-box;
+}
+
+.year-shelf-case .year-shelf-spine,
+.year-shelf-case .year-shelf-flat {
+  position: relative;
+  flex: 0 0 var(--w);
+  width: var(--w);
+  height: var(--h);
+  margin: 0;
+  border-width: calc(1.5px * var(--k, 1));
+  border-radius: calc(3px * var(--k, 1));
+  box-shadow: none;
+}
+
+.year-shelf-case .year-shelf-spine[data-lean] {
+  margin-right: calc(var(--h) * 0.12 + 4px * var(--k, 1));
+  rotate: 7deg;
+  transform-origin: bottom left;
+}
+
+.year-shelf-case .year-shelf-spine .spine-face,
+.year-shelf-case .year-shelf-flat .spine-face {
+  border-radius: calc(2px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-spine .spine-cap {
+  height: 22%;
+  min-height: calc(11px * var(--k, 1));
+  border-bottom-width: calc(1.5px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-flat .spine-cap {
+  width: calc(14px * var(--k, 1));
+  border-right-width: calc(1.5px * var(--k, 1));
+}
+
+.year-shelf-case .spine-motif {
+  width: calc(10px * var(--k, 1));
+  height: calc(10px * var(--k, 1));
+}
+
+.year-shelf-case [data-thin] .spine-motif {
+  width: calc(7px * var(--k, 1));
+  height: calc(7px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-spine .spine-body {
+  padding: calc(2px * var(--k, 1)) 0;
+}
+
+.year-shelf-case .year-shelf-flat .spine-body {
+  padding: 0 calc(3px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-spine .spine-title,
+.year-shelf-case .year-shelf-flat .spine-title {
+  padding: 0;
+  font-size: calc(8px * var(--k, 1));
+  text-shadow:
+    -1px -1px 0 #2D241F, 0 -1px 0 #2D241F, 1px -1px 0 #2D241F,
+    -1px 0 0 #2D241F, 1px 0 0 #2D241F,
+    -1px 1px 0 #2D241F, 0 1px 0 #2D241F, 1px 1px 0 #2D241F;
+}
+
+.year-shelf-case [data-thin] .spine-title {
+  font-size: calc(6px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-pile {
+  display: flex;
+  flex: 0 0 var(--w);
+  flex-direction: column;
+  align-items: flex-start;
+  width: var(--w);
+  margin: 0;
+}
+
+.year-shelf-case .year-shelf-pile .year-shelf-flat {
+  flex: 0 0 auto;
+}
+
+.year-shelf-case .year-shelf-flat + .year-shelf-flat {
+  margin-top: -1px;
+}
+
+.year-shelf-case .year-shelf-flat:nth-child(odd) {
+  margin-left: calc(6px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-flat:nth-child(3n) {
+  margin-left: calc(2px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-pile-top {
+  align-self: center;
+  margin-bottom: -1px;
+}
+
+.year-shelf-case .year-shelf-decoration {
+  flex: 0 0 var(--w);
+  width: var(--w);
+  height: var(--h);
+  margin: 0 calc(2px * var(--k, 1));
+}
+
+.year-shelf-case .year-shelf-object {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom;
+}
+
+.year-shelf-case .year-shelf-editable[aria-pressed="true"] {
+  outline-width: 2px;
+  outline-offset: 2px;
+}
+
+.year-shelf-case-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.year-shelf-case-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 84px;
+  padding: 6px 4px;
+  border: 1px solid var(--surface-2);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.year-shelf-case-option img {
+  width: 30px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.year-shelf-case-option[aria-pressed="true"] {
+  border-color: var(--rose-ink);
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 1px;
+}
+
+.year-shelf-case-option:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .year-shelf-wall {
+    gap: 14px;
+  }
+
+  .year-shelf-wall > .year-shelf-card {
+    width: 100%;
+    min-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .year-shelf-cases {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .year-shelf-wall .library-year-challenge,
+  .year-shelf-wall .year-shelf-editor {
+    max-width: none;
+  }
+}
+
+.year-shelf-wall {
+  display: grid;
+  grid-auto-columns: max-content;
+  grid-auto-flow: column;
+  grid-template-rows: auto auto auto;
+  row-gap: 0;
+}
+
+.year-shelf-wall > .year-shelf-card {
+  display: grid;
+  grid-row: span 3;
+  grid-template-rows: subgrid;
+  align-content: start;
+  row-gap: 0;
+}
+
+.year-shelf-card-head {
+  align-self: start;
+}
+
+.year-shelf-wall .year-shelf-cases {
+  align-self: end;
+}
+
+@media (max-width: 600px) {
+  .year-shelf-wall {
+    grid-auto-columns: 100%;
+  }
+}
+
+.year-shelf-case.is-openable {
+  cursor: zoom-in;
+}
+
+.year-shelf-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 4px 0 10px;
+}
+
+.year-shelf-card-actions .year-shelf-organize {
+  margin: 0;
+}
+
+.year-shelf-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  padding: 24px 16px;
+  background: rgb(45 36 31 / 55%);
+  overscroll-behavior: contain;
+}
+
+.year-shelf-zoom-panel {
+  box-sizing: border-box;
+  height: max-content;
+  max-width: 100%;
+  padding: 20px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: 0 18px 50px rgb(45 36 31 / 30%);
+}
+
+.year-shelf-zoom-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+  margin-bottom: 14px;
+}
+
+.year-shelf-zoom-head h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0;
+  font-size: 28px;
+}
+
+.year-shelf-zoom-head h2 span {
+  color: var(--text-2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.year-shelf-zoom-head .year-shelf-organize {
+  margin: 0;
+}
+
+.year-shelf-zoom-close {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  margin-left: auto;
+  border: 1px solid var(--surface-2);
+  border-radius: 50%;
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.year-shelf-zoom-close:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 3px;
+}
+
+.year-shelf-zoom-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 28px;
+}
+
+.year-shelf-zoom-body .year-shelf-cases {
+  flex-direction: column;
+  margin: 0;
+}
+
+.year-shelf-zoom-body .year-shelf-editor {
+  flex: 0 0 360px;
+  width: 360px;
+  max-width: 100%;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .year-shelf-zoom {
+    padding: 0;
+  }
+
+  .year-shelf-zoom-panel {
+    width: 100%;
+    min-height: 100%;
+    padding: 14px;
+    border-radius: 0;
+  }
+
+  .year-shelf-zoom-body {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .year-shelf-zoom-body .year-shelf-editor {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+}
+
+.year-shelf-spine .spine-body[data-solid],
+.year-shelf-flat .spine-body[data-solid] {
+  background-color: var(--spine-fill);
+}
+
+.year-shelf-cases.is-editing .year-shelf-case-row {
+  border-radius: calc(4px * var(--k, 1));
+}
+
+.year-shelf-case-row.is-drop {
+  background: rgb(200 151 159 / 28%);
+  outline: 2px dashed var(--rose-ink);
+  outline-offset: -2px;
 }

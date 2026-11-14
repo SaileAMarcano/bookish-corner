@@ -1,17 +1,44 @@
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import ShelfDecoration from './ShelfDecoration';
-import { SHELF_POSES } from './shelfUtils';
+import { SHELF_POSES, SPINE_FACES } from './shelfUtils';
 import { SpineMotif } from './SpineFace';
 import { SPINE_COLORS, SPINE_MOTIFS } from './shelfSpines';
+import { BOOKCASES, BOOKCASE_MODELS, bookcaseImage } from './bookcases';
 
-function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onMotif, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onFace, onMotif, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
+    const colorIndex = Math.max(0, BOOKCASES[bookcase.model].colors.indexOf(bookcase.color));
 
     return (
         <div className="year-shelf-editor">
             <p className="year-shelf-editor-hint">{t('library.shelf.editHint')}</p>
+
+            <fieldset className="year-shelf-editor-group">
+                <legend>{t('library.shelf.bookcase')}</legend>
+                <div className="year-shelf-case-options">
+                    {BOOKCASE_MODELS.map((model) => {
+                        const color = BOOKCASES[model].colors[colorIndex];
+                        return (
+                            <button key={model} type="button" className="year-shelf-case-option"
+                                aria-pressed={bookcase.model === model} onClick={() => onBookcase({ model, color })}>
+                                <img src={bookcaseImage({ model, color })} alt="" />
+                                <span>{t('library.shelf.bookcases.' + model)}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+                <div className="year-shelf-case-options">
+                    {BOOKCASES[bookcase.model].colors.map((color) => (
+                        <button key={color} type="button" className="year-shelf-case-option"
+                            aria-pressed={bookcase.color === color} onClick={() => onBookcase({ model: bookcase.model, color })}>
+                            <img src={bookcaseImage({ model: bookcase.model, color })} alt="" />
+                            <span>{t('library.shelf.caseColors.' + bookcase.model + '-' + color)}</span>
+                        </button>
+                    ))}
+                </div>
+            </fieldset>
 
             {item ? (
                 <div className="year-shelf-editor-item">
@@ -45,6 +72,14 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                         <fieldset className="year-shelf-editor-group">
                             <legend>{t('library.shelf.color')}</legend>
                             <div className="year-shelf-editor-row">
+                                {SPINE_FACES.map((face) => (
+                                    <button key={face} type="button" className="year-shelf-button"
+                                        aria-pressed={(item.face ?? 'cover') === face} onClick={() => onFace(face)}>
+                                        {t('library.shelf.faces.' + face)}
+                                    </button>
+                                ))}
+                            </div>
+                            <div className="year-shelf-editor-row">
                                 <button type="button" className="year-shelf-button"
                                     aria-pressed={item.tone === null} onClick={() => onTone(null)}>
                                     {t('library.shelf.colorAuto')}
@@ -66,12 +101,6 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                     {item.type === 'book' && (
                         <fieldset className="year-shelf-editor-group">
                             <legend>{t('library.shelf.motif')}</legend>
-                            <div className="year-shelf-editor-row">
-                                <button type="button" className="year-shelf-button"
-                                    aria-pressed={item.motif === null} onClick={() => onMotif(null)}>
-                                    {t('library.shelf.motifAuto')}
-                                </button>
-                            </div>
                             <div className="year-shelf-swatches">
                                 {SPINE_MOTIFS.map((motif) => (
                                     <button key={motif} type="button" className="year-shelf-swatch year-shelf-motif"

@@ -100,7 +100,7 @@ function ActivityCard({ activity, currentUserId, onChange }) {
                     aria-pressed={activity.hasLiked}
                     disabled={isOwner}
                 >
-                    <Icon name="sparkle" />
+                    <Icon name="sparkle" filled={activity.hasLiked} />
                     {t('posts.like')} ({activity.likeCount})
                 </button>
 
