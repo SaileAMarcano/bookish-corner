@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ShelfDecoration from './ShelfDecoration';
 import SpineFace from './SpineFace';
+import BookCover from './BookCover';
 import { SPINE_COLORS, isLightColor, useCoverTone } from './shelfSpines';
 import { groupItems } from './shelfUtils';
 import { BASE_WIDTH, bookcaseImage, caseGeometry, decorationSize, layoutCases } from './bookcases';
@@ -22,15 +23,19 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const { t } = useTranslation();
     const isBook = item.type === 'book';
     const isFlat = isBook && item.pose === 'flat';
+    const isFront = isBook && item.pose === 'front';
     const label = isBook ? labelOf(item.book) : t('library.shelf.objects.' + item.name);
-    const baseClass = isBook ? (isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration';
-    const coverTone = useCoverTone(isBook && item.tone == null && !item.color ? item.book.coverImage : null);
+    const baseClass = isBook ? (isFront ? 'year-shelf-front' : isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration';
+    const coverTone = useCoverTone(isBook && !isFront && item.tone == null && !item.color ? item.book.coverImage : null);
     const fill = isBook ? item.color || SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
     const size = { '--w': item.w + 'px', '--h': item.h + 'px' };
     const style = isBook
         ? { ...size, '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8' }
         : size;
-    const content = isBook ? (
+    const content = isFront ? (
+        <BookCover className="year-shelf-front-art" src={item.book.coverImage}
+            title={item.book.title} author={item.book.author} bookId={item.book.bookId} />
+    ) : isBook ? (
         <SpineFace title={item.book.title} cover={item.face === 'solid' ? null : item.book.coverImage}
             solid={item.face === 'solid'} motif={item.motif ?? item.look.motif} />
     ) : (
@@ -66,7 +71,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     );
 }
 
-function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, decorationWidth = width, label, emptyText, editing, selectedKey, onSelect, onMove, onCheckMove, onOpen }) {
+function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, density = 'desktop', decorationWidth = width, label, emptyText, editing, selectedKey, onSelect, onMove, onCheckMove, onOpen }) {
     const { t } = useTranslation();
     const stageRef = useRef(null);
     const dragRef = useRef(null);
@@ -137,7 +142,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, deco
         const moving = items.find(item => item.key === state.key);
         let preview = null;
         if (moving?.type === 'decoration') {
-            const { k } = caseGeometry(bookcase.model, width, { immersive });
+            const { k } = caseGeometry(bookcase.model, width, { immersive, density });
             const size = decorationSize(moving.name, k);
             const stage = stageRef.current.getBoundingClientRect();
             const anchor = node.closest(next.onto ? '.year-shelf-pile' : '[data-shelf-row]') || node;
@@ -271,7 +276,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, deco
         );
     }
 
-    const options = { immersive, decorationWidth };
+    const options = { immersive, density, decorationWidth };
     const groups = groupItems(items);
     const cases = layoutCases(groups, bookcase.model, width, options);
 
@@ -283,9 +288,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, deco
     return (
         <div className={'year-shelf-cases' + (editing ? ' is-editing' : '') + (immersive ? ' is-immersive' : '')} ref={stageRef} role="group" aria-label={label}>
             {cases.map((rows, index) => {
-                const lastOccupied = rows.reduce((last, row, position) => row.groups.length > 0 ? position : last, -1);
-                const rowCount = index < cases.length - 1 ? rows.length
-                    : Math.min(rows.length, Math.max(2, lastOccupied + 1 + (editing ? 1 : 0)));
+                const rowCount = rows.length;
                 const geometry = caseGeometry(bookcase.model, width, { ...options, rowCount }, groups);
                 return (
                 <div key={index} className={'year-shelf-case' + (immersive ? ' is-immersive' : '') + (onOpen && !editing ? ' is-openable' : '')}

@@ -3,10 +3,11 @@ import { groupItems, moveItem, moveToShelf, pinShelves } from './shelfUtils';
 
 const OPTIONS = { immersive: true };
 
-export function placementIssue(items, model) {
+export function placementIssue(items, model, options = {}) {
+    const profile = { ...OPTIONS, ...options };
     const groups = groupItems(items);
-    const { k } = caseGeometry(model, BASE_WIDTH, OPTIONS, groups);
-    const layout = layoutCases(groups, model, BASE_WIDTH, OPTIONS);
+    const { k } = caseGeometry(model, BASE_WIDTH, profile, groups);
+    const layout = layoutCases(groups, model, BASE_WIDTH, profile);
     for (const rows of layout) for (const row of rows) for (const group of row.groups) {
         const members = group.type === 'pile' ? [...group.items, ...(group.top ? [group.top] : [])] : [group];
         if (group.type === 'pile' && group.top) {
@@ -36,14 +37,14 @@ export function shelfCapacity(items) {
     return Math.max(5, Math.ceil((last + 1) / 5) * 5);
 }
 
-export function findDecorationSpace(items, decoration, model, capacity = shelfCapacity(items)) {
+export function findDecorationSpace(items, decoration, model, options = {}, capacity = shelfCapacity(items)) {
     const candidates = [...items.filter(item => item.key !== decoration.key), decoration];
     for (let shelf = 0; shelf < capacity; shelf++) {
         const floor = moveToShelf(candidates, decoration.key, shelf);
-        if (!placementIssue(floor, model)) return floor;
+        if (!placementIssue(floor, model, options)) return floor;
         for (const pile of groupItems(items).filter(group => group.type === 'pile' && group.shelf === shelf && !group.top)) {
             const onPile = moveItem(candidates, decoration.key, pile.items[pile.items.length - 1].key, false);
-            if (!placementIssue(onPile, model)) return onPile;
+            if (!placementIssue(onPile, model, options)) return onPile;
         }
     }
     return null;
@@ -51,8 +52,9 @@ export function findDecorationSpace(items, decoration, model, capacity = shelfCa
 
 // Adapt saved arrangements to the fixed object sizes without moving books
 // out of their saved shelves. Decorations that cannot fit remain in the tray.
-export function prepareDecorations(items, model) {
-    let placed = pinShelves(items.filter(item => item.type === 'book'), model, BASE_WIDTH, OPTIONS);
+export function prepareDecorations(items, model, options = {}) {
+    const profile = { ...OPTIONS, ...options };
+    let placed = pinShelves(items.filter(item => item.type === 'book'), model, BASE_WIDTH, profile);
     const capacity = shelfCapacity(placed);
     const unplaced = [];
     let relocated = 0;
@@ -63,9 +65,9 @@ export function prepareDecorations(items, model) {
         const insert = previous ? placed.findIndex(next => next.key === previous.key) + 1 : 0;
         const candidate = [...placed];
         candidate.splice(insert, 0, { ...item, shelf: item.shelf ?? previous?.shelf ?? 0 });
-        if (!placementIssue(candidate, model)) placed = candidate;
+        if (!placementIssue(candidate, model, profile)) placed = candidate;
         else {
-            const fitted = findDecorationSpace(placed, item, model, capacity);
+            const fitted = findDecorationSpace(placed, item, model, profile, capacity);
             if (fitted) { placed = fitted; relocated++; }
             else unplaced.push(item.name);
         }

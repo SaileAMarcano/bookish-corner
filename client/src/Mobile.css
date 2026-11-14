@@ -1,0 +1,194 @@
+/* Shared phone layout. Book and decoration dimensions belong to bookcases.js. */
+@media (max-width: 860px) {
+  .sidebar {
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom));
+  }
+
+  .sidebar .sidebar-nav > *,
+  .sidebar .sidebar-nav > .sidebar-nav-group {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .sidebar .sidebar-nav > .sidebar-link,
+  .sidebar .sidebar-nav > .sidebar-nav-group > summary {
+    flex-direction: column;
+    width: 100%;
+    min-height: 48px;
+    gap: 3px;
+    padding: 4px 0;
+  }
+
+  .sidebar .sidebar-nav > .sidebar-link .sidebar-label,
+  .sidebar .sidebar-nav > .sidebar-nav-group > summary .sidebar-label {
+    display: block;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .app-shell .app-main {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}
+
+@media (max-width: 900px) {
+  .year-shelf-zoom-body > .year-shelf-editor-drawer {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 5;
+    width: 100%;
+    max-width: none;
+    max-height: 56dvh;
+    padding-bottom: env(safe-area-inset-bottom);
+    border: 1px solid var(--surface-2);
+    border-radius: 16px 16px 0 0;
+    background: var(--surface);
+    box-shadow: 0 -6px 24px rgb(45 36 31 / 15%);
+  }
+
+  .year-shelf-editor-drawer > summary {
+    display: list-item;
+    min-height: 44px;
+    box-sizing: border-box;
+    padding: 12px 20px;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .year-shelf-editor-drawer > .year-shelf-editor {
+    box-sizing: border-box;
+    max-height: calc(56dvh - 46px - env(safe-area-inset-bottom));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 12px;
+    border: 0;
+    border-radius: 0;
+    gap: 14px;
+  }
+
+  .year-shelf-editor-drawer .year-shelf-editor-hint {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .year-shelf-editor-drawer .year-shelf-case-option {
+    flex-direction: row;
+    align-items: center;
+    width: auto;
+    min-height: 44px;
+    gap: 6px;
+    padding: 6px;
+    font-size: 11px;
+  }
+
+  .year-shelf-editor-drawer .year-shelf-case-option img {
+    width: 16px;
+    height: 32px;
+  }
+
+  .year-shelf-editor-drawer .year-shelf-editor-actions {
+    position: sticky;
+    bottom: -12px;
+    padding: 8px 0;
+    background: var(--surface);
+  }
+
+  .year-shelf-zoom-body .year-shelf-cases.is-editing {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .year-shelf-zoom-body.has-open-tools .year-shelf-cases.is-editing {
+    padding-bottom: 58dvh;
+  }
+}
+
+@media (max-width: 600px) {
+  .app-shell .app-main .page {
+    padding: 16px 12px;
+    gap: 18px;
+    min-width: 0;
+  }
+
+  .app-shell .topbar {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+
+  .topbar .topbar-search {
+    min-height: 40px;
+    gap: 6px;
+    padding-left: 12px;
+  }
+
+  .topbar .topbar-search input,
+  .app-main .page input:not([type="range"]):not([type="checkbox"]):not([type="radio"]),
+  .app-main .page select,
+  .app-main .page textarea {
+    font-size: 16px;
+  }
+
+  .topbar .topbar-actions { gap: 6px; }
+  .library-page .library-heading { margin: 0 0 12px; font-size: 30px; }
+  .library-page .library-layout { gap: 16px; }
+  .library-page .library-now { margin-bottom: 14px; }
+  .library-page .library-now-head { margin-bottom: 10px; gap: 10px; }
+  .library-page .library-now-head h2 { font-size: 22px; }
+  .library-page .library-now-empty { padding: 14px; font-size: 13px; }
+  .library-page .library-view-switch { margin-bottom: 14px; }
+  .library-page .library-tools { gap: 12px; margin-bottom: 18px; }
+  .library-page .library-search-sort { gap: 8px; min-width: 0; }
+  .library-page .library-search { min-width: 0; }
+  .library-page .library-sort { max-width: 45%; }
+
+  .library-page .library-status-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 5px;
+    gap: 6px;
+  }
+
+  .library-page .book-filter-chip { flex-shrink: 0; min-height: 40px; padding: 8px 12px; font-size: 12px; }
+  .library-page .library-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 8px; }
+  .library-page .library-grid-tile { padding: 2px; gap: 5px; }
+  .library-page .library-grid-caption h3 { font-size: 14px; }
+  .library-page .library-grid-author { font-size: 11px; }
+  .library-page .library-grid-status { font-size: 9px; padding: 3px 5px; }
+  .library-page .library-year-heading { font-size: 22px; gap: 6px; margin-bottom: 12px; }
+  .library-page .library-book-group + .library-book-group { margin-top: 24px; }
+  .library-page .library-now-title { font-size: 20px; }
+  .library-page .library-year-challenge { padding: 12px; margin-bottom: 0; }
+  .library-page .library-year-challenge-head { gap: 8px; }
+  .library-page .library-year-challenge-status { font-size: 11px; }
+
+  .home .home-greeting-title { font-size: clamp(24px, 7vw, 30px); }
+  .home .home-greeting-lead { font-size: 14px; }
+  .home .home-section-title { font-size: 22px; }
+  .home .home-main { gap: 22px; }
+  .home .post-card { padding: 14px; }
+  .profile-header .profile-header-body { padding: 12px; gap: 12px; }
+  .profile-header .profile-header-avatar { width: 64px; height: 64px; }
+  .profile-header .profile-name { font-size: 24px; }
+
+  .book-diary .book-diary-scroll { padding: 16px; }
+  .book-diary .book-diary-header { grid-template-columns: 72px minmax(0, 1fr); gap: 12px; }
+  .book-diary .book-diary-cover { width: 72px; height: 108px; }
+  .book-diary .book-diary-heading h2 { font-size: 22px; }
+  .book-diary .book-diary-close { width: 44px; height: 44px; }
+  .book-diary input, .book-diary select, .book-diary textarea { font-size: 16px; }
+
+  .year-shelf-view .year-shelf-intro h2 { font-size: 22px; }
+  .year-shelf-view .year-shelf-intro p { font-size: 13px; }
+  .year-shelf-wall > .year-shelf-card { padding: 6px; min-width: 0; }
+  .year-shelf-view .year-shelf-button { min-height: 40px; padding: 8px 10px; font-size: 12px; }
+  .year-shelf-zoom .year-shelf-zoom-head { margin-bottom: 8px; gap: 6px; }
+  .year-shelf-zoom .year-shelf-zoom-head h2 { font-size: 20px; }
+  .year-shelf-zoom .year-shelf-zoom-head h2 span { font-size: 11px; }
+  .year-shelf-zoom .year-shelf-button { min-height: 40px; padding: 8px; font-size: 12px; }
+  .year-shelf-front-art.cover-fabric::before { inset: 4px; }
+}
+
+@media (max-width: 359px) {
+  .library-page .library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

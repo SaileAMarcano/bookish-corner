@@ -8,7 +8,7 @@ export const DECORATIONS = [
     { name: 'flowers', milestone: 'genre-wanderer' },
     { name: 'tea', milestone: 'goal-reached' },
 ];
-export const SHELF_POSES = ['upright', 'flat'];
+export const SHELF_POSES = ['upright', 'flat', 'front'];
 export const SPINE_FACES = ['cover', 'solid'];
 export const SHELF_TONES = SPINE_COLORS.map((color, index) => index);
 
@@ -28,7 +28,7 @@ function startsPile(index, total) {
 }
 
 export function bookItem(book, pose = 'upright', tone = null, motif = null, face = null, shelf = null, color = null) {
-    return { type: 'book', key: 'book-' + book.id, book, pose: pose === 'flat' ? 'flat' : 'upright', tone, motif, face, shelf, color };
+    return { type: 'book', key: 'book-' + book.id, book, pose: SHELF_POSES.includes(pose) ? pose : 'upright', tone, motif, face, shelf, color };
 }
 
 export function decorationItem(name, pose = 'upright', shelf = null) {
@@ -207,7 +207,7 @@ export function pinShelves(items, model, width, options) {
 export function toPayload(items) {
     return items.map((item) =>
         item.type === 'book'
-            ? { bookId: item.book.id, pose: item.pose === 'flat' ? 'flat' : 'upright', tone: item.tone, color: item.color, motif: item.motif, face: item.face, shelf: item.shelf }
+            ? { bookId: item.book.id, pose: SHELF_POSES.includes(item.pose) ? item.pose : 'upright', tone: item.tone, color: item.color, motif: item.motif, face: item.face, shelf: item.shelf }
             : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright', shelf: item.shelf }
     );
 }

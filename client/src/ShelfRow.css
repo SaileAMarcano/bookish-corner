@@ -1,3 +1,71 @@
+.year-shelf-cases .year-shelf-case .year-shelf-front {
+  position: relative;
+  display: block;
+  flex: 0 0 var(--w);
+  width: var(--w);
+  height: var(--h);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: calc(1px * var(--k, 1)) solid var(--spine-ink);
+  border-radius: calc(3px * var(--k, 1));
+  background: var(--spine-fill);
+  color: var(--spine-ink);
+  text-decoration: none;
+  box-shadow: inset calc(3px * var(--k, 1)) 0 0 rgb(0 0 0 / 12%);
+}
+
+.year-shelf-cases .year-shelf-case .year-shelf-front-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  object-fit: contain;
+  border-radius: inherit;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.year-shelf-cases .year-shelf-case .year-shelf-front-art.cover-fabric {
+  display: flex;
+  padding: clamp(3px, calc(4px * var(--k, 1)), 8px);
+  gap: calc(3px * var(--k, 1));
+}
+
+.year-shelf-front-art .cover-fabric-star {
+  font-size: clamp(10px, calc(9px * var(--k, 1)), 14px);
+}
+
+.year-shelf-front-art .cover-fabric-title {
+  font-size: clamp(9px, calc(8px * var(--k, 1)), 13px);
+  overflow-wrap: anywhere;
+}
+
+.year-shelf-front-art .cover-fabric-author {
+  font-size: clamp(8px, calc(6px * var(--k, 1)), 11px);
+}
+
+.year-shelf-cases .year-shelf-case.is-immersive .year-shelf-spine .spine-title,
+.year-shelf-cases .year-shelf-case.is-immersive .year-shelf-flat .spine-title {
+  font-size: clamp(10px, calc(9px * var(--k, 1)), 15px);
+}
+
+.year-shelf-editor-drawer {
+  flex: 0 0 360px;
+  width: 360px;
+  max-width: 100%;
+}
+
+.year-shelf-editor-drawer > summary {
+  display: none;
+}
+
+.year-shelf-front:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: -3px;
+}
+
 .year-shelf-cases {
   position: relative;
 }

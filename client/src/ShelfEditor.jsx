@@ -71,7 +71,7 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                         {item.type === 'decoration' && !canTop && <p className="year-shelf-editor-hint">{t('library.shelf.pileHint')}</p>}
                     </fieldset>
 
-                    {item.type === 'book' && (
+                    {item.type === 'book' && item.pose !== 'front' && (
                         <fieldset className="year-shelf-editor-group">
                             <legend>{t('library.shelf.color')}</legend>
                             <div className="year-shelf-editor-row">
@@ -104,7 +104,7 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                         </fieldset>
                     )}
 
-                    {item.type === 'book' && (
+                    {item.type === 'book' && item.pose !== 'front' && (
                         <fieldset className="year-shelf-editor-group">
                             <legend>{t('library.shelf.motif')}</legend>
                             <div className="year-shelf-swatches">

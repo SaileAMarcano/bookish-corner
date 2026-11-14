@@ -1354,6 +1354,7 @@ const en = {
             unlocked: 'Unlocked',
             locked: 'Yet to discover',
             organize: 'Organize shelf',
+            customize: 'Customize bookshelf',
             editHint: 'Drag a book or a decoration to move it. Drop a decoration on a pile to place it on top. On a phone, press and hold before dragging. Select one to see its options.',
             selectHint: 'Select a book or a decoration to change it.',
             position: 'Position',
@@ -1363,6 +1364,7 @@ const en = {
             poses: {
                 upright: 'Upright',
                 flat: 'Lying flat',
+                front: 'Show cover',
             },
             color: 'Spine',
             faces: {

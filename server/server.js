@@ -2174,7 +2174,7 @@ const SHELF_DECORATIONS = {
     flowers: 'genre-wanderer',
     tea: 'goal-reached',
 };
-const SHELF_POSES = ['upright', 'lean', 'flat'];
+const SHELF_POSES = ['upright', 'lean', 'flat', 'front'];
 const SHELF_TONES = 12;
 const SHELF_FACES = ['cover', 'solid'];
 const SHELF_ROWS = 500;

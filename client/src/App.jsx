@@ -52,6 +52,7 @@ import SearchBox from './SearchBox';
 import { ADMIN_ITEMS } from './adminNav';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
+import './Mobile.css';
 
 const TOUR_STEPS = ['feed', 'composer', 'library', 'lists', 'search', 'bell', 'account', 'preferences'];
 

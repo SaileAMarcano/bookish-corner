@@ -220,7 +220,7 @@ CREATE TABLE shelf_items (
     position     SMALLINT NOT NULL CHECK (position >= 0),
     user_book_id INTEGER UNIQUE REFERENCES user_books (id) ON DELETE CASCADE,
     decoration   TEXT CHECK (decoration IN ('candle', 'quill', 'stars', 'flowers', 'tea')),
-    pose         TEXT NOT NULL DEFAULT 'upright' CHECK (pose IN ('upright', 'lean', 'flat')),
+    pose         TEXT NOT NULL DEFAULT 'upright' CHECK (pose IN ('upright', 'lean', 'flat', 'front')),
     tone         SMALLINT CHECK (tone BETWEEN 0 AND 11),
     shelf        SMALLINT CHECK (shelf BETWEEN 0 AND 499),
     color        TEXT CHECK (color ~ '^#[0-9a-f]{6}$'),

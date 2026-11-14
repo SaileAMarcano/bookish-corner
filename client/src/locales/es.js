@@ -1354,6 +1354,7 @@ const es = {
             unlocked: 'Desbloqueado',
             locked: 'Por descubrir',
             organize: 'Organizar estante',
+            customize: 'Personalizar estantería',
             editHint: 'Arrastra un libro o un adorno para moverlo. Suelta un adorno sobre una pila para ponerlo encima. En el celular, mantén presionado antes de arrastrar. Selecciona uno para ver sus opciones.',
             selectHint: 'Selecciona un libro o un adorno para cambiarlo.',
             position: 'Posición',
@@ -1363,6 +1364,7 @@ const es = {
             poses: {
                 upright: 'De pie',
                 flat: 'Acostado',
+                front: 'Mostrar portada',
             },
             color: 'Lomo',
             faces: {
