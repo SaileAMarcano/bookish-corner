@@ -1,4 +1,4 @@
-import { getCoverTone } from './libraryUtils';
+import { SPINE_COLORS, genreLook } from './shelfSpines';
 
 export const DECORATIONS = [
     { name: 'candle', milestone: 'first-chapter' },
@@ -8,10 +8,9 @@ export const DECORATIONS = [
     { name: 'tea', milestone: 'goal-reached' },
 ];
 export const SHELF_POSES = ['upright', 'lean', 'flat'];
-export const SHELF_TONES = [0, 1, 2, 3, 4, 5];
+export const SHELF_TONES = SPINE_COLORS.map((color, index) => index);
 
-const SPINE_VARIANTS = 8;
-const FLAT_VARIANTS = 4;
+const BOOK_SIZES = 5;
 const PILE_EVERY = 7;
 const PILE_AT = 3;
 const PILE_SIZE = 3;
@@ -28,8 +27,8 @@ function startsPile(index, total) {
     return index % PILE_EVERY === PILE_AT && total - index >= 2;
 }
 
-export function bookItem(book, pose = 'upright', tone = null) {
-    return { type: 'book', key: 'book-' + book.id, book, pose, tone };
+export function bookItem(book, pose = 'upright', tone = null, motif = null) {
+    return { type: 'book', key: 'book-' + book.id, book, pose, tone, motif };
 }
 
 export function decorationItem(name, pose = 'upright') {
@@ -77,7 +76,7 @@ export function savedItems(books, rows, unlockedNames) {
         const book = booksById.get(row.userBookId);
         if (book && !placed.has(book.id)) {
             placed.add(book.id);
-            items.push(bookItem(book, row.pose, row.tone));
+            items.push(bookItem(book, row.pose, row.tone, row.motif));
         }
     }
 
@@ -90,7 +89,6 @@ export function savedItems(books, rows, unlockedNames) {
 
 export function groupItems(items) {
     const groups = [];
-    let previousVariant = -1;
 
     for (const item of items) {
         if (item.type === 'decoration') {
@@ -105,10 +103,10 @@ export function groupItems(items) {
         }
 
         const hash = hashOf(item.book);
-        const tone = item.tone ?? getCoverTone(item.book.bookId || item.book.title || '');
+        const shaped = { ...item, size: (hash >>> 8) % BOOK_SIZES, shape: (hash >>> 4) % 3, look: genreLook(item.book, hash) };
 
         if (item.pose === 'flat') {
-            const flat = { ...item, tone, variant: (hash >>> 8) % FLAT_VARIANTS };
+            const flat = shaped;
             const last = groups[groups.length - 1];
 
             if (last && last.type === 'pile' && !last.top && last.items.length < PILE_SIZE) {
@@ -119,10 +117,7 @@ export function groupItems(items) {
             continue;
         }
 
-        let variant = (hash >>> 8) % SPINE_VARIANTS;
-        if (variant === previousVariant) variant = (variant + 1) % SPINE_VARIANTS;
-        previousVariant = variant;
-        groups.push({ ...item, tone, variant });
+        groups.push(shaped);
     }
 
     return groups;
@@ -182,7 +177,7 @@ export function moveBy(items, key, step) {
 export function toPayload(items) {
     return items.map((item) =>
         item.type === 'book'
-            ? { bookId: item.book.id, pose: item.pose, tone: item.tone }
+            ? { bookId: item.book.id, pose: item.pose, tone: item.tone, motif: item.motif }
             : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright' }
     );
 }

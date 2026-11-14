@@ -221,7 +221,8 @@ CREATE TABLE shelf_items (
     user_book_id INTEGER UNIQUE REFERENCES user_books (id) ON DELETE CASCADE,
     decoration   TEXT CHECK (decoration IN ('candle', 'quill', 'stars', 'flowers', 'tea')),
     pose         TEXT NOT NULL DEFAULT 'upright' CHECK (pose IN ('upright', 'lean', 'flat')),
-    tone         SMALLINT CHECK (tone BETWEEN 0 AND 5),
+    tone         SMALLINT CHECK (tone BETWEEN 0 AND 11),
+    motif        TEXT CHECK (motif IN ('star', 'heart', 'flower', 'quill', 'key', 'planet', 'moon', 'hourglass', 'leaf', 'bubble')),
     CHECK ((user_book_id IS NULL) <> (decoration IS NULL)),
     UNIQUE (user_id, decoration)
 );

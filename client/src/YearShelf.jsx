@@ -187,6 +187,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                 onMoveBy={(step) => changeItems((list) => moveBy(list, editing.selectedKey, step))}
                                 onPose={(pose) => changeSelected({ pose })}
                                 onTone={(tone) => changeSelected({ tone })}
+                                onMotif={(motif) => changeSelected({ motif })}
                                 onRemove={removeSelected}
                                 onAdd={addDecoration}
                                 onSave={save}

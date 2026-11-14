@@ -16037,7 +16037,80 @@ a.post-tag:hover,
 }
 
 .profile-qr-dialog {
+  position: relative;
   text-align: center;
+}
+
+.profile-qr-dialog .report-form {
+  position: relative;
+}
+
+.profile-qr-stars {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.profile-qr-star {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: apply-card-twinkle var(--twinkle-time) var(--twinkle-delay) ease-in-out infinite;
+}
+
+.profile-qr-star-gold {
+  fill: #F6C94E;
+  filter: drop-shadow(0 0 4px #F6C94E);
+}
+
+.profile-qr-star-rose {
+  fill: #EBA3B4;
+  filter: drop-shadow(0 0 4px #EBA3B4);
+}
+
+.profile-qr-star-sage {
+  fill: #A3BC8C;
+  filter: drop-shadow(0 0 4px #A3BC8C);
+}
+
+:root[data-motion="reduce"] .profile-qr-star {
+  animation: none;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-qr-star {
+    animation: none;
+    opacity: 0.8;
+  }
+}
+
+.profile-qr-code {
+  position: relative;
+}
+
+.profile-qr-code .profile-qr-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 58px;
+  height: 58px;
+  border: 2px solid #2D241F;
+  border-radius: 14px;
+  background: #FFFFFF;
+  transform: translate(-50%, -50%);
+}
+
+.profile-qr-code .profile-qr-mark img {
+  width: auto;
+  height: 44px;
+}
+
+.profile-qr-error {
+  margin: 0;
+  color: var(--error);
+  font-size: 13px;
 }
 
 .profile-qr {
@@ -16295,4 +16368,268 @@ a.post-tag:hover,
 .year-shelf-tray-button .year-shelf-object {
   width: auto;
   height: 36px;
+}
+
+.year-shelf-spine,
+.year-shelf-flat {
+  box-sizing: border-box;
+  border: 3px solid #2D241F;
+  background: var(--spine-fill);
+  color: var(--spine-ink);
+}
+
+.year-shelf-spine {
+  height: calc(var(--spine-height) * (0.9 + var(--book-size, 2) * 0.04));
+  border-radius: 7px;
+  box-shadow: inset 6px 0 0 rgb(255 255 255 / 16%);
+}
+
+.year-shelf-flat {
+  width: calc(150px + var(--book-size, 2) * 6px);
+  padding: 0;
+  border-radius: 7px;
+  box-shadow: inset 0 5px 0 rgb(255 255 255 / 16%);
+}
+
+.year-shelf-spine .spine-face,
+.year-shelf-flat .spine-face {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  overflow: hidden;
+  max-width: none;
+  max-height: none;
+  border-radius: 4px;
+  writing-mode: horizontal-tb;
+}
+
+.year-shelf-spine .spine-face {
+  flex-direction: column;
+}
+
+.year-shelf-flat .spine-face {
+  flex-direction: row;
+}
+
+.year-shelf-spine .spine-cap,
+.year-shelf-flat .spine-cap {
+  position: static;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  max-height: none;
+  background: var(--spine-fill);
+  writing-mode: horizontal-tb;
+}
+
+.year-shelf-spine .spine-cap {
+  height: 32px;
+  border-bottom: 3px solid #2D241F;
+}
+
+.year-shelf-flat .spine-cap {
+  width: 32px;
+  border-right: 3px solid #2D241F;
+}
+
+.year-shelf-spine .spine-body,
+.year-shelf-flat .spine-body {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  max-height: none;
+  background-color: color-mix(in srgb, var(--spine-fill) 55%, #FAF4E8);
+  background-position: center;
+  background-size: cover;
+  writing-mode: horizontal-tb;
+}
+
+.year-shelf-spine .spine-body {
+  padding: 6px 0;
+}
+
+.year-shelf-flat .spine-body {
+  padding: 0 6px;
+}
+
+.spine-motif {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  overflow: visible;
+}
+
+.year-shelf-spine .spine-title,
+.year-shelf-flat .spine-title {
+  position: static;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+  max-width: 100%;
+  max-height: 100%;
+  box-sizing: border-box;
+  border: 2px solid #2D241F;
+  border-radius: 4px;
+  background: #FAF4E8;
+  color: #2D241F;
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.05;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.year-shelf-spine .spine-title {
+  padding: 6px 2px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+}
+
+.year-shelf-flat .spine-title {
+  padding: 2px 6px;
+  writing-mode: horizontal-tb;
+  text-align: center;
+}
+
+@media (max-width: 860px) {
+  .year-shelf-flat {
+    width: calc(132px + var(--book-size, 2) * 5px);
+  }
+
+  .year-shelf-spine .spine-title {
+    font-size: 12px;
+  }
+}
+
+.year-shelf-editor-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.year-shelf-editor-group legend {
+  margin-bottom: 8px;
+  padding: 0;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.year-shelf-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 40px);
+  gap: 10px;
+}
+
+.year-shelf-swatches .year-shelf-swatch {
+  border: 3px solid #2D241F;
+}
+
+.year-shelf-swatches .year-shelf-motif {
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #8B515E;
+}
+
+.year-shelf-motif .spine-motif {
+  width: 22px;
+  height: 22px;
+}
+
+@media (max-width: 600px) {
+  .year-shelf-card {
+    margin-bottom: 18px;
+    padding: 14px;
+  }
+
+  .year-shelf-card .library-year-heading {
+    font-size: 26px;
+  }
+
+  .year-shelf-card .library-year-challenge-progress {
+    margin-top: 10px;
+  }
+
+  .year-shelf-card .library-year-challenge-link {
+    margin-top: 8px;
+  }
+
+  .year-shelf-organize {
+    min-height: 36px;
+    margin: 2px 0 6px;
+    font-size: 12px;
+  }
+
+  .year-shelf-stage {
+    --spine-width: 30px;
+    gap: 4px;
+    min-height: 168px;
+    padding-bottom: 24px;
+  }
+
+  .year-shelf-stage .year-shelf-spine {
+    --spine-height: 130px;
+  }
+
+  .year-shelf-spine,
+  .year-shelf-flat {
+    border-width: 2.5px;
+  }
+
+  .year-shelf-flat {
+    width: calc(108px + var(--book-size, 2) * 4px);
+    height: 32px;
+  }
+
+  .year-shelf-pile {
+    margin: 0 4px;
+  }
+
+  .year-shelf-spine .spine-cap {
+    height: 25px;
+    border-bottom-width: 2.5px;
+  }
+
+  .year-shelf-flat .spine-cap {
+    width: 25px;
+    border-right-width: 2.5px;
+  }
+
+  .spine-motif {
+    width: 15px;
+    height: 15px;
+  }
+
+  .year-shelf-spine .spine-title,
+  .year-shelf-flat .spine-title {
+    font-size: 10.5px;
+  }
+
+  .year-shelf-spine .spine-title {
+    padding: 4px 1px;
+  }
+
+  .year-shelf-flat .spine-title {
+    padding: 1px 4px;
+  }
+
+  .year-shelf-decoration {
+    margin: 0 3px;
+  }
+
+  .year-shelf-object {
+    height: 50px;
+  }
 }

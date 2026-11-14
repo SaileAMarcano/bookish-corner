@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import ShelfDecoration from './ShelfDecoration';
-import SpineArt, { FlatSpineArt } from './SpineArt';
+import SpineFace from './SpineFace';
+import { SPINE_COLORS, isLightColor, useCoverTone } from './shelfSpines';
 import { groupItems } from './shelfUtils';
 
 const HOLD_TIME = 280;
@@ -21,12 +22,13 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const isFlat = isBook && item.pose === 'flat';
     const label = isBook ? labelOf(item.book) : t('library.shelf.objects.' + item.name);
     const baseClass = isBook ? (isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration';
-    const style = isBook ? { '--spine-tone': 'var(--shelf-tone-' + item.tone + ')' } : {};
+    const coverTone = useCoverTone(isBook && item.tone == null ? item.book.coverImage : null);
+    const fill = isBook ? SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
+    const style = isBook
+        ? { '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8', '--book-size': item.size }
+        : {};
     const content = isBook ? (
-        <>
-            {isFlat ? <FlatSpineArt variant={item.variant} /> : <SpineArt variant={item.variant} />}
-            <span>{item.book.title}</span>
-        </>
+        <SpineFace title={item.book.title} cover={item.book.coverImage} motif={item.motif ?? item.look.motif} />
     ) : (
         <ShelfDecoration name={item.name} />
     );
@@ -36,7 +38,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
 
         return (
             <button type="button" className={baseClass + ' year-shelf-editable' + stateClass}
-                data-shelf-key={item.key} data-shelf-flat={isFlat || undefined}
+                data-shelf-key={item.key} data-shelf-flat={isFlat || undefined} data-shape={isBook ? item.shape : undefined}
                 data-lean={(isBook && item.pose === 'lean') || undefined}
                 style={offset ? { ...style, translate: `${offset.x}px ${offset.y}px` } : style}
                 aria-pressed={selected} aria-label={label}
@@ -54,7 +56,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     }
 
     return (
-        <Link to={'/book/' + item.book.bookId} className={baseClass}
+        <Link to={'/book/' + item.book.bookId} className={baseClass} data-shape={item.shape}
             data-lean={item.pose === 'lean' || undefined} style={style} title={label} aria-label={label}>
             {content}
         </Link>

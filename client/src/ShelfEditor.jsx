@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import ShelfDecoration from './ShelfDecoration';
-import { SHELF_POSES, SHELF_TONES } from './shelfUtils';
+import { SHELF_POSES } from './shelfUtils';
+import { SpineMotif } from './SpineFace';
+import { SPINE_COLORS, SPINE_MOTIFS } from './shelfSpines';
 
-function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onMotif, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
 
@@ -15,63 +17,91 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                 <div className="year-shelf-editor-item">
                     <strong className="display">{name}</strong>
 
-                    <div className="year-shelf-editor-row" role="group" aria-label={t('library.shelf.position')}>
-                        <button type="button" className="year-shelf-button" onClick={() => onMoveBy(-1)} disabled={isFirst}>
-                            {t('library.shelf.moveLeft')}
-                        </button>
-                        <button type="button" className="year-shelf-button" onClick={() => onMoveBy(1)} disabled={isLast}>
-                            {t('library.shelf.moveRight')}
-                        </button>
-                    </div>
+                    <fieldset className="year-shelf-editor-group">
+                        <legend>{t('library.shelf.pose')}</legend>
+                        <div className="year-shelf-editor-row">
+                            {item.type === 'book' ? SHELF_POSES.map((pose) => (
+                                <button key={pose} type="button" className="year-shelf-button"
+                                    aria-pressed={item.pose === pose} onClick={() => onPose(pose)}>
+                                    {t('library.shelf.poses.' + pose)}
+                                </button>
+                            )) : (
+                                <>
+                                    <button type="button" className="year-shelf-button"
+                                        aria-pressed={!(canTop && item.pose === 'flat')} onClick={() => onPose('upright')}>
+                                        {t('library.shelf.decorationPoses.upright')}
+                                    </button>
+                                    <button type="button" className="year-shelf-button"
+                                        aria-pressed={canTop && item.pose === 'flat'} disabled={!canTop} onClick={() => onPose('flat')}>
+                                        {t('library.shelf.decorationPoses.flat')}
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                        {item.type === 'decoration' && !canTop && <p className="year-shelf-editor-hint">{t('library.shelf.pileHint')}</p>}
+                    </fieldset>
 
                     {item.type === 'book' && (
-                        <>
-                            <div className="year-shelf-editor-row" role="group" aria-label={t('library.shelf.pose')}>
-                                {SHELF_POSES.map((pose) => (
-                                    <button key={pose} type="button" className="year-shelf-button"
-                                        aria-pressed={item.pose === pose} onClick={() => onPose(pose)}>
-                                        {t('library.shelf.poses.' + pose)}
-                                    </button>
-                                ))}
-                            </div>
-
-                            <div className="year-shelf-editor-row" role="group" aria-label={t('library.shelf.color')}>
+                        <fieldset className="year-shelf-editor-group">
+                            <legend>{t('library.shelf.color')}</legend>
+                            <div className="year-shelf-editor-row">
                                 <button type="button" className="year-shelf-button"
                                     aria-pressed={item.tone === null} onClick={() => onTone(null)}>
                                     {t('library.shelf.colorAuto')}
                                 </button>
-                                {SHELF_TONES.map((tone) => (
-                                    <button key={tone} type="button" className="year-shelf-swatch"
-                                        style={{ '--spine-tone': 'var(--shelf-tone-' + tone + ')' }}
+                            </div>
+                            <div className="year-shelf-swatches">
+                                {SPINE_COLORS.map(({ key, hex }, tone) => (
+                                    <button key={key} type="button" className="year-shelf-swatch"
+                                        style={{ background: hex }}
                                         aria-pressed={item.tone === tone}
-                                        aria-label={t('library.shelf.colorOption', { number: tone + 1 })}
+                                        aria-label={t('library.shelf.colors.' + key)}
+                                        title={t('library.shelf.colors.' + key)}
                                         onClick={() => onTone(tone)}></button>
                                 ))}
                             </div>
-                        </>
+                        </fieldset>
                     )}
 
-                    {item.type === 'decoration' && (
-                        <>
-                            <div className="year-shelf-editor-row" role="group" aria-label={t('library.shelf.pose')}>
+                    {item.type === 'book' && (
+                        <fieldset className="year-shelf-editor-group">
+                            <legend>{t('library.shelf.motif')}</legend>
+                            <div className="year-shelf-editor-row">
                                 <button type="button" className="year-shelf-button"
-                                    aria-pressed={!(canTop && item.pose === 'flat')} onClick={() => onPose('upright')}>
-                                    {t('library.shelf.decorationPoses.upright')}
-                                </button>
-                                <button type="button" className="year-shelf-button"
-                                    aria-pressed={canTop && item.pose === 'flat'} disabled={!canTop} onClick={() => onPose('flat')}>
-                                    {t('library.shelf.decorationPoses.flat')}
+                                    aria-pressed={item.motif === null} onClick={() => onMotif(null)}>
+                                    {t('library.shelf.motifAuto')}
                                 </button>
                             </div>
-                            {!canTop && <p className="year-shelf-editor-hint">{t('library.shelf.pileHint')}</p>}
+                            <div className="year-shelf-swatches">
+                                {SPINE_MOTIFS.map((motif) => (
+                                    <button key={motif} type="button" className="year-shelf-swatch year-shelf-motif"
+                                        aria-pressed={item.motif === motif}
+                                        aria-label={t('library.shelf.motifs.' + motif)}
+                                        title={t('library.shelf.motifs.' + motif)}
+                                        onClick={() => onMotif(motif)}>
+                                        <SpineMotif motif={motif} />
+                                    </button>
+                                ))}
+                            </div>
+                        </fieldset>
+                    )}
 
-                            <div className="year-shelf-editor-row">
+                    <fieldset className="year-shelf-editor-group">
+                        <legend>{t('library.shelf.position')}</legend>
+                        <div className="year-shelf-editor-row">
+                            <button type="button" className="year-shelf-button" onClick={() => onMoveBy(-1)} disabled={isFirst}>
+                                {t('library.shelf.moveLeft')}
+                            </button>
+                            <button type="button" className="year-shelf-button" onClick={() => onMoveBy(1)} disabled={isLast}>
+                                {t('library.shelf.moveRight')}
+                            </button>
+                            {item.type === 'decoration' && (
                                 <button type="button" className="year-shelf-button" onClick={onRemove}>
                                     {t('library.shelf.removeDecoration')}
                                 </button>
-                            </div>
-                        </>
-                    )}
+                            )}
+                        </div>
+                    </fieldset>
                 </div>
             ) : (
                 <p className="year-shelf-editor-hint">{t('library.shelf.selectHint')}</p>
