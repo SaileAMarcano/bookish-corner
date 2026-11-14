@@ -223,6 +223,7 @@ CREATE TABLE shelf_items (
     pose         TEXT NOT NULL DEFAULT 'upright' CHECK (pose IN ('upright', 'lean', 'flat')),
     tone         SMALLINT CHECK (tone BETWEEN 0 AND 11),
     shelf        SMALLINT CHECK (shelf BETWEEN 0 AND 499),
+    color        TEXT CHECK (color ~ '^#[0-9a-f]{6}$'),
     face         TEXT CHECK (face IN ('cover', 'solid')),
     motif        TEXT CHECK (motif IN ('star', 'heart', 'flower', 'quill', 'key', 'planet', 'moon', 'hourglass', 'leaf', 'bubble')),
     CHECK ((user_book_id IS NULL) <> (decoration IS NULL)),

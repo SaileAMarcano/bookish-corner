@@ -1,5 +1,5 @@
 import { SPINE_COLORS, genreLook } from './shelfSpines';
-import { layoutCases } from './bookcases';
+import { layoutCases, PILE_SIZE } from './bookcases';
 
 export const DECORATIONS = [
     { name: 'candle', milestone: 'first-chapter' },
@@ -8,14 +8,12 @@ export const DECORATIONS = [
     { name: 'flowers', milestone: 'genre-wanderer' },
     { name: 'tea', milestone: 'goal-reached' },
 ];
-export const SHELF_POSES = ['upright', 'lean', 'flat'];
+export const SHELF_POSES = ['upright', 'flat'];
 export const SPINE_FACES = ['cover', 'solid'];
 export const SHELF_TONES = SPINE_COLORS.map((color, index) => index);
 
-const BOOK_SIZES = 5;
 const PILE_EVERY = 7;
 const PILE_AT = 3;
-const PILE_SIZE = 3;
 
 function hashOf(book) {
     let hash = 2166136261;
@@ -29,8 +27,8 @@ function startsPile(index, total) {
     return index % PILE_EVERY === PILE_AT && total - index >= 2;
 }
 
-export function bookItem(book, pose = 'upright', tone = null, motif = null, face = null, shelf = null) {
-    return { type: 'book', key: 'book-' + book.id, book, pose, tone, motif, face, shelf };
+export function bookItem(book, pose = 'upright', tone = null, motif = null, face = null, shelf = null, color = null) {
+    return { type: 'book', key: 'book-' + book.id, book, pose: pose === 'flat' ? 'flat' : 'upright', tone, motif, face, shelf, color };
 }
 
 export function decorationItem(name, pose = 'upright', shelf = null) {
@@ -39,7 +37,6 @@ export function decorationItem(name, pose = 'upright', shelf = null) {
 
 export function autoItems(books) {
     const items = [];
-    let previousLeans = false;
 
     for (let index = 0; index < books.length; index++) {
         const book = books[index];
@@ -51,14 +48,10 @@ export function autoItems(books) {
                 items.push(bookItem(item, 'flat'));
             }
             index += size - 1;
-            previousLeans = false;
             continue;
         }
 
-        const nextIsPile = startsPile(index + 1, books.length);
-        const leans = index < books.length - 1 && !nextIsPile && !previousLeans && hash % 5 === 0;
-        previousLeans = leans;
-        items.push(bookItem(book, leans ? 'lean' : 'upright'));
+        items.push(bookItem(book));
     }
 
     return items;
@@ -78,7 +71,7 @@ export function savedItems(books, rows, unlockedNames) {
         const book = booksById.get(row.userBookId);
         if (book && !placed.has(book.id)) {
             placed.add(book.id);
-            items.push(bookItem(book, row.pose, row.tone, row.motif, row.face, row.shelf));
+            items.push(bookItem(book, row.pose, row.tone, row.motif, row.face, row.shelf, row.color));
         }
     }
 
@@ -105,7 +98,7 @@ export function groupItems(items) {
         }
 
         const hash = hashOf(item.book);
-        const shaped = { ...item, size: (hash >>> 8) % BOOK_SIZES, shape: (hash >>> 4) % 3, look: genreLook(item.book, hash) };
+        const shaped = { ...item, shape: (hash >>> 4) % 3, look: genreLook(item.book, hash) };
 
         if (item.pose === 'flat') {
             const flat = shaped;
@@ -196,10 +189,10 @@ export function moveToShelf(items, key, shelf) {
     return rest;
 }
 
-export function pinShelves(items, model) {
+export function pinShelves(items, model, width, options) {
     const shelves = new Map();
 
-    layoutCases(groupItems(items), model).forEach((rows) => {
+    layoutCases(groupItems(items), model, width, options).forEach((rows) => {
         rows.forEach((row) => {
             row.groups.forEach((group) => {
                 const members = group.type === 'pile' ? [...group.items, ...(group.top ? [group.top] : [])] : [group];
@@ -214,7 +207,7 @@ export function pinShelves(items, model) {
 export function toPayload(items) {
     return items.map((item) =>
         item.type === 'book'
-            ? { bookId: item.book.id, pose: item.pose, tone: item.tone, motif: item.motif, face: item.face, shelf: item.shelf }
+            ? { bookId: item.book.id, pose: item.pose === 'flat' ? 'flat' : 'upright', tone: item.tone, color: item.color, motif: item.motif, face: item.face, shelf: item.shelf }
             : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright', shelf: item.shelf }
     );
 }

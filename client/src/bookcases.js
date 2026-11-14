@@ -1,20 +1,24 @@
 export const BASE_WIDTH = 320;
+export const PILE_SIZE = 5;
 
 export const BOOKCASES = {
     scroll: {
         colors: ['black', 'tan', 'walnut'],
+        frame: [11, 89],
         rows: [[13.96, 26.63], [29.29, 41.96], [44.63, 57.29], [59.96, 72.63], [75.29, 88]],
         left: 20.3,
         right: 80.4,
     },
     gothic: {
         colors: ['oak', 'honey', 'walnut'],
+        frame: [7, 93],
         rows: [[27.67, 35.75], [39.21, 47.29], [50.75, 58.83], [62.29, 70.38], [73.83, 81.92]],
         left: 20.2,
         right: 80.7,
     },
     floral: {
         colors: ['rose', 'sage', 'night'],
+        frame: [8, 92],
         rows: [[16.42, 25.54], [27.92, 37.04], [39.42, 48.54], [50.92, 60.04], [62.42, 71.63]],
         left: 16.3,
         right: 83.6,
@@ -24,7 +28,9 @@ export const BOOKCASES = {
 export const BOOKCASE_MODELS = Object.keys(BOOKCASES);
 
 const DECORATION_RATIOS = { candle: 0.72, quill: 0.52, stars: 0.75, flowers: 0.88, tea: 0.94 };
+const DECORATION_HEIGHTS = { candle: 60, quill: 76, stars: 64, flowers: 90, tea: 44 };
 const THIN_GENRES = ['Manga', 'Comics'];
+const LEGACY_PILE_SIZE = 3;
 
 export function bookcaseImage({ model, color }) {
     return '/bookcases/' + model + '-' + color + '.webp';
@@ -64,49 +70,84 @@ function rowsOf(model, caseWidth, k) {
     }));
 }
 
-function measureBook(item, rowHeight, k) {
-    const thin = isThin(item.book);
-    return {
-        thin,
-        w: Math.round((thin ? 10 : 15) * k),
-        h: Math.round(rowHeight * (0.8 + item.size * 0.04)),
-    };
+export function caseGeometry(model, width = BASE_WIDTH, { immersive = false, rowCount = 5 } = {}, groups = []) {
+    const expandedPiles = groups.some((group) => group.type === 'pile' && group.items.length > LEGACY_PILE_SIZE);
+    if (!immersive && !expandedPiles) {
+        return { width, height: width * 2, artWidth: width, cropLeft: 0, k: width / BASE_WIDTH, rows: rowsOf(model, width, width / BASE_WIDTH), slices: [] };
+    }
+
+    const { frame, rows: sourceRows } = BOOKCASES[model];
+    const artWidth = immersive ? width / ((frame[1] - frame[0]) / 100) : width;
+    const artHeight = artWidth * 2;
+    const cropLeft = immersive ? (frame[0] / 100) * artWidth : 0;
+    const k = artWidth / BASE_WIDTH;
+    const originalRows = rowsOf(model, artWidth, k);
+    const slices = [];
+    let sourceCursor = 0;
+    let cursor = 0;
+
+    // Keep carved ends and shelf boards at their original proportions. Only
+    // the quiet back panels and straight posts grow to make room for books.
+    function slice(sourceTop, sourceHeight, height = sourceHeight) {
+        if (sourceHeight <= 0) return;
+        slices.push({ sourceTop, sourceHeight, top: cursor, height });
+        cursor += height;
+    }
+
+    const rows = originalRows.slice(0, Math.max(1, Math.min(rowCount, originalRows.length))).map((row, index) => {
+        const [top, bottom] = sourceRows[index].map((value) => (value / 100) * artHeight);
+        slice(sourceCursor, top - sourceCursor);
+        const neededHeight = immersive
+            ? row.width * 0.86
+            : PILE_SIZE * Math.round(12 * k) + row.height * 0.5 + 6 * k;
+        const height = Math.max(bottom - top, neededHeight);
+        const next = { ...row, top: cursor, left: row.left - cropLeft, height: height + 3 * k };
+        slice(top, bottom - top, height);
+        sourceCursor = bottom;
+        return next;
+    });
+    const baseTop = (sourceRows[sourceRows.length - 1][1] / 100) * artHeight;
+    slice(baseTop, artHeight - baseTop);
+
+    return { width, height: cursor, artWidth, cropLeft, k, rows, slices };
 }
 
-function measure(group, row, k) {
+export function decorationSize(name, k = 1) {
+    const h = (DECORATION_HEIGHTS[name] ?? 60) * k;
+    return { h, w: h * (DECORATION_RATIOS[name] ?? 0.8) };
+}
+
+function measure(group, k, bookSize) {
     if (group.type === 'decoration') {
-        const h = Math.round(row.height * 0.66);
-        return { ...group, h, w: Math.round(h * (DECORATION_RATIOS[group.name] ?? 0.8)) };
+        const size = decorationSize(group.name, k);
+        return { ...group, ...size, span: size.w + 4 * k };
     }
 
     if (group.type === 'pile') {
-        const length = Math.round(Math.min(row.width * 0.6, row.height * 1.12));
-        const items = group.items.map((item) => {
-            const thin = isThin(item.book);
-            return { ...item, thin, w: Math.round(length - (thin ? 8 * k : 0) + item.size * 2 * k), h: Math.round((thin ? 10 : 15) * k) };
-        });
-        const pileHeight = items.reduce((total, item) => total + item.h, 0);
-        const top = group.top
-            ? { ...group.top, h: Math.round(Math.max(14 * k, Math.min(row.height * 0.5, row.height - pileHeight - 6 * k))) }
-            : null;
-        if (top) top.w = Math.round(top.h * (DECORATION_RATIOS[top.name] ?? 0.8));
+        const items = group.items.map((item) => ({ ...item, w: bookSize.h, h: bookSize.w }));
+        const pileHeight = items.reduce((total, item) => total + item.h, 0) - Math.max(0, items.length - 1);
+        const top = group.top ? { ...group.top, ...decorationSize(group.top.name, k) } : null;
 
-        return { ...group, items, top, w: Math.round(length + 7 * k), h: pileHeight };
+        const w = Math.ceil(Math.max(bookSize.h, top ? top.w + 4 * k : 0));
+        return { ...group, items, top, w, h: pileHeight };
     }
 
-    const book = measureBook(group, row.height, k);
-    const lean = group.pose === 'lean' ? Math.round(row.height * 0.12 + 4 * k) : 0;
-    return { ...group, ...book, lean, span: book.w + lean };
+    return { ...group, ...bookSize, span: bookSize.w };
 }
 
 function spanOf(group) {
     return group.span ?? group.w;
 }
 
-export function layoutCases(groups, model, caseWidth = BASE_WIDTH) {
-    const k = caseWidth / BASE_WIDTH;
+export function layoutCases(groups, model, caseWidth = BASE_WIDTH, options = {}) {
+    const { immersive = false } = options;
+    const { k, rows } = caseGeometry(model, caseWidth, options, groups);
+    const bookRows = caseGeometry(model, caseWidth, options).rows;
+    const bookSize = {
+        w: Math.round((immersive ? 24 : 12) * k),
+        h: Math.round(Math.min(...bookRows.map((row) => row.height)) * 0.9),
+    };
     const gap = 2 * k;
-    const rows = rowsOf(model, caseWidth, k);
     const buckets = [];
     let cursor = 0;
 
@@ -115,8 +156,9 @@ export function layoutCases(groups, model, caseWidth = BASE_WIDTH) {
 
         for (;;) {
             while (buckets.length <= index) buckets.push({ groups: [], used: 0 });
-            const row = rows[index % rows.length];
-            const shaped = measure(group, row, k);
+            const rowIndex = index % rows.length;
+            const row = rows[rowIndex];
+            const shaped = measure(group, k, bookSize);
             const bucket = buckets[index];
             const needed = spanOf(shaped) + (bucket.used > 0 ? gap : 0);
 

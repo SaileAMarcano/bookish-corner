@@ -3,12 +3,15 @@ import Notice from './Notice';
 import ShelfDecoration from './ShelfDecoration';
 import { SHELF_POSES, SPINE_FACES } from './shelfUtils';
 import { SpineMotif } from './SpineFace';
-import { SPINE_COLORS, SPINE_MOTIFS } from './shelfSpines';
+import { SPINE_COLORS, SPINE_LIGHTNESS, SPINE_MOTIFS, spineColor, spineSliders } from './shelfSpines';
 import { BOOKCASES, BOOKCASE_MODELS, bookcaseImage } from './bookcases';
 
-function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onFace, onMotif, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onColor, onFace, onMotif, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
+    const sliders = item?.type === 'book'
+        ? spineSliders(item.color || SPINE_COLORS[item.tone ?? item.look?.tone ?? 0].hex)
+        : null;
     const colorIndex = Math.max(0, BOOKCASES[bookcase.model].colors.indexOf(bookcase.color));
 
     return (
@@ -81,20 +84,23 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                             </div>
                             <div className="year-shelf-editor-row">
                                 <button type="button" className="year-shelf-button"
-                                    aria-pressed={item.tone === null} onClick={() => onTone(null)}>
+                                    aria-pressed={!item.color && item.tone === null} onClick={() => onTone(null)}>
                                     {t('library.shelf.colorAuto')}
                                 </button>
                             </div>
-                            <div className="year-shelf-swatches">
-                                {SPINE_COLORS.map(({ key, hex }, tone) => (
-                                    <button key={key} type="button" className="year-shelf-swatch"
-                                        style={{ background: hex }}
-                                        aria-pressed={item.tone === tone}
-                                        aria-label={t('library.shelf.colors.' + key)}
-                                        title={t('library.shelf.colors.' + key)}
-                                        onClick={() => onTone(tone)}></button>
-                                ))}
-                            </div>
+                            {sliders && (
+                                <div className="year-shelf-color">
+                                    <label htmlFor="shelf-color-hue">{t('library.shelf.hue')}</label>
+                                    <span className="year-shelf-color-track year-shelf-color-hues" aria-hidden="true"></span>
+                                    <input id="shelf-color-hue" type="range" min="0" max="359" step="1" value={sliders.hue}
+                                        onChange={(event) => onColor(spineColor(Number(event.target.value), sliders.lightness))} />
+                                    <label htmlFor="shelf-color-lightness">{t('library.shelf.lightness')}</label>
+                                    <span className="year-shelf-color-track" aria-hidden="true"
+                                        style={{ background: `linear-gradient(90deg, ${spineColor(sliders.hue, SPINE_LIGHTNESS[0])}, ${spineColor(sliders.hue, 50)}, ${spineColor(sliders.hue, SPINE_LIGHTNESS[1])})` }}></span>
+                                    <input id="shelf-color-lightness" type="range" min={SPINE_LIGHTNESS[0]} max={SPINE_LIGHTNESS[1]} step="1" value={sliders.lightness}
+                                        onChange={(event) => onColor(spineColor(sliders.hue, Number(event.target.value)))} />
+                                </div>
+                            )}
                         </fieldset>
                     )}
 

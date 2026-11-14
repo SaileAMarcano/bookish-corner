@@ -9,8 +9,9 @@ import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
 import { groupReadBooks } from './libraryUtils';
-import { bookcaseOf } from './bookcases';
-import { DECORATIONS, autoItems, canSitOnPile, decorationItem, moveBy, moveItem, moveToShelf, pinShelves, savedItems, toPayload } from './shelfUtils';
+import { BASE_WIDTH, bookcaseOf } from './bookcases';
+import { DECORATIONS, autoItems, canSitOnPile, decorationItem, moveBy, pinShelves, savedItems, toPayload } from './shelfUtils';
+import { findDecorationSpace, placementIssue, prepareDecorations, proposedMove } from './decorationPlacement';
 
 function YearShelf({ books, booksStatus, readingGoal, username }) {
     const { t } = useTranslation();
@@ -24,14 +25,27 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     const [saveError, setSaveError] = useState('');
     const [openYear, setOpenYear] = useState(null);
     const [viewport, setViewport] = useState(() => window.innerWidth);
+    const [zoomContentWidth, setZoomContentWidth] = useState(null);
     const wallRef = useRef(null);
     const closeRef = useRef(null);
+    const zoomBodyRef = useRef(null);
 
     useEffect(() => {
         const handleResize = () => setViewport(window.innerWidth);
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        const body = zoomBodyRef.current;
+        if (!body || openYear === null) return undefined;
+
+        const observer = new ResizeObserver(([entry]) => {
+            if (entry.contentRect.width > 0) setZoomContentWidth(entry.contentRect.width);
+        });
+        observer.observe(body);
+        return () => observer.disconnect();
+    }, [openYear]);
 
     useEffect(() => {
         if (openYear === null) return undefined;
@@ -110,6 +124,12 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
         )
         .map((decoration) => decoration.name);
     const rows = layout || [];
+    const wallDecorationWidth = viewport <= 600 ? Math.min(400, viewport - 72) : 400;
+    const wallWidth = Math.min(320, viewport - 48);
+    const decorationWidth = viewport <= 900 ? Math.min(560, viewport - 48) : Math.min(560, viewport - 520);
+    const zoomWidth = viewport <= 900
+        ? Math.min(600, viewport - 24, zoomContentWidth ?? Infinity)
+        : Math.min(600, viewport - 520);
 
     function itemsOf(year, yearBooks) {
         const yearRows = rows.filter((row) => row.year === (year ?? 0));
@@ -125,7 +145,29 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     }
 
     function changeItems(change) {
-        setEditing((current) => ({ ...current, items: change(current.items) }));
+        const items = change(editing.items);
+        const issue = placementIssue(items, editing.bookcase.model);
+        if (issue) { setSaveError(issueMessage(issue)); return false; }
+        setSaveError('');
+        setEditing({ ...editing, items });
+        return true;
+    }
+
+    function issueMessage(issue) {
+        return t('library.shelf.placement.' + issue.kind, {
+            name: issue.name ? t('library.shelf.objects.' + issue.name) : t('library.shelf.placement.object'),
+        });
+    }
+
+    function checkMove(from, to, before, shelf) {
+        const next = proposedMove(editing.items, from, to, before, shelf);
+        return next.issue || placementIssue(next.items, editing.bookcase.model);
+    }
+
+    function move(from, to, before, shelf) {
+        const next = proposedMove(editing.items, from, to, before, shelf);
+        if (next.issue) { setSaveError(issueMessage(next.issue)); return; }
+        changeItems(() => next.items);
     }
 
     function changeSelected(values) {
@@ -135,16 +177,17 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     }
 
     function removeSelected() {
-        setEditing((current) => ({
-            ...current,
-            selectedKey: null,
-            items: current.items.filter((item) => item.key !== current.selectedKey),
-        }));
+        if (changeItems(items => items.filter(item => item.key !== editing.selectedKey))) {
+            setEditing(current => ({ ...current, selectedKey: null }));
+        }
     }
 
     function addDecoration(name) {
         const item = decorationItem(name);
-        setEditing((current) => ({ ...current, selectedKey: item.key, items: [...current.items, item] }));
+        const items = findDecorationSpace(editing.items, item, editing.bookcase.model);
+        if (!items) { setSaveError(issueMessage({ kind: 'noSpace', name })); return; }
+        setSaveError('');
+        setEditing({ ...editing, selectedKey: item.key, items });
     }
 
     function showYear(yearKey) {
@@ -163,11 +206,13 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     }
 
     function save() {
+        const issue = placementIssue(editing.items, editing.bookcase.model);
+        if (issue) { setSaveError(issueMessage(issue)); return; }
         setSaving(true);
         setSaveError('');
 
         const { yearKey, bookcase } = editing;
-        apiFetch('/api/shelf/' + yearKey, { method: 'PUT', body: { items: toPayload(pinShelves(editing.items, bookcase.model)), bookcase } })
+        apiFetch('/api/shelf/' + yearKey, { method: 'PUT', body: { items: toPayload(pinShelves(editing.items, bookcase.model, BASE_WIDTH, { immersive: true })), bookcase } })
             .then((data) => {
                 setLayout(data);
                 setCases((current) => [...current.filter((row) => row.year !== yearKey), { year: yearKey, ...bookcase }]);
@@ -177,12 +222,12 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
             .finally(() => setSaving(false));
     }
 
-    const wallWidth = viewport <= 600 ? Math.min(400, viewport - 72) : 400;
-    const zoomWidth = viewport <= 900 ? Math.min(560, viewport - 48) : Math.min(560, viewport - 520);
     const views = groups.map(({ year, books: yearBooks }) => {
         const yearKey = year ?? 0;
         const isEditing = editing?.yearKey === yearKey;
-        const items = isEditing ? editing.items : itemsOf(year, yearBooks);
+        const bookcase = isEditing ? editing.bookcase : bookcaseOf(cases, year);
+        const prepared = isEditing ? { items: editing.items } : prepareDecorations(itemsOf(year, yearBooks), bookcase.model);
+        const items = prepared.items;
 
         return {
             year,
@@ -191,7 +236,8 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
             isEditing,
             items,
             label: year ?? t('library.undated'),
-            bookcase: isEditing ? editing.bookcase : bookcaseOf(cases, year),
+            bookcase,
+            prepared,
             selectedIndex: isEditing ? items.findIndex((item) => item.key === editing.selectedKey) : -1,
             canOrganize: layout && milestones && !editing && (yearBooks.length > 0 || unlocked.length > 0),
         };
@@ -200,7 +246,9 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
 
     function organize(view) {
         setOpenYear(view.yearKey);
-        setEditing({ yearKey: view.yearKey, items: pinShelves(view.items, view.bookcase.model), bookcase: view.bookcase, selectedKey: null });
+        setSaveError(view.prepared.unplaced?.length ? t('library.shelf.placement.unplaced')
+            : view.prepared.relocated ? t('library.shelf.placement.relocated') : '');
+        setEditing({ yearKey: view.yearKey, items: pinShelves(view.items, view.bookcase.model, BASE_WIDTH, { immersive: true }), bookcase: view.bookcase, selectedKey: null });
     }
 
     return (
@@ -257,6 +305,8 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                     items={view.items}
                                     bookcase={view.bookcase}
                                     width={wallWidth}
+                                    immersive
+                                    decorationWidth={wallDecorationWidth}
                                     label={t('library.shelf.yearLabel', { year: view.label })}
                                     emptyText={t('library.shelf.empty')}
                                     editing={false}
@@ -283,19 +333,26 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                         aria-label={t('library.shelf.close')} onClick={closeYear}>
                                         <Icon name="close" size={22} />
                                     </button>
+                                    {saveError && <div className="year-shelf-placement-notice"><Notice message={saveError} /></div>}
                                 </header>
 
-                                <div className="year-shelf-zoom-body">
+                                <div className="year-shelf-zoom-body" ref={zoomBodyRef}>
                                     <ShelfRow
                                         items={openView.items}
                                         bookcase={openView.bookcase}
                                         width={zoomWidth}
+                                        immersive
+                                        decorationWidth={decorationWidth}
                                         label={t('library.shelf.yearLabel', { year: openView.label })}
                                         emptyText={t('library.shelf.empty')}
                                         editing={openView.isEditing}
                                         selectedKey={openView.isEditing ? editing.selectedKey : null}
                                         onSelect={(key) => setEditing((current) => ({ ...current, selectedKey: key }))}
-                                        onMove={(fromKey, toKey, before, shelf) => changeItems((list) => (toKey ? moveItem(list, fromKey, toKey, before) : moveToShelf(list, fromKey, shelf)))}
+                                        onMove={move}
+                                        onCheckMove={(from, to, before, shelf) => {
+                                            const issue = checkMove(from, to, before, shelf);
+                                            return issue ? issueMessage(issue) : null;
+                                        }}
                                     />
 
                                     {openView.isEditing && (
@@ -306,14 +363,20 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                             canTop={openView.selectedIndex >= 0 && canSitOnPile(openView.items, editing.selectedKey)}
                                             tray={unlocked.filter((name) => !openView.items.some((item) => item.name === name))}
                                             saving={saving}
-                                            error={saveError}
+                                            error=""
                                             onMoveBy={(step) => changeItems((list) => moveBy(list, editing.selectedKey, step))}
                                             onPose={(pose) => changeSelected({ pose })}
-                                            onTone={(tone) => changeSelected({ tone })}
+                                            onTone={(tone) => changeSelected({ tone, color: null })}
+                                            onColor={(color) => changeSelected({ color })}
                                             onFace={(face) => changeSelected({ face })}
                                             onMotif={(motif) => changeSelected({ motif })}
                                             bookcase={openView.bookcase}
-                                            onBookcase={(next) => setEditing((current) => ({ ...current, bookcase: next }))}
+                                            onBookcase={(next) => {
+                                                const issue = placementIssue(editing.items, next.model);
+                                                if (issue) { setSaveError(issueMessage(issue)); return; }
+                                                setSaveError('');
+                                                setEditing({ ...editing, bookcase: next });
+                                            }}
                                             onRemove={removeSelected}
                                             onAdd={addDecoration}
                                             onSave={save}

@@ -38,9 +38,53 @@ function rgbOf(hex) {
     return [value >> 16, (value >> 8) & 255, value & 255];
 }
 
+export const SPINE_SATURATION = 35;
+export const SPINE_LIGHTNESS = [18, 85];
+
+export function spineColor(hue, lightness) {
+    const s = SPINE_SATURATION / 100;
+    const l = lightness / 100;
+    const a = s * Math.min(l, 1 - l);
+    const channel = (n) => {
+        const k = (n + hue / 30) % 12;
+        const value = l - a * Math.max(-1, Math.min(k - 3, 9 - k, 1));
+        return Math.round(value * 255).toString(16).padStart(2, '0');
+    };
+    return '#' + channel(0) + channel(8) + channel(4);
+}
+
+export function spineSliders(hex) {
+    const [r, g, b] = rgbOf(hex).map((value) => value / 255);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const delta = max - min;
+    let hue = 0;
+
+    if (delta > 0) {
+        if (max === r) hue = ((g - b) / delta) % 6;
+        else if (max === g) hue = (b - r) / delta + 2;
+        else hue = (r - g) / delta + 4;
+    }
+
+    const lightness = Math.round(((max + min) / 2) * 100);
+    return {
+        hue: Math.round((hue * 60 + 360) % 360),
+        lightness: Math.max(SPINE_LIGHTNESS[0], Math.min(SPINE_LIGHTNESS[1], lightness)),
+    };
+}
+
 export function isLightColor(hex) {
-    const [r, g, b] = rgbOf(hex);
-    return 0.299 * r + 0.587 * g + 0.114 * b > 150;
+    function luminance(color) {
+        const [r, g, b] = rgbOf(color).map((value) => {
+            const channel = value / 255;
+            return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+    const fill = luminance(hex);
+    const darkContrast = (fill + 0.05) / (luminance('#2D241F') + 0.05);
+    const lightContrast = (luminance('#FAF4E8') + 0.05) / (fill + 0.05);
+    return darkContrast >= lightContrast;
 }
 
 export function genreLook(book, hash) {

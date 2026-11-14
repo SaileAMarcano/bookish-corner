@@ -1,0 +1,129 @@
+.year-shelf-cases {
+  position: relative;
+}
+
+.year-shelf-cases .year-shelf-case .year-shelf-pile-top {
+  margin-bottom: calc(6px * var(--k, 1));
+}
+
+.year-shelf-placement-notice {
+  grid-column: 1 / -1;
+}
+
+.year-shelf-placement-notice .notice {
+  margin: 0;
+}
+
+.year-shelf-drop-preview {
+  position: absolute;
+  z-index: 4;
+  box-sizing: border-box;
+  border: 2px dashed var(--sage);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--sage) 15%, transparent);
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.year-shelf-drop-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.year-shelf-drop-preview.is-invalid {
+  border-color: var(--rose-ink);
+  background: color-mix(in srgb, var(--rose) 20%, transparent);
+}
+
+.year-shelf-drop-status {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  translate: -50% 0;
+  z-index: 6;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: min(480px, calc(100vw - 32px));
+  margin: 0;
+  padding: 12px 16px;
+  border: 2px solid var(--sage);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  pointer-events: none;
+}
+
+.year-shelf-drop-status.is-invalid {
+  border-color: var(--rose-ink);
+}
+
+.year-shelf-cases .year-shelf-case .year-shelf-pile .year-shelf-flat {
+  margin-left: 0;
+}
+
+.year-shelf-zoom .year-shelf-cases {
+  isolation: isolate;
+}
+
+.year-shelf-wall .year-shelf-cases {
+  justify-content: center;
+}
+
+.year-shelf-cases.is-editing .year-shelf-editable:not(.is-dragging) {
+  translate: 0 0;
+}
+
+.year-shelf-cases .year-shelf-case .year-shelf-editable[aria-pressed="true"],
+.year-shelf-cases .year-shelf-case .year-shelf-editable:focus-visible {
+  outline-offset: -3px;
+}
+
+.year-shelf-case .year-shelf-case-slice {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  user-select: none;
+}
+
+.year-shelf-zoom .year-shelf-zoom-panel {
+  padding: 20px 12px;
+}
+
+.year-shelf-zoom .year-shelf-zoom-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 8px;
+  position: sticky;
+  top: -24px;
+  z-index: 3;
+  padding: 10px 0;
+  background: var(--surface);
+}
+
+.year-shelf-zoom .year-shelf-zoom-head h2 {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 2px 8px;
+  font-size: 24px;
+}
+
+.year-shelf-zoom .year-shelf-zoom-close {
+  grid-column: 3;
+}
+
+.year-shelf-zoom .year-shelf-cases.is-immersive {
+  align-items: center;
+}
+
+@media (max-width: 900px) {
+  .year-shelf-zoom .year-shelf-zoom-panel {
+    padding: 8px 12px 20px;
+  }
+
+  .year-shelf-zoom .year-shelf-zoom-head {
+    top: 0;
+  }
+}

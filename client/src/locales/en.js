@@ -564,7 +564,7 @@ const en = {
                 statuses: { q: 'What do the reading statuses mean?', a: 'Want to read is your wish list, Reading is what you have open now, Read is what you finished, Paused is a book you will come back to, and Did not finish is a book you left behind. You can change the status of a book whenever you want.' },
                 progress: { q: 'How do I update my progress?', a: 'Use "Update progress" on a book you are reading, in Home or in your Library. Write the page you are on and, if you want, a short note about how it is going.' },
                 challenge: { q: 'How does the reading challenge work?', a: 'In your Library, choose "Set a reading goal for this year" and pick how many books you want to read. Every book you finish this year counts toward it.' },
-                shelf: { q: 'What is the year shelf?', a: 'Every book you finish appears as a spine on the shelf of the year you read it. Your achievements unlock little objects you can place on the shelf you choose. Use "Organize shelf" to drag your books, lean them, stack them or change their color. Select a spine to open the book.' },
+                shelf: { q: 'What is the year shelf?', a: 'Every book you finish appears as a spine on the shelf of the year you read it. Your achievements unlock little objects you can place on the shelf you choose. Use "Organize shelf" to drag your books, stack them or change their color. Select a spine to open the book.' },
             },
             community: {
                 post: { q: 'How do I share a post?', a: 'Write in the box at the top of Home. You can add up to four books, an image, a song from Spotify and tags.' },
@@ -1362,7 +1362,6 @@ const en = {
             pose: 'Placement',
             poses: {
                 upright: 'Upright',
-                lean: 'Leaning',
                 flat: 'Lying flat',
             },
             color: 'Spine',
@@ -1384,6 +1383,8 @@ const en = {
                 bubble: 'Speech bubble',
             },
             colorAuto: 'From the cover',
+            hue: 'Color',
+            lightness: 'Light or dark',
             colors: {
                 plum: 'Plum',
                 rose: 'Rose',
@@ -1406,6 +1407,17 @@ const en = {
                 flat: 'On top of the pile',
             },
             pileHint: 'To place it on top of a pile, move it right after the pile.',
+            placement: {
+                object: 'This object',
+                fits: 'Fits here',
+                support: '{{name}} needs a wider support. Try another pile or a free shelf.',
+                pileHeight: '{{name}} does not fit on this pile. Try a lower pile or a free shelf.',
+                occupied: 'This pile already has a decoration. Move it before placing another on top.',
+                space: 'There is not enough room on this shelf for this change. Rearrange the books or choose another shelf.',
+                noSpace: 'There is no room for {{name}}. Rearrange the books or free up a shelf.',
+                relocated: 'Some decorations have been moved to a free space to keep their full size.',
+                unplaced: 'Some decorations do not fit at full size and remain available under Add a decoration.',
+            },
             save: 'Save shelf',
             objects: {
                 candle: 'Candle',

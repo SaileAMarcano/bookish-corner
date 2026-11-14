@@ -564,7 +564,7 @@ const es = {
                 statuses: { q: '¿Qué significan los estados de lectura?', a: 'Quiero leer es tu lista de deseos, Leyendo es lo que tienes abierto ahora, Leído es lo que terminaste, En pausa es un libro al que volverás y Abandonado es un libro que dejaste. Puedes cambiar el estado de un libro cuando quieras.' },
                 progress: { q: '¿Cómo actualizo mi progreso?', a: 'Usa «Actualizar progreso» en un libro que estés leyendo, desde el Inicio o tu Biblioteca. Escribe la página en la que vas y, si quieres, una nota corta sobre cómo va.' },
                 challenge: { q: '¿Cómo funciona el reto de lectura?', a: 'En tu Biblioteca, elige «Ponte una meta de lectura para este año» y decide cuántos libros quieres leer. Cada libro que termines este año suma.' },
-                shelf: { q: '¿Qué es el estante del año?', a: 'Cada libro que terminas aparece como un lomo en el estante del año en que lo leíste. Tus logros desbloquean pequeños adornos que puedes colocar en el estante que elijas. Con «Organizar estante» puedes arrastrar tus libros, inclinarlos, apilarlos o cambiarles el color. Selecciona un lomo para abrir el libro.' },
+                shelf: { q: '¿Qué es el estante del año?', a: 'Cada libro que terminas aparece como un lomo en el estante del año en que lo leíste. Tus logros desbloquean pequeños adornos que puedes colocar en el estante que elijas. Con «Organizar estante» puedes arrastrar tus libros, apilarlos o cambiarles el color. Selecciona un lomo para abrir el libro.' },
             },
             community: {
                 post: { q: '¿Cómo comparto una publicación?', a: 'Escribe en el recuadro de arriba del Inicio. Puedes añadir hasta cuatro libros, una imagen, una canción de Spotify y etiquetas.' },
@@ -1362,7 +1362,6 @@ const es = {
             pose: 'Colocación',
             poses: {
                 upright: 'De pie',
-                lean: 'Inclinado',
                 flat: 'Acostado',
             },
             color: 'Lomo',
@@ -1384,6 +1383,8 @@ const es = {
                 bubble: 'Bocadillo',
             },
             colorAuto: 'Según la portada',
+            hue: 'Color',
+            lightness: 'Claro u oscuro',
             colors: {
                 plum: 'Ciruela',
                 rose: 'Rosa',
@@ -1406,6 +1407,17 @@ const es = {
                 flat: 'Encima de la pila',
             },
             pileHint: 'Para ponerlo encima de una pila, muévelo justo después de la pila.',
+            placement: {
+                object: 'Este objeto',
+                fits: 'Cabe aquí',
+                support: '{{name}} necesita más superficie de apoyo. Prueba otra pila o una balda libre.',
+                pileHeight: '{{name}} no cabe encima de esta pila. Prueba una pila más baja o una balda libre.',
+                occupied: 'Esta pila ya tiene un adorno. Muévelo antes de colocar otro encima.',
+                space: 'No queda espacio en esta balda para este cambio. Reorganiza los libros o elige otra balda.',
+                noSpace: 'No queda espacio para colocar {{name}}. Reorganiza los libros o libera una balda.',
+                relocated: 'Algunos adornos se han colocado en un espacio libre para conservar su tamaño.',
+                unplaced: 'Algunos adornos no caben con su tamaño completo y siguen disponibles en Añadir un adorno.',
+            },
             save: 'Guardar estante',
             objects: {
                 candle: 'Vela',

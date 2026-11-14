@@ -5,7 +5,8 @@ import ShelfDecoration from './ShelfDecoration';
 import SpineFace from './SpineFace';
 import { SPINE_COLORS, isLightColor, useCoverTone } from './shelfSpines';
 import { groupItems } from './shelfUtils';
-import { BASE_WIDTH, bookcaseImage, layoutCases } from './bookcases';
+import { BASE_WIDTH, bookcaseImage, caseGeometry, decorationSize, layoutCases } from './bookcases';
+import './ShelfRow.css';
 
 const HOLD_TIME = 280;
 const TOUCH_SLOP = 8;
@@ -23,11 +24,11 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const isFlat = isBook && item.pose === 'flat';
     const label = isBook ? labelOf(item.book) : t('library.shelf.objects.' + item.name);
     const baseClass = isBook ? (isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration';
-    const coverTone = useCoverTone(isBook && item.tone == null ? item.book.coverImage : null);
-    const fill = isBook ? SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
+    const coverTone = useCoverTone(isBook && item.tone == null && !item.color ? item.book.coverImage : null);
+    const fill = isBook ? item.color || SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
     const size = { '--w': item.w + 'px', '--h': item.h + 'px' };
     const style = isBook
-        ? { ...size, '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8', '--book-size': item.size }
+        ? { ...size, '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8' }
         : size;
     const content = isBook ? (
         <SpineFace title={item.book.title} cover={item.face === 'solid' ? null : item.book.coverImage}
@@ -35,16 +36,12 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     ) : (
         <ShelfDecoration name={item.name} />
     );
-    const shared = {
-        'data-thin': (isBook && item.thin) || undefined,
-        'data-lean': (isBook && item.pose === 'lean') || undefined,
-    };
 
     if (editing) {
         const stateClass = (offset ? ' is-dragging' : '') + (dropSide ? ' drop-' + dropSide : '');
 
         return (
-            <button type="button" className={baseClass + ' year-shelf-editable' + stateClass} {...shared}
+            <button type="button" className={baseClass + ' year-shelf-editable' + stateClass}
                 data-shelf-key={item.key} data-shelf-flat={isFlat || undefined}
                 style={offset ? { ...style, translate: `${offset.x}px ${offset.y}px` } : style}
                 aria-pressed={selected} aria-label={label}
@@ -62,14 +59,15 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     }
 
     return (
-        <Link to={'/book/' + item.book.bookId} className={baseClass} {...shared}
+        <Link to={'/book/' + item.book.bookId} className={baseClass}
             style={style} title={label} aria-label={label}>
             {content}
         </Link>
     );
 }
 
-function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editing, selectedKey, onSelect, onMove, onOpen }) {
+function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, decorationWidth = width, label, emptyText, editing, selectedKey, onSelect, onMove, onCheckMove, onOpen }) {
+    const { t } = useTranslation();
     const stageRef = useRef(null);
     const dragRef = useRef(null);
     const dropRef = useRef(null);
@@ -80,7 +78,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
     useEffect(() => () => dragRef.current?.stop(false), []);
 
     function scrollerOf() {
-        return stageRef.current?.closest('.year-shelf-wall') || stageRef.current;
+        return stageRef.current?.closest('.year-shelf-wall, .year-shelf-zoom') || stageRef.current;
     }
 
     function findDrop(state) {
@@ -91,13 +89,14 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
         let target = under?.closest('[data-shelf-key]');
         const rowNode = under?.closest('[data-shelf-row]');
 
+        if (state.key.startsWith('decoration-') && (!under || !stage.contains(under) || (!target && !rowNode))) {
+            if (dropRef.current) { dropRef.current = null; setDrop(null); }
+            return;
+        }
+
         if ((!target || !stage.contains(target)) && rowNode && stage.contains(rowNode)) {
             const row = Number(rowNode.dataset.shelfRow);
-            const current = dropRef.current;
-            if (!current || current.key !== null || current.row !== row) {
-                dropRef.current = { key: null, row };
-                setDrop(dropRef.current);
-            }
+            updateDrop(state, { key: null, row }, rowNode);
             return;
         }
 
@@ -127,11 +126,30 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
             : state.x < box.left + box.width / 2;
         const next = { key: target.dataset.shelfKey, before: onto ? false : before, onto };
 
+        updateDrop(state, next, target);
+    }
+
+    function updateDrop(state, next, node) {
+        const message = onCheckMove?.(state.key, next.key, next.before, next.row) || null;
         const current = dropRef.current;
-        if (!current || current.key !== next.key || current.before !== next.before || current.onto !== next.onto) {
-            dropRef.current = next;
-            setDrop(next);
+        if (current && current.key === next.key && current.row === next.row && current.before === next.before
+            && current.onto === next.onto && current.message === message) return;
+        const moving = items.find(item => item.key === state.key);
+        let preview = null;
+        if (moving?.type === 'decoration') {
+            const { k } = caseGeometry(bookcase.model, width, { immersive });
+            const size = decorationSize(moving.name, k);
+            const stage = stageRef.current.getBoundingClientRect();
+            const anchor = node.closest(next.onto ? '.year-shelf-pile' : '[data-shelf-row]') || node;
+            const box = anchor.getBoundingClientRect();
+            const itemBox = node.getBoundingClientRect();
+            const left = next.onto ? box.left + (box.width - size.w) / 2
+                : next.key ? (next.before ? itemBox.left : itemBox.right) : box.left;
+            preview = { name: moving.name, w: size.w, h: size.h,
+                left: left - stage.left, top: (next.onto ? box.top - 6 * k : box.bottom) - size.h - stage.top };
         }
+        dropRef.current = { ...next, message, preview };
+        setDrop(dropRef.current);
     }
 
     function handlePointerDown(event, key) {
@@ -146,6 +164,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
             startX: event.clientX,
             startY: event.clientY,
             startScroll: scroller.scrollLeft,
+            startScrollTop: scroller.scrollTop,
             x: event.clientX,
             y: event.clientY,
             active: false,
@@ -157,11 +176,13 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
             const box = scroller.getBoundingClientRect();
             if (state.x < box.left + EDGE) scroller.scrollLeft -= EDGE_SPEED;
             if (state.x > box.right - EDGE) scroller.scrollLeft += EDGE_SPEED;
+            if (state.y < box.top + EDGE) scroller.scrollTop -= EDGE_SPEED;
+            if (state.y > box.bottom - EDGE) scroller.scrollTop += EDGE_SPEED;
 
             setDrag({
                 key,
                 x: state.x - state.startX + scroller.scrollLeft - state.startScroll,
-                y: state.y - state.startY,
+                y: state.y - state.startY + scroller.scrollTop - state.startScrollTop,
             });
             findDrop(state);
             state.frame = requestAnimationFrame(tick);
@@ -250,7 +271,9 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
         );
     }
 
-    const cases = layoutCases(groupItems(items), bookcase.model, width);
+    const options = { immersive, decorationWidth };
+    const groups = groupItems(items);
+    const cases = layoutCases(groups, bookcase.model, width, options);
 
     function handleCaseClick(event) {
         if (editing || !onOpen || event.target.closest('a, button')) return;
@@ -258,12 +281,24 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
     }
 
     return (
-        <div className={'year-shelf-cases' + (editing ? ' is-editing' : '')} ref={stageRef} role="group" aria-label={label}>
-            {cases.map((rows, index) => (
-                <div key={index} className={'year-shelf-case' + (onOpen && !editing ? ' is-openable' : '')}
-                    style={{ width, height: width * 2, '--k': width / BASE_WIDTH }} onClick={handleCaseClick}>
-                    <img className="year-shelf-case-art" src={bookcaseImage(bookcase)} alt="" draggable="false" />
-                    {rows.map((row, rowIndex) => (
+        <div className={'year-shelf-cases' + (editing ? ' is-editing' : '') + (immersive ? ' is-immersive' : '')} ref={stageRef} role="group" aria-label={label}>
+            {cases.map((rows, index) => {
+                const lastOccupied = rows.reduce((last, row, position) => row.groups.length > 0 ? position : last, -1);
+                const rowCount = index < cases.length - 1 ? rows.length
+                    : Math.min(rows.length, Math.max(2, lastOccupied + 1 + (editing ? 1 : 0)));
+                const geometry = caseGeometry(bookcase.model, width, { ...options, rowCount }, groups);
+                return (
+                <div key={index} className={'year-shelf-case' + (immersive ? ' is-immersive' : '') + (onOpen && !editing ? ' is-openable' : '')}
+                    style={{ width: geometry.width, height: geometry.height, '--k': geometry.k }} onClick={handleCaseClick}>
+                    {geometry.slices.length > 0 ? geometry.slices.map((slice, sliceIndex) => {
+                        const scale = slice.height / slice.sourceHeight;
+                        return <div key={sliceIndex} className="year-shelf-case-slice" aria-hidden="true"
+                            style={{ top: slice.top, height: slice.height,
+                                backgroundImage: 'url(' + JSON.stringify(bookcaseImage(bookcase)) + ')',
+                                backgroundSize: `${geometry.artWidth}px ${geometry.artWidth * 2 * scale}px`,
+                                backgroundPosition: `${-geometry.cropLeft}px ${-slice.sourceTop * scale}px` }} />;
+                    }) : <img className="year-shelf-case-art" src={bookcaseImage(bookcase)} alt="" draggable="false" />}
+                    {rows.slice(0, rowCount).map((row, rowIndex) => (
                         <div key={rowIndex} data-shelf-row={row.index}
                             className={'year-shelf-case-row' + (drop && drop.key === null && drop.row === row.index ? ' is-drop' : '')}
                             style={{ top: row.top, left: row.left, width: row.width, height: row.height }}>
@@ -279,7 +314,15 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, label, emptyText, editi
                         </div>
                     ))}
                 </div>
-            ))}
+                );
+            })}
+            {drop?.preview && <div className={'year-shelf-drop-preview' + (drop.message ? ' is-invalid' : '')}
+                style={{ left: drop.preview.left, top: drop.preview.top, width: drop.preview.w, height: drop.preview.h }} aria-hidden="true">
+                <ShelfDecoration name={drop.preview.name} />
+            </div>}
+            {drop && <p className={'year-shelf-drop-status' + (drop.message ? ' is-invalid' : '')} role="status" aria-live="polite">
+                {drop.message || t('library.shelf.placement.fits')}
+            </p>}
             {items.length === 0 && <p className="year-shelf-empty">{emptyText}</p>}
         </div>
     );

@@ -17053,3 +17053,35 @@ a.post-tag:hover,
   outline: 2px dashed var(--rose-ink);
   outline-offset: -2px;
 }
+
+.year-shelf-color {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 340px;
+}
+
+.year-shelf-color label {
+  margin-top: 6px;
+  color: var(--text-2);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+}
+
+.year-shelf-color-track {
+  height: 14px;
+  box-sizing: border-box;
+  border: 2px solid #2D241F;
+  border-radius: 999px;
+}
+
+.year-shelf-color-hues {
+  background: linear-gradient(90deg, hsl(0 35% 55%), hsl(60 35% 55%), hsl(120 35% 55%), hsl(180 35% 55%), hsl(240 35% 55%), hsl(300 35% 55%), hsl(360 35% 55%));
+}
+
+.year-shelf-color input[type="range"] {
+  width: 100%;
+  min-height: 32px;
+  margin: 0;
+  accent-color: var(--rose-ink);
+}
