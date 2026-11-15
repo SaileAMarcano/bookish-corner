@@ -170,6 +170,7 @@
 
 .year-shelf-wall .year-shelf-cases {
   justify-content: center;
+  align-self: start;
 }
 
 .year-shelf-cases.is-editing .year-shelf-editable:not(.is-dragging) {

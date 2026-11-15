@@ -69,7 +69,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     );
 }
 
-function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, density = 'desktop', decorationWidth = width, label, emptyText, editing, selectedKey, onSelect, onMove, onCheckMove, onOpen }) {
+function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, density = 'desktop', minHeight = 0, decorationWidth = width, label, emptyText, editing, selectedKey, onSelect, onMove, onCheckMove, onOpen }) {
     const { t } = useTranslation();
     const stageRef = useRef(null);
     const dragRef = useRef(null);
@@ -250,7 +250,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
         );
     }
 
-    const options = { immersive, density, decorationWidth };
+    const options = { immersive, density, minHeight, decorationWidth };
     const groups = groupItems(items);
     const cases = layoutCases(groups, bookcase.model, width, options);
 

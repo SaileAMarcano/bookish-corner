@@ -9,8 +9,8 @@ import Notice from './Notice';
 import Icon from './Icon';
 import { apiFetch } from './api';
 import { groupReadBooks } from './libraryUtils';
-import { BASE_WIDTH, bookcaseOf, shelfDensity } from './bookcases';
-import { DECORATIONS, autoItems, canSitOnPile, decorationItem, moveBy, pinShelves, savedItems, toPayload } from './shelfUtils';
+import { BASE_WIDTH, bookcaseOf, caseGeometry, shelfDensity } from './bookcases';
+import { DECORATIONS, autoItems, canSitOnPile, decorationItem, groupItems, moveBy, pinShelves, savedItems, toPayload } from './shelfUtils';
 import { findDecorationSpace, placementIssue, prepareDecorations, proposedMove, shelfCapacity } from './decorationPlacement';
 
 function YearShelf({ books, booksStatus, readingGoal, username }) {
@@ -293,6 +293,8 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
             canOrganize: layout && milestones && !editing && (yearBooks.length > 0 || unlocked.length > 0),
         };
     });
+    const wallHeight = Math.max(...views.map(view =>
+        caseGeometry(view.bookcase.model, wallWidth, shelfOptions, groupItems(view.items)).height));
     const openView = views.find((view) => view.yearKey === openYear) || null;
 
     function organize(view) {
@@ -358,6 +360,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                     items={view.items}
                                     bookcase={view.bookcase}
                                     width={wallWidth}
+                                    minHeight={wallHeight}
                                     immersive
                                     density={density}
                                     decorationWidth={wallDecorationWidth}

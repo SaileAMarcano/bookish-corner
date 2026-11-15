@@ -86,7 +86,26 @@ function rowsOf(model, caseWidth, k) {
     }));
 }
 
-export function caseGeometry(model, width = BASE_WIDTH, { immersive = false, rowCount = 5, density = 'desktop' } = {}, groups = []) {
+export function caseGeometry(model, width = BASE_WIDTH, { immersive = false, rowCount = 5, density = 'desktop', minHeight = 0 } = {}, groups = []) {
+    if (immersive && minHeight > 0) {
+        const geometry = caseGeometry(model, width, { immersive, rowCount, density }, groups);
+        const growth = Math.max(0, minHeight - geometry.height) / geometry.rows.length;
+        if (growth === 0) return geometry;
+
+        // Equalize the wall display by extending only the empty back panels.
+        // Keep the artwork's carved ends, books and decorations at their scale.
+        const panels = new Set(geometry.rows.map(row => row.top));
+        let offset = 0;
+        const slices = geometry.slices.map(slice => {
+            const extra = panels.has(slice.top) ? growth : 0;
+            const next = { ...slice, top: slice.top + offset, height: slice.height + extra };
+            offset += extra;
+            return next;
+        });
+        return { ...geometry, height: minHeight, slices,
+            rows: geometry.rows.map((row, index) => ({ ...row, top: row.top + index * growth, height: row.height + growth })) };
+    }
+
     const expandedPiles = groups.some((group) => group.type === 'pile' && group.items.length > LEGACY_PILE_SIZE);
     if (!immersive && !expandedPiles) {
         return { width, height: width * 2, artWidth: width, cropLeft: 0, k: width / BASE_WIDTH, rows: rowsOf(model, width, width / BASE_WIDTH), slices: [] };
