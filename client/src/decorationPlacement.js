@@ -1,5 +1,5 @@
-import { BASE_WIDTH, caseGeometry, layoutCases } from './bookcases';
-import { groupItems, moveItem, moveToShelf, pinShelves } from './shelfUtils';
+import { BASE_WIDTH, caseGeometry, layoutCases } from './bookcases.js';
+import { groupItems, moveItem, moveToShelf, pinShelves } from './shelfUtils.js';
 
 const OPTIONS = { immersive: true };
 

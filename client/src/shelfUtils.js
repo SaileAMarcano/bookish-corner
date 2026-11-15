@@ -1,5 +1,5 @@
-import { SPINE_COLORS, genreLook } from './shelfSpines';
-import { layoutCases, PILE_SIZE } from './bookcases';
+import { SPINE_COLORS, genreLook } from './shelfSpines.js';
+import { layoutCases, PILE_SIZE } from './bookcases.js';
 
 export const DECORATIONS = [
     { name: 'candle', milestone: 'first-chapter' },
@@ -160,12 +160,25 @@ export function moveItem(items, fromKey, toKey, before) {
 
 export function moveBy(items, key, step) {
     const index = items.findIndex((item) => item.key === key);
-    const target = index + step;
+    const moving = items[index];
+    if (!moving || (step !== -1 && step !== 1)) return items;
+    const rest = items.filter(item => item.key !== key);
+    const target = step < 0 ? rest[index - 1] : rest[index];
+    // Lateral controls stay on the current shelf. A shelf change has its own
+    // control, so an arrow cannot accidentally overflow a neighbouring shelf.
+    if (!target || target.shelf !== moving.shelf) return items;
 
-    if (index < 0 || target < 0 || target >= items.length) return items;
-
-    const next = [...items];
-    [next[index], next[target]] = [next[target], { ...next[index], shelf: next[target].shelf }];
+    const pile = groupItems(rest).find(group => group.type === 'pile'
+        && (group.items.some(item => item.key === target.key) || group.top?.key === target.key));
+    const samePile = groupItems(items).some(group => group.type === 'pile'
+        && group.items.some(item => item.key === key)
+        && group.items.some(item => item.key === target.key));
+    const edge = pile && !samePile
+        ? (step < 0 ? pile.items[0] : pile.top || pile.items[pile.items.length - 1])
+        : target;
+    const targetIndex = rest.findIndex(item => item.key === edge.key);
+    const next = [...rest];
+    next.splice(targetIndex + (step > 0 ? 1 : 0), 0, moving);
     return next;
 }
 

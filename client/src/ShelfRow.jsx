@@ -9,8 +9,6 @@ import { groupItems } from './shelfUtils';
 import { BASE_WIDTH, bookcaseImage, caseGeometry, decorationSize, layoutCases } from './bookcases';
 import './ShelfRow.css';
 
-const HOLD_TIME = 280;
-const TOUCH_SLOP = 8;
 const MOUSE_SLOP = 6;
 const EDGE = 48;
 const EDGE_SPEED = 10;
@@ -94,7 +92,8 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
         let target = under?.closest('[data-shelf-key]');
         const rowNode = under?.closest('[data-shelf-row]');
 
-        if (state.key.startsWith('decoration-') && (!under || !stage.contains(under) || (!target && !rowNode))) {
+        // A release over the editor, frame or header is not a shelf move.
+        if (!under || !stage.contains(under) || (!target && !rowNode)) {
             if (dropRef.current) { dropRef.current = null; setDrop(null); }
             return;
         }
@@ -105,24 +104,11 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
             return;
         }
 
-        if (!target || !stage.contains(target)) {
-            let best = Infinity;
-            target = null;
-            for (const node of stage.querySelectorAll('[data-shelf-key]')) {
-                if (node.dataset.shelfKey === state.key) continue;
-                const box = node.getBoundingClientRect();
-                const dx = Math.max(box.left - state.x, 0, state.x - box.right);
-                const dy = Math.max(box.top - state.y, 0, state.y - box.bottom);
-                const distance = dx * dx + dy * dy * 4;
-                if (distance < best) {
-                    best = distance;
-                    target = node;
-                }
-            }
-            if (!target) return;
+        if (target.dataset.shelfKey === state.key) {
+            dropRef.current = null;
+            setDrop(null);
+            return;
         }
-
-        if (target.dataset.shelfKey === state.key) return;
 
         const box = target.getBoundingClientRect();
         const onto = Boolean(target.dataset.shelfFlat) && state.key.startsWith('decoration-');
@@ -158,6 +144,9 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
     }
 
     function handlePointerDown(event, key) {
+        // Touch keeps native scrolling. Mobile placement uses explicit controls
+        // instead of a long press that Safari can cancel as a pan gesture.
+        if (event.pointerType === 'touch') return;
         if (event.pointerType === 'mouse' && event.button !== 0) return;
         dragRef.current?.stop(false);
 
@@ -165,7 +154,6 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
         const state = {
             key,
             pointerId: event.pointerId,
-            touch: event.pointerType === 'touch',
             startX: event.clientX,
             startY: event.clientY,
             startScroll: scroller.scrollLeft,
@@ -173,7 +161,6 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
             x: event.clientX,
             y: event.clientY,
             active: false,
-            timer: null,
             frame: null,
         };
 
@@ -205,11 +192,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
             if (state.active) return;
 
             const distance = Math.hypot(state.x - state.startX, state.y - state.startY);
-            if (state.touch) {
-                if (distance > TOUCH_SLOP) state.stop(false);
-            } else if (distance > MOUSE_SLOP) {
-                start();
-            }
+            if (distance > MOUSE_SLOP) start();
         };
 
         const handleUp = (upEvent) => {
@@ -220,17 +203,11 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
             if (cancelEvent.pointerId === state.pointerId) state.stop(false);
         };
 
-        const blockScroll = (touchEvent) => {
-            if (state.active) touchEvent.preventDefault();
-        };
-
         state.stop = (apply) => {
-            clearTimeout(state.timer);
             cancelAnimationFrame(state.frame);
             window.removeEventListener('pointermove', handleMove);
             window.removeEventListener('pointerup', handleUp);
             window.removeEventListener('pointercancel', handleCancel);
-            window.removeEventListener('touchmove', blockScroll);
 
             const target = dropRef.current;
             dragRef.current = null;
@@ -247,12 +224,9 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
             }
         };
 
-        if (state.touch) state.timer = setTimeout(start, HOLD_TIME);
-
         window.addEventListener('pointermove', handleMove);
         window.addEventListener('pointerup', handleUp);
         window.addEventListener('pointercancel', handleCancel);
-        window.addEventListener('touchmove', blockScroll, { passive: false });
         dragRef.current = state;
     }
 

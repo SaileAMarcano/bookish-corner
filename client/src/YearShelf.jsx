@@ -11,7 +11,7 @@ import { apiFetch } from './api';
 import { groupReadBooks } from './libraryUtils';
 import { BASE_WIDTH, bookcaseOf, shelfDensity } from './bookcases';
 import { DECORATIONS, autoItems, canSitOnPile, decorationItem, moveBy, pinShelves, savedItems, toPayload } from './shelfUtils';
-import { findDecorationSpace, placementIssue, prepareDecorations, proposedMove } from './decorationPlacement';
+import { findDecorationSpace, placementIssue, prepareDecorations, proposedMove, shelfCapacity } from './decorationPlacement';
 
 function YearShelf({ books, booksStatus, readingGoal, username }) {
     const { t } = useTranslation();
@@ -24,6 +24,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     const [saving, setSaving] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [toolsOpen, setToolsOpen] = useState(false);
+    const [moveFeedback, setMoveFeedback] = useState('');
     const [openYear, setOpenYear] = useState(null);
     const [viewport, setViewport] = useState(() => window.innerWidth);
     const [zoomContentWidth, setZoomContentWidth] = useState(null);
@@ -160,7 +161,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     function changeItems(change) {
         const items = change(editing.items);
         const issue = placementIssue(items, editing.bookcase.model, shelfOptions);
-        if (issue) { setSaveError(issueMessage(issue)); return false; }
+        if (issue) { setMoveFeedback(''); setSaveError(issueMessage(issue)); return false; }
         setSaveError('');
         setEditing({ ...editing, items });
         return true;
@@ -178,9 +179,45 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     }
 
     function move(from, to, before, shelf) {
+        setMoveFeedback('');
         const next = proposedMove(editing.items, from, to, before, shelf);
         if (next.issue) { setSaveError(issueMessage(next.issue)); return; }
         changeItems(() => next.items);
+    }
+
+    function selectItem(key) {
+        setSaveError('');
+        setMoveFeedback('');
+        setEditing(current => ({ ...current, selectedKey: key }));
+        if (key) {
+            setToolsOpen(true);
+            requestAnimationFrame(() => {
+                zoomBodyRef.current?.querySelector('.year-shelf-editor')?.scrollTo({ top: 0 });
+            });
+            revealItem(key);
+        }
+    }
+
+    function moveSelectedToShelf(shelf) {
+        if (!Number.isInteger(shelf) || shelf < 0 || shelf >= shelfCapacity(editing.items)) return;
+        const next = proposedMove(editing.items, editing.selectedKey, null, false, shelf);
+        if (!changeItems(() => next.items)) return;
+        setMoveFeedback(t('library.shelf.movedToShelf', { number: shelf + 1 }));
+        revealItem(editing.selectedKey);
+    }
+
+    function revealItem(key) {
+        requestAnimationFrame(() => {
+            const body = zoomBodyRef.current;
+            const selected = body?.querySelector('[data-shelf-key="' + CSS.escape(key) + '"]');
+            const scroller = body?.closest('.year-shelf-zoom');
+            if (!selected || !scroller) return;
+            const box = selected.getBoundingClientRect();
+            const top = body.closest('.year-shelf-zoom-panel').querySelector('.year-shelf-zoom-head').getBoundingClientRect().bottom + 12;
+            const bottom = viewport <= 900 ? body.querySelector('.year-shelf-editor-drawer').getBoundingClientRect().top - 12 : window.innerHeight - 12;
+            const offset = box.top < top ? box.top - top : box.bottom > bottom ? Math.min(box.bottom - bottom, box.top - top) : 0;
+            scroller.scrollBy({ top: offset, behavior: 'auto' });
+        });
     }
 
     function changeSelected(values) {
@@ -263,6 +300,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
         setSaveError(view.prepared.unplaced?.length ? t('library.shelf.placement.unplaced')
             : view.prepared.relocated ? t('library.shelf.placement.relocated') : '');
         setToolsOpen(false);
+        setMoveFeedback('');
         setEditing({ yearKey: view.yearKey, items: pinShelves(view.items, view.bookcase.model, BASE_WIDTH, shelfOptions), bookcase: view.bookcase, selectedKey: null, density });
     }
 
@@ -364,7 +402,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                         emptyText={t('library.shelf.empty')}
                                         editing={openView.isEditing}
                                         selectedKey={openView.isEditing ? editing.selectedKey : null}
-                                        onSelect={(key) => { setEditing((current) => ({ ...current, selectedKey: key })); if (key) setToolsOpen(true); }}
+                                        onSelect={selectItem}
                                         onMove={move}
                                         onCheckMove={(from, to, before, shelf) => {
                                             const issue = checkMove(from, to, before, shelf);
@@ -378,13 +416,16 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                             <summary>{t('library.shelf.customize')}</summary>
                                             <ShelfEditor
                                                 item={openView.selectedIndex >= 0 ? openView.items[openView.selectedIndex] : null}
-                                                isFirst={openView.selectedIndex === 0}
-                                                isLast={openView.selectedIndex === openView.items.length - 1}
+                                                isFirst={openView.selectedIndex <= 0 || openView.items[openView.selectedIndex - 1]?.shelf !== openView.items[openView.selectedIndex]?.shelf}
+                                                isLast={openView.selectedIndex === openView.items.length - 1 || openView.items[openView.selectedIndex + 1]?.shelf !== openView.items[openView.selectedIndex]?.shelf}
+                                                shelfCount={shelfCapacity(openView.items)}
+                                                feedback={moveFeedback}
                                                 canTop={openView.selectedIndex >= 0 && canSitOnPile(openView.items, editing.selectedKey)}
                                                 tray={unlocked.filter((name) => !openView.items.some((item) => item.name === name))}
                                                 saving={saving}
-                                                error=""
-                                                onMoveBy={(step) => changeItems((list) => moveBy(list, editing.selectedKey, step))}
+                                                error={saveError}
+                                                onMoveBy={(step) => { setMoveFeedback(''); changeItems(list => moveBy(list, editing.selectedKey, step)); }}
+                                                onShelf={moveSelectedToShelf}
                                                 onPose={(pose) => changeSelected({ pose })}
                                                 onTone={(tone) => changeSelected({ tone, color: null })}
                                                 onColor={(color) => changeSelected({ color })}

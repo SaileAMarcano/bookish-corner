@@ -61,6 +61,40 @@
   display: none;
 }
 
+.year-shelf-movement select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--rose);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+}
+
+.year-shelf-movement label {
+  font-size: 13px;
+  color: var(--text-2);
+}
+
+.year-shelf-editor-row.year-shelf-move-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.year-shelf-zoom .year-shelf-move-buttons .year-shelf-button {
+  min-height: 44px;
+  padding: 8px;
+}
+
+.year-shelf-move-feedback {
+  margin: 0;
+  font-size: 13px;
+  color: var(--ink);
+}
+
 .year-shelf-front:focus-visible {
   outline: 2px solid var(--rose-ink);
   outline-offset: -3px;

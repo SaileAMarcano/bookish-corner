@@ -6,7 +6,7 @@ import { SpineMotif } from './SpineFace';
 import { SPINE_COLORS, SPINE_LIGHTNESS, SPINE_MOTIFS, spineColor, spineSliders } from './shelfSpines';
 import { BOOKCASES, BOOKCASE_MODELS, bookcaseImage } from './bookcases';
 
-function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMoveBy, onPose, onTone, onColor, onFace, onMotif, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray, saving, error, onMoveBy, onShelf, onPose, onTone, onColor, onFace, onMotif, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
     const sliders = item?.type === 'book'
@@ -18,34 +18,41 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
         <div className="year-shelf-editor">
             <p className="year-shelf-editor-hint">{t('library.shelf.editHint')}</p>
 
-            <fieldset className="year-shelf-editor-group">
-                <legend>{t('library.shelf.bookcase')}</legend>
-                <div className="year-shelf-case-options">
-                    {BOOKCASE_MODELS.map((model) => {
-                        const color = BOOKCASES[model].colors[colorIndex];
-                        return (
-                            <button key={model} type="button" className="year-shelf-case-option"
-                                aria-pressed={bookcase.model === model} onClick={() => onBookcase({ model, color })}>
-                                <img src={bookcaseImage({ model, color })} alt="" />
-                                <span>{t('library.shelf.bookcases.' + model)}</span>
-                            </button>
-                        );
-                    })}
-                </div>
-                <div className="year-shelf-case-options">
-                    {BOOKCASES[bookcase.model].colors.map((color) => (
-                        <button key={color} type="button" className="year-shelf-case-option"
-                            aria-pressed={bookcase.color === color} onClick={() => onBookcase({ model: bookcase.model, color })}>
-                            <img src={bookcaseImage({ model: bookcase.model, color })} alt="" />
-                            <span>{t('library.shelf.caseColors.' + bookcase.model + '-' + color)}</span>
-                        </button>
-                    ))}
-                </div>
-            </fieldset>
-
             {item ? (
                 <div className="year-shelf-editor-item">
                     <strong className="display">{name}</strong>
+
+                    <fieldset className="year-shelf-editor-group year-shelf-movement">
+                        <legend>{t('library.shelf.position')}</legend>
+                        <label htmlFor="shelf-destination">{t('library.shelf.destination')}</label>
+                        <select id="shelf-destination" value={item.shelf ?? 0}
+                            onChange={event => onShelf(Number(event.target.value))}>
+                            {Array.from({ length: shelfCount }, (_, shelf) => (
+                                <option key={shelf} value={shelf}>{t('library.shelf.shelfNumber', { number: shelf + 1 })}</option>
+                            ))}
+                        </select>
+                        <div className="year-shelf-editor-row year-shelf-move-buttons">
+                            <button type="button" className="year-shelf-button" onClick={() => onShelf(item.shelf - 1)} disabled={!item.shelf}>
+                                {t('library.shelf.moveUp')}
+                            </button>
+                            <button type="button" className="year-shelf-button" onClick={() => onShelf(item.shelf + 1)} disabled={item.shelf >= shelfCount - 1}>
+                                {t('library.shelf.moveDown')}
+                            </button>
+                            <button type="button" className="year-shelf-button" onClick={() => onMoveBy(-1)} disabled={isFirst}>
+                                {t('library.shelf.moveLeft')}
+                            </button>
+                            <button type="button" className="year-shelf-button" onClick={() => onMoveBy(1)} disabled={isLast}>
+                                {t('library.shelf.moveRight')}
+                            </button>
+                        </div>
+                        {feedback && <p className="year-shelf-move-feedback" role="status">{feedback}</p>}
+                        {error && <Notice message={error} />}
+                        {item.type === 'decoration' && (
+                            <button type="button" className="year-shelf-button" onClick={onRemove}>
+                                {t('library.shelf.removeDecoration')}
+                            </button>
+                        )}
+                    </fieldset>
 
                     <fieldset className="year-shelf-editor-group">
                         <legend>{t('library.shelf.pose')}</legend>
@@ -120,27 +127,35 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                             </div>
                         </fieldset>
                     )}
-
-                    <fieldset className="year-shelf-editor-group">
-                        <legend>{t('library.shelf.position')}</legend>
-                        <div className="year-shelf-editor-row">
-                            <button type="button" className="year-shelf-button" onClick={() => onMoveBy(-1)} disabled={isFirst}>
-                                {t('library.shelf.moveLeft')}
-                            </button>
-                            <button type="button" className="year-shelf-button" onClick={() => onMoveBy(1)} disabled={isLast}>
-                                {t('library.shelf.moveRight')}
-                            </button>
-                            {item.type === 'decoration' && (
-                                <button type="button" className="year-shelf-button" onClick={onRemove}>
-                                    {t('library.shelf.removeDecoration')}
-                                </button>
-                            )}
-                        </div>
-                    </fieldset>
                 </div>
             ) : (
                 <p className="year-shelf-editor-hint">{t('library.shelf.selectHint')}</p>
             )}
+
+            <fieldset className="year-shelf-editor-group">
+                <legend>{t('library.shelf.bookcase')}</legend>
+                <div className="year-shelf-case-options">
+                    {BOOKCASE_MODELS.map((model) => {
+                        const color = BOOKCASES[model].colors[colorIndex];
+                        return (
+                            <button key={model} type="button" className="year-shelf-case-option"
+                                aria-pressed={bookcase.model === model} onClick={() => onBookcase({ model, color })}>
+                                <img src={bookcaseImage({ model, color })} alt="" />
+                                <span>{t('library.shelf.bookcases.' + model)}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+                <div className="year-shelf-case-options">
+                    {BOOKCASES[bookcase.model].colors.map((color) => (
+                        <button key={color} type="button" className="year-shelf-case-option"
+                            aria-pressed={bookcase.color === color} onClick={() => onBookcase({ model: bookcase.model, color })}>
+                            <img src={bookcaseImage({ model: bookcase.model, color })} alt="" />
+                            <span>{t('library.shelf.caseColors.' + bookcase.model + '-' + color)}</span>
+                        </button>
+                    ))}
+                </div>
+            </fieldset>
 
             {tray.length > 0 && (
                 <div className="year-shelf-tray">
@@ -158,7 +173,7 @@ function ShelfEditor({ item, isFirst, isLast, canTop, tray, saving, error, onMov
                 </div>
             )}
 
-            {error && <Notice message={error} />}
+            {!item && error && <Notice message={error} />}
 
             <div className="year-shelf-editor-row year-shelf-editor-actions">
                 <button type="button" className="year-shelf-button" onClick={onCancel} disabled={saving}>

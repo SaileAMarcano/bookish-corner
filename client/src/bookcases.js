@@ -98,12 +98,15 @@ export function caseGeometry(model, width = BASE_WIDTH, { immersive = false, row
     const cropLeft = immersive ? (frame[0] / 100) * artWidth : 0;
     const k = artWidth / BASE_WIDTH;
     const originalRows = rowsOf(model, artWidth, k);
+    const desktopBuckets = immersive && density === 'desktop'
+        ? distributeGroups(groups, originalRows[0].width, k, bookDimensions(originalRows[0].width, k, density))
+        : null;
     const slices = [];
     let sourceCursor = 0;
     let cursor = 0;
 
     // Keep carved ends and shelf boards at their original proportions. Only
-    // the quiet back panels and straight posts grow to make room for books.
+    // the quiet back panels and straight posts resize around their contents.
     function slice(sourceTop, sourceHeight, height = sourceHeight) {
         if (sourceHeight <= 0) return;
         slices.push({ sourceTop, sourceHeight, top: cursor, height });
@@ -114,10 +117,14 @@ export function caseGeometry(model, width = BASE_WIDTH, { immersive = false, row
         const [top, bottom] = sourceRows[index].map((value) => (value / 100) * artHeight);
         slice(sourceCursor, top - sourceCursor);
         const size = bookDimensions(row.width, k, density);
-        const neededHeight = immersive
-            ? Math.max(size.h + 8 * k, PILE_SIZE * size.w + 6 * k, 96 * k)
-            : PILE_SIZE * Math.round(12 * k) + row.height * 0.5 + 6 * k;
-        const height = Math.max(bottom - top, neededHeight);
+        const fullHeight = Math.max(size.h + 8 * k, PILE_SIZE * size.w + 6 * k, 96 * k);
+        const rowGroups = desktopBuckets?.filter((_, shelf) => shelf % originalRows.length === index).flatMap(bucket => bucket.groups);
+        const neededHeight = desktopBuckets
+            ? Math.max(size.h + 8 * k, ...rowGroups.map(group => group.type === 'pile' && group.top
+                ? Math.min(group.h + group.top.h + 6 * k, fullHeight)
+                : group.h + 6 * k))
+            : immersive ? fullHeight : PILE_SIZE * Math.round(12 * k) + row.height * 0.5 + 6 * k;
+        const height = desktopBuckets ? neededHeight : Math.max(bottom - top, neededHeight);
         const next = { ...row, top: cursor, left: row.left - cropLeft, height: height + 3 * k };
         slice(top, bottom - top, height);
         sourceCursor = bottom;
@@ -153,14 +160,7 @@ function measure(group, k, bookSize) {
     return { ...group, ...bookSize, w, span: w };
 }
 
-function spanOf(group) {
-    return group.span ?? group.w;
-}
-
-export function layoutCases(groups, model, caseWidth = BASE_WIDTH, options = {}) {
-    const { density = 'desktop' } = options;
-    const { k, rows } = caseGeometry(model, caseWidth, options, groups);
-    const bookSize = bookDimensions(rows[0].width, k, density);
+function distributeGroups(groups, rowWidth, k, bookSize) {
     const gap = 2 * k;
     const buckets = [];
     let cursor = 0;
@@ -170,13 +170,11 @@ export function layoutCases(groups, model, caseWidth = BASE_WIDTH, options = {})
 
         for (;;) {
             while (buckets.length <= index) buckets.push({ groups: [], used: 0 });
-            const rowIndex = index % rows.length;
-            const row = rows[rowIndex];
             const shaped = measure(group, k, bookSize);
             const bucket = buckets[index];
             const needed = spanOf(shaped) + (bucket.used > 0 ? gap : 0);
 
-            if (bucket.used === 0 || bucket.used + needed <= row.width + 0.01) {
+            if (bucket.used === 0 || bucket.used + needed <= rowWidth + 0.01) {
                 bucket.groups.push(shaped);
                 bucket.used += needed;
                 break;
@@ -186,6 +184,19 @@ export function layoutCases(groups, model, caseWidth = BASE_WIDTH, options = {})
 
         cursor = index;
     }
+
+    return buckets;
+}
+
+function spanOf(group) {
+    return group.span ?? group.w;
+}
+
+export function layoutCases(groups, model, caseWidth = BASE_WIDTH, options = {}) {
+    const { density = 'desktop' } = options;
+    const { k, rows } = caseGeometry(model, caseWidth, options, groups);
+    const bookSize = bookDimensions(rows[0].width, k, density);
+    const buckets = distributeGroups(groups, rows[0].width, k, bookSize);
 
     const caseCount = Math.max(1, Math.ceil(buckets.length / rows.length));
     return Array.from({ length: caseCount }, (_, caseIndex) =>

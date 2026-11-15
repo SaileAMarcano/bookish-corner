@@ -32,6 +32,15 @@
 }
 
 @media (max-width: 900px) {
+  .year-shelf-zoom {
+    scroll-padding-top: 80px;
+    scroll-padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+
+  .year-shelf-zoom:has(.year-shelf-editor-drawer[open]) {
+    scroll-padding-bottom: 58dvh;
+  }
+
   .year-shelf-zoom-body > .year-shelf-editor-drawer {
     position: fixed;
     inset: auto 0 0;
