@@ -433,7 +433,6 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                                 onTone={(tone) => changeSelected({ tone, color: null })}
                                                 onColor={(color) => changeSelected({ color })}
                                                 onFace={(face) => changeSelected({ face })}
-                                                onMotif={(motif) => changeSelected({ motif })}
                                                 bookcase={openView.bookcase}
                                                 onBookcase={(next) => {
                                                     const issue = placementIssue(editing.items, next.model, shelfOptions);

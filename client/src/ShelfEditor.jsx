@@ -2,11 +2,10 @@ import { useTranslation } from 'react-i18next';
 import Notice from './Notice';
 import ShelfDecoration from './ShelfDecoration';
 import { SHELF_POSES, SPINE_FACES } from './shelfUtils';
-import { SpineMotif } from './SpineFace';
-import { SPINE_COLORS, SPINE_LIGHTNESS, SPINE_MOTIFS, spineColor, spineSliders } from './shelfSpines';
+import { SPINE_COLORS, SPINE_LIGHTNESS, spineColor, spineSliders } from './shelfSpines';
 import { BOOKCASES, BOOKCASE_MODELS, bookcaseImage } from './bookcases';
 
-function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray, saving, error, onMoveBy, onShelf, onPose, onTone, onColor, onFace, onMotif, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray, saving, error, onMoveBy, onShelf, onPose, onTone, onColor, onFace, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
     const sliders = item?.type === 'book'
@@ -108,23 +107,6 @@ function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray
                                         onChange={(event) => onColor(spineColor(sliders.hue, Number(event.target.value)))} />
                                 </div>
                             )}
-                        </fieldset>
-                    )}
-
-                    {item.type === 'book' && item.pose !== 'front' && (
-                        <fieldset className="year-shelf-editor-group">
-                            <legend>{t('library.shelf.motif')}</legend>
-                            <div className="year-shelf-swatches">
-                                {SPINE_MOTIFS.map((motif) => (
-                                    <button key={motif} type="button" className="year-shelf-swatch year-shelf-motif"
-                                        aria-pressed={item.motif === motif}
-                                        aria-label={t('library.shelf.motifs.' + motif)}
-                                        title={t('library.shelf.motifs.' + motif)}
-                                        onClick={() => onMotif(motif)}>
-                                        <SpineMotif motif={motif} />
-                                    </button>
-                                ))}
-                            </div>
                         </fieldset>
                     )}
                 </div>
