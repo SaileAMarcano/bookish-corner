@@ -8,6 +8,13 @@ const PUSH_GROUPS = {
     books: ['book_added'],
 };
 
+const GROUP_ICONS = {
+    follows: 'bookmark-simple',
+    comments: 'chat-circle',
+    likes: 'heart',
+    books: 'book-bookmark',
+};
+
 const GONE = new Set([404, 410]);
 let library = null;
 
@@ -27,6 +34,11 @@ function webPush() {
 
 function groupOf(type) {
     return Object.keys(PUSH_GROUPS).find((group) => PUSH_GROUPS[group].includes(type));
+}
+
+function iconsOf(group) {
+    const name = GROUP_ICONS[group] || 'book-bookmark';
+    return { icon: `/push/${name}.png`, badge: `/push/badge-${name}.png` };
 }
 
 function linkOf(row) {
@@ -50,6 +62,7 @@ function payloadOf(row) {
         url: linkOf(row),
         tag: `${row.type}-${row.postId || row.listId || row.workId || row.actorUsername || row.id}`,
         notificationId: row.id,
+        ...iconsOf(groupOf(row.type)),
     };
 }
 
@@ -112,6 +125,7 @@ async function sendTestPush(userId) {
         body: pushText(subscription.language, 'testBody'),
         url: '/notifications',
         tag: 'test',
+        ...iconsOf('books'),
     })));
     return subscriptions.length;
 }

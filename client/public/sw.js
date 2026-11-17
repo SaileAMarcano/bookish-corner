@@ -12,8 +12,8 @@ self.addEventListener('push', (event) => {
 
     event.waitUntil(self.registration.showNotification(data.title || 'A Library of Us', {
         body: data.body || '',
-        icon: '/icon-192.png',
-        badge: '/badge-96.png',
+        icon: data.icon || '/icon-192.png',
+        badge: data.badge || '/badge-96.png',
         tag: data.tag,
         renotify: Boolean(data.tag),
         data: { url: data.url || '/notifications', id: data.notificationId || null },
