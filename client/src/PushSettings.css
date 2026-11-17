@@ -1,0 +1,44 @@
+.push-install-steps {
+    margin: 0;
+    padding: 14px 16px 14px 36px;
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--ink);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.push-install-steps li + li {
+    margin-top: 6px;
+}
+
+.push-types {
+    display: grid;
+    gap: 14px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.push-types li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.push-type-label {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.push-status {
+    margin: 14px 0 0;
+    color: var(--text-2);
+    font-size: 13px;
+}
+
+.settings-switch:disabled {
+    opacity: .5;
+    cursor: default;
+}

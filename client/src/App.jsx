@@ -43,6 +43,7 @@ import MilestoneCelebration from './MilestoneCelebration';
 import Tour from './Tour';
 import FirstBook from './FirstBook';
 import { apiFetch } from './api';
+import { forgetDevice } from './push';
 import { getAvatarSrc } from './utils';
 import Icon from './Icon';
 import Notice from './Notice';
@@ -271,7 +272,8 @@ function App() {
   };
 
   const handleLogout = () => {
-    apiFetch('/api/logout', { method: 'POST' })
+    forgetDevice()
+      .then(() => apiFetch('/api/logout', { method: 'POST' }))
       .then(clearSession)
       .catch((error) => setToast(error.message));
   };

@@ -3,11 +3,13 @@ import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from './LanguageSwitcher';
 import Icon from './Icon';
 import DeleteAccount from './DeleteAccount';
+import PushSettings from './PushSettings';
 import { getAvatarSrc } from './utils';
 
 const SECTIONS =[
     { id: 'profile', icon: 'about' },
     { id: 'appearance', icon: 'sparkle' },
+    { id: 'notifications', icon: 'bell' },
     { id: 'accessibility', icon: 'eye' },
     { id: 'account', icon: 'lock' },
 ];
@@ -134,6 +136,10 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                         <SettingRow label={t('settings.appearance.language')} hint={t('settings.appearance.languageHint')}>
                             <LanguageSwitcher onChange={onLanguageChange} />
                         </SettingRow>
+                    </SettingsSection>
+
+                    <SettingsSection id="notifications" icon="bell">
+                        <PushSettings />
                     </SettingsSection>
 
                     <SettingsSection id="accessibility" icon="eye">

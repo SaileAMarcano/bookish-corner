@@ -5,6 +5,9 @@ import './index.css'
 import './i18n'
 import App from './App.jsx'
 import ErrorBoundary from './ErrorBoundary.jsx'
+import { registerServiceWorker } from './push'
+
+registerServiceWorker()
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

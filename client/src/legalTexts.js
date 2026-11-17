@@ -5,8 +5,8 @@ export const LEGAL_PAGES = {
 };
 
 export const LEGAL_UPDATED = {
-    en: 'November 12, 2026',
-    es: '12 de noviembre de 2026',
+    en: 'November 17, 2026',
+    es: '17 de noviembre de 2026',
 };
 
 export const LEGAL_TEXTS = {
@@ -37,6 +37,7 @@ A Library of Us is a platform to track your reading and share it with other read
 - **Your profile (whatever you choose to add):** display name, photo, bio, "about me", favorite quote, location, Instagram or TikTok links, reading goal and reader type.
 - **Your activity:** the books in your library and their status, progress, dates, ratings, reviews, posts and images, comments, likes, lists, tags, who you follow and who follows you, and achievements.
 - **Your preferences:** language, light or dark mode, theme and accessibility options.
+- **Phone and computer notifications (only if you turn them on):** a technical address for each device where you turn them on, and which types of alerts you want. You can turn them off anytime in Settings.
 - **What you send us:** support messages (with the page you wrote from and your browser type, so we can understand the problem) and reports.
 - **Beta application:** name, email, age, social media (optional), language, favorite genres, how you track your reading, how you found us and your sentence.
 - **Membership:** payments are processed by our payment platform. We **never see or store your card**: we only know whether your membership is active and until when.
@@ -63,6 +64,7 @@ We use providers that store or process data for us, only so the service works:
 - **Render:** the server that runs the app.
 - **Cloudflare:** network and domain security.
 - **Resend:** account emails.
+- **Your browser's notification service** (Google, Apple, Mozilla or Microsoft): delivers the notifications you turn on, with the text of the alert.
 - **Web3Forms:** an email to the team when a beta application arrives.
 - **Payment platform:** membership payments, as merchant of record (it handles payment, taxes and invoices).
 - **Spotify:** if a post has music, the player is loaded by Spotify (see section 6).
@@ -189,6 +191,7 @@ A Library of Us es una plataforma para registrar lecturas y compartir con otras 
 - **Tu perfil (lo que tú decidas añadir):** nombre visible, foto, biografía, "sobre mí", cita favorita, ubicación, enlaces a Instagram o TikTok, meta de lectura y forma de leer.
 - **Tu actividad:** libros de tu biblioteca y su estado, progreso, fechas, calificaciones, reseñas, publicaciones e imágenes, comentarios, me gusta, listas, etiquetas, a quién sigues y quién te sigue, y logros.
 - **Tus preferencias:** idioma, modo claro u oscuro, tema y opciones de accesibilidad.
+- **Notificaciones en el celular o la computadora (solo si las activas):** una dirección técnica por cada dispositivo donde las activas y qué tipos de avisos quieres. Puedes apagarlas cuando quieras en Configuración.
 - **Lo que nos envías:** mensajes de soporte (con la página desde donde escribes y el tipo de navegador, para entender el problema) y reportes.
 - **Postulación a la beta:** nombre, correo, edad, red social (opcional), idioma, géneros favoritos, cómo llevas tus lecturas, cómo nos conociste y tu frase.
 - **Membresía:** los pagos los procesa nuestra plataforma de pagos. Nosotros **no vemos ni guardamos tu tarjeta**: solo sabemos si tu membresía está activa y hasta cuándo.
@@ -215,6 +218,7 @@ Usamos proveedores que guardan o procesan datos por nosotros y solo para que el 
 - **Render:** el servidor donde corre la app.
 - **Cloudflare:** red y seguridad del dominio.
 - **Resend:** envío de los correos de la cuenta.
+- **El servicio de notificaciones de tu navegador** (Google, Apple, Mozilla o Microsoft): entrega las notificaciones que actives, con el texto del aviso.
 - **Web3Forms:** aviso por correo al equipo cuando llega una postulación a la beta.
 - **Plataforma de pagos:** cobro de la membresía, como vendedor oficial (gestiona el pago, los impuestos y las facturas).
 - **Spotify:** si una publicación tiene música, el reproductor lo carga Spotify (ver punto 6).
