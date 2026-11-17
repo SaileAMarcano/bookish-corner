@@ -57,7 +57,7 @@
 .bookshelf-selected-cover { position: relative; flex: 0 0 80px; width: 80px; height: 126px; overflow: hidden; border-radius: 0 5px 5px 0; box-shadow: 0 1px 2px rgb(45 36 31 / 22%), 4px 8px 16px rgb(45 36 31 / 28%), 10px 18px 30px rgb(45 36 31 / 14%); }
 .bookshelf-selected-cover::after { position: absolute; inset: 0; border-radius: inherit; background: linear-gradient(90deg, rgb(0 0 0 / 22%), rgb(255 255 255 / 12%) 5%, transparent 10%); content: ''; pointer-events: none; }
 :root[data-theme="dark"] .bookshelf-selected-cover { box-shadow: 0 1px 2px rgb(0 0 0 / 45%), 4px 8px 16px rgb(0 0 0 / 50%), 10px 18px 30px rgb(0 0 0 / 30%); }
-.bookshelf-selected-cover > * { display: block; width: 100%; height: 100%; box-sizing: border-box; object-fit: contain; }
+.bookshelf-selected-cover > * { display: block; width: 100%; height: 100%; box-sizing: border-box; object-fit: cover; }
 .bookshelf-selected-cover > .cover-fabric { display: flex; justify-content: space-between; padding: 10px 8px; background: var(--selected-fill); color: var(--selected-ink); }
 .bookshelf-selected-cover .cover-fabric::before, .bookshelf-selected-cover .cover-fabric-star { display: none; }
 .bookshelf-selected-cover .cover-fabric-title { font-size: 15px; font-weight: 500; }
@@ -102,7 +102,7 @@
 .year-shelf-cases.is-unified .year-shelf-case .year-shelf-spine .spine-title { font-size: calc(var(--h) * .10); font-weight: 500; padding: 0; line-height: 1.1; text-shadow: none; max-height: 100%; }
 .year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-title { font-size: calc(var(--w) * .08); font-weight: 500; padding: 0; line-height: 1.1; text-shadow: none; }
 .year-shelf-cases.is-unified .year-shelf-case .spine-title { font-optical-sizing: none; font-variation-settings: 'opsz' 20; }
-.year-shelf-cases.is-unified .year-shelf-case .year-shelf-front-art { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-front-art { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .year-shelf-cases.is-unified .year-shelf-front-art.cover-fabric { gap: 4px; justify-content: space-between; background: var(--spine-fill); color: var(--spine-ink); padding: 8%; }
 .year-shelf-cases.is-unified .year-shelf-front-art.cover-fabric::before, .year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-star { display: none; }
 .year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-title { font-family: 'Fraunces', serif; font-size: calc(var(--h) * .12); line-height: 1.1; font-weight: 500; overflow-wrap: normal; }
