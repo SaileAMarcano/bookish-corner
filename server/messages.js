@@ -114,6 +114,9 @@ const MESSAGES = {
         resetLinkInvalid: 'This link is not valid or has expired. Ask for a new one.',
         termsRequired: 'Please accept the terms and the privacy policy to create your account.',
         googleSignupExpired: 'Your Google sign-up expired. Please try again.',
+        pushInvalid: 'This device could not be set up for notifications. Try again.',
+        pushTypesInvalid: 'Choose valid notification types.',
+        pushUnavailable: 'Phone notifications are not available right now.',
     },
     es: {
         loginRequired: 'Tienes que iniciar sesión',
@@ -228,8 +231,43 @@ const MESSAGES = {
         resetLinkInvalid: 'Este enlace no es válido o ya caducó. Pide uno nuevo.',
         termsRequired: 'Acepta los términos y la política de privacidad para crear tu cuenta.',
         googleSignupExpired: 'El registro con Google caducó. Vuelve a intentarlo.',
+        pushInvalid: 'No pudimos preparar este dispositivo para las notificaciones. Vuelve a intentarlo.',
+        pushTypesInvalid: 'Elige tipos de notificación válidos.',
+        pushUnavailable: 'Las notificaciones en el celular no están disponibles en este momento.',
     },
 };
+
+const PUSH_TEXT = {
+    en: {
+        post_like: 'liked your post.',
+        post_comment: 'commented on your post.',
+        review_like: 'liked your review of “{{title}}”.',
+        review_comment: 'commented on your review of “{{title}}”.',
+        follow: 'started following you.',
+        book_added: 'The book you asked for, “{{title}}”, is now in the library.',
+        list_like: 'liked your list “{{title}}”.',
+        list_comment: 'commented on your list “{{title}}”.',
+        testTitle: 'Notifications are on',
+        testBody: 'This is how A Library of Us will let you know when someone follows you or comments.',
+    },
+    es: {
+        post_like: 'le dio me gusta a tu publicación.',
+        post_comment: 'comentó tu publicación.',
+        review_like: 'le dio me gusta a tu reseña de «{{title}}».',
+        review_comment: 'comentó tu reseña de «{{title}}».',
+        follow: 'empezó a seguirte.',
+        book_added: 'El libro que pediste, «{{title}}», ya está en la biblioteca.',
+        list_like: 'le dio me gusta a tu lista «{{title}}».',
+        list_comment: 'comentó tu lista «{{title}}».',
+        testTitle: 'Notificaciones activadas',
+        testBody: 'Así te avisará A Library of Us cuando alguien te siga o te comente.',
+    },
+};
+
+function pushText(language, key, values = {}) {
+    const text = (PUSH_TEXT[language] || PUSH_TEXT.en)[key] || PUSH_TEXT.en[key] || '';
+    return text.replace(/\{\{(\w+)\}\}/g, (match, name) => values[name] ?? '');
+}
 
 function languageOf(req) {
     const header = (req.get('Accept-Language') || '').toLowerCase();
@@ -240,4 +278,4 @@ function msg(req, key) {
     return MESSAGES[languageOf(req)][key] || MESSAGES.en[key] || key;
 }
 
-module.exports = { LANGUAGES, languageOf, msg };
+module.exports = { LANGUAGES, languageOf, msg, pushText };

@@ -6,6 +6,7 @@ const { LANGUAGES, languageOf, msg } = require('./messages');
 const { syncMilestones } = require('./milestones');
 const { resolveReadingDates } = require('./readingDates');
 const { sendResetEmail } = require('./mailer');
+const { PUSH_GROUPS, pushEnabled, sendPushes, sendTestPush } = require('./push');
 const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -152,9 +153,10 @@ async function logAction(req, action, target, detail = null) {
 async function notify(userId, actorId, type, refs = {}) {
     if (userId === actorId) return;
 
-    await query(`
+    const [created] = await query(`
         INSERT INTO notifications (user_id, actor_id, type, post_id, post_comment_id, user_book_id, comment_id, work_id, list_id, list_comment_id)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        RETURNING id
     `, [
         userId,
         actorId,
@@ -167,6 +169,7 @@ async function notify(userId, actorId, type, refs = {}) {
         refs.listId ?? null,
         refs.listCommentId ?? null,
     ]);
+    sendPushes([created.id]);
 }
 
 async function unnotify(userId, actorId, type, refs = {}) {
@@ -3307,6 +3310,68 @@ app.post('/api/notifications/read-all', requireAuth, async (req, res) => {
     res.json({ message: 'Read' });
 });
 
+const PUSH_TYPES = Object.keys(PUSH_GROUPS);
+
+function validSubscription(body) {
+    const endpoint = body?.endpoint;
+    const p256dh = body?.keys?.p256dh;
+    const auth = body?.keys?.auth;
+    if (typeof endpoint !== 'string' || endpoint.length > 1000 || !endpoint.startsWith('https://')) return null;
+    if (typeof p256dh !== 'string' || typeof auth !== 'string' || p256dh.length > 200 || auth.length > 100) return null;
+    return { endpoint, p256dh, auth };
+}
+
+app.get('/api/push', requireAuth, async (req, res) => {
+    const endpoint = typeof req.query.endpoint === 'string' ? req.query.endpoint : '';
+    const [user] = await query(`
+        SELECT push_types, EXISTS (SELECT 1 FROM push_subscriptions WHERE user_id = $1 AND endpoint = $2) AS this_device
+        FROM users WHERE id = $1
+    `, [req.session.user.id, endpoint]);
+    res.json({
+        enabled: pushEnabled(),
+        publicKey: process.env.VAPID_PUBLIC_KEY || null,
+        types: user.pushTypes,
+        groups: PUSH_TYPES,
+        thisDevice: user.thisDevice,
+    });
+});
+
+app.post('/api/push/subscriptions', requireAuth, async (req, res) => {
+    if (!pushEnabled()) return res.status(503).json({ error: msg(req, 'pushUnavailable') });
+    const subscription = validSubscription(req.body);
+    if (!subscription) return res.status(400).json({ error: msg(req, 'pushInvalid') });
+
+    await query(`
+        INSERT INTO push_subscriptions (user_id, endpoint, p256dh, auth)
+        VALUES ($1, $2, $3, $4)
+        ON CONFLICT (endpoint) DO UPDATE SET user_id = EXCLUDED.user_id, p256dh = EXCLUDED.p256dh, auth = EXCLUDED.auth
+    `, [req.session.user.id, subscription.endpoint, subscription.p256dh, subscription.auth]);
+    res.status(201).json({ message: 'Subscribed' });
+});
+
+app.delete('/api/push/subscriptions', requireAuth, async (req, res) => {
+    const endpoint = req.body?.endpoint;
+    if (typeof endpoint !== 'string') return res.status(400).json({ error: msg(req, 'pushInvalid') });
+    await query('DELETE FROM push_subscriptions WHERE user_id = $1 AND endpoint = $2', [req.session.user.id, endpoint]);
+    res.json({ message: 'Unsubscribed' });
+});
+
+app.put('/api/push/types', requireAuth, async (req, res) => {
+    const types = req.body?.types;
+    if (!Array.isArray(types) || types.some((type) => !PUSH_TYPES.includes(type))) {
+        return res.status(400).json({ error: msg(req, 'pushTypesInvalid') });
+    }
+    const unique = PUSH_TYPES.filter((type) => types.includes(type));
+    await query('UPDATE users SET push_types = $1 WHERE id = $2', [unique, req.session.user.id]);
+    res.json({ types: unique });
+});
+
+app.post('/api/push/test', requireAuth, async (req, res) => {
+    if (!pushEnabled()) return res.status(503).json({ error: msg(req, 'pushUnavailable') });
+    const sent = await sendTestPush(req.session.user.id);
+    res.json({ sent });
+});
+
 app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
     const id = Number(req.params.id);
     if (!Number.isInteger(id)) {
@@ -3807,10 +3872,12 @@ async function markRequestAdded(requestId, workId, userId) {
 
     if (!request) return;
 
-    await query(`
+    const created = await query(`
         INSERT INTO notifications (user_id, type, work_id)
         SELECT user_id, 'book_added', $1 FROM book_request_votes WHERE request_id = $2
+        RETURNING id
     `, [workId, id]);
+    sendPushes(created.map((row) => row.id));
 }
 
 app.delete('/api/editor/books/:id', requireStaff('editor'), async (req, res) => {
