@@ -22,12 +22,12 @@ for (const {model, options} of profiles) {
     });
 
     test(`${label}: lateral movement crosses a whole decorated pile, preserving its support`, () => {
-        const items = [book(1, 'flat'), decorationItem('tea', 'flat', 0), book(2), book(3)];
+        const items = [book(1, 'flat'), decorationItem('candle', 'flat', 0), book(2), book(3)];
         const moved = moveBy(items, 'book-2', -1);
-        assert.deepEqual(moved.map(item => item.key), ['book-2', 'book-1', 'decoration-tea', 'book-3']);
+        assert.deepEqual(moved.map(item => item.key), ['book-2', 'book-1', 'decoration-candle', 'book-3']);
         const pile = groupItems(moved).find(group => group.type === 'pile');
         assert.equal(pile.items.length, 1);
-        assert.equal(pile.top.key, 'decoration-tea');
+        assert.equal(pile.top.key, 'decoration-candle');
         // Moving around an ordinary pile never creates extra piles.
         const plain = [book(1, 'flat'), book(2, 'flat'), book(3)];
         assert.equal(placementIssue(moveBy(plain, 'book-3', -1), model, options), null);
@@ -72,7 +72,7 @@ for (const {model, options} of profiles) {
 }
 
 for (const model of BOOKCASE_MODELS) {
-    test(`${model}: desktop shelves fit books closely while a five-book pile keeps its full height`, () => {
+    test(`${model}: desktop shelves fit books closely and a five-book pile stays within the standing book height`, () => {
         const options = {immersive: true, density: 'desktop'};
         const books = [book(1), ...Array.from({length: 5}, (_, i) => book(i + 2, 'flat', 1)), decorationItem('flowers', 'upright', 2)];
         const rows = layoutCases(groupItems(books), model, 480, options)[0];
@@ -82,11 +82,11 @@ for (const model of BOOKCASE_MODELS) {
         assert.ok(standing.h / rows[0].height > 0.8);
         assert.ok(pile.h <= rows[1].height);
         assert.ok(flowers.h <= rows[2].height);
-        assert.ok(rows[0].height < rows[1].height);
+        assert.ok(pile.h <= standing.h);
         assert.equal(placementIssue(books, model, options), null);
-        const withTea = [book(1, 'flat'), decorationItem('tea', 'flat', 0)];
-        assert.equal(placementIssue(withTea, model, options), null);
-        const tooTall = [...Array.from({length: 5}, (_, i) => book(i + 1, 'flat')), decorationItem('tea', 'flat', 0)];
+        const withQuill = [book(1, 'flat'), decorationItem('quill', 'flat', 0)];
+        assert.equal(placementIssue(withQuill, model, options), null);
+        const tooTall = [...Array.from({length: 5}, (_, i) => book(i + 1, 'flat')), decorationItem('quill', 'flat', 0)];
         assert.equal(placementIssue(tooTall, model, options)?.kind, 'pileHeight');
     });
 }

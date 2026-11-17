@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import LibraryYearChallenge from './LibraryYearChallenge';
+import ShelfViewer from './ShelfViewer';
 import ShelfDecoration from './ShelfDecoration';
 import ShelfEditor from './ShelfEditor';
 import ShelfRow from './ShelfRow';
@@ -28,7 +28,6 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     const [openYear, setOpenYear] = useState(null);
     const [viewport, setViewport] = useState(() => window.innerWidth);
     const [zoomContentWidth, setZoomContentWidth] = useState(null);
-    const wallRef = useRef(null);
     const closeRef = useRef(null);
     const zoomBodyRef = useRef(null);
 
@@ -63,10 +62,19 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
         if (openYear === null) return undefined;
 
         const previous = document.body.style.overflow;
+        const trigger = document.activeElement;
         document.body.style.overflow = 'hidden';
         closeRef.current?.focus();
 
         const handleKey = (event) => {
+            if (event.key === 'Tab') {
+                const panel = closeRef.current?.closest('[role="dialog"]');
+                const controls = [...panel.querySelectorAll('a[href], button:not(:disabled), input, select, summary')].filter(node => node.getClientRects().length > 0);
+                const first = controls[0];
+                const last = controls[controls.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+            }
             if (event.key === 'Escape') {
                 setOpenYear(null);
                 setEditing(null);
@@ -77,6 +85,8 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
 
         return () => {
             document.body.style.overflow = previous;
+            if (trigger?.isConnected && trigger.matches('button, a, summary, input, select') && trigger.getClientRects().length) trigger.focus();
+            else document.querySelector('.bookshelf-header .year-shelf-save')?.focus();
             window.removeEventListener('keydown', handleKey);
         };
     }, [openYear]);
@@ -138,8 +148,6 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
     const rows = layout || [];
     const density = shelfDensity(viewport);
     const shelfOptions = { immersive: true, density };
-    const wallDecorationWidth = viewport <= 600 ? Math.min(400, viewport - 72) : 400;
-    const wallWidth = Math.min(320, viewport - 64);
     const decorationWidth = viewport <= 900 ? Math.min(560, viewport - 48) : Math.min(560, viewport - 520);
     const zoomWidth = viewport <= 900
         ? Math.min(600, viewport - 24, zoomContentWidth ?? Infinity)
@@ -241,11 +249,6 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
             unplaced: editing.unplaced?.filter(decoration => decoration !== name) });
     }
 
-    function showYear(yearKey) {
-        const column = wallRef.current?.querySelector('[data-year="' + yearKey + '"]');
-        column?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-    }
-
     function stopEditing() {
         setEditing(null);
         setSaveError('');
@@ -268,6 +271,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                 setLayout(data);
                 setCases((current) => [...current.filter((row) => row.year !== yearKey), { year: yearKey, ...bookcase }]);
                 setEditing(null);
+                setOpenYear(null);
             })
             .catch((err) => setSaveError(err.message))
             .finally(() => setSaving(false));
@@ -293,8 +297,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
             canOrganize: layout && milestones && !editing && (yearBooks.length > 0 || unlocked.length > 0),
         };
     });
-    const wallHeight = Math.max(...views.map(view =>
-        caseGeometry(view.bookcase.model, wallWidth, shelfOptions, groupItems(view.items)).height));
+    const caseHeight = Math.max(...views.map(view => caseGeometry(view.bookcase.model, BASE_WIDTH, shelfOptions, groupItems(view.items)).height));
     const openView = views.find((view) => view.yearKey === openYear) || null;
 
     function organize(view) {
@@ -308,12 +311,6 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
 
     return (
         <section className="year-shelf-view" aria-labelledby="year-shelf-title">
-            <header className="year-shelf-intro">
-                <h2 className="display" id="year-shelf-title">{t('library.shelf.title')}</h2>
-                <p>{t('library.shelf.description')}</p>
-                <p>{t('library.shelf.scroll')}</p>
-            </header>
-
             {error && <Notice message={error} onRetry={retry} />}
             {!milestones && !error && <p role="status">{t('milestones.loading')}</p>}
 
@@ -321,57 +318,8 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                 <p role="status">{t(booksStatus === 'error' ? 'library.shelf.booksError' : 'nightstand.loading')}</p>
             ) : (
                 <>
-                    {groups.length > 1 && (
-                        <nav className="year-shelf-years" aria-label={t('library.shelf.years')}>
-                            {groups.map(({ year }) => (
-                                <button key={year ?? 'undated'} type="button" className="year-shelf-button"
-                                    onClick={() => showYear(year ?? 0)}>
-                                    {year ?? t('library.undated')}
-                                </button>
-                            ))}
-                        </nav>
-                    )}
-                    <div className="year-shelf-wall" ref={wallRef}>
-                        {views.map((view) => (
-                            <section className="year-shelf-card" key={view.yearKey} data-year={view.yearKey} aria-labelledby={'library-year-' + view.yearKey}>
-                                <div className="year-shelf-card-head">
-                                    {view.year === currentYear ? (
-                                        <LibraryYearChallenge year={view.year} count={view.yearBooks.length} readingGoal={readingGoal} />
-                                    ) : (
-                                        <h2 className="display library-year-heading" id={'library-year-' + view.yearKey}>
-                                            {view.label}
-                                            <span>· {t('library.bookCount', { count: view.yearBooks.length })}</span>
-                                        </h2>
-                                    )}
-
-                                    <div className="year-shelf-card-actions">
-                                        <button type="button" className="year-shelf-button" onClick={() => setOpenYear(view.yearKey)}>
-                                            {t('library.shelf.open')}
-                                        </button>
-                                        {view.canOrganize && (
-                                            <button type="button" className="year-shelf-button year-shelf-organize" onClick={() => organize(view)}>
-                                                {t('library.shelf.organize')}
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <ShelfRow
-                                    items={view.items}
-                                    bookcase={view.bookcase}
-                                    width={wallWidth}
-                                    minHeight={wallHeight}
-                                    immersive
-                                    density={density}
-                                    decorationWidth={wallDecorationWidth}
-                                    label={t('library.shelf.yearLabel', { year: view.label })}
-                                    emptyText={t('library.shelf.empty')}
-                                    editing={false}
-                                    onOpen={() => setOpenYear(view.yearKey)}
-                                />
-                            </section>
-                        ))}
-                    </div>
+                    <ShelfViewer views={views} viewport={viewport} density={density} currentYear={currentYear}
+                        readingGoal={readingGoal} username={username} minHeight={caseHeight} onOrganize={organize} />
 
                     {openView && (
                         <div className="year-shelf-zoom" onClick={(event) => event.target === event.currentTarget && !editing && closeYear()}>
@@ -399,6 +347,8 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                         bookcase={openView.bookcase}
                                         width={zoomWidth}
                                         immersive
+                                        unified
+                                        minHeight={caseHeight}
                                         density={density}
                                         decorationWidth={decorationWidth}
                                         label={t('library.shelf.yearLabel', { year: openView.label })}
@@ -443,7 +393,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                                 onRemove={removeSelected}
                                                 onAdd={addDecoration}
                                                 onSave={save}
-                                                onCancel={stopEditing}
+                                                onCancel={closeYear}
                                             />
                                         </details>
                                     )}
@@ -455,8 +405,8 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
             )}
 
             {milestones && (
-                <section className="year-shelf-rewards" aria-labelledby="year-shelf-rewards-title">
-                    <h2 className="display" id="year-shelf-rewards-title">{t('library.shelf.rewards')}</h2>
+                <details className="year-shelf-rewards">
+                    <summary className="display" id="year-shelf-rewards-title">{t('library.shelf.rewards')}</summary>
                     <ul className="year-shelf-reward-list">
                         {DECORATIONS.map(({ name, milestone }) => {
                             const achieved = unlocked.includes(name);
@@ -474,7 +424,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                         })}
                     </ul>
                     <Link to="/achievements">{t('celebration.seeAll')}</Link>
-                </section>
+                </details>
             )}
         </section>
     );

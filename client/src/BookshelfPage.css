@@ -1,0 +1,154 @@
+.app-main .page.bookshelf-page {
+    width: 100%;
+    max-width: 1240px;
+    padding-top: 24px;
+    box-sizing: border-box;
+}
+
+.bookshelf-header, .bookshelf-header-actions, .bookshelf-context, .bookshelf-reading-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.bookshelf-header { justify-content: space-between; margin-bottom: 16px; }
+.bookshelf-page :is(h1, h2, h3) { color: var(--ink); font-weight: 500; }
+.bookshelf-header h1 { margin: 0; font-size: 32px; font-style: normal; }
+.bookshelf-header .year-shelf-button { display: inline-flex; align-items: center; gap: 7px; min-height: 40px; }
+.bookshelf-icon { display: inline-grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; padding: 0; border: 1px solid var(--surface-2); border-radius: 50%; background: var(--surface); color: var(--ink); cursor: pointer; }
+.bookshelf-icon:disabled { opacity: .4; cursor: default; }
+.bookshelf-icon:focus-visible, .bookshelf-context select:focus-visible { outline: 2px solid var(--rose-ink); outline-offset: 3px; }
+.bookshelf-ambience { position: relative; }
+.bookshelf-ambience > summary { list-style: none; }
+.bookshelf-ambience > summary::-webkit-details-marker { display: none; }
+.bookshelf-ambience-panel { position: absolute; z-index: 15; top: calc(100% + 10px); right: 0; box-sizing: border-box; width: min(280px, calc(100vw - 32px)); padding: 18px; background: var(--surface); border: 1px solid var(--surface-2); border-radius: 12px; box-shadow: 0 10px 30px rgb(0 0 0 / 16%); }
+.bookshelf-ambience-panel h2 { margin: 0 0 18px; font-size: 21px; }
+.bookshelf-ambience-panel label { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--text-2); }
+.bookshelf-ambience-panel input[type="range"] { display: block; width: 100%; margin: 14px 0 22px; accent-color: var(--rose-deep); }
+.bookshelf-ambience-panel .bookshelf-check { justify-content: flex-start; align-items: center; min-height: 44px; color: var(--ink); }
+.bookshelf-check input { width: 18px; height: 18px; accent-color: var(--rose-deep); }
+.bookshelf-ambience-panel .year-shelf-button { width: 100%; margin-top: 12px; justify-content: center; }
+.bookshelf-context { margin-bottom: 20px; flex-wrap: wrap; }
+.bookshelf-context > select { max-width: 140px; min-height: 40px; padding: 4px 6px; border: 0; background: transparent; color: var(--ink); font: 24px 'Fraunces', serif; }
+.bookshelf-context option { background: var(--surface); color: var(--ink); }
+.bookshelf-context > span { color: var(--text-2); font-size: 12px; }
+.bookshelf-context .bookshelf-warm-toggle { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.bookshelf-warm-toggle[aria-pressed="true"] { background: var(--amber-soft); border-color: var(--amber); color: var(--amber); }
+.bookshelf-challenge { position: relative; font-size: 12px; }
+.bookshelf-challenge summary { display: flex; align-items: center; gap: 4px; min-height: 40px; color: var(--amber); cursor: pointer; list-style: none; }
+.bookshelf-challenge .library-year-challenge { position: absolute; z-index: 14; top: 100%; left: 0; width: min(320px, calc(100vw - 40px)); box-sizing: border-box; padding: 18px; border: 1px solid var(--surface-2); border-radius: 10px; background: var(--surface); box-shadow: 0 10px 30px rgb(0 0 0 / 16%); }
+.bookshelf-challenge .library-year-challenge-head { flex-wrap: wrap; }
+.bookshelf-challenge .library-year-heading { font-size: 24px; }
+.bookshelf-layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; align-items: start; }
+.bookshelf-map, .bookshelf-inspector { min-width: 0; }
+.bookshelf-map > h2 { margin: 0 0 8px; font-size: 20px; }
+.bookshelf-case-label { margin: 0 0 12px; color: var(--text-2); font-size: 11px; }
+.bookshelf-map > .year-shelf-cases { flex-direction: column; width: max-content; margin: 0 auto; padding-right: 28px; gap: 20px; }
+.bookshelf-reading-head { min-height: 38px; margin-bottom: 12px; }
+.bookshelf-reading-head > h2 { flex: 1; margin: 0; font-size: 25px; }
+.bookshelf-reading-head > span { margin-right: 4px; font-size: 12px; color: var(--text-2); }
+.bookshelf-row-target { position: absolute; right: -27px; width: 26px; height: 26px; transform: translateY(-50%); padding: 0; border: 1px solid var(--surface-2); border-radius: 50%; background: var(--surface); color: var(--text-2); font: 11px 'Inter', sans-serif; cursor: pointer; }
+.bookshelf-row-target[aria-pressed="true"] { border-color: var(--rose-deep); background: var(--rose-deep); color: var(--on-rose-deep); }
+.bookshelf-row-target:focus-visible { outline: 2px solid var(--rose-ink); outline-offset: 2px; }
+.bookshelf-stack { min-width: 0; }
+.bookshelf-stack > .year-shelf-cases { margin: 0; }
+.bookshelf-selected { display: flex; gap: 18px; align-items: flex-start; margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--surface-2); }
+.bookshelf-selected-cover { flex: 0 0 80px; width: 80px; height: 126px; overflow: hidden; border-radius: 0 5px 5px 0; }
+.bookshelf-selected-cover > * { display: block; width: 100%; height: 100%; box-sizing: border-box; object-fit: contain; }
+.bookshelf-selected-cover > .cover-fabric { display: flex; justify-content: space-between; padding: 10px 8px; background: var(--selected-fill); color: var(--selected-ink); }
+.bookshelf-selected-cover .cover-fabric::before, .bookshelf-selected-cover .cover-fabric-star { display: none; }
+.bookshelf-selected-cover .cover-fabric-title { font-size: 15px; font-weight: 500; }
+.bookshelf-selected-cover .cover-fabric-author { font-size: 8px; }
+.bookshelf-selected-cover .cover-fabric-author, .year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-author { order: -1; }
+.bookshelf-selected-cover .cover-fabric-title, .year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-title { margin: auto 0; }
+.bookshelf-selected-copy { min-width: 0; }
+.bookshelf-eyebrow { display: block; margin-bottom: 8px; font-size: 11px; color: var(--text-2); text-transform: uppercase; letter-spacing: .09em; }
+.bookshelf-selected-copy h3 { margin: 0; font-size: 25px; line-height: 1.15; overflow-wrap: anywhere; }
+.bookshelf-selected-copy p { margin: 6px 0 12px; color: var(--text-2); font-size: 13px; }
+.bookshelf-selected-copy a { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-size: 12px; }
+.bookshelf-empty { padding: 8px 0; color: var(--text-2); font-size: 13px; }
+.bookshelf-mobile-tabs { display: none; }
+.bookshelf-page .year-shelf-rewards { margin-top: 30px; padding-top: 18px; border-top: 1px solid var(--surface-2); }
+.bookshelf-page .year-shelf-rewards > summary { font-size: 20px; cursor: pointer; }
+
+.year-shelf-scene { position: absolute; left: 0; transform-origin: top left; }
+.year-shelf-well { position: absolute; overflow: hidden; isolation: isolate; }
+.year-shelf-well > .year-shelf-case-row { inset: 0; width: 100%; height: 100%; }
+.year-shelf-case.is-row-view { overflow: hidden; background: transparent; }
+.year-shelf-cases.is-row-list { flex-direction: column; gap: 0; }
+.bookshelf-row-number { position: absolute; top: 10px; right: 12%; color: #f3dab2; text-shadow: 0 1px 3px #211a14; font-size: 11px; pointer-events: none; }
+.year-shelf-cases.is-unified.is-editing .year-shelf-well:has(.is-dragging) { overflow: visible; z-index: 5; }
+.year-shelf-cases.is-unified .year-shelf-case-row { align-items: flex-end; }
+.year-shelf-cases.is-unified .year-shelf-case :is(.year-shelf-spine, .year-shelf-flat, .year-shelf-front) { box-sizing: border-box; flex: 0 0 var(--w); width: var(--w); height: var(--h); min-width: 0; min-height: 0; margin: 0; padding: 0; border: 1px solid rgb(35 25 16 / 45%); background: var(--spine-fill); color: var(--spine-ink); box-shadow: inset 1px 0 rgb(255 255 255 / 12%); text-align: center; isolation: isolate; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-spine { border-radius: 2px 1px 1px 2px; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-spine { border-width: calc(var(--h) * .007); }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat { border-radius: 1.5px 2px 2px 1.5px; overflow: hidden; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat { border-width: calc(var(--w) * .007); }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-front { overflow: hidden; border-radius: 0 calc(var(--h) * .026) calc(var(--h) * .026) 0; border-color: rgb(35 25 16 / 20%); }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-front { border-width: calc(var(--h) * .004); }
+.year-shelf-cases.is-unified .year-shelf-case .spine-face { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: inherit; display: flex; flex-direction: column; background-color: var(--spine-fill); }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-face { flex-direction: row; }
+.year-shelf-cases.is-unified .year-shelf-case .spine-body { flex: 1; min-height: 0; min-width: 0; padding: 3px 0; background: transparent; color: var(--spine-ink); }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-spine .spine-cap { display: grid; place-items: center; flex: 0 0 17%; height: 17%; min-height: 0; padding: 0; background: transparent; }
+.year-shelf-cases.is-unified .year-shelf-case .spine-cap .spine-motif { width: calc(var(--h) * .06); height: calc(var(--h) * .06); }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-cap { display: none; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-body { padding: 0 3px; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-spine .spine-title { font-size: calc(var(--h) * .10); font-weight: 500; padding: 0; line-height: 1.1; text-shadow: none; max-height: 100%; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-title { font-size: calc(var(--w) * .08); font-weight: 500; padding: 0; line-height: 1.1; text-shadow: none; }
+.year-shelf-cases.is-unified .year-shelf-case .spine-title { font-optical-sizing: none; font-variation-settings: 'opsz' 20; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-front-art { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+.year-shelf-cases.is-unified .year-shelf-front-art.cover-fabric { gap: 4px; justify-content: space-between; background: var(--spine-fill); color: var(--spine-ink); padding: 8%; }
+.year-shelf-cases.is-unified .year-shelf-front-art.cover-fabric::before, .year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-star { display: none; }
+.year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-title { font-family: 'Fraunces', serif; font-size: calc(var(--h) * .12); line-height: 1.1; font-weight: 500; overflow-wrap: normal; }
+.year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-title { font-optical-sizing: none; font-variation-settings: 'opsz' 28; }
+.year-shelf-cases.is-unified .year-shelf-front-art .cover-fabric-author { font-size: calc(var(--h) * .055); }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-pile { gap: 0; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-pile .year-shelf-flat { flex: 0 0 auto; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-pile .year-shelf-flat + .year-shelf-flat { margin-top: -1px; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-decoration:last-child { margin-left: auto; margin-right: 0; }
+.year-shelf-cases.is-unified .year-shelf-case :is(.year-shelf-editable[aria-pressed="true"], [data-book-key][aria-pressed="true"]) { outline: 1.5px solid var(--rose-ink); outline-offset: -1.5px; }
+
+.shelf-lighting { position: absolute; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+.shelf-light-wash { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 100% at 50% 0, #ffd58a48, #ffd58a18 48%, transparent 95%); opacity: var(--shelf-warmth); }
+.shelf-garland { position: absolute; top: 0; left: 0; width: 100%; height: 22%; }
+.shelf-light-wire { position: absolute; left: -4%; top: -55%; width: 108%; height: 100%; border-bottom: .7px solid #32261de0; border-radius: 0 0 50% 50%; }
+.shelf-light-bulb { position: absolute; width: 2.5px; height: 3px; transform: translateX(-50%); border-radius: 45% 45% 50% 50%; background: #ffebbc; opacity: calc(.35 + var(--shelf-warmth) * .65); box-shadow: 0 0 3px #ffeab6, 0 0 8px #ffd57db0, 0 2px 15px #ffc56e80; }
+.shelf-light-bulb::before { position: absolute; left: 35%; bottom: 100%; width: 30%; height: 25%; background: #493822; content: ''; }
+.shelf-garland[data-lit="false"] .shelf-light-bulb { background: #ada08c; box-shadow: none; }
+
+@media (max-width: 860px) {
+    .app-main .page.bookshelf-page { padding: 18px 12px 24px; }
+    .bookshelf-header { gap: 8px; margin-bottom: 12px; }
+    .bookshelf-header h1 { font-size: 24px; }
+    .bookshelf-header-actions { gap: 7px; }
+    .bookshelf-header .year-shelf-button { min-height: 40px; padding: 8px; font-size: 11px; }
+    .bookshelf-header .year-shelf-button > svg { display: none; }
+    .bookshelf-ambience-panel { right: -90px; }
+    .bookshelf-context { gap: 6px; margin-bottom: 12px; }
+    .bookshelf-context > select { max-width: 105px; font-size: 23px; min-height: 44px; }
+    .bookshelf-context > span { font-size: 11px; }
+    .bookshelf-context .bookshelf-warm-toggle { padding: 8px; min-height: 44px; font-size: 11px; }
+    .bookshelf-challenge { display: none; }
+    .bookshelf-mobile-tabs { display: flex; gap: 7px; margin-bottom: 14px; }
+    .bookshelf-mobile-tabs .year-shelf-button { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 12px; font-size: 12px; }
+    .bookshelf-layout { display: block; }
+    .bookshelf-viewer[data-mobile-view="map"] .bookshelf-inspector, .bookshelf-viewer[data-mobile-view="shelves"] .bookshelf-map { display: none; }
+    .bookshelf-map { padding: 0 20px; }
+    .bookshelf-reading-head > h2 { font-size: 22px; }
+    .bookshelf-reading-head > span { font-size: 11px; }
+    .bookshelf-icon { width: 44px; height: 44px; }
+    .bookshelf-reading-head .bookshelf-icon { width: 44px; height: 44px; }
+    .bookshelf-row-target { width: 44px; height: 44px; right: -44px; }
+    .bookshelf-map > .year-shelf-cases { padding-right: 44px; }
+    .bookshelf-selected { position: sticky; bottom: calc(68px + env(safe-area-inset-bottom)); z-index: 8; margin-top: 12px; padding: 12px; background: var(--surface); border: 1px solid var(--surface-2); border-radius: 10px; }
+    .bookshelf-selected-cover, .bookshelf-eyebrow { display: none; }
+    .bookshelf-selected-copy { display: grid; grid-template-columns: minmax(0, 1fr) auto; width: 100%; column-gap: 8px; align-items: center; }
+    .bookshelf-selected-copy h3 { font-size: 16px; }
+    .bookshelf-selected-copy p { margin: 4px 0 0; grid-column: 1; font-size: 11px; }
+    .bookshelf-selected-copy a { grid-column: 2; grid-row: 1 / 3; min-height: 44px; padding: 8px; font-size: 11px; }
+    .bookshelf-page .year-shelf-rewards > summary { font-size: 19px; }
+}
+
+@media (max-width: 360px) {
+    .bookshelf-header h1 { font-size: 22px; }
+}

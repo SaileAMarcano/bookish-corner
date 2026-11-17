@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import ShelfDecoration from './ShelfDecoration';
 import SpineFace from './SpineFace';
 import BookCover from './BookCover';
+import ShelfLighting from './ShelfLighting';
+import { shelfWell, shelfViewport } from './shelfView';
 import { SPINE_COLORS, isLightColor, useCoverTone } from './shelfSpines';
 import { groupItems } from './shelfUtils';
 import { BASE_WIDTH, bookcaseImage, caseGeometry, decorationSize, layoutCases } from './bookcases';
@@ -17,7 +19,7 @@ function labelOf(book) {
     return [book.title, book.author].filter(Boolean).join(' · ');
 }
 
-function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, onClick }) {
+function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, onClick, onBookSelect }) {
     const { t } = useTranslation();
     const isBook = item.type === 'book';
     const isFlat = isBook && item.pose === 'flat';
@@ -35,7 +37,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
             title={item.book.title} author={item.book.author} bookId={item.book.bookId} />
     ) : isBook ? (
         <SpineFace title={item.book.title} cover={item.face === 'solid' ? null : item.book.coverImage}
-            solid={item.face === 'solid'} />
+            solid={item.face === 'solid'} motif={item.motif ?? item.look.motif} />
     ) : (
         <ShelfDecoration name={item.name} />
     );
@@ -57,6 +59,11 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
         );
     }
 
+    if (isBook && onBookSelect) {
+        return <button type="button" className={baseClass} data-book-key={item.key} style={style}
+            aria-label={label} aria-pressed={selected} onClick={() => onBookSelect(item.key)}>{content}</button>;
+    }
+
     if (!isBook) {
         return <span className={baseClass} style={style} role="img" aria-label={label}>{content}</span>;
     }
@@ -69,7 +76,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     );
 }
 
-function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, density = 'desktop', minHeight = 0, decorationWidth = width, label, emptyText, editing, selectedKey, onSelect, onMove, onCheckMove, onOpen }) {
+function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, density = 'desktop', minHeight = 0, decorationWidth = width, label, emptyText, editing, selectedKey, onSelect, onMove, onCheckMove, onOpen, unified = false, mode = 'case', focusShelf = 0, onShelfChange, onBookSelect, ambience }) {
     const { t } = useTranslation();
     const stageRef = useRef(null);
     const dragRef = useRef(null);
@@ -81,7 +88,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
     useEffect(() => () => dragRef.current?.stop(false), []);
 
     function scrollerOf() {
-        return stageRef.current?.closest('.year-shelf-wall, .year-shelf-zoom') || stageRef.current;
+        return stageRef.current?.closest('.year-shelf-wall, .year-shelf-zoom, .bookshelf-stack') || stageRef.current;
     }
 
     function findDrop(state) {
@@ -242,17 +249,20 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
                 item={item}
                 editing={editing}
                 selected={item.key === selectedKey}
-                offset={drag?.key === item.key ? drag : null}
+                offset={drag?.key === item.key ? { ...drag, x: drag.x / viewScale, y: drag.y / viewScale } : null}
                 dropSide={drop?.key === item.key ? (drop.onto ? 'onto' : drop.before ? 'before' : 'after') : null}
                 onPointerDown={handlePointerDown}
                 onClick={handleClick}
+                onBookSelect={onBookSelect}
             />
         );
     }
 
     const options = { immersive, density, minHeight, decorationWidth };
     const groups = groupItems(items);
-    const cases = layoutCases(groups, bookcase.model, width, options);
+    const measureWidth = unified ? BASE_WIDTH : width;
+    const viewScale = width / measureWidth;
+    const cases = layoutCases(groups, bookcase.model, measureWidth, options);
 
     function handleCaseClick(event) {
         if (editing || !onOpen || event.target.closest('a, button')) return;
@@ -260,38 +270,52 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
     }
 
     return (
-        <div className={'year-shelf-cases' + (editing ? ' is-editing' : '') + (immersive ? ' is-immersive' : '')} ref={stageRef} role="group" aria-label={label}>
-            {cases.map((rows, index) => {
-                const rowCount = rows.length;
-                const geometry = caseGeometry(bookcase.model, width, { ...options, rowCount }, groups);
-                return (
-                <div key={index} className={'year-shelf-case' + (immersive ? ' is-immersive' : '') + (onOpen && !editing ? ' is-openable' : '')}
-                    style={{ width: geometry.width, height: geometry.height, '--k': geometry.k }} onClick={handleCaseClick}>
-                    {geometry.slices.length > 0 ? geometry.slices.map((slice, sliceIndex) => {
-                        const scale = slice.height / slice.sourceHeight;
-                        return <div key={sliceIndex} className="year-shelf-case-slice" aria-hidden="true"
-                            style={{ top: slice.top, height: slice.height,
-                                backgroundImage: 'url(' + JSON.stringify(bookcaseImage(bookcase)) + ')',
-                                backgroundSize: `${geometry.artWidth}px ${geometry.artWidth * 2 * scale}px`,
-                                backgroundPosition: `${-geometry.cropLeft}px ${-slice.sourceTop * scale}px` }} />;
-                    }) : <img className="year-shelf-case-art" src={bookcaseImage(bookcase)} alt="" draggable="false" />}
-                    {rows.slice(0, rowCount).map((row, rowIndex) => (
-                        <div key={rowIndex} data-shelf-row={row.index}
-                            className={'year-shelf-case-row' + (drop && drop.key === null && drop.row === row.index ? ' is-drop' : '')}
-                            style={{ top: row.top, left: row.left, width: row.width, height: row.height }}>
-                            {row.groups.map((group) => {
-                                if (group.type !== 'pile') return renderItem(group);
-                                return (
-                                    <div key={group.key} className="year-shelf-pile" style={{ '--w': group.w + 'px' }}>
-                                        {group.top && <div className="year-shelf-pile-top">{renderItem(group.top)}</div>}
-                                        {group.items.map(renderItem)}
-                                    </div>
-                                );
-                            })}
+        <div className={'year-shelf-cases' + (editing ? ' is-editing' : '') + (immersive ? ' is-immersive' : '') + (unified ? ' is-unified' : '') + (mode !== 'case' ? ' is-row-list' : '')} ref={stageRef} role="group" aria-label={label}>
+            {cases.flatMap((rows, index) => {
+                const geometry = caseGeometry(bookcase.model, measureWidth, { ...options, rowCount: rows.length }, groups);
+                const crops = mode === 'case' ? [null] : rows.filter(row => mode === 'rows' || row.index === focusShelf);
+                return crops.map(crop => {
+                    const viewport = crop ? shelfViewport(geometry, crop) : { top: 0, height: geometry.height };
+                    const visibleRows = crop ? [crop] : rows;
+                    return (
+                        <div key={crop ? crop.index : index} data-focus-shelf={crop?.index}
+                            className={'year-shelf-case' + (immersive ? ' is-immersive' : '') + (crop ? ' is-row-view' : '')}
+                            style={{ width, height: viewport.height * viewScale, '--k': geometry.k }} onClick={handleCaseClick}>
+                            <div className="year-shelf-scene" style={{ width: geometry.width, height: geometry.height,
+                                top: -viewport.top * viewScale, transform: `scale(${viewScale})` }}>
+                                {geometry.slices.length > 0 ? geometry.slices.map((slice, sliceIndex) => {
+                                    const scale = slice.height / slice.sourceHeight;
+                                    return <div key={sliceIndex} className="year-shelf-case-slice" aria-hidden="true"
+                                        style={{ top: slice.top, height: slice.height,
+                                            backgroundImage: 'url(' + JSON.stringify(bookcaseImage(bookcase)) + ')',
+                                            backgroundSize: `${geometry.artWidth}px ${geometry.artWidth * 2 * scale}px`,
+                                            backgroundPosition: `${-geometry.cropLeft}px ${-slice.sourceTop * scale}px` }} />;
+                                }) : <img className="year-shelf-case-art" src={bookcaseImage(bookcase)} alt="" draggable="false" />}
+                                {visibleRows.map(row => {
+                                    const well = unified ? shelfWell(geometry, row, bookcase.model) : row;
+                                    return <div className="year-shelf-well" key={row.index} style={{ top: well.top, left: well.left, width: well.width, height: well.height }}>
+                                        {ambience && <ShelfLighting {...ambience} />}
+                                        <div data-shelf-row={row.index} className={'year-shelf-case-row' + (drop && drop.key === null && drop.row === row.index ? ' is-drop' : '')}>
+                                            {row.groups.map(group => group.type !== 'pile' ? renderItem(group) : (
+                                                <div key={group.key} className="year-shelf-pile" style={{ '--w': group.w + 'px' }}>
+                                                    {group.top && <div className="year-shelf-pile-top">{renderItem(group.top)}</div>}
+                                                    {group.items.map(renderItem)}
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>;
+                                })}
+                            </div>
+                            {mode === 'case' && onShelfChange && rows.map(row => (
+                                <button type="button" key={row.index} className="bookshelf-row-target"
+                                    style={{ top: (row.top + row.height / 2) * viewScale }}
+                                    aria-label={t('library.shelf.viewer.enlarge', { number: row.index + 1 })}
+                                    aria-pressed={row.index === focusShelf} onClick={() => onShelfChange(row.index)}>{row.index + 1}</button>
+                            ))}
+                            {crop && <span className="bookshelf-row-number" aria-hidden="true">{crop.index + 1}</span>}
                         </div>
-                    ))}
-                </div>
-                );
+                    );
+                });
             })}
             {drop?.preview && <div className={'year-shelf-drop-preview' + (drop.message ? ' is-invalid' : '')}
                 style={{ left: drop.preview.left, top: drop.preview.top, width: drop.preview.w, height: drop.preview.h }} aria-hidden="true">

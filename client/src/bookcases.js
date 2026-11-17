@@ -14,7 +14,9 @@ function bookDimensions(width, k, density) {
     const { covers, spines } = SHELF_DENSITIES[density] || SHELF_DENSITIES.desktop;
     const gap = 2 * k;
     const frontWidth = (width - (covers - 1) * gap) / covers;
-    return { w: (width - (spines - 1) * gap) / spines, h: frontWidth / 0.6, frontWidth };
+    const h = frontWidth / 0.6;
+    const span = (width - (spines - 1) * gap) / spines;
+    return { w: Math.min(span, h * 0.19), h, frontWidth, spines };
 }
 
 export const BOOKCASES = {
@@ -188,14 +190,17 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
         let index = Number.isInteger(group.shelf) ? group.shelf : cursor;
 
         for (;;) {
-            while (buckets.length <= index) buckets.push({ groups: [], used: 0 });
+            while (buckets.length <= index) buckets.push({ groups: [], used: 0, spines: 0 });
             const shaped = measure(group, k, bookSize);
             const bucket = buckets[index];
             const needed = spanOf(shaped) + (bucket.used > 0 ? gap : 0);
 
-            if (bucket.used === 0 || bucket.used + needed <= rowWidth + 0.01) {
+            const isSpine = shaped.type === 'book' && shaped.pose !== 'front';
+            const full = isSpine && bucket.spines >= bookSize.spines;
+            if (!full && (bucket.used === 0 || bucket.used + needed <= rowWidth + 0.01)) {
                 bucket.groups.push(shaped);
                 bucket.used += needed;
+                if (isSpine) bucket.spines += 1;
                 break;
             }
             index += 1;

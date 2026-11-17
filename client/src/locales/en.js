@@ -142,6 +142,8 @@ const en = {
         logout: 'Log out',
     },
     nav: {
+        tracking: 'Reading tracker',
+        myBookshelf: 'My bookshelf',
         sidebar: 'Main menu',
         home: 'Home',
         reading: 'Currently Reading',
@@ -1322,6 +1324,24 @@ const en = {
     },
     library: {
         shelf: {
+            viewer: {
+                organize: 'Organize',
+                customizeCase: 'Customize bookcase',
+                ambience: 'Your reading corner',
+                intensity: 'Light intensity',
+                strings: 'String lights',
+                warm: 'Warm light',
+                fullCase: 'Your bookcase',
+                chooseYear: 'Choose year',
+                inspector: 'Shelf close-up',
+                shelves: 'Shelves',
+                selected: 'Selected book',
+                openBook: 'View book',
+                previous: 'Previous shelf',
+                next: 'Next shelf',
+                enlarge: 'Enlarge shelf {{number}}',
+                done: 'Done',
+            },
             viewLabel: 'Library view',
             covers: 'Covers',
             title: 'Yearly shelf',

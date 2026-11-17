@@ -7,7 +7,6 @@ import StarRating from './StarRating';
 import Icon from './Icon';
 import ReadingNow from './ReadingNow';
 import LibraryYearChallenge from './LibraryYearChallenge';
-import YearShelf from './YearShelf';
 import { nightstandMessage } from './utils';
 import { groupReadBooks } from './libraryUtils';
 
@@ -69,14 +68,13 @@ function LibraryTile({ book, isSelected, onEdit, onChoose }) {
     );
 }
 
-function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
+function LibraryPage({ books, onUpdate, booksStatus, readingGoal }) {
     const { t } = useTranslation();
     const [selectedId, setSelectedId] = useState(null);
     const [status, setStatus] = useState('all');
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState('recent');
     const [activeId, setActiveId] = useState(null);
-    const [view, setView] = useState('grid');
     const selectedBook = books.find((book) => book.id === selectedId);
 
     function openBook(book) {
@@ -120,21 +118,9 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
 
     return (
         <main className="page library-page">
-            <h1 className="display library-heading">{t('nav.library')}</h1>
+            <h1 className="display library-heading">{t('nav.tracking')}</h1>
             <ReadingNow books={books} booksStatus={booksStatus} onOpen={openBook} />
 
-            <div className="library-view-switch" role="group" aria-label={t('library.shelf.viewLabel')}>
-                <button type="button" className={'book-filter-chip ' + (view === 'grid' ? 'active' : '')}
-                    aria-pressed={view === 'grid'} onClick={() => setView('grid')}>
-                    {t('library.shelf.covers')}
-                </button>
-                <button type="button" className={'book-filter-chip ' + (view === 'shelf' ? 'active' : '')}
-                    aria-pressed={view === 'shelf'} onClick={() => setView('shelf')}>
-                    {t('library.shelf.title')}
-                </button>
-            </div>
-
-            {view === 'grid' ? (
                 <div className="library-layout">
                     {booksStatus === 'ready' && (
                         <aside className="library-side library-challenge-side" aria-label={t('profileSide.challenge', { year: currentYear })}>
@@ -214,10 +200,6 @@ function LibraryPage({ books, onUpdate, booksStatus, readingGoal, username }) {
                         ))}
                     </div>
                 </div>
-            ) : (
-                <YearShelf key={username} books={books} booksStatus={booksStatus} readingGoal={readingGoal} username={username} />
-            )}
-
             {selectedBook && <BookModal key={selectedBook.id} book={selectedBook} onClose={() => setSelectedId(null)} onUpdate={onUpdate} />}
         </main>
     );

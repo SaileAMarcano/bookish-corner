@@ -142,6 +142,8 @@ const es = {
         logout: 'Cerrar sesión',
     },
     nav: {
+        tracking: 'Seguimiento',
+        myBookshelf: 'Mi estantería',
         sidebar: 'Menú principal',
         home: 'Inicio',
         reading: 'Leyendo ahora',
@@ -1322,6 +1324,24 @@ const es = {
     },
     library: {
         shelf: {
+            viewer: {
+                organize: 'Organizar',
+                customizeCase: 'Personalizar mueble',
+                ambience: 'Tu rincón de lectura',
+                intensity: 'Intensidad de la luz',
+                strings: 'Guirnalda de luces',
+                warm: 'Luz cálida',
+                fullCase: 'Tu mueble',
+                chooseYear: 'Elegir año',
+                inspector: 'Visor de repisa',
+                shelves: 'Repisas',
+                selected: 'Libro seleccionado',
+                openBook: 'Ver libro',
+                previous: 'Repisa anterior',
+                next: 'Repisa siguiente',
+                enlarge: 'Ampliar repisa {{number}}',
+                done: 'Listo',
+            },
             viewLabel: 'Vista de la biblioteca',
             covers: 'Portadas',
             title: 'Estante del año',

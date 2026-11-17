@@ -6,7 +6,16 @@ import { ADMIN_ITEMS } from './adminNav';
 
 const NAV_ITEMS = [
     { to: '/', label: 'nav.home', icon: 'home' },
-    { to: '/library', label: 'nav.library', icon: 'library', tour: 'library' },
+    {
+        key: 'library',
+        label: 'nav.library',
+        icon: 'library',
+        tour: 'library',
+        children: [
+            { to: '/library', label: 'nav.tracking', icon: 'reading' },
+            { to: '/library/shelves', label: 'nav.myBookshelf', icon: 'library' },
+        ],
+    },
     {
         key: 'profile',
         tour: 'lists',
@@ -141,6 +150,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
                         >
                             <Icon name={item.icon} size={20} />
                             <span className="sidebar-label">{t(item.label)}</span>
+                            {item.key === 'library' && readingCount > 0 && <span className="sidebar-badge" aria-hidden="true">{readingCount}</span>}
                             <span className="sidebar-group-arrow"><Icon name="chevronDown" size={14} /></span>
                         </summary>
                         <div className="sidebar-subnav">

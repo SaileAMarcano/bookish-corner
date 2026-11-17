@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { Routes, Route, Navigate, useNavigate, useLocation, useSearchParams, Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import './App.css'
@@ -19,6 +19,7 @@ import AboutPage from './AboutPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import LibraryPage from './LibraryPage';
+import BookshelfPage from './BookshelfPage';
 import TaggedPage from './TaggedPage';
 import ExplorePage from './ExplorePage';
 import ReviewsPage from './ReviewsPage';
@@ -70,6 +71,7 @@ function themeOf(user) {
 
 function App() {
   const { t } = useTranslation();
+  const location = useLocation();
   const [books, setBooks] = useState([])
   const booksLoadVersion = useRef(0);
   const [booksStatus, setBooksStatus] = useState('loading');
@@ -81,7 +83,12 @@ function App() {
   const userLoadVersion = useRef(0);
   const [userStatus, setUserStatus] = useState('loading');
   const [userError, setUserError] = useState('');
-  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [userMenuState, setUserMenuState] = useState({ locationKey: location.key, open: false });
+  if (userMenuState.locationKey !== location.key) {
+    setUserMenuState({ locationKey: location.key, open: false });
+  }
+  const showUserMenu = userMenuState.locationKey === location.key && userMenuState.open;
+  const setShowUserMenu = useCallback((open) => setUserMenuState({ locationKey: location.key, open }), [location.key]);
   const [moderationCount, setModerationCount] = useState(0);
   const [supportCount, setSupportCount] = useState(0);
   const navigate = useNavigate();
@@ -188,7 +195,6 @@ function App() {
   }, []);
 
   const menuRef = useRef(null);
-  const location = useLocation();
   const path = location.pathname.replace(/\/+$/, '') || '/';
   const isPublicPage = ['/', '/beta', '/home', '/about', '/features', '/login', '/signup'].includes(path);
   useEffect(() => {
@@ -211,11 +217,8 @@ function App() {
       document.removeEventListener('pointerdown', handleClickOutside);
       document.removeEventListener('keydown', handleEscape);
     };
-  }, [showUserMenu]);
+  }, [showUserMenu, setShowUserMenu]);
 
-  useEffect(() => {
-    setShowUserMenu(false);
-  }, [location]);
 
   const canModerate = ['admin', 'moderator'].includes(currentUser?.staffRole);
 
@@ -567,7 +570,8 @@ function App() {
           <Route path="/book/:id" element={<BookPage books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/author/:name" element={<AuthorPage books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/reading" element={<Navigate to="/library" replace />} />
-          <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} readingGoal={currentUser.readingGoal} username={currentUser.username} />} />
+          <Route path="/library" element={<LibraryPage books={books} onUpdate={loadUserBooks} booksStatus={booksStatus} readingGoal={currentUser.readingGoal} />} />
+          <Route path="/library/shelves" element={<BookshelfPage books={books} booksStatus={booksStatus} readingGoal={currentUser.readingGoal} username={currentUser.username} />} />
           {['admin', 'moderator'].includes(currentUser.staffRole) && (
             <>
               <Route path="/admin" element={<AdminSummary currentUser={currentUser} />} />
