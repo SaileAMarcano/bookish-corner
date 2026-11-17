@@ -27,8 +27,16 @@ function pushEnabled() {
 function webPush() {
     if (!library) {
         library = import('web-push').then((lib) => {
-            lib.setVapidDetails(process.env.VAPID_SUBJECT || 'mailto:admin@alibraryofus.com', process.env.VAPID_PUBLIC_KEY, process.env.VAPID_PRIVATE_KEY);
+            lib.setVapidDetails(
+                (process.env.VAPID_SUBJECT || 'mailto:admin@alibraryofus.com').trim(),
+                process.env.VAPID_PUBLIC_KEY.trim(),
+                process.env.VAPID_PRIVATE_KEY.trim()
+            );
             return lib;
+        }).catch((error) => {
+            library = null;
+            console.error('Push setup failed. Check VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT:', error.message);
+            throw error;
         });
     }
     return library;
@@ -80,19 +88,26 @@ function payloadOf(row) {
 }
 
 async function deliver(subscription, payload) {
-    const lib = await webPush();
+    let lib;
+    try {
+        lib = await webPush();
+    } catch {
+        return false;
+    }
     try {
         await lib.sendNotification(
             { endpoint: subscription.endpoint, keys: { p256dh: subscription.p256dh, auth: subscription.auth } },
             JSON.stringify(payload),
             { TTL: 60 * 60 * 24, urgency: 'normal' }
         );
+        return true;
     } catch (error) {
         if (GONE.has(error.statusCode)) {
             await query('DELETE FROM push_subscriptions WHERE id = $1', [subscription.subscriptionId]);
         } else {
-            console.error('Push failed', error.statusCode || error.message);
+            console.error('Push failed', error.statusCode || '', error.body || error.message);
         }
+        return false;
     }
 }
 
@@ -137,14 +152,14 @@ async function sendTestPush(userId) {
         FROM push_subscriptions s JOIN users u ON u.id = s.user_id
         WHERE s.user_id = $1
     `, [userId]);
-    await Promise.all(subscriptions.map((subscription) => deliver(subscription, {
+    const results = await Promise.all(subscriptions.map((subscription) => deliver(subscription, {
         title: pushText(subscription.language, 'testTitle'),
         body: pushText(subscription.language, 'testBody'),
         url: '/notifications',
         tag: 'test',
         ...iconsOf('books'),
     })));
-    return subscriptions.length;
+    return { sent: results.filter(Boolean).length, devices: subscriptions.length };
 }
 
 module.exports = { PUSH_GROUPS, pushEnabled, sendPushes, sendTestPush };

@@ -117,6 +117,7 @@ const MESSAGES = {
         pushInvalid: 'This device could not be set up for notifications. Try again.',
         pushTypesInvalid: 'Choose valid notification types.',
         pushUnavailable: 'Phone notifications are not available right now.',
+        pushSendFailed: 'The test notification could not be sent. The server log explains why (usually the VAPID keys in the server settings).',
         announcementInvalid: 'Write the title (up to 80 characters) and the message (up to 1000) in both languages. The link must start with / and point to a page in the app.',
     },
     es: {
@@ -235,6 +236,7 @@ const MESSAGES = {
         pushInvalid: 'No pudimos preparar este dispositivo para las notificaciones. Vuelve a intentarlo.',
         pushTypesInvalid: 'Elige tipos de notificación válidos.',
         pushUnavailable: 'Las notificaciones en el celular no están disponibles en este momento.',
+        pushSendFailed: 'No se pudo enviar la notificación de prueba. El registro del servidor dice por qué (casi siempre son las claves VAPID en la configuración del servidor).',
         announcementInvalid: 'Escribe el título (hasta 80 caracteres) y el mensaje (hasta 1000) en los dos idiomas. El enlace debe empezar con / y llevar a una página de la app.',
     },
 };

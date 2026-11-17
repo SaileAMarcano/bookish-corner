@@ -3445,8 +3445,11 @@ app.put('/api/push/types', requireAuth, async (req, res) => {
 
 app.post('/api/push/test', requireAuth, async (req, res) => {
     if (!pushEnabled()) return res.status(503).json({ error: msg(req, 'pushUnavailable') });
-    const sent = await sendTestPush(req.session.user.id);
-    res.json({ sent });
+    const result = await sendTestPush(req.session.user.id);
+    if (result.devices > 0 && result.sent === 0) {
+        return res.status(502).json({ error: msg(req, 'pushSendFailed') });
+    }
+    res.json(result);
 });
 
 app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
