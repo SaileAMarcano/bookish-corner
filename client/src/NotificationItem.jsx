@@ -7,6 +7,7 @@ function notificationLink(notification) {
     if (type === 'post_like' || type === 'post_comment') return `/post/${notification.postId}`;
     if (type === 'follow') return `/u/${notification.actorUsername}`;
     if (type === 'list_like' || type === 'list_comment') return `/lists/${notification.listId}`;
+    if (type === 'announcement') return notification.announcementLink || '/updates';
     return `/book/${notification.workId}`;
 }
 
@@ -14,8 +15,9 @@ function NotificationItem({ notification, showDetail = false, onOpen }) {
     const { t } = useTranslation();
     const isUnread = !notification.readAt;
     const isFollow = notification.type === 'follow';
+    const isAnnouncement = notification.type === 'announcement';
     const detail = isFollow ? notification.actorBio : notification.commentText;
-    const avatar = notification.actorUsername ? getAvatarSrc(notification.actorAvatar) : '/logo-mark.png';
+    const avatar = isAnnouncement ? '/push/book-bookmark.png' : notification.actorUsername ? getAvatarSrc(notification.actorAvatar) : '/logo-mark.png';
 
     return (
         <Link
@@ -25,17 +27,26 @@ function NotificationItem({ notification, showDetail = false, onOpen }) {
         >
             <img className="notification-avatar" src={avatar} alt="" />
 
-            <span className="notification-body">
-                <span>
-                    {notification.actorName && <strong>{notification.actorName} </strong>}
-                    {t(`notifications.types.${notification.type}`, { title: notification.listTitle || notification.bookTitle })}
+            {isAnnouncement ? (
+                <span className="notification-body">
+                    <span><strong>{notification.announcementTitle}</strong></span>
+                    {showDetail && notification.announcementBody && (
+                        <span className="notification-detail">{notification.announcementBody}</span>
+                    )}
                 </span>
-                {showDetail && detail && (
-                    <span className="notification-detail">
-                        {isFollow ? detail : t('staffActivity.quoted', { title: detail })}
+            ) : (
+                <span className="notification-body">
+                    <span>
+                        {notification.actorName && <strong>{notification.actorName} </strong>}
+                        {t(`notifications.types.${notification.type}`, { title: notification.listTitle || notification.bookTitle })}
                     </span>
-                )}
-            </span>
+                    {showDetail && detail && (
+                        <span className="notification-detail">
+                            {isFollow ? detail : t('staffActivity.quoted', { title: detail })}
+                        </span>
+                    )}
+                </span>
+            )}
 
             <span className="notification-meta">
                 <span>{timeAgo(notification.createdAt)}</span>

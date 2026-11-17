@@ -6,5 +6,6 @@ export const ADMIN_ITEMS = [
     { to: '/admin/applications', label: 'nav.adminApplications', icon: 'feather', roles: ['admin', 'moderator'] },
     { to: '/admin/invites', label: 'nav.adminInvites', icon: 'mail', roles: ['admin', 'moderator'] },
     { to: '/admin/catalog', label: 'nav.adminCatalog', icon: 'library', roles: ['admin', 'editor'] },
+    { to: '/admin/announcements', label: 'nav.adminAnnouncements', icon: 'bell', roles: ['admin'] },
     { to: '/admin/activity', label: 'nav.adminActivity', icon: 'clock', roles: ['admin', 'moderator'] },
 ];

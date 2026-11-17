@@ -52,6 +52,8 @@ import TermsUpdate from './TermsUpdate';
 import SearchPanel from './SearchPanel';
 import SearchBox from './SearchBox';
 import { ADMIN_ITEMS } from './adminNav';
+import AdminAnnouncements from './AdminAnnouncements';
+import UpdatesPage from './UpdatesPage';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 import './Mobile.css';
@@ -560,6 +562,7 @@ function App() {
           <Route path="/settings" element={<SettingsPage currentUser={currentUser} theme={theme} seasonTheme={seasonTheme} onThemeToggle={handleThemeToggle} onSeasonThemeChange={handleSeasonThemeChange} onLanguageChange={handleLanguageChange} reduceMotion={reduceMotion} onReduceMotionToggle={handleReduceMotionToggle} colorVision={colorVision} onColorVisionChange={handleColorVisionChange} onLogout={handleLogout} onDeleted={clearSession} />} />
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/updates" element={<UpdatesPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />
           <Route path="/lists/:id" element={<ListPage currentUser={currentUser} books={books} onLibraryChange={loadUserBooks} />} />
           <Route path="/tagged/:slug" element={<TaggedPage currentUser={currentUser} />} />
@@ -587,6 +590,9 @@ function App() {
           )}
           {['admin', 'editor'].includes(currentUser.staffRole) && (
             <Route path="/admin/catalog" element={<AdminCatalog />} />
+          )}
+          {currentUser.staffRole === 'admin' && (
+            <Route path="/admin/announcements" element={<AdminAnnouncements />} />
           )}
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
