@@ -37,7 +37,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
             title={item.book.title} author={item.book.author} bookId={item.book.bookId} />
     ) : isBook ? (
         <SpineFace title={item.book.title} cover={item.face === 'solid' ? null : item.book.coverImage}
-            solid={item.face === 'solid'} motif={item.motif ?? item.look.motif} />
+            solid={item.face === 'solid'} />
     ) : (
         <ShelfDecoration name={item.name} />
     );
