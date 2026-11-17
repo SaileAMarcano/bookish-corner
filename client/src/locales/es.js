@@ -1438,7 +1438,7 @@ const es = {
                 quill: 'Pluma en tintero',
                 stars: 'Frasco de estrellas',
                 flowers: 'Flores',
-                tea: 'Taza de té',
+                bookends: 'Sujetalibros',
             },
         },
         yearChallenge: {

@@ -1438,7 +1438,7 @@ const en = {
                 quill: 'Quill and inkwell',
                 stars: 'Jar of stars',
                 flowers: 'Flowers',
-                tea: 'Cup of tea',
+                bookends: 'Bookends',
             },
         },
         yearChallenge: {

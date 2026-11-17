@@ -6,7 +6,7 @@ export const DECORATIONS = [
     { name: 'quill', milestone: 'thoughtful-reader' },
     { name: 'stars', milestone: 'bookworm' },
     { name: 'flowers', milestone: 'genre-wanderer' },
-    { name: 'tea', milestone: 'goal-reached' },
+    { name: 'bookends', milestone: 'goal-reached' },
 ];
 export const SHELF_POSES = ['upright', 'flat', 'front'];
 export const SPINE_FACES = ['cover', 'solid'];

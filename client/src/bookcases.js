@@ -45,8 +45,8 @@ export const BOOKCASES = {
 
 export const BOOKCASE_MODELS = Object.keys(BOOKCASES);
 
-const DECORATION_RATIOS = { candle: 0.72, quill: 0.52, stars: 0.75, flowers: 0.88, tea: 0.94 };
-const DECORATION_HEIGHTS = { candle: 60, quill: 76, stars: 64, flowers: 90, tea: 44 };
+const DECORATION_RATIOS = { candle: 0.72, quill: 0.52, stars: 0.75, flowers: 0.88, bookends: 0.9 };
+const DECORATION_HEIGHTS = { candle: 60, quill: 76, stars: 64, flowers: 90, bookends: 70 };
 const THIN_GENRES = ['Manga', 'Comics'];
 const LEGACY_PILE_SIZE = 3;
 

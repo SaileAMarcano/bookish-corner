@@ -2172,7 +2172,7 @@ const SHELF_DECORATIONS = {
     quill: 'thoughtful-reader',
     stars: 'bookworm',
     flowers: 'genre-wanderer',
-    tea: 'goal-reached',
+    bookends: 'goal-reached',
 };
 const SHELF_POSES = ['upright', 'lean', 'flat', 'front'];
 const SHELF_TONES = 12;
