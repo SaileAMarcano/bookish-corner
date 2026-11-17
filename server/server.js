@@ -3266,6 +3266,9 @@ app.get('/api/notifications', requireAuth, async (req, res) => {
     const rows = await query(`
         SELECT n.id, n.type, n.read_at, n.created_at, n.post_id, n.work_id, n.list_id,
                nl.title AS list_title,
+               CASE WHEN $2 = 'es' THEN an.title_es ELSE an.title_en END AS announcement_title,
+               CASE WHEN $2 = 'es' THEN an.body_es ELSE an.body_en END AS announcement_body,
+               an.link AS announcement_link,
                u.username AS actor_username, COALESCE(u.display_name, u.username) AS actor_name,
                u.avatar_url AS actor_avatar, u.bio AS actor_bio,
                ${TRANSLATED_TITLE} AS book_title,
@@ -3277,6 +3280,7 @@ app.get('/api/notifications', requireAuth, async (req, res) => {
         LEFT JOIN post_comments pc ON pc.id = n.post_comment_id
         LEFT JOIN comments c ON c.id = n.comment_id
         LEFT JOIN lists nl ON nl.id = n.list_id
+        LEFT JOIN announcements an ON an.id = n.announcement_id
         WHERE n.user_id = $1 AND (NOT $3 OR n.read_at IS NULL)
         ORDER BY n.created_at DESC, n.id DESC
         LIMIT $4 OFFSET $5
@@ -3308,6 +3312,79 @@ app.post('/api/notifications/read-all', requireAuth, async (req, res) => {
         [req.session.user.id]
     );
     res.json({ message: 'Read' });
+});
+
+const ANNOUNCEMENT_FIELDS = [['titleEs', 80], ['bodyEs', 1000], ['titleEn', 80], ['bodyEn', 1000]];
+
+function announcementFrom(body) {
+    const values = {};
+    for (const [field, max] of ANNOUNCEMENT_FIELDS) {
+        const value = typeof body?.[field] === 'string' ? body[field].trim() : '';
+        if (!value || value.length > max) return null;
+        values[field] = value;
+    }
+    const link = typeof body?.link === 'string' ? body.link.trim() : '';
+    if (link && (!/^\/(?![/\\])/.test(link) || link.length > 200)) return null;
+    values.link = link || null;
+    return values;
+}
+
+app.get('/api/announcements', requireAuth, async (req, res) => {
+    const language = languageOf(req);
+    const announcements = await query(`
+        SELECT id, link, created_at,
+               CASE WHEN $1 = 'es' THEN title_es ELSE title_en END AS title,
+               CASE WHEN $1 = 'es' THEN body_es ELSE body_en END AS body
+        FROM announcements
+        ORDER BY created_at DESC
+        LIMIT 50
+    `, [language]);
+    res.json(announcements);
+});
+
+app.get('/api/admin/announcements', requireStaff(), async (req, res) => {
+    const announcements = await query(`
+        SELECT a.id, a.title_es, a.body_es, a.title_en, a.body_en, a.link, a.created_at,
+               COALESCE(u.display_name, u.username) AS author_name,
+               COUNT(n.id) AS sent,
+               COUNT(n.read_at) AS opened
+        FROM announcements a
+        LEFT JOIN users u ON u.id = a.author_id
+        LEFT JOIN notifications n ON n.announcement_id = a.id
+        GROUP BY a.id, u.display_name, u.username
+        ORDER BY a.created_at DESC
+        LIMIT 50
+    `);
+    const [people] = await query('SELECT COUNT(*) AS count FROM users');
+    res.json({ announcements, people: people.count });
+});
+
+app.post('/api/admin/announcements', requireStaff(), async (req, res) => {
+    const values = announcementFrom(req.body);
+    if (!values) return res.status(400).json({ error: msg(req, 'announcementInvalid') });
+
+    const [created] = await query(`
+        INSERT INTO announcements (author_id, title_es, body_es, title_en, body_en, link)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id
+    `, [req.session.user.id, values.titleEs, values.bodyEs, values.titleEn, values.bodyEn, values.link]);
+    const notifications = await query(`
+        INSERT INTO notifications (user_id, type, announcement_id)
+        SELECT id, 'announcement', $1 FROM users
+        RETURNING id
+    `, [created.id]);
+    await logAction(req, 'announcement_sent', values.titleEs);
+    sendPushes(notifications.map((row) => row.id));
+    res.status(201).json({ id: created.id, sent: notifications.length });
+});
+
+app.delete('/api/admin/announcements/:id', requireStaff(), async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(404).json({ error: msg(req, 'notFound') });
+    const [deleted] = await query('DELETE FROM announcements WHERE id = $1 RETURNING title_es', [id]);
+    if (!deleted) return res.status(404).json({ error: msg(req, 'notFound') });
+    await logAction(req, 'announcement_deleted', deleted.titleEs);
+    res.json({ id });
 });
 
 const PUSH_TYPES = Object.keys(PUSH_GROUPS);
