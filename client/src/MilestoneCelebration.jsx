@@ -109,14 +109,19 @@ function BetaWindow() {
     );
 }
 
-const BOTTLE_POP = [[-16, -14], [0, -22], [16, -14]];
+const BOTTLES = [[-52, -14, 0.1], [-30, -7, 0], [30, 7, 0], [52, 14, 0.1]];
 
 function MessageBottle() {
     return (
-        <span className="milestone-note-bottle" aria-hidden="true">
-            <img className="milestone-note-bottle-glass" src="/shelf/bottle.webp" alt="" />
-            {BOTTLE_POP.map(([x, y]) => (
-                <Star key={x} className="milestone-note-bottle-pop star-tone-gold" size={9} style={{ '--pop-x': `${x}px`, '--pop-y': `${y}px` }} />
+        <span className="milestone-note-bottles" aria-hidden="true">
+            {BOTTLES.map(([x, rotate, delay]) => (
+                <img
+                    key={x}
+                    className="milestone-note-bottle"
+                    src="/shelf/bottle.webp"
+                    alt=""
+                    style={{ '--to-x': `${x}px`, '--tilt': `${rotate}deg`, '--bottle-delay': `${delay}s` }}
+                />
             ))}
         </span>
     );
