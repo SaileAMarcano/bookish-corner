@@ -17,6 +17,24 @@ const BENEFITS = [
 
 const POLL_TRIES = 20;
 const POLL_DELAY = 3000;
+const PENDING_KEY = 'alou-supporter-pending';
+
+function setPending(value) {
+    try {
+        if (value) localStorage.setItem(PENDING_KEY, '1');
+        else localStorage.removeItem(PENDING_KEY);
+    } catch {
+        return;
+    }
+}
+
+function isPending() {
+    try {
+        return localStorage.getItem(PENDING_KEY) === '1';
+    } catch {
+        return false;
+    }
+}
 
 function MembershipPage({ onChanged }) {
     const { t, i18n } = useTranslation();
@@ -32,13 +50,21 @@ function MembershipPage({ onChanged }) {
 
     useEffect(() => {
         apiFetch('/api/membership')
-            .then(setData)
+            .then((next) => {
+                setData(next);
+                if (next.isMember && isPending()) {
+                    setPending(false);
+                    setCelebrating(true);
+                }
+            })
             .catch((err) => setError(err.message));
         return () => clearTimeout(timer.current);
     }, []);
 
     useEffect(() => onPaddleEvent((event) => {
         if (event.name !== 'checkout.completed') return;
+        setPending(true);
+        window.Paddle?.Checkout.close();
         setWaiting(true);
         setMessage('');
         let tries = 0;
@@ -50,6 +76,7 @@ function MembershipPage({ onChanged }) {
                         setData(next);
                         setWaiting(false);
                         setMessage(t('membership.thanks'));
+                        setPending(false);
                         setCelebrating(true);
                         onChanged?.();
                     } else if (tries < POLL_TRIES) {
