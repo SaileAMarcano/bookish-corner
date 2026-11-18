@@ -20,6 +20,7 @@ function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
     const [tab, setTab] = useState(initialTab === 'review' ? 'review' : 'reading');
     const [status, setStatus] = useState(book.status || 'reading');
     const [rating, setRating] = useState(book.rating || 0);
+    const [superStar, setSuperStar] = useState(Boolean(book.superStar));
     const [review, setReview] = useState(book.review || '');
     const [reviewIsSpoiler, setReviewIsSpoiler] = useState(Boolean(book.reviewIsSpoiler));
     const [genre, setGenre] = useState(book.genre || '');
@@ -31,7 +32,7 @@ function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
     const [finishedOn, setFinishedOn] = useState(book.status === 'finished' ? book.finishedOn || '' : '');
     const [exactDate, setExactDate] = useState(book.status === 'finished' && Boolean(book.finishedOn));
     const savedFields = useRef({
-        status, rating, review, reviewIsSpoiler: Boolean(review.trim()) && reviewIsSpoiler,
+        status, rating, superStar: superStar && rating === 5, review, reviewIsSpoiler: Boolean(review.trim()) && reviewIsSpoiler,
         genre: genre || null, currentPage: toNumber(currentPage), totalPages: toNumber(totalPages),
         currentChapter: toNumber(currentChapter), readYear: unknownYear ? null : Number(readYear),
         finishedOn: exactDate ? finishedOn : null,
@@ -136,6 +137,7 @@ function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
         const fields = {
             status,
             rating,
+            superStar: superStar && rating === 5,
             review,
             reviewIsSpoiler: Boolean(review.trim()) && reviewIsSpoiler,
             genre: genre || null,
@@ -246,11 +248,26 @@ function BookModal({ book, onClose, onUpdate, initialTab = 'reading' }) {
                                     <StarRating
                                         value={rating}
                                         size={23}
+                                        superStar={superStar && rating === 5}
                                         onChange={(value) => {
                                             setRating(value);
                                             setSaved(false);
                                         }}
                                     />
+                                    {book.canSuperStar && rating === 5 && (
+                                        <button
+                                            type="button"
+                                            className={`super-star-toggle ${superStar ? 'active' : ''}`}
+                                            aria-pressed={superStar}
+                                            onClick={() => {
+                                                setSuperStar(!superStar);
+                                                setSaved(false);
+                                            }}
+                                        >
+                                            <Icon name="sparkle" size={14} />
+                                            {t(superStar ? 'stars.superStarOn' : 'stars.superStarAdd')}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 

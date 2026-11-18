@@ -218,6 +218,10 @@ async function unnotify(userId, actorId, type, refs = {}) {
 }
 
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
+const OWNER_HAS_PLUS = `EXISTS (SELECT 1 FROM users pu WHERE pu.id = ub.user_id AND (pu.plus_until > now() OR pu.staff_role = 'admin'))`;
+const SUPER_STAR = `(ub.super_star AND ${OWNER_HAS_PLUS})`;
+const SUPER_STAR_LIMIT = 5;
+const IS_SUPPORTER = (alias) => `COALESCE(${alias}.plus_until > now(), false)`;
 const TRANSLATED_DESCRIPTION = 'COALESCE(t.description, w.description)';
 const JOIN_TRANSLATION = 'LEFT JOIN work_translations t ON t.work_id = w.id AND t.language';
 const GENRES = [
@@ -298,8 +302,9 @@ app.get('/api/books/:id', requireAuth, async (req, res) => {
     }
 
     const reviews = await query(`
-        SELECT ub.id, ub.review, ub.review_is_spoiler, ub.rating, ub.status, ub.created_at,
+        SELECT ub.id, ub.review, ub.review_is_spoiler, ub.rating, ${SUPER_STAR} AS super_star, ub.status, ub.created_at,
                u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               ${IS_SUPPORTER('u')} AS is_supporter,
                (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id) AS like_count,
                (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id) AS comment_count,
                EXISTS (SELECT 1 FROM likes l WHERE l.user_book_id = ub.id AND l.user_id = $2) AS has_liked,
@@ -683,7 +688,7 @@ const PROGRESS_NOTE_MAX_LENGTH = 280;
 
 app.patch('/api/user-books/:id', requireAuth, async (req, res) => withTransaction(async (query) => {
     const { id } = req.params;
-    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, progressNote, reviewIsSpoiler } = req.body;
+    const { status, progress, review, isFavorite, genre, currentPage, totalPages, currentChapter, rating, progressNote, reviewIsSpoiler, superStar } = req.body;
 
     const [userBook] = await query("SELECT *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on FROM user_books WHERE id = $1 FOR UPDATE", [id]);
     if (!userBook) {
@@ -743,6 +748,22 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => withTransactio
         return res.status(400).json({ error: msg(req, 'pageOverTotal') });
     }
 
+    if (superStar !== undefined && typeof superStar !== 'boolean') {
+        return res.status(400).json({ error: msg(req, 'invalidRequest') });
+    }
+    const newRating = rating ?? Number(userBook.rating);
+    const newSuperStar = Boolean(superStar ?? userBook.superStar) && newRating === 5;
+    if (superStar === true && !userBook.superStar) {
+        const [owner] = await query('SELECT plus_until, staff_role FROM users WHERE id = $1', [userBook.userId]);
+        if (!hasPlus(owner)) return res.status(403).json({ error: msg(req, 'superStarMembers') });
+        if (newRating !== 5) return res.status(400).json({ error: msg(req, 'superStarRating') });
+        const [{ count }] = await query(
+            'SELECT COUNT(*) AS count FROM user_books WHERE user_id = $1 AND super_star AND id <> $2',
+            [userBook.userId, id]
+        );
+        if (count >= SUPER_STAR_LIMIT) return res.status(400).json({ error: msg(req, 'superStarLimit') });
+    }
+
     const statusChanged = status !== undefined && status !== userBook.status;
     const startedNow = statusChanged && status === 'reading' && (userBook.status === 'want-to-read' || !userBook.startedAt);
     const finishedNow = statusChanged && status === 'finished';
@@ -767,6 +788,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => withTransactio
             total_pages = $7,
             current_chapter = $8,
             rating = COALESCE($9, rating),
+            super_star = $19,
             read_year = $16,
             finished_on = $17::date,
             started_at = CASE WHEN $10 THEN now() ELSE started_at END,
@@ -777,7 +799,7 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => withTransactio
                                     ELSE progress_note_at END
         WHERE id = $13
         RETURNING *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on
-    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote, dates.readYear, dates.finishedOn, newReviewIsSpoiler]);
+    `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote, dates.readYear, dates.finishedOn, newReviewIsSpoiler, newSuperStar]);
 
     const noteChanged = noteGiven && cleanNote !== userBook.progressNote;
     if (finishedNow) {
@@ -812,6 +834,7 @@ app.delete('/api/user-books/:id', requireAuth, async (req, res) => {
 async function findUserBooks(req, ownerId) {
     return query(`
         SELECT ub.id, ub.status, ub.review, ub.review_is_spoiler, ub.is_favorite, ub.genre, ub.rating,
+               ${SUPER_STAR} AS super_star, ${OWNER_HAS_PLUS} AS can_super_star,
                ub.current_page, ub.total_pages, ub.current_chapter,
                ub.started_at, ub.finished_at, ub.last_read_at, ub.created_at,
                ub.read_year, to_char(ub.finished_on, 'YYYY-MM-DD') AS finished_on,
@@ -951,6 +974,7 @@ async function findPosts(req, condition, value) {
     return query(`
         SELECT p.id, p.text, p.image_url, p.is_spoiler, p.spotify_url, p.created_at, p.edited_at,
                u.id AS user_id, u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               ${IS_SUPPORTER('u')} AS is_supporter,
                COALESCE(u.pinned_post_id = p.id, false) AS is_pinned,
                (SELECT COUNT(*) FROM post_likes pl WHERE pl.post_id = p.id) AS like_count,
                (SELECT COUNT(*) FROM post_comments pc WHERE pc.post_id = p.id) AS comment_count,
@@ -1104,9 +1128,10 @@ async function findActivity(req, ids) {
     return query(`
         SELECT ru.id, ru.user_id, ru.kind, ru.current_page, ru.total_pages, ru.progress, ru.note AS progress_note,
                ru.updated_at AS happened_at, ub.id AS user_book_id,
-               ub.status, ub.rating, ub.review, ub.review_is_spoiler,
+               ub.status, ub.rating, ${SUPER_STAR} AS super_star, ub.review, ub.review_is_spoiler,
                w.id AS book_id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
                u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               ${IS_SUPPORTER('u')} AS is_supporter,
                (SELECT COUNT(*) FROM reading_update_likes l WHERE l.update_id = ru.id) AS like_count,
                (SELECT COUNT(*) FROM reading_update_comments c WHERE c.update_id = ru.id) AS comment_count,
                EXISTS (SELECT 1 FROM reading_update_likes l WHERE l.update_id = ru.id AND l.user_id = $3) AS has_liked
@@ -1267,10 +1292,11 @@ app.get('/api/reviews', requireAuth, async (req, res) => {
     const ordering = order === 'popular' ? 'like_count DESC, ub.review_updated_at DESC NULLS LAST, ub.id DESC' : 'ub.review_updated_at DESC NULLS LAST, ub.id DESC';
     const term = `%${escapeLike(plainSearch(q.trim()))}%`;
     const items = await query(`
-        SELECT ub.id, ub.review, ub.review_is_spoiler, ub.rating,
+        SELECT ub.id, ub.review, ub.review_is_spoiler, ub.rating, ${SUPER_STAR} AS super_star,
                COALESCE(ub.review_updated_at, ub.created_at) AS review_updated_at,
                w.id AS book_id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
                u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
+               ${IS_SUPPORTER('u')} AS is_supporter,
                ub.user_id = $1 AS is_mine,
                (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id) AS like_count,
                (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id) AS comment_count,
@@ -2211,7 +2237,8 @@ app.get('/api/users', requireAuth, async (req, res) => {
 app.get('/api/users/:username', requireAuth, async (req, res) => {
     const [user] = await query(`
         SELECT id, username, COALESCE(display_name, username) AS display_name, bio, avatar_url,
-                about_me, favorite_quote, favorite_things, location, instagram_url, tiktok_url, reading_goal, created_at, staff_role, 
+                about_me, favorite_quote, favorite_things, location, instagram_url, tiktok_url, reading_goal, created_at, staff_role,
+               ${IS_SUPPORTER('users')} AS is_supporter,
                (SELECT COUNT(*) FROM user_books
                WHERE user_books.user_id = users.id AND user_books.status = 'finished') AS books_read,
                (SELECT COUNT(*) FROM user_books
@@ -4196,6 +4223,7 @@ app.get('/api/profile', requireAuth, async (req, res) => {
     const [user] = await query(`
         SELECT id, username, email, bio, avatar_url, instagram_url, tiktok_url, about_me, favorite_quote,
     favorite_things, location, reading_goal, reader_type, created_at, staff_role,
+    ${IS_SUPPORTER('users')} AS is_supporter,
     COALESCE(display_name, username) AS display_name,
         (SELECT COUNT(*) FROM user_books
                    WHERE user_books.user_id = users.id AND user_books.status = 'finished') AS books_read,

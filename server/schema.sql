@@ -91,6 +91,7 @@ CREATE TABLE user_books (
                     CHECK (rating BETWEEN 0 AND 5 AND rating * 2 = round(rating * 2)),
     genre           TEXT,
     is_favorite     BOOLEAN NOT NULL DEFAULT false,
+    super_star      BOOLEAN NOT NULL DEFAULT false,
     started_at      TIMESTAMPTZ,
     finished_at     TIMESTAMPTZ,
     read_year       SMALLINT,

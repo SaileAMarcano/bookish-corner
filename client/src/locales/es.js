@@ -411,6 +411,9 @@ const es = {
         processor: 'Los pagos los procesa Paddle, nuestro revendedor oficial. Nunca vemos tu tarjeta.',
         terms: 'Ver los términos y los reembolsos',
     },
+    supporter: {
+        badge: 'Apoya A Library of Us',
+    },
     updates: {
         kicker: 'A Library of Us',
         title: 'Novedades',
@@ -1144,6 +1147,9 @@ const es = {
         justNow: 'justo ahora',
     },
     stars: {
+        superStar: '5 estrellas y la Súper estrella',
+        superStarAdd: 'Darle la Súper estrella',
+        superStarOn: 'Tiene la Súper estrella',
         outOf: '{{value}} de 5 estrellas',
         rate: 'Calificar con {{value}} de 5',
         labels: {

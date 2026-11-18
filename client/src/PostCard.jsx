@@ -10,6 +10,7 @@ import SpotifyPlayer from './SpotifyPlayer';
 import ReportButton from './ReportButton';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
+import SupporterBadge from './SupporterBadge';
 
 function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPinned, onPinChange, books = [], openComments = false }) {
     const { t } = useTranslation();
@@ -78,6 +79,7 @@ function PostCard({ post, currentUserId, onChange, onDeleted, activeTag, showPin
                 <img className="post-avatar" src={getAvatarSrc(post.avatarUrl)} alt="" />
                 <div>
                     <Link to={`/u/${post.username}`} className="post-author">{post.displayName}</Link>
+                    {post.isSupporter && <SupporterBadge />}
                     <div className="post-date">
                         {timeAgo(post.createdAt)}
                         {post.editedAt && <span className="post-edited"> · {t('posts.edited')}</span>}

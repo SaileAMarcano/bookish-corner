@@ -411,6 +411,9 @@ const en = {
         processor: 'Payments are processed by Paddle, our official reseller. We never see your card.',
         terms: 'Read the terms and refunds',
     },
+    supporter: {
+        badge: 'Supports A Library of Us',
+    },
     updates: {
         kicker: 'A Library of Us',
         title: 'Updates',
@@ -1144,6 +1147,9 @@ const en = {
         justNow: 'just now',
     },
     stars: {
+        superStar: '5 stars and the Super star',
+        superStarAdd: 'Give it the Super star',
+        superStarOn: 'Has the Super star',
         outOf: '{{value}} out of 5 stars',
         rate: 'Rate {{value}} out of 5',
         labels: {

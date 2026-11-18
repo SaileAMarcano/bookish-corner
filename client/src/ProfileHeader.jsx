@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import { ProfileBadge } from './MilestoneSeal';
 import { getAvatarSrc, parseDbDate } from './utils';
+import SupporterBadge from './SupporterBadge';
 
 function validSocialUrl(value, domain) {
     if (!value) return false;
@@ -42,7 +43,10 @@ function ProfileHeader({ profile, onShowFollows, children }) {
 
                 <div className="profile-header-info">
                     <div className="profile-name-row">
-                        <h1 className="display profile-name">{profile.displayName}</h1>
+                        <h1 className="display profile-name">
+                            {profile.displayName}
+                            {profile.isSupporter && <SupporterBadge size={18} />}
+                        </h1>
                         {profile.badge && <ProfileBadge milestoneKey={profile.badge} />}
                     </div>
                     <div className="profile-username">@{profile.username}</div>

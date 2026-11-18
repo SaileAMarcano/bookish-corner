@@ -9,6 +9,7 @@ import ReviewComments from './ReviewComments';
 import ReviewText from './ReviewText';
 import { apiFetch } from './api';
 import { getAvatarSrc, timeAgo } from './utils';
+import SupporterBadge from './SupporterBadge';
 
 const KIND_ICONS = {
     finished: 'check',
@@ -42,6 +43,7 @@ function ActivityCard({ activity, currentUserId, onChange, openComments = false 
                 <img className="post-avatar" src={getAvatarSrc(activity.avatarUrl)} alt="" />
                 <div>
                     <Link to={`/u/${activity.username}`} className="post-author">{activity.displayName}</Link>
+                    {activity.isSupporter && <SupporterBadge />}
                     <div className="post-date">
                         <Link to={`/activity/${activity.id}`} className="activity-time-link">{timeAgo(activity.happenedAt)}</Link>
                     </div>
@@ -63,7 +65,7 @@ function ActivityCard({ activity, currentUserId, onChange, openComments = false 
                     <div className="activity-author">{activity.author}</div>
 
                     {activity.kind === 'finished' && activity.rating > 0 && (
-                        <StarRating value={activity.rating} size={16} />
+                        <StarRating value={activity.rating} size={16} superStar={activity.superStar} />
                     )}
 
                     {activity.kind === 'finished' && activity.review && (

@@ -12,7 +12,7 @@ function StarShape({ size }) {
     );
 }
 
-function StarRating({ value, onChange, size = 26 }) {
+function StarRating({ value, onChange, size = 26, superStar = false }) {
     const { t } = useTranslation();
     const [hovered, setHovered] = useState(0);
     const [burst, setBurst] = useState({ key: 0, value: 0 });
@@ -31,7 +31,7 @@ function StarRating({ value, onChange, size = 26 }) {
             className="star-rating"
             onMouseLeave={() => setHovered(0)}
             role={onChange ? undefined : 'img'}
-            aria-label={onChange ? undefined : t('stars.outOf', { value })}
+            aria-label={onChange ? undefined : (superStar ? t('stars.superStar') : t('stars.outOf', { value }))}
         >
             {STARS.map((star) => {
                 let fill = 0;
@@ -79,6 +79,13 @@ function StarRating({ value, onChange, size = 26 }) {
                     </span>
                 );
             })}
+            {superStar && (
+                <span className="star star-super" aria-hidden="true">
+                    <span className="star-art">
+                        <StarShape size={size} />
+                    </span>
+                </span>
+            )}
         </div>
     );
 

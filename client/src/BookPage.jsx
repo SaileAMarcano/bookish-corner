@@ -12,6 +12,7 @@ import Notice from './Notice';
 import { apiFetch } from './api';
 import { getAvatarSrc, genreLabel, pageSummary, slugify, timeAgo } from './utils';
 import LoadingState from './LoadingState';
+import SupporterBadge from './SupporterBadge';
 
 function BookPage({ books, onLibraryChange }) {
     const { id } = useParams();
@@ -181,10 +182,11 @@ function BookPage({ books, onLibraryChange }) {
                         <div className="book-review-body">
                             <div className="book-review-head">
                                 <Link to={`/u/${review.username}`} className="post-author">{review.displayName}</Link>
+                                {review.isSupporter && <SupporterBadge />}
                                 <span className="post-date">{timeAgo(review.createdAt)}</span>
                             </div>
 
-                            {review.rating > 0 && <StarRating value={review.rating} size={16} />}
+                            {review.rating > 0 && <StarRating value={review.rating} size={16} superStar={review.superStar} />}
 
                             <ReviewText text={review.review} isSpoiler={review.reviewIsSpoiler} className="book-review-text" />
 

@@ -17094,3 +17094,80 @@ a.post-tag:hover,
   margin: 0;
   accent-color: var(--rose-ink);
 }
+
+.supporter-badge {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-left: 6px;
+  border-radius: 50%;
+  background: var(--rose-soft);
+  color: var(--rose-ink);
+  vertical-align: -3px;
+}
+
+.profile-name .supporter-badge {
+  width: 30px;
+  height: 30px;
+  margin-left: 10px;
+  vertical-align: 2px;
+}
+
+.book-review-head .supporter-badge {
+  margin-left: -2px;
+  align-self: center;
+}
+
+.star-super .star-art {
+  display: flex;
+}
+
+.star-super svg {
+  fill: #FFD36E;
+  stroke: #E58AA9;
+  animation: super-star-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes super-star-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px #FFCF6B) drop-shadow(0 0 5px #F48FB1); }
+  50% { filter: drop-shadow(0 0 4px #FFE08F) drop-shadow(0 0 10px #F48FB1); }
+}
+
+:root[data-motion="reduce"] .star-super svg {
+  animation: none;
+  filter: drop-shadow(0 0 3px #FFCF6B) drop-shadow(0 0 7px #F48FB1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-super svg {
+    animation: none;
+    filter: drop-shadow(0 0 3px #FFCF6B) drop-shadow(0 0 7px #F48FB1);
+  }
+}
+
+.super-star-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--rose);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--rose-ink);
+  font: 600 12px 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.super-star-toggle.active {
+  border-color: #E58AA9;
+  background: linear-gradient(90deg, #FFE7A8, #F9C9D8);
+  color: #5A2A3A;
+}
+
+.super-star-toggle:focus-visible {
+  outline: 2px solid var(--rose-ink);
+  outline-offset: 2px;
+}

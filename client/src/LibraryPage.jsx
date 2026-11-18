@@ -53,7 +53,7 @@ function LibraryTile({ book, isSelected, onEdit, onChoose }) {
                 </button>
             </div>
             <div className="library-grid-author">{book.author}</div>
-            {book.rating > 0 && <StarRating value={book.rating} size={15} />}
+            {book.rating > 0 && <StarRating value={book.rating} size={15} superStar={book.superStar} />}
             {book.status !== 'finished' && book.totalPages > 0 && (
                 <small className="library-grid-pages">
                     {t('library.pages', { current: book.currentPage || 0, total: book.totalPages })}
