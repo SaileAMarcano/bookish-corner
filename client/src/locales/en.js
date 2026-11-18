@@ -1450,7 +1450,7 @@ const en = {
         },
     },
     celebration: {
-        seasideTitle: 'Your story flows on',
+        seasideTitle: 'A message from the sea',
         moonlitTitle: 'Your story shines',
         unlocked: 'Badge unlocked!',
         betaText: 'Thank you for being here from the very beginning.',

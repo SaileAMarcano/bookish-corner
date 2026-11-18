@@ -109,12 +109,16 @@ function BetaWindow() {
     );
 }
 
-function SeaWave() {
+const BOTTLE_POP = [[-16, -14], [0, -22], [16, -14]];
+
+function MessageBottle() {
     return (
-        <svg className="milestone-note-wave" viewBox="0 0 120 28" aria-hidden="true">
-            <path className="milestone-note-wave-back" d="M2 18c10-8 20-8 30 0s20 8 30 0 20-8 30 0 20 8 26 2" />
-            <path className="milestone-note-wave-front" d="M2 12c10-8 20-8 30 0s20 8 30 0 20-8 30 0 20 8 26 2" />
-        </svg>
+        <span className="milestone-note-bottle" aria-hidden="true">
+            <img className="milestone-note-bottle-glass" src="/shelf/bottle.webp" alt="" />
+            {BOTTLE_POP.map(([x, y]) => (
+                <Star key={x} className="milestone-note-bottle-pop star-tone-gold" size={9} style={{ '--pop-x': `${x}px`, '--pop-y': `${y}px` }} />
+            ))}
+        </span>
     );
 }
 
@@ -272,8 +276,14 @@ function MilestoneCelebration({ currentUser, books, seasonTheme }) {
                     <Link to="/achievements" className="milestone-note-link">
                         <span className="milestone-note-ribbon">
                             <span className="milestone-note-kicker">{t(SEASON_TITLES[seasonTheme] || 'celebration.newAchievement')}</span>
-                            <AchievementMark className="milestone-note-badge" milestoneKey={note.key} />
-                            {seaside && <SeaWave />}
+                            {seaside ? (
+                                <span className="milestone-note-bottle-stage">
+                                    <MessageBottle />
+                                    <AchievementMark className="milestone-note-badge milestone-note-badge-message" milestoneKey={note.key} />
+                                </span>
+                            ) : (
+                                <AchievementMark className="milestone-note-badge" milestoneKey={note.key} />
+                            )}
                             {seasonTheme === 'moonlit' && <MoonPhases />}
                             <strong className="milestone-note-title">
                                 {note.count

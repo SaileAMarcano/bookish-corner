@@ -17486,74 +17486,119 @@ a.post-tag:hover,
   background: #2C6466;
 }
 
-.milestone-note-wave {
-  width: 104px;
-  height: 24px;
-  margin-top: -4px;
-  overflow: visible;
-  animation: sea-wave-sway 2.1s ease-in-out both;
+.milestone-note-bottle-stage {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  width: 60px;
+  height: 52px;
 }
 
-.milestone-note-wave path {
-  fill: none;
-  stroke-width: 3;
-  stroke-linecap: round;
-  stroke-dasharray: 160;
-  stroke-dashoffset: 160;
-  animation: sea-wave-draw 2.1s ease-out forwards;
+.milestone-note-bottle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 44px;
+  margin-left: -22px;
+  animation: bottle-float 2.2s ease-in-out forwards;
 }
 
-.milestone-note-wave-back {
-  stroke: #5FA7A8;
-  animation-delay: 0.15s;
+.milestone-note-bottle-glass {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
-.milestone-note-wave-front {
-  stroke: #A9DEDA;
+.milestone-note-bottle-pop {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  margin-left: -4px;
+  opacity: 0;
+  animation: bottle-pop 0.7s 1s ease-out forwards;
 }
 
-@keyframes sea-wave-draw {
+.milestone-note .milestone-note-badge-message {
+  position: relative;
+  opacity: 0;
+  animation: message-rise 0.8s 1.15s cubic-bezier(0.3, 1.4, 0.5, 1) forwards;
+}
+
+@keyframes bottle-float {
   0% {
-    stroke-dashoffset: 160;
     opacity: 0;
+    transform: translateY(26px) rotate(-8deg);
   }
 
-  20% {
+  25% {
+    opacity: 1;
+    transform: translateY(0) rotate(6deg);
+  }
+
+  40% {
+    transform: translateY(-3px) rotate(-5deg);
+  }
+
+  55% {
+    opacity: 1;
+    transform: translateY(0) rotate(3deg);
+  }
+
+  80% {
+    opacity: 0.6;
+    transform: translateY(10px) rotate(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(22px) rotate(0);
+  }
+}
+
+@keyframes bottle-pop {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.4);
+  }
+
+  40% {
     opacity: 1;
   }
 
-  70% {
-    stroke-dashoffset: 0;
-  }
-
   100% {
-    stroke-dashoffset: 0;
-    opacity: 0.85;
+    opacity: 0;
+    transform: translate(var(--pop-x), var(--pop-y)) scale(1);
   }
 }
 
-@keyframes sea-wave-sway {
+@keyframes message-rise {
   0% {
-    transform: translateX(-10px);
-  }
-
-  50% {
-    transform: translateX(6px);
+    opacity: 0;
+    transform: translateY(16px) scale(0.4) rotate(-10deg);
   }
 
   100% {
-    transform: translateX(0);
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .milestone-note-wave path {
-    stroke-dashoffset: 0;
+  .milestone-note-bottle {
+    display: none;
+  }
+
+  .milestone-note .milestone-note-badge-message {
+    opacity: 1;
   }
 }
 
-:root[data-motion="reduce"] .milestone-note-wave path {
-  stroke-dashoffset: 0;
+:root[data-motion="reduce"] .milestone-note-bottle {
+  display: none;
+}
+
+:root[data-motion="reduce"] .milestone-note .milestone-note-badge-message {
+  opacity: 1;
 }
 
 :root[data-season="moonlit"] {

@@ -1450,7 +1450,7 @@ const es = {
         },
     },
     celebration: {
-        seasideTitle: 'Tu historia sigue su curso',
+        seasideTitle: 'Llegó un mensaje del mar',
         moonlitTitle: 'Tu historia brilla',
         unlocked: '¡Insignia desbloqueada!',
         betaText: 'Gracias por estar aquí desde el principio.',
