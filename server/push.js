@@ -3,8 +3,8 @@ const { pushText } = require('./messages');
 
 const PUSH_GROUPS = {
     follows: ['follow'],
-    comments: ['post_comment', 'review_comment', 'list_comment'],
-    likes: ['post_like', 'review_like', 'list_like'],
+    comments: ['post_comment', 'review_comment', 'list_comment', 'update_comment'],
+    likes: ['post_like', 'review_like', 'list_like', 'update_like'],
     books: ['book_added'],
     updates: ['announcement'],
 };
@@ -56,6 +56,7 @@ function linkOf(row) {
     if (row.type === 'follow') return `/u/${row.actorUsername}`;
     if (row.type === 'list_like' || row.type === 'list_comment') return `/lists/${row.listId}`;
     if (row.type === 'announcement') return row.announcementLink || '/updates';
+    if (row.type === 'update_like' || row.type === 'update_comment') return `/activity/${row.readingUpdateId}`;
     return `/book/${row.workId}`;
 }
 
@@ -81,7 +82,7 @@ function payloadOf(row) {
         title: row.actorName || 'A Library of Us',
         body: comment ? `${action}\n“${comment}”` : action,
         url: linkOf(row),
-        tag: `${row.type}-${row.postId || row.listId || row.workId || row.actorUsername || row.id}`,
+        tag: `${row.type}-${row.readingUpdateId || row.postId || row.listId || row.workId || row.actorUsername || row.id}`,
         notificationId: row.id,
         ...iconsOf(groupOf(row.type)),
     };
@@ -114,7 +115,7 @@ async function deliver(subscription, payload) {
 async function pushNotifications(ids) {
     if (!pushEnabled() || !ids.length) return;
     const rows = await query(`
-        SELECT n.id, n.type, n.post_id, n.work_id, n.list_id, n.announcement_id,
+        SELECT n.id, n.type, n.post_id, n.work_id, n.list_id, n.announcement_id, n.reading_update_id,
                CASE WHEN r.language = 'es' THEN an.title_es ELSE an.title_en END AS announcement_title,
                CASE WHEN r.language = 'es' THEN an.body_es ELSE an.body_en END AS announcement_body,
                an.link AS announcement_link,
@@ -122,7 +123,7 @@ async function pushNotifications(ids) {
                r.language, r.push_types,
                a.username AS actor_username, COALESCE(a.display_name, a.username) AS actor_name,
                COALESCE(t.title, w.title) AS book_title, l.title AS list_title,
-               COALESCE(pc.text, c.text, lc.text) AS comment_text
+               COALESCE(pc.text, c.text, lc.text, ruc.text) AS comment_text
         FROM notifications n
         JOIN users r ON r.id = n.user_id
         JOIN push_subscriptions s ON s.user_id = n.user_id
@@ -133,6 +134,7 @@ async function pushNotifications(ids) {
         LEFT JOIN post_comments pc ON pc.id = n.post_comment_id
         LEFT JOIN comments c ON c.id = n.comment_id
         LEFT JOIN list_comments lc ON lc.id = n.list_comment_id
+        LEFT JOIN reading_update_comments ruc ON ruc.id = n.reading_update_comment_id
         LEFT JOIN announcements an ON an.id = n.announcement_id
         WHERE n.id = ANY($1::int[])
     `, [ids]);

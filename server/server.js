@@ -154,8 +154,8 @@ async function notify(userId, actorId, type, refs = {}) {
     if (userId === actorId) return;
 
     const [created] = await query(`
-        INSERT INTO notifications (user_id, actor_id, type, post_id, post_comment_id, user_book_id, comment_id, work_id, list_id, list_comment_id)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+        INSERT INTO notifications (user_id, actor_id, type, post_id, post_comment_id, user_book_id, comment_id, work_id, list_id, list_comment_id, reading_update_id, reading_update_comment_id)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
         RETURNING id
     `, [
         userId,
@@ -168,6 +168,8 @@ async function notify(userId, actorId, type, refs = {}) {
         refs.workId ?? null,
         refs.listId ?? null,
         refs.listCommentId ?? null,
+        refs.readingUpdateId ?? null,
+        refs.readingUpdateCommentId ?? null,
     ]);
     sendPushes([created.id]);
 }
@@ -179,7 +181,8 @@ async function unnotify(userId, actorId, type, refs = {}) {
           AND post_id IS NOT DISTINCT FROM $4
           AND user_book_id IS NOT DISTINCT FROM $5
           AND list_id IS NOT DISTINCT FROM $6
-    `, [userId, actorId, type, refs.postId ?? null, refs.userBookId ?? null, refs.listId ?? null]);
+          AND reading_update_id IS NOT DISTINCT FROM $7
+    `, [userId, actorId, type, refs.postId ?? null, refs.userBookId ?? null, refs.listId ?? null, refs.readingUpdateId ?? null]);
 }
 
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
@@ -471,6 +474,50 @@ app.get('/api/author-books', requireAuth, async (req, res) => {
 });
 
 
+const UPDATE_MERGE_WINDOW = '3 hours';
+
+function progressOf(userBook) {
+    if (userBook.totalPages > 0) return Math.min(100, Math.round((userBook.currentPage || 0) * 100 / userBook.totalPages));
+    return userBook.progress || 0;
+}
+
+async function recordStart(userBookId) {
+    await query(`
+        INSERT INTO reading_updates (user_book_id, user_id, kind)
+        SELECT id, user_id, 'started' FROM user_books WHERE id = $1 AND status = 'reading'
+    `, [userBookId]);
+}
+
+async function recordReadingUpdate(run, userBook, kind, note) {
+    const values = [userBook.currentPage, userBook.totalPages, progressOf(userBook)];
+
+    if (kind === 'progress') {
+        const [recent] = await run(`
+            SELECT ru.id FROM reading_updates ru
+            WHERE ru.id = (SELECT MAX(id) FROM reading_updates WHERE user_book_id = $1)
+              AND ru.kind IN ('started', 'progress')
+              AND ru.updated_at > now() - $2::interval
+              AND NOT EXISTS (SELECT 1 FROM reading_update_likes l WHERE l.update_id = ru.id)
+              AND NOT EXISTS (SELECT 1 FROM reading_update_comments c WHERE c.update_id = ru.id)
+        `, [userBook.id, UPDATE_MERGE_WINDOW]);
+
+        if (recent) {
+            await run(`
+                UPDATE reading_updates
+                SET kind = 'progress', current_page = $2, total_pages = $3, progress = $4,
+                    note = CASE WHEN $5 THEN $6 ELSE note END, updated_at = now()
+                WHERE id = $1
+            `, [recent.id, ...values, note !== undefined, note ?? null]);
+            return;
+        }
+    }
+
+    await run(`
+        INSERT INTO reading_updates (user_book_id, user_id, kind, current_page, total_pages, progress, note)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
+    `, [userBook.id, userBook.userId, kind, ...values, kind === 'finished' ? null : note ?? null]);
+}
+
 app.post('/api/user-books', requireAuth, async (req, res) => {
     const { bookId } = req.body;
     const status = req.body.status === 'want-to-read' ? 'want-to-read' : 'reading';
@@ -484,6 +531,7 @@ app.post('/api/user-books', requireAuth, async (req, res) => {
             VALUES ($1, $2, $3, CASE WHEN $3 = 'reading' THEN now() END, now())
             RETURNING id, user_id, work_id AS book_id, status
         `, [req.session.user.id, bookId, status]);
+        await recordStart(entry.id);
         res.status(201).json(entry);
     } catch (error) {
         if (error.code === '23505') {
@@ -549,6 +597,7 @@ app.post('/api/user-books/from-search', requireAuth, async (req, res) => {
             VALUES ($1, $2, now(), now())
             RETURNING id
         `, [req.session.user.id, book.id]);
+        await recordStart(entry.id);
         res.status(201).json({ id: entry.id, book });
     } catch (error) {
         if (error.code === '23505') {
@@ -697,6 +746,15 @@ app.patch('/api/user-books/:id', requireAuth, async (req, res) => withTransactio
         WHERE id = $13
         RETURNING *, to_char(finished_on, 'YYYY-MM-DD') AS finished_on
     `, [status, progress, newReview, isFavorite, newGenre, newPage, newTotal, newChapter, rating, startedNow, finishedNow, readNow, id, noteGiven, cleanNote, dates.readYear, dates.finishedOn, newReviewIsSpoiler]);
+
+    const noteChanged = noteGiven && cleanNote !== userBook.progressNote;
+    if (finishedNow) {
+        await recordReadingUpdate(query, updated, 'finished');
+    } else if (startedNow) {
+        await recordReadingUpdate(query, updated, 'started', noteGiven ? cleanNote : undefined);
+    } else if (updated.status === 'reading' && (readNow || (noteChanged && cleanNote))) {
+        await recordReadingUpdate(query, updated, 'progress', noteGiven ? cleanNote : undefined);
+    }
 
     return updated;
 }).then((updated) => {
@@ -1001,9 +1059,6 @@ function parsePage(value = '0') {
     return typeof value === 'string' && /^\d{1,4}$/.test(value) && Number(value) <= 500 ? Number(value) : null;
 }
 
-const ACTIVITY_DATE = `CASE WHEN ub.status = 'finished' THEN COALESCE(ub.finished_at, ub.created_at)
-                            ELSE COALESCE(ub.last_read_at, ub.started_at, ub.created_at) END`;
-
 const FEED_ORDER = {
     'for-you': `(CASE WHEN i.from_followed THEN 3 ELSE 0 END
                 + CASE WHEN i.followed_tag THEN 2 ELSE 0 END
@@ -1015,28 +1070,94 @@ const FEED_ORDER = {
 
 async function findActivity(req, ids) {
     return query(`
-        SELECT ub.id, ub.user_id, ub.status, ub.rating, ub.review, ub.review_is_spoiler, ub.current_page, ub.total_pages, ub.progress_note,
-               CASE WHEN ub.status = 'finished' THEN 'finished'
-                    WHEN COALESCE(ub.current_page, 0) > 0 OR ub.progress > 0 THEN 'progress'
-                    ELSE 'started'
-               END AS kind,
-               CASE WHEN ub.total_pages > 0
-                    THEN LEAST(100, ROUND(COALESCE(ub.current_page, 0) * 100.0 / ub.total_pages))
-                    ELSE ub.progress
-               END AS progress,
-               ${ACTIVITY_DATE} AS happened_at,
+        SELECT ru.id, ru.user_id, ru.kind, ru.current_page, ru.total_pages, ru.progress, ru.note AS progress_note,
+               ru.updated_at AS happened_at, ub.id AS user_book_id,
+               ub.status, ub.rating, ub.review, ub.review_is_spoiler,
                w.id AS book_id, ${TRANSLATED_TITLE} AS title, w.author, w.cover_image,
                u.username, COALESCE(u.display_name, u.username) AS display_name, u.avatar_url,
-               (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id) AS like_count,
-               (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id) AS comment_count,
-               EXISTS (SELECT 1 FROM likes l WHERE l.user_book_id = ub.id AND l.user_id = $3) AS has_liked
-        FROM user_books ub
+               (SELECT COUNT(*) FROM reading_update_likes l WHERE l.update_id = ru.id) AS like_count,
+               (SELECT COUNT(*) FROM reading_update_comments c WHERE c.update_id = ru.id) AS comment_count,
+               EXISTS (SELECT 1 FROM reading_update_likes l WHERE l.update_id = ru.id AND l.user_id = $3) AS has_liked
+        FROM reading_updates ru
+        JOIN user_books ub ON ub.id = ru.user_book_id
         JOIN works w ON w.id = ub.work_id
         ${JOIN_TRANSLATION} = $2
-        JOIN users u ON u.id = ub.user_id
-        WHERE ub.id = ANY($1)
+        JOIN users u ON u.id = ru.user_id
+        WHERE ru.id = ANY($1)
     `, [ids, languageOf(req), req.session.user.id]);
 }
+
+const UPDATE_COMMENT_FIELDS = `
+    SELECT c.id, c.text, c.created_at, u.username,
+           COALESCE(u.display_name, u.username) AS display_name, u.avatar_url
+    FROM reading_update_comments c
+    JOIN users u ON u.id = c.user_id`;
+
+async function findReadingUpdate(id) {
+    if (!Number.isInteger(id)) return null;
+    const [update] = await query(`
+        SELECT ru.id, ru.user_id, ub.work_id
+        FROM reading_updates ru JOIN user_books ub ON ub.id = ru.user_book_id
+        WHERE ru.id = $1
+    `, [id]);
+    return update || null;
+}
+
+app.get('/api/reading-updates/:id', requireAuth, async (req, res) => {
+    const id = Number(req.params.id);
+    const [update] = Number.isInteger(id) ? await findActivity(req, [id]) : [];
+    if (!update) return res.status(404).json({ error: msg(req, 'notFound') });
+    res.json({ type: 'activity', ...update });
+});
+
+app.post('/api/reading-updates/:id/like', requireAuth, async (req, res) => {
+    const update = await findReadingUpdate(Number(req.params.id));
+    if (!update) return res.status(404).json({ error: msg(req, 'notFound') });
+    if (update.userId === req.session.user.id) return res.status(403).json({ error: msg(req, 'ownUpdateLike') });
+
+    const inserted = await query(`
+        INSERT INTO reading_update_likes (update_id, user_id) VALUES ($1, $2)
+        ON CONFLICT DO NOTHING RETURNING update_id
+    `, [update.id, req.session.user.id]);
+    if (inserted.length === 0) return res.status(400).json({ error: msg(req, 'alreadyLiked') });
+    await notify(update.userId, req.session.user.id, 'update_like', { readingUpdateId: update.id, workId: update.workId });
+    res.status(201).json({ message: 'Liked' });
+});
+
+app.delete('/api/reading-updates/:id/like', requireAuth, async (req, res) => {
+    const update = await findReadingUpdate(Number(req.params.id));
+    if (!update) return res.status(404).json({ error: msg(req, 'notFound') });
+    const removed = await query('DELETE FROM reading_update_likes WHERE update_id = $1 AND user_id = $2 RETURNING update_id', [update.id, req.session.user.id]);
+    if (removed.length > 0) await unnotify(update.userId, req.session.user.id, 'update_like', { readingUpdateId: update.id });
+    res.json({ message: 'Unliked' });
+});
+
+app.get('/api/reading-updates/:id/comments', requireAuth, async (req, res) => {
+    const id = Number(req.params.id);
+    if (!Number.isInteger(id)) return res.status(404).json({ error: msg(req, 'notFound') });
+    res.json(await query(`${UPDATE_COMMENT_FIELDS} WHERE c.update_id = $1 ORDER BY c.created_at DESC`, [id]));
+});
+
+app.post('/api/reading-updates/:id/comments', requireAuth, async (req, res) => {
+    const text = typeof req.body.text === 'string' ? req.body.text.trim() : '';
+    if (!text) return res.status(400).json({ error: msg(req, 'commentEmpty') });
+    if (text.length > COMMENT_MAX_LENGTH) return res.status(400).json({ error: msg(req, 'commentTooLong') });
+
+    const update = await findReadingUpdate(Number(req.params.id));
+    if (!update) return res.status(404).json({ error: msg(req, 'notFound') });
+
+    const [created] = await query(
+        'INSERT INTO reading_update_comments (update_id, user_id, text) VALUES ($1, $2, $3) RETURNING id',
+        [update.id, req.session.user.id, text]
+    );
+    await notify(update.userId, req.session.user.id, 'update_comment', {
+        readingUpdateId: update.id,
+        readingUpdateCommentId: created.id,
+        workId: update.workId,
+    });
+    const [comment] = await query(`${UPDATE_COMMENT_FIELDS} WHERE c.id = $1`, [created.id]);
+    res.status(201).json(comment);
+});
 
 app.get('/api/feed', requireAuth, async (req, res) => {
     const userId = req.session.user.id;
@@ -1061,12 +1182,11 @@ app.get('/api/feed', requireAuth, async (req, res) => {
                    ) AS followed_tag
             FROM posts p
             UNION ALL
-            SELECT 'activity', ub.id, ub.user_id, ${ACTIVITY_DATE},
-                   (SELECT COUNT(*) FROM likes l WHERE l.user_book_id = ub.id)
-                     + (SELECT COUNT(*) FROM comments c WHERE c.user_book_id = ub.id),
+            SELECT 'activity', ru.id, ru.user_id, ru.updated_at,
+                   (SELECT COUNT(*) FROM reading_update_likes l WHERE l.update_id = ru.id)
+                     + (SELECT COUNT(*) FROM reading_update_comments c WHERE c.update_id = ru.id),
                    false
-            FROM user_books ub
-            WHERE ub.status IN ('reading', 'finished')
+            FROM reading_updates ru
         ),
         marked AS (
             SELECT items.*,
@@ -3264,7 +3384,7 @@ app.get('/api/notifications', requireAuth, async (req, res) => {
     if (page === null) return res.status(400).json({ error: msg(req, 'invalidRequest') });
 
     const rows = await query(`
-        SELECT n.id, n.type, n.read_at, n.created_at, n.post_id, n.work_id, n.list_id,
+        SELECT n.id, n.type, n.read_at, n.created_at, n.post_id, n.work_id, n.list_id, n.reading_update_id,
                nl.title AS list_title,
                CASE WHEN $2 = 'es' THEN an.title_es ELSE an.title_en END AS announcement_title,
                CASE WHEN $2 = 'es' THEN an.body_es ELSE an.body_en END AS announcement_body,
@@ -3272,13 +3392,14 @@ app.get('/api/notifications', requireAuth, async (req, res) => {
                u.username AS actor_username, COALESCE(u.display_name, u.username) AS actor_name,
                u.avatar_url AS actor_avatar, u.bio AS actor_bio,
                ${TRANSLATED_TITLE} AS book_title,
-               COALESCE(pc.text, c.text) AS comment_text
+               COALESCE(pc.text, c.text, ruc.text) AS comment_text
         FROM notifications n
         LEFT JOIN users u ON u.id = n.actor_id
         LEFT JOIN works w ON w.id = n.work_id
         ${JOIN_TRANSLATION} = $2
         LEFT JOIN post_comments pc ON pc.id = n.post_comment_id
         LEFT JOIN comments c ON c.id = n.comment_id
+        LEFT JOIN reading_update_comments ruc ON ruc.id = n.reading_update_comment_id
         LEFT JOIN lists nl ON nl.id = n.list_id
         LEFT JOIN announcements an ON an.id = n.announcement_id
         WHERE n.user_id = $1 AND (NOT $3 OR n.read_at IS NULL)
@@ -3465,7 +3586,7 @@ app.patch('/api/notifications/:id/read', requireAuth, async (req, res) => {
     res.json({ id });
 });
 
-const REPORT_TYPES = ['post', 'post_comment', 'review', 'review_comment', 'profile', 'tag', 'list', 'list_comment'];
+const REPORT_TYPES = ['post', 'post_comment', 'review', 'review_comment', 'profile', 'tag', 'list', 'list_comment', 'update_comment'];
 const REPORT_REASONS = ['spoiler', 'offensive', 'harassment', 'spam', 'other'];
 const REPORT_ACTIONS = { dismiss: 'dismissed', spoiler: 'spoiler', remove: 'removed' };
 
@@ -3507,6 +3628,11 @@ const REPORT_TARGETS = {
         JOIN users u ON u.id = c.user_id
         JOIN lists l ON l.id = c.list_id
         WHERE c.id = $1`,
+    update_comment: `
+        SELECT c.id, c.text, c.update_id, u.id AS author_id, u.username AS author
+        FROM reading_update_comments c
+        JOIN users u ON u.id = c.user_id
+        WHERE c.id = $1`,
 };
 
 async function findReportTarget(type, id) {
@@ -3538,6 +3664,8 @@ async function removeReportedContent(type, target) {
         await query('DELETE FROM lists WHERE id = $1', [target.id]);
     } else if (type === 'list_comment') {
         await query('DELETE FROM list_comments WHERE id = $1', [target.id]);
+    } else if (type === 'update_comment') {
+        await query('DELETE FROM reading_update_comments WHERE id = $1', [target.id]);
     }
 }
 
