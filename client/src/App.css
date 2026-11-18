@@ -17958,4 +17958,169 @@ a.post-tag:hover,
   :root[data-theme="dark"][data-season="adventure"] {
     --season-corners: url('/seasons/adventure/background-dark-wide.webp');
   }
+
+  :root[data-season="ink"] {
+    --season-corners: url('/seasons/ink/background-light-wide.webp');
+  }
+
+  :root[data-theme="dark"][data-season="ink"] {
+    --season-corners: url('/seasons/ink/background-dark-wide.webp');
+  }
+}
+
+:root[data-season="ink"] {
+  --bg: #F6F6F4;
+  --surface: #FFFFFF;
+  --surface-2: #DCDCDA;
+  --ink: #141414;
+  --text-2: #565656;
+  --rose: #3A3A3A;
+  --rose-deep: #1C1C1C;
+  --rose-ink: #1C1C1C;
+  --rose-hover: #2C2C2C;
+  --on-rose: #FFFFFF;
+  --on-rose-deep: #FFFFFF;
+  --rose-deep-hover: #000000;
+  --rose-soft: #E3E3E1;
+  --star-fill: #2A2A2A;
+  --star-line: #000000;
+  --glass: rgba(255, 255, 255, 0.86);
+  --season-corners: url('/seasons/ink/background-light.webp');
+}
+
+:root[data-theme="dark"][data-season="ink"] {
+  --bg: #141414;
+  --surface: #1C1C1C;
+  --surface-2: #343434;
+  --ink: #F2F2F2;
+  --text-2: #ADADAD;
+  --rose: #D6D6D6;
+  --rose-deep: #ECECEC;
+  --rose-ink: #F0F0F0;
+  --rose-hover: #C8C8C8;
+  --on-rose: #111111;
+  --on-rose-deep: #111111;
+  --rose-deep-hover: #FFFFFF;
+  --rose-soft: #3A3A3A;
+  --star-fill: #E6E6E6;
+  --star-line: #FFFFFF;
+  --glass: rgba(28, 28, 28, 0.86);
+  --season-corners: url('/seasons/ink/background-dark.webp');
+}
+
+:root[data-season="ink"] .home-greeting-rays,
+:root[data-season="ink"] .home-greeting-stars {
+  display: none;
+}
+
+:root[data-season="ink"] .sidebar-link.active {
+  background: var(--rose-soft);
+}
+
+:root[data-season="ink"] .home .continue-card .progress-fill {
+  background: #1C1C1C;
+}
+
+:root[data-theme="dark"][data-season="ink"] .home .continue-card .progress-fill {
+  background: #EDEDED;
+}
+
+:root[data-season="ink"] .milestone-note-ribbon {
+  background: #161616;
+}
+
+:root[data-season="ink"] .milestone-note-kicker {
+  color: #FFFFFF;
+}
+
+.milestone-note-ink {
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.milestone-note-ink-lines {
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+}
+
+.milestone-note-ink-left {
+  left: 0;
+}
+
+.milestone-note-ink-right {
+  right: 0;
+}
+
+.milestone-note-ink-lines i {
+  position: absolute;
+  top: var(--ink-y);
+  width: 16px;
+  height: 2.5px;
+  margin-top: -1px;
+  border-radius: 2px;
+  background: #FFFFFF;
+  opacity: 0;
+  animation: ink-line 0.45s var(--ink-delay) cubic-bezier(0.2, 1.4, 0.4, 1) forwards, ink-pulse 1.4s 1.2s ease-in-out infinite;
+}
+
+.milestone-note-ink-left i {
+  right: 6px;
+  transform-origin: 100% 50%;
+  rotate: var(--ink-angle);
+}
+
+.milestone-note-ink-right i {
+  left: 6px;
+  transform-origin: 0 50%;
+  rotate: var(--ink-angle);
+}
+
+.milestone-note .milestone-note-badge-ink {
+  animation: ink-pop 0.5s 0.2s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+@keyframes ink-line {
+  from {
+    opacity: 0;
+    transform: scaleX(0);
+  }
+
+  to {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes ink-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+@keyframes ink-pop {
+  from {
+    transform: scale(0.4);
+  }
+
+  to {
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milestone-note-ink-lines i {
+    opacity: 1;
+  }
+}
+
+:root[data-motion="reduce"] .milestone-note-ink-lines i {
+  opacity: 1;
 }

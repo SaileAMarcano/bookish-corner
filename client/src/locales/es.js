@@ -731,6 +731,7 @@ const es = {
                 seaside: 'Brisa de mar, azules suaves y acuarela de playa.',
                 moonlit: 'Lilas, noches azules y nubes de luna.',
                 adventure: 'Mapas, rojos valientes y azul de alta mar.',
+                ink: 'Blanco y negro, tramas de puntos y alma de manga.',
             },
             dark: 'Modo oscuro',
             darkHint: 'Más cómodo para leer de noche.',
@@ -812,6 +813,7 @@ const es = {
         seaside: 'Capítulos junto al mar',
         moonlit: 'Folio a la luz de la luna',
         adventure: 'Edición de aventuras',
+        ink: 'Tinta y viñetas',
     },
     public: {
         home: 'Inicio',
@@ -1455,6 +1457,7 @@ const es = {
         seasideTitle: 'Llegó un mensaje del mar',
         moonlitTitle: 'Tu historia brilla',
         adventureTitle: 'Tu historia llega más lejos',
+        inkTitle: 'Una nueva viñeta en tu historia',
         unlocked: '¡Insignia desbloqueada!',
         betaText: 'Gracias por estar aquí desde el principio.',
         seeAll: 'Ver mis logros',

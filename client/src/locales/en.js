@@ -731,6 +731,7 @@ const en = {
                 seaside: 'Sea breeze, soft blues and beach watercolor.',
                 moonlit: 'Lilacs, blue nights and moonlit clouds.',
                 adventure: 'Maps, brave reds and deep sea blue.',
+                ink: 'Black and white, halftone dots and a manga soul.',
             },
             dark: 'Dark mode',
             darkHint: 'Easier on the eyes at night.',
@@ -812,6 +813,7 @@ const en = {
         seaside: 'Seaside Chapters',
         moonlit: 'Moonlit Folio',
         adventure: 'Adventure Edition',
+        ink: 'Ink & Panels',
     },
     public: {
         home: 'Home',
@@ -1455,6 +1457,7 @@ const en = {
         seasideTitle: 'A message from the sea',
         moonlitTitle: 'Your story shines',
         adventureTitle: 'Your story goes further',
+        inkTitle: 'A new panel in your story',
         unlocked: 'Badge unlocked!',
         betaText: 'Thank you for being here from the very beginning.',
         seeAll: 'See my achievements',

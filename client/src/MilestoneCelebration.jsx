@@ -166,7 +166,19 @@ function MapRoute() {
     );
 }
 
-const SEASON_TITLES = { seaside: 'celebration.seasideTitle', moonlit: 'celebration.moonlitTitle', adventure: 'celebration.adventureTitle' };
+const INK_LINES = [-12, 0, 12];
+
+function InkLines({ side }) {
+    return (
+        <span className={`milestone-note-ink-lines milestone-note-ink-${side}`} aria-hidden="true">
+            {INK_LINES.map((y, index) => (
+                <i key={y} style={{ '--ink-y': `${y}px`, '--ink-angle': `${side === 'left' ? -y * 1.6 : y * 1.6}deg`, '--ink-delay': `${(0.5 + index * 0.08).toFixed(2)}s` }} />
+            ))}
+        </span>
+    );
+}
+
+const SEASON_TITLES = { seaside: 'celebration.seasideTitle', moonlit: 'celebration.moonlitTitle', adventure: 'celebration.adventureTitle', ink: 'celebration.inkTitle' };
 
 function MilestoneCelebration({ currentUser, books, seasonTheme }) {
     const { t } = useTranslation();
@@ -301,6 +313,12 @@ function MilestoneCelebration({ currentUser, books, seasonTheme }) {
                                     <MessageBottle />
                                     <AchievementMark className="milestone-note-badge milestone-note-badge-message" milestoneKey={note.key} />
                                 </span>
+                            ) : seasonTheme === 'ink' ? (
+                                <span className="milestone-note-ink">
+                                    <InkLines side="left" />
+                                    <AchievementMark className="milestone-note-badge milestone-note-badge-ink" milestoneKey={note.key} />
+                                    <InkLines side="right" />
+                                </span>
                             ) : (
                                 <AchievementMark className="milestone-note-badge" milestoneKey={note.key} />
                             )}
@@ -322,7 +340,7 @@ function MilestoneCelebration({ currentUser, books, seasonTheme }) {
                     </Link>
 
                     <span className="milestone-note-stars" aria-hidden="true">
-                        {!seaside && NOTE_BURST.map(([x, y], index) => (
+                        {!seaside && seasonTheme !== 'ink' && NOTE_BURST.map(([x, y], index) => (
                             <Star
                                 key={`burst-${x}-${y}`}
                                 className={`milestone-note-burst star-tone-${TONES[index % TONES.length]}`}
