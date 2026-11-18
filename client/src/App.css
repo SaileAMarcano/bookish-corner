@@ -17356,98 +17356,74 @@ a.post-tag:hover,
   isolation: isolate;
 }
 
-.year-shelf-lamp-glow {
+.year-shelf-light {
   position: absolute;
   z-index: -1;
-  top: 38%;
-  left: 50%;
-  width: 300%;
+  pointer-events: none;
+}
+
+.year-shelf-light-moon {
+  inset: 0;
+  background: url('/shelf/moon-light.webp') center / 100% 100% no-repeat;
+  filter: blur(6px);
+  opacity: 0.95;
+}
+
+.year-shelf-lamp-moon .year-shelf-object {
+  filter: brightness(1.06);
+}
+
+.year-shelf-light-candle {
+  top: 17%;
+  left: 43%;
+  width: 70%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(255 238 196 / 60%) 0%, rgb(255 214 150 / 28%) 30%, rgb(255 214 150 / 0%) 62%);
+  background: radial-gradient(circle, rgb(255 226 150 / 85%) 0%, rgb(255 196 110 / 40%) 30%, rgb(255 196 110 / 0%) 65%);
   transform: translate(-50%, -50%);
-  pointer-events: none;
-  animation: lamp-flicker 3.4s infinite;
+  animation: flame-flicker 2.6s infinite;
 }
 
-.year-shelf-lamp .year-shelf-object {
-  filter: drop-shadow(0 0 5px rgb(255 230 175 / 85%)) brightness(1.05);
-  animation: lamp-shine 3.4s infinite;
-}
-
-@keyframes lamp-flicker {
+@keyframes flame-flicker {
   0%,
   100% {
     opacity: 0.95;
+    transform: translate(-50%, -50%) scale(1);
   }
 
   6% {
     opacity: 0.6;
+    transform: translate(-50%, -50%) scale(0.9);
   }
 
   8% {
     opacity: 0.98;
-  }
-
-  36% {
-    opacity: 0.85;
+    transform: translate(-50%, -50%) scale(1.03);
   }
 
   38% {
-    opacity: 0.45;
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(0.92);
   }
 
   40% {
     opacity: 0.92;
-  }
-
-  66% {
-    opacity: 0.88;
+    transform: translate(-50%, -50%) scale(1);
   }
 
   69% {
     opacity: 0.62;
+    transform: translate(-50%, -50%) scale(0.94);
   }
 
   72% {
     opacity: 1;
-  }
-}
-
-@keyframes lamp-shine {
-  0%,
-  100% {
-    filter: drop-shadow(0 0 5px rgb(255 230 175 / 85%)) brightness(1.05);
-  }
-
-  6% {
-    filter: drop-shadow(0 0 2px rgb(255 230 175 / 50%)) brightness(0.96);
-  }
-
-  8% {
-    filter: drop-shadow(0 0 6px rgb(255 230 175 / 90%)) brightness(1.06);
-  }
-
-  38% {
-    filter: drop-shadow(0 0 1px rgb(255 230 175 / 40%)) brightness(0.94);
-  }
-
-  40% {
-    filter: drop-shadow(0 0 5px rgb(255 230 175 / 85%)) brightness(1.05);
-  }
-
-  69% {
-    filter: drop-shadow(0 0 2px rgb(255 230 175 / 55%)) brightness(0.97);
-  }
-
-  72% {
-    filter: drop-shadow(0 0 6px rgb(255 230 175 / 95%)) brightness(1.07);
+    transform: translate(-50%, -50%) scale(1.04);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .year-shelf-lamp-glow,
-  .year-shelf-lamp .year-shelf-object {
+  .year-shelf-light-candle {
     animation: none;
   }
 }

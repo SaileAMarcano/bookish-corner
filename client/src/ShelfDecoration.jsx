@@ -1,13 +1,13 @@
-const LAMPS = new Set(['moon']);
+const LIGHTS = new Set(['moon', 'candle']);
 
 function ShelfDecoration({ name }) {
     const image = <img className="year-shelf-object" src={'/shelf/' + name + '.webp'} alt="" draggable="false" />;
 
-    if (!LAMPS.has(name)) return image;
+    if (!LIGHTS.has(name)) return image;
 
     return (
-        <span className="year-shelf-lamp">
-            <span className="year-shelf-lamp-glow" aria-hidden="true" />
+        <span className={`year-shelf-lamp year-shelf-lamp-${name}`}>
+            <span className={`year-shelf-light year-shelf-light-${name}`} aria-hidden="true" />
             {image}
         </span>
     );
