@@ -53,8 +53,46 @@ export const BOOKCASES = {
 
 export const BOOKCASE_MODELS = Object.keys(BOOKCASES);
 
-const DECORATION_RATIOS = { candle: 0.72, quill: 0.52, stars: 0.75, flowers: 0.88, bookends: 1.89 };
-const DECORATION_HEIGHTS = { candle: 60, quill: 76, stars: 64, flowers: 90, bookends: 56 };
+const DECORATION_RATIOS = {
+    candle: 0.72, quill: 0.52, stars: 0.75, flowers: 0.88, bookends: 1.89,
+    bottle: 0.88,
+    seashell: 1.23,
+    compass: 0.7,
+    clock: 0.93,
+    moon: 0.68,
+    'moon-chest': 1.41,
+    geode: 0.95,
+    'secret-door': 0.74,
+    'dragon-egg': 0.64,
+    'treasure-map': 1.54,
+    suitcase: 1.14,
+    globe: 0.72,
+    camera: 1.46,
+    'reading-cat': 0.77,
+    'paper-lantern': 0.75,
+    daruma: 0.92,
+    'fox-mask': 0.69,
+};
+const DECORATION_HEIGHTS = {
+    candle: 60, quill: 76, stars: 64, flowers: 90, bookends: 56,
+    bottle: 58,
+    seashell: 50,
+    compass: 62,
+    clock: 60,
+    moon: 70,
+    'moon-chest': 52,
+    geode: 56,
+    'secret-door': 72,
+    'dragon-egg': 64,
+    'treasure-map': 52,
+    suitcase: 54,
+    globe: 70,
+    camera: 48,
+    'reading-cat': 64,
+    'paper-lantern': 62,
+    daruma: 58,
+    'fox-mask': 66,
+};
 const THIN_GENRES = ['Manga', 'Comics'];
 const THIN_RATIO = 0.62;
 const LEGACY_PILE_SIZE = 3;

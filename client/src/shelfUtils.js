@@ -7,6 +7,23 @@ export const DECORATIONS = [
     { name: 'stars', milestone: 'bookworm' },
     { name: 'flowers', milestone: 'genre-wanderer' },
     { name: 'bookends', milestone: 'goal-reached' },
+    { name: 'bottle', theme: 'seaside', member: true },
+    { name: 'seashell', theme: 'seaside', member: true },
+    { name: 'compass', theme: 'seaside', member: true },
+    { name: 'clock', theme: 'seaside', member: true },
+    { name: 'moon', theme: 'moonlit', member: true },
+    { name: 'moon-chest', theme: 'moonlit', member: true },
+    { name: 'geode', theme: 'moonlit', member: true },
+    { name: 'secret-door', theme: 'moonlit', member: true },
+    { name: 'dragon-egg', theme: 'moonlit', member: true },
+    { name: 'treasure-map', theme: 'adventure', member: true },
+    { name: 'suitcase', theme: 'adventure', member: true },
+    { name: 'globe', theme: 'adventure', member: true },
+    { name: 'camera', theme: 'adventure', member: true },
+    { name: 'reading-cat', theme: 'ink', member: true },
+    { name: 'paper-lantern', theme: 'ink', member: true },
+    { name: 'daruma', theme: 'ink', member: true },
+    { name: 'fox-mask', theme: 'ink', member: true },
 ];
 export const SHELF_POSES = ['upright', 'flat', 'front'];
 export const SPINE_FACES = ['cover', 'solid'];

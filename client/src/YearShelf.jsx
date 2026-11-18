@@ -13,7 +13,7 @@ import { BASE_WIDTH, bookcaseOf, caseGeometry, shelfDensity } from './bookcases'
 import { DECORATIONS, autoItems, canSitOnPile, decorationItem, groupItems, moveBy, pinShelves, savedItems, toPayload } from './shelfUtils';
 import { findDecorationSpace, placementIssue, prepareDecorations, proposedMove, shelfCapacity } from './decorationPlacement';
 
-function YearShelf({ books, booksStatus, readingGoal, username }) {
+function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
     const { t } = useTranslation();
     const [milestones, setMilestones] = useState(null);
     const [layout, setLayout] = useState(null);
@@ -141,10 +141,12 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
         ...allGroups.filter((group) => group.year !== currentYear),
     ];
     const unlocked = DECORATIONS
-        .filter((decoration) =>
-            milestones?.some((milestone) => milestone.key === decoration.milestone && milestone.achieved)
+        .filter((decoration) => decoration.member
+            ? isMember
+            : milestones?.some((milestone) => milestone.key === decoration.milestone && milestone.achieved)
         )
         .map((decoration) => decoration.name);
+    const earned = DECORATIONS.filter((decoration) => !decoration.member).map((decoration) => decoration.name);
     const rows = layout || [];
     const density = shelfDensity(viewport);
     const shelfOptions = { immersive: true, density };
@@ -159,7 +161,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
 
         const items = autoItems(yearBooks);
         if (year === currentYear) {
-            for (const name of unlocked) {
+            for (const name of unlocked.filter((name) => earned.includes(name))) {
                 if (!rows.some((row) => row.decoration === name)) items.push(decorationItem(name));
             }
         }
@@ -408,7 +410,7 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                 <details className="year-shelf-rewards">
                     <summary className="display" id="year-shelf-rewards-title">{t('library.shelf.rewards')}</summary>
                     <ul className="year-shelf-reward-list">
-                        {DECORATIONS.map(({ name, milestone }) => {
+                        {DECORATIONS.map(({ name, milestone, member }) => {
                             const achieved = unlocked.includes(name);
 
                             return (
@@ -417,7 +419,11 @@ function YearShelf({ books, booksStatus, readingGoal, username }) {
                                     <div>
                                         <strong>{t('library.shelf.objects.' + name)}</strong>
                                         <span>{t(achieved ? 'library.shelf.unlocked' : 'library.shelf.locked')}</span>
-                                        <small>{t('milestones.items.' + milestone + '.rule')}</small>
+                                        <small>
+                                            {member ? (
+                                                isMember ? t('library.shelf.memberRule') : <Link to="/membership">{t('library.shelf.join')}</Link>
+                                            ) : t('milestones.items.' + milestone + '.rule')}
+                                        </small>
                                     </div>
                                 </li>
                             );

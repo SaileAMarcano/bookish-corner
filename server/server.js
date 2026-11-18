@@ -2355,6 +2355,23 @@ const SHELF_DECORATIONS = {
     stars: 'bookworm',
     flowers: 'genre-wanderer',
     bookends: 'goal-reached',
+    bottle: null,
+    seashell: null,
+    compass: null,
+    clock: null,
+    moon: null,
+    'moon-chest': null,
+    geode: null,
+    'secret-door': null,
+    'dragon-egg': null,
+    'treasure-map': null,
+    suitcase: null,
+    globe: null,
+    camera: null,
+    'reading-cat': null,
+    'paper-lantern': null,
+    daruma: null,
+    'fox-mask': null,
 };
 const SHELF_POSES = ['upright', 'lean', 'flat', 'front'];
 const SHELF_TONES = 12;
@@ -2451,9 +2468,19 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
 
     if (decorations.length > 0) {
         const milestones = await syncMilestones(userId);
-        const unlocked = decorations.every((decoration) =>
-            milestones.some((milestone) => milestone.key === SHELF_DECORATIONS[decoration] && milestone.achieved)
+        const [{ plus }] = await query(
+            "SELECT (plus_until > now() OR staff_role = 'admin') IS TRUE AS plus FROM users WHERE id = $1",
+            [userId]
         );
+        const memberOnly = decorations.filter((decoration) => SHELF_DECORATIONS[decoration] === null);
+        if (memberOnly.length > 0 && !plus) {
+            return res.status(403).json({ error: msg(req, 'decorationMembers') });
+        }
+        const unlocked = decorations
+            .filter((decoration) => SHELF_DECORATIONS[decoration] !== null)
+            .every((decoration) =>
+                milestones.some((milestone) => milestone.key === SHELF_DECORATIONS[decoration] && milestone.achieved)
+            );
         if (!unlocked) {
             return res.status(400).json({ error: msg(req, 'milestoneNotReached') });
         }
