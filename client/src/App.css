@@ -17427,3 +17427,131 @@ a.post-tag:hover,
     animation: none;
   }
 }
+
+:root[data-season="seaside"] {
+  --bg: #F6F1E8;
+  --surface: #FCF9F3;
+  --surface-2: #E3DCCF;
+  --ink: #15343A;
+  --text-2: #566A6C;
+  --rose: #6FA6A2;
+  --rose-deep: #2D5D84;
+  --rose-ink: #24605F;
+  --rose-hover: #5E9792;
+  --on-rose: #0F3438;
+  --on-rose-deep: #FFFFFF;
+  --rose-deep-hover: #244E70;
+  --rose-soft: #D5E8E4;
+  --glass: rgba(252, 249, 243, 0.86);
+}
+
+:root[data-theme="dark"][data-season="seaside"] {
+  --bg: #10282E;
+  --surface: #16343B;
+  --surface-2: #24474F;
+  --ink: #E8F1EF;
+  --text-2: #A9BDBD;
+  --rose: #8AC2BF;
+  --rose-deep: #89B7DE;
+  --rose-ink: #9FD3D0;
+  --rose-hover: #9DCFCB;
+  --on-rose: #0C2831;
+  --on-rose-deep: #0C2831;
+  --rose-deep-hover: #9DC6E8;
+  --rose-soft: #234C52;
+  --glass: rgba(22, 52, 59, 0.86);
+}
+
+:root[data-season="seaside"] .app-main {
+  background: url('/seasons/seaside/wash-light.webp') top center / max(100%, 760px) auto no-repeat;
+}
+
+:root[data-theme="dark"][data-season="seaside"] .app-main {
+  background-image: url('/seasons/seaside/wash-dark.webp');
+}
+
+:root[data-season="seaside"] .sidebar-link.active {
+  background: var(--rose-soft);
+}
+
+:root[data-season="seaside"] .home .continue-card .progress-fill {
+  background: #3F7476;
+}
+
+:root[data-theme="dark"][data-season="seaside"] .home .continue-card .progress-fill {
+  background: #9DD2D1;
+}
+
+:root[data-season="seaside"] .milestone-note-ribbon {
+  background: #2C6466;
+}
+
+.milestone-note-wave {
+  width: 104px;
+  height: 24px;
+  margin-top: -4px;
+  overflow: visible;
+  animation: sea-wave-sway 2.1s ease-in-out both;
+}
+
+.milestone-note-wave path {
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 160;
+  stroke-dashoffset: 160;
+  animation: sea-wave-draw 2.1s ease-out forwards;
+}
+
+.milestone-note-wave-back {
+  stroke: #5FA7A8;
+  animation-delay: 0.15s;
+}
+
+.milestone-note-wave-front {
+  stroke: #A9DEDA;
+}
+
+@keyframes sea-wave-draw {
+  0% {
+    stroke-dashoffset: 160;
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  70% {
+    stroke-dashoffset: 0;
+  }
+
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.85;
+  }
+}
+
+@keyframes sea-wave-sway {
+  0% {
+    transform: translateX(-10px);
+  }
+
+  50% {
+    transform: translateX(6px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milestone-note-wave path {
+    stroke-dashoffset: 0;
+  }
+}
+
+:root[data-motion="reduce"] .milestone-note-wave path {
+  stroke-dashoffset: 0;
+}

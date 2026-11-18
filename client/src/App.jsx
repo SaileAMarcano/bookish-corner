@@ -62,6 +62,8 @@ import './Mobile.css';
 
 const TOUR_STEPS = ['feed', 'composer', 'library', 'lists', 'search', 'bell', 'account', 'preferences'];
 
+const SEASON_THEMES = ['classic', 'christmas', 'seaside'];
+
 function applyUserLanguage(user) {
   if (user.language && user.language !== i18n.language) {
     i18n.changeLanguage(user.language);
@@ -104,7 +106,7 @@ function App() {
     document.documentElement.dataset.theme = theme;
   }, [theme]);
 
-  const seasonTheme = currentUser?.seasonTheme === 'christmas' ? 'christmas' : 'classic';
+  const seasonTheme = SEASON_THEMES.includes(currentUser?.seasonTheme) ? currentUser.seasonTheme : 'classic';
   const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(currentUser?.staffRole));
 
   useEffect(() => {
@@ -614,7 +616,7 @@ function App() {
         </div>
       )}
 
-      <MilestoneCelebration currentUser={currentUser} books={books} />
+      <MilestoneCelebration currentUser={currentUser} books={books} seasonTheme={seasonTheme} />
     
       {!currentUser.tourSeenAt && location.pathname === '/' && (
         <Tour

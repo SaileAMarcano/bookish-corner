@@ -728,6 +728,7 @@ const en = {
             themes: {
                 classic: 'Warm paper and rose, all year long.',
                 christmas: 'Snow, deep reds and a cozy winter corner.',
+                seaside: 'Sea breeze, soft blues and beach watercolor.',
             },
             dark: 'Dark mode',
             darkHint: 'Easier on the eyes at night.',
@@ -806,6 +807,7 @@ const en = {
         title: 'Theme',
         classic: 'Classic',
         christmas: 'Christmas',
+        seaside: 'Seaside Chapters',
     },
     public: {
         home: 'Home',
@@ -1446,6 +1448,7 @@ const en = {
         },
     },
     celebration: {
+        seasideTitle: 'Your story flows on',
         unlocked: 'Badge unlocked!',
         betaText: 'Thank you for being here from the very beginning.',
         seeAll: 'See my achievements',

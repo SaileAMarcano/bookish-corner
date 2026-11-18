@@ -20,6 +20,7 @@ const COLOR_VISIONS = ['default', 'red-green', 'blue-yellow'];
 const SEASON_THEMES = [
     { id: 'classic', image: '/seasons/classic/sidebar.png' },
     { id: 'christmas', image: '/seasons/christmas/sidebar.png' },
+    { id: 'seaside', image: '/seasons/seaside/sidebar.png' },
 ]
 
 function SettingsSection({ id, icon, children }) {

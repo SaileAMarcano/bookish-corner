@@ -109,7 +109,16 @@ function BetaWindow() {
     );
 }
 
-function MilestoneCelebration({ currentUser, books }) {
+function SeaWave() {
+    return (
+        <svg className="milestone-note-wave" viewBox="0 0 120 28" aria-hidden="true">
+            <path className="milestone-note-wave-back" d="M2 18c10-8 20-8 30 0s20 8 30 0 20-8 30 0 20 8 26 2" />
+            <path className="milestone-note-wave-front" d="M2 12c10-8 20-8 30 0s20 8 30 0 20-8 30 0 20 8 26 2" />
+        </svg>
+    );
+}
+
+function MilestoneCelebration({ currentUser, books, seasonTheme }) {
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
@@ -167,6 +176,7 @@ function MilestoneCelebration({ currentUser, books }) {
     }, [showBeta]);
 
     const note = showBeta ? null : notes[0];
+    const seaside = seasonTheme === 'seaside';
 
     useEffect(() => {
         if (!note) return;
@@ -235,8 +245,9 @@ function MilestoneCelebration({ currentUser, books }) {
                 <div key={note.key} className={`milestone-note ${leaving ? 'leaving' : ''}`} role="status">
                     <Link to="/achievements" className="milestone-note-link">
                         <span className="milestone-note-ribbon">
-                            <span className="milestone-note-kicker">{t('celebration.newAchievement')}</span>
+                            <span className="milestone-note-kicker">{seaside ? t('celebration.seasideTitle') : t('celebration.newAchievement')}</span>
                             <AchievementMark className="milestone-note-badge" milestoneKey={note.key} />
+                            {seaside && <SeaWave />}
                             <strong className="milestone-note-title">
                                 {note.count
                                     ? t('celebration.manyTitle', { count: note.count })
@@ -253,7 +264,7 @@ function MilestoneCelebration({ currentUser, books }) {
                     </Link>
 
                     <span className="milestone-note-stars" aria-hidden="true">
-                        {NOTE_BURST.map(([x, y], index) => (
+                        {!seaside && NOTE_BURST.map(([x, y], index) => (
                             <Star
                                 key={`burst-${x}-${y}`}
                                 className={`milestone-note-burst star-tone-${TONES[index % TONES.length]}`}
