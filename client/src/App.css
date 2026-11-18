@@ -17373,6 +17373,17 @@ a.post-tag:hover,
   filter: brightness(1.06);
 }
 
+.year-shelf-light-paper-lantern {
+  inset: 0;
+  background: url('/shelf/paper-lantern-light.webp') center / 100% 100% no-repeat;
+  filter: blur(7px);
+  opacity: 0.95;
+}
+
+.year-shelf-lamp-paper-lantern .year-shelf-object {
+  filter: sepia(0.35) brightness(1.08);
+}
+
 .year-shelf-light-candle {
   top: 17%;
   left: 43%;

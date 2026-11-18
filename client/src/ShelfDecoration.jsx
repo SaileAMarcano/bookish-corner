@@ -1,4 +1,4 @@
-const LIGHTS = new Set(['moon', 'candle']);
+const LIGHTS = new Set(['moon', 'candle', 'paper-lantern']);
 
 function ShelfDecoration({ name }) {
     const image = <img className="year-shelf-object" src={'/shelf/' + name + '.webp'} alt="" draggable="false" />;
