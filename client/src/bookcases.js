@@ -56,6 +56,7 @@ export const BOOKCASE_MODELS = Object.keys(BOOKCASES);
 const DECORATION_RATIOS = { candle: 0.72, quill: 0.52, stars: 0.75, flowers: 0.88, bookends: 1.89 };
 const DECORATION_HEIGHTS = { candle: 60, quill: 76, stars: 64, flowers: 90, bookends: 56 };
 const THIN_GENRES = ['Manga', 'Comics'];
+const THIN_RATIO = 0.62;
 const LEGACY_PILE_SIZE = 3;
 
 export function bookcaseImage({ model, color }) {
@@ -177,7 +178,7 @@ function measure(group, k, bookSize) {
     }
 
     if (group.type === 'pile') {
-        const items = group.items.map((item) => ({ ...item, w: bookSize.h, h: bookSize.w }));
+        const items = group.items.map((item) => ({ ...item, w: bookSize.h, h: thickness(item, bookSize) }));
         const pileHeight = items.reduce((total, item) => total + item.h, 0) - Math.max(0, items.length - 1);
         const top = group.top ? { ...group.top, ...decorationSize(group.top.name, k) } : null;
 
@@ -185,8 +186,12 @@ function measure(group, k, bookSize) {
         return { ...group, items, top, w, h: pileHeight };
     }
 
-    const w = group.pose === 'front' ? bookSize.frontWidth : bookSize.w;
+    const w = group.pose === 'front' ? bookSize.frontWidth : thickness(group, bookSize);
     return { ...group, ...bookSize, w, span: w };
+}
+
+function thickness(item, bookSize) {
+    return item.book && isThin(item.book) ? bookSize.w * THIN_RATIO : bookSize.w;
 }
 
 function distributeGroups(groups, rowWidth, k, bookSize) {
@@ -198,17 +203,14 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
         let index = Number.isInteger(group.shelf) ? group.shelf : cursor;
 
         for (;;) {
-            while (buckets.length <= index) buckets.push({ groups: [], used: 0, spines: 0 });
+            while (buckets.length <= index) buckets.push({ groups: [], used: 0 });
             const shaped = measure(group, k, bookSize);
             const bucket = buckets[index];
             const needed = spanOf(shaped) + (bucket.used > 0 ? gap : 0);
 
-            const isSpine = shaped.type === 'book' && shaped.pose !== 'front';
-            const full = isSpine && bucket.spines >= bookSize.spines;
-            if (!full && (bucket.used === 0 || bucket.used + needed <= rowWidth + 0.01)) {
+            if (bucket.used === 0 || bucket.used + needed <= rowWidth + 0.01) {
                 bucket.groups.push(shaped);
                 bucket.used += needed;
-                if (isSpine) bucket.spines += 1;
                 break;
             }
             index += 1;

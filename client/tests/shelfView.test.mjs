@@ -33,3 +33,18 @@ for (const model of BOOKCASE_MODELS) for (const density of Object.keys(SHELF_DEN
         }
     });
 }
+
+test('manga and comics stand thinner than other books, upright and in piles', () => {
+    const manga = (id, pose = 'upright') => bookItem({ id, title: `Manga ${id}`, genre: 'Manga' }, pose);
+    const novel = (id, pose = 'upright') => bookItem({ id, title: `Novel ${id}`, workGenre: 'Fantasy' }, pose);
+    const options = { immersive: true, density: 'mobile' };
+    const [row] = layoutCases(groupItems([novel(1), manga(2), bookItem({ id: 3, title: 'Comic', workGenre: 'Comics' })]), 'scroll', BASE_WIDTH, options)[0];
+    const [book, thin, comic] = row.groups;
+    assert.ok(thin.w < book.w * 0.7 && comic.w === thin.w);
+    assert.equal(thin.h, book.h);
+    const fit = shelfFit('scroll', BASE_WIDTH, options).spines;
+    const crowded = layoutCases(groupItems(Array.from({ length: fit + 3 }, (_, index) => manga(index + 1))), 'scroll', BASE_WIDTH, options)[0];
+    assert.equal(crowded[0].groups.length, fit + 3);
+    const pile = layoutCases(groupItems([novel(10, 'flat'), manga(11, 'flat')]), 'scroll', BASE_WIDTH, options)[0][0].groups[0];
+    assert.ok(pile.items[1].h < pile.items[0].h);
+});
