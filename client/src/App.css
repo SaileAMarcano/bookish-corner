@@ -17171,3 +17171,10 @@ a.post-tag:hover,
   outline: 2px solid var(--rose-ink);
   outline-offset: 2px;
 }
+
+.legal-card a {
+  color: var(--rose-deep);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}

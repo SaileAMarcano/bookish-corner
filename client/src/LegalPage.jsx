@@ -5,8 +5,19 @@ import PublicHeader from './PublicHeader';
 import PublicFooter from './PublicFooter';
 import { LEGAL_PAGES, LEGAL_TEXTS, LEGAL_UPDATED } from './legalTexts';
 
-function withBold(text) {
-    return text.split(/\*\*(.+?)\*\*/g).map((part, index) => (index % 2 ? <strong key={index}>{part}</strong> : part));
+function withInline(text) {
+    return text.split(/(\*\*.+?\*\*|\[[^\]]+\]\([^)]+\))/g).map((part, index) => {
+        const bold = part.match(/^\*\*(.+)\*\*$/);
+        if (bold) return <strong key={index}>{bold[1]}</strong>;
+        const link = part.match(/^\[([^\]]+)\]\(([^)]+)\)$/);
+        if (!link) return part;
+        const external = link[2].startsWith('http');
+        return (
+            <a key={index} href={link[2]} target={external ? '_blank' : undefined} rel={external ? 'noopener noreferrer' : undefined}>
+                {link[1]}
+            </a>
+        );
+    });
 }
 
 function toBlocks(body) {
@@ -60,12 +71,12 @@ function LegalPage({ doc, signedIn }) {
                     <p className="legal-updated">{t('legal.updated', { date: LEGAL_UPDATED[language] })}</p>
 
                     {toBlocks(text.body).map((block, index) => {
-                        if (block.type === 'h2') return <h2 key={index} className="display legal-heading">{withBold(block.text)}</h2>;
-                        if (block.type === 'p') return <p key={index}>{withBold(block.text)}</p>;
+                        if (block.type === 'h2') return <h2 key={index} className="display legal-heading">{withInline(block.text)}</h2>;
+                        if (block.type === 'p') return <p key={index}>{withInline(block.text)}</p>;
                         const List = block.type;
                         return (
                             <List key={index}>
-                                {block.items.map((item) => <li key={item}>{withBold(item)}</li>)}
+                                {block.items.map((item) => <li key={item}>{withInline(item)}</li>)}
                             </List>
                         );
                     })}

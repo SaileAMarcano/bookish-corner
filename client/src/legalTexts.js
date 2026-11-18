@@ -24,13 +24,13 @@ export const LEGAL_TEXTS = {
 7. **Respect privacy.** Don't post other people's personal information (address, phone, email, photos without permission).
 8. **Be yourself.** Don't pretend to be someone else, an author, a publisher or the A Library of Us team.
 
-**If you see something that breaks these guidelines,** use the **Report** button. Our moderation team reviews it. Depending on the case, we may hide or remove the content, send a warning, or suspend or close the account. If you think we got it wrong, write to us from **Help** or at **admin@alibraryofus.com**.`,
+**If you see something that breaks these guidelines,** use the **Report** button. Our moderation team reviews it. Depending on the case, we may hide or remove the content, send a warning, or suspend or close the account. If you think we got it wrong, write to us from **Help** or at [admin@alibraryofus.com](mailto:admin@alibraryofus.com).`,
         },
         privacy: {
             title: "Privacy policy",
             body: `## 1. Who is responsible for your data
 A Library of Us is a platform to track your reading and share it with other readers. The person responsible for your data is **Saile Adriana Marcano Mejias**, who runs A Library of Us from Bogotá, Colombia.
-**Contact:** admin@alibraryofus.com
+**Contact:** [admin@alibraryofus.com](mailto:admin@alibraryofus.com)
 
 ## 2. What we store
 - **Your account:** username, email and password. Your password is stored encrypted: not even the team can see it.
@@ -90,7 +90,7 @@ Under Colombian Law 1581 of 2012, you can:
 
 ## 8. How to use them
 - **In the app:** change your profile in **Edit profile** and delete your account in **Settings → Delete account**.
-- **By email:** write to **admin@alibraryofus.com** from your account's email and tell us what you need.
+- **By email:** write to [admin@alibraryofus.com](mailto:admin@alibraryofus.com) from your account's email and tell us what you need.
 - We answer **requests** within **10 business days** and **complaints** within **15 business days**. If we need more time, we'll tell you before the deadline and explain why.
 
 ## 9. How long we keep it
@@ -111,7 +111,7 @@ If we change this policy, we'll tell you in the app or by email before it applie
         terms: {
             title: "Terms of service",
             body: `## 1. What this is
-These terms are the agreement between you and A Library of Us, run from Bogotá, Colombia. By creating an account or using the app you accept these terms, the **Community guidelines** and the **Privacy policy**.
+These terms are the agreement between you and A Library of Us, run by **Saile Adriana Marcano Mejias** from Bogotá, Colombia. By creating an account or using the app you accept these terms, the **Community guidelines** and the **Privacy policy**.
 
 ## 2. Who can use the app
 - You must be **18 or older**.
@@ -135,7 +135,7 @@ We may review, hide or remove content that breaks these terms or the guidelines,
 ## 7. Supporter membership
 - The **supporter membership** costs **US$5.99 per month**, or **20,000 COP per month in Colombia** (plus any taxes that apply in your country). It renews every month until you cancel.
 - **It includes:** all the app themes we publish, a supporter badge on your profile and the **Super star** (6 stars for up to 5 books). The app's core features stay **free** for everyone.
-- Payments are processed by **Paddle (Paddle.com Market Limited)**, which acts as merchant of record: it is the seller on your receipt and handles the charge, taxes and invoices. Its buyer terms also apply to the purchase.
+- Payments are processed by **Paddle (Paddle.com Market Limited)**, which acts as merchant of record: it is the seller on your receipt and handles the charge, taxes and invoices. Its [buyer terms](https://www.paddle.com/legal/checkout-buyer-terms) also apply to the purchase.
 - **Cancel:** you can cancel at any time from **Supporter membership** in the app or the link in your purchase email from Paddle. Your membership stays active until the end of the month you already paid, and you won't be charged again.
 - If we change the price, we'll tell you at least **30 days in advance**, and it will apply from your next renewal.
 - We may change or add benefits; if we remove an important one, we'll let you know.
@@ -143,7 +143,7 @@ We may review, hide or remove content that breaks these terms or the guidelines,
 ## 8. Refunds
 - **Right of withdrawal:** if you change your mind, you can ask for a **full refund** within **5 business days** of your **first payment**.
 - Monthly **renewals** are not refunded, unless you were charged by mistake or a problem on our side kept you from using the membership.
-- **How to ask:** write to **admin@alibraryofus.com** from your account's email, or use the link in the purchase email from Paddle. The refund goes back to the same payment method.
+- **How to ask:** write to [admin@alibraryofus.com](mailto:admin@alibraryofus.com) from your account's email, or use the link in the purchase email from Paddle. The refund goes back to the same payment method.
 
 ## 9. What belongs to A Library of Us
 The name, logo, illustrations, design and code of the app belong to A Library of Us. Don't copy or use them without permission.
@@ -161,7 +161,7 @@ These terms are governed by the laws of **Colombia**.
 If we change these terms, we'll tell you in the app or by email before they apply. If you keep using the app afterwards, we understand you accept them.
 
 ## 14. Contact
-**admin@alibraryofus.com**`,
+[admin@alibraryofus.com](mailto:admin@alibraryofus.com)`,
         },
     },
     es: {
@@ -178,13 +178,13 @@ If we change these terms, we'll tell you in the app or by email before they appl
 7. **Respeta la privacidad.** No publiques datos personales de otras personas (dirección, teléfono, correo, fotos sin permiso).
 8. **Sé tú.** No te hagas pasar por otra persona, autora, editorial o por el equipo de A Library of Us.
 
-**Si ves algo que no cumple estas normas,** usa el botón **Reportar**. El equipo de moderación lo revisa. Según el caso, podemos ocultar o borrar el contenido, enviarte un aviso, o suspender o cerrar la cuenta. Si crees que nos equivocamos, escríbenos desde **Ayuda** o a **admin@alibraryofus.com**.`,
+**Si ves algo que no cumple estas normas,** usa el botón **Reportar**. El equipo de moderación lo revisa. Según el caso, podemos ocultar o borrar el contenido, enviarte un aviso, o suspender o cerrar la cuenta. Si crees que nos equivocamos, escríbenos desde **Ayuda** o a [admin@alibraryofus.com](mailto:admin@alibraryofus.com).`,
         },
         privacy: {
             title: "Política de privacidad y tratamiento de datos personales",
             body: `## 1. Quién es responsable de tus datos
 A Library of Us es una plataforma para registrar lecturas y compartir con otras personas que leen. La responsable del tratamiento de tus datos es **Saile Adriana Marcano Mejias**, que opera A Library of Us desde Bogotá, Colombia.
-**Contacto:** admin@alibraryofus.com
+**Contacto:** [admin@alibraryofus.com](mailto:admin@alibraryofus.com)
 
 ## 2. Qué datos guardamos
 - **Tu cuenta:** nombre de usuario, correo y contraseña. La contraseña se guarda cifrada: ni el equipo puede verla.
@@ -244,7 +244,7 @@ Según la Ley 1581 de 2012, puedes:
 
 ## 8. Cómo ejercerlos
 - **Desde la app:** puedes cambiar tu perfil en **Editar perfil** y borrar tu cuenta en **Configuración → Eliminar cuenta**.
-- **Por correo:** escribe a **admin@alibraryofus.com** desde el correo de tu cuenta, contando qué necesitas.
+- **Por correo:** escribe a [admin@alibraryofus.com](mailto:admin@alibraryofus.com) desde el correo de tu cuenta, contando qué necesitas.
 - Respondemos las **consultas** en máximo **10 días hábiles** y los **reclamos** en máximo **15 días hábiles**. Si necesitamos más tiempo, te avisamos antes y te contamos por qué.
 
 ## 9. Cuánto tiempo los guardamos
@@ -265,7 +265,7 @@ Si cambiamos esta política te avisaremos en la app o por correo antes de que em
         terms: {
             title: "Términos y condiciones",
             body: `## 1. Qué es esto
-Estos términos son el acuerdo entre tú y A Library of Us, operada desde Bogotá, Colombia. Al crear una cuenta o usar la app aceptas estos términos, las **Normas de la comunidad** y la **Política de privacidad**.
+Estos términos son el acuerdo entre tú y A Library of Us, operada por **Saile Adriana Marcano Mejias** desde Bogotá, Colombia. Al crear una cuenta o usar la app aceptas estos términos, las **Normas de la comunidad** y la **Política de privacidad**.
 
 ## 2. Quién puede usar la app
 - Tienes que tener **18 años o más**.
@@ -289,7 +289,7 @@ Podemos revisar, ocultar o borrar contenido que no cumpla los términos o las no
 ## 7. Membresía de soporte
 - La **membresía de soporte** cuesta **US$5,99 al mes**, o **20.000 COP al mes en Colombia** (más los impuestos que apliquen según tu país). Se renueva sola cada mes hasta que la canceles.
 - **Incluye:** todos los temas de la app que publiquemos, una insignia de apoyo en tu perfil y la **Súper estrella** (6 estrellas para hasta 5 libros). Las funciones básicas de la app siguen siendo **gratis** para todas las personas.
-- El pago lo procesa **Paddle (Paddle.com Market Limited)**, que actúa como vendedor oficial: es quien aparece en tu recibo y gestiona el cobro, los impuestos y las facturas. Sus términos para compradores también aplican a la compra.
+- El pago lo procesa **Paddle (Paddle.com Market Limited)**, que actúa como vendedor oficial: es quien aparece en tu recibo y gestiona el cobro, los impuestos y las facturas. Sus [términos para compradores](https://www.paddle.com/legal/checkout-buyer-terms) también aplican a la compra.
 - **Cancelar:** puedes cancelar cuando quieras desde **Membresía de apoyo** en la app o con el enlace del correo de compra de Paddle. La membresía sigue activa hasta el final del mes ya pagado y no se vuelve a cobrar.
 - Si cambiamos el precio te avisaremos al menos **30 días antes**, y el cambio se aplicará desde la siguiente renovación.
 - Podemos cambiar o añadir beneficios; si quitamos uno importante, te avisaremos.
@@ -297,7 +297,7 @@ Podemos revisar, ocultar o borrar contenido que no cumpla los términos o las no
 ## 8. Reembolsos
 - **Derecho de retracto:** si te arrepientes, puedes pedir el **reembolso completo** dentro de los **5 días hábiles** siguientes a tu **primer pago**.
 - Las **renovaciones** mensuales no se reembolsan, salvo que haya un cobro por error o un problema nuestro que no te haya dejado usar la membresía.
-- **Cómo pedirlo:** escribe a **admin@alibraryofus.com** con el correo de tu cuenta, o usa el enlace del correo de compra que te envía Paddle. El reembolso vuelve al mismo medio de pago.
+- **Cómo pedirlo:** escribe a [admin@alibraryofus.com](mailto:admin@alibraryofus.com) con el correo de tu cuenta, o usa el enlace del correo de compra que te envía Paddle. El reembolso vuelve al mismo medio de pago.
 
 ## 9. Lo que es de A Library of Us
 El nombre, el logo, las ilustraciones, el diseño y el código de la app son de A Library of Us. No los copies ni los uses sin permiso.
@@ -315,7 +315,7 @@ Estos términos se rigen por las leyes de **Colombia**.
 Si cambiamos estos términos te avisaremos en la app o por correo antes de que se apliquen. Si sigues usando la app después, entendemos que los aceptas.
 
 ## 14. Contacto
-**admin@alibraryofus.com**`,
+[admin@alibraryofus.com](mailto:admin@alibraryofus.com)`,
         },
     },
 };
