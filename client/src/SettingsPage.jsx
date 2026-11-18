@@ -10,6 +10,7 @@ const SECTIONS =[
     { id: 'profile', icon: 'about' },
     { id: 'appearance', icon: 'sparkle' },
     { id: 'notifications', icon: 'bell' },
+    { id: 'membership', icon: 'favorites' },
     { id: 'accessibility', icon: 'eye' },
     { id: 'account', icon: 'lock' },
 ];
@@ -140,6 +141,14 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
 
                     <SettingsSection id="notifications" icon="bell">
                         <PushSettings />
+                    </SettingsSection>
+
+                    <SettingsSection id="membership" icon="favorites">
+                        <SettingRow label={t('settings.membership.row')} hint={t(currentUser.isPlus ? 'settings.membership.rowMember' : 'settings.membership.rowHint')}>
+                            <Link to="/membership" className="ghost-button">
+                                {t('settings.membership.open')}
+                            </Link>
+                        </SettingRow>
                     </SettingsSection>
 
                     <SettingsSection id="accessibility" icon="eye">

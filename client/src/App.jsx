@@ -55,6 +55,7 @@ import SearchBox from './SearchBox';
 import { ADMIN_ITEMS } from './adminNav';
 import AdminAnnouncements from './AdminAnnouncements';
 import UpdatesPage from './UpdatesPage';
+import MembershipPage from './MembershipPage';
 import LanguageSwitcher from './LanguageSwitcher';
 import i18n from './i18n';
 import './Mobile.css';
@@ -484,6 +485,13 @@ function App() {
                     {t('nav.settings')}
                   </Link>
                   <Link
+                    to="/membership"
+                    className="ghost-button"
+                    onClick={() => setShowUserMenu(false)}
+                  >
+                    {t('nav.membership')}
+                  </Link>
+                  <Link
                     to="/help"
                     state={{ from: location.pathname + location.search }}
                     className="ghost-button"
@@ -564,6 +572,7 @@ function App() {
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/updates" element={<UpdatesPage />} />
+          <Route path="/membership" element={<MembershipPage onChanged={loadCurrentUser} />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />
           <Route path="/activity/:id" element={<ActivityPage currentUser={currentUser} />} />
           <Route path="/lists/:id" element={<ListPage currentUser={currentUser} books={books} onLibraryChange={loadUserBooks} />} />
