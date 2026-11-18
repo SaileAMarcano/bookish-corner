@@ -8,17 +8,18 @@ import { getAvatarSrc, timeAgo } from './utils';
 
 const COMMENT_MAX = 1000;
 
-function ReviewComments({ reviewId, onCountChange }) {
+function ReviewComments({ reviewId, endpoint, reportType = 'review_comment', onCountChange }) {
     const { t } = useTranslation();
     const [comments, setComments] = useState(null);
     const [text, setText] = useState('');
     const [error, setError] = useState('');
     const [isSending, setIsSending] = useState(false);
+    const path = endpoint || `/api/user-books/${reviewId}/comments`;
 
     useEffect(() => {
         let ignore = false;
 
-        apiFetch(`/api/user-books/${reviewId}/comments`)
+        apiFetch(path)
             .then((data) => {
                 if (!ignore) setComments(data);
             })
@@ -29,7 +30,7 @@ function ReviewComments({ reviewId, onCountChange }) {
         return () => {
             ignore = true;
         };
-    }, [reviewId]);
+    }, [path]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -38,7 +39,7 @@ function ReviewComments({ reviewId, onCountChange }) {
 
         setIsSending(true);
         setError('');
-        apiFetch(`/api/user-books/${reviewId}/comments`, { method: 'POST', body: { text: cleanText } })
+        apiFetch(path, { method: 'POST', body: { text: cleanText } })
             .then((comment) => {
                 const updated = [comment, ...(comments || [])];
                 setComments(updated);
@@ -71,7 +72,7 @@ function ReviewComments({ reviewId, onCountChange }) {
                         <p className="post-comment-text">{comment.text}</p>
                     </div>
 
-                    <ReportButton targetType="review_comment" targetId={comment.id} />
+                    <ReportButton targetType={reportType} targetId={comment.id} />
                 </div>
             ))}
 

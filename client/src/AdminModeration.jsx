@@ -6,7 +6,7 @@ import { apiFetch } from './api';
 import { timeAgo } from './utils';
 import LoadingState from './LoadingState';
 
-const FILTERS = ['all', 'post', 'post_comment', 'review', 'review_comment', 'profile', 'tag', 'list', 'list_comment'];
+const FILTERS = ['all', 'post', 'post_comment', 'review', 'review_comment', 'update_comment', 'profile', 'tag', 'list', 'list_comment'];
 
 function groupKey(group) {
     return `${group.targetType}-${group.targetId}`;
@@ -18,6 +18,7 @@ function targetLink(group) {
     if (targetType === 'tag') return `/tagged/${target.slug}`;
     if (targetType === 'list') return `/lists/${target.id}`;
     if (targetType === 'list_comment') return `/lists/${target.listId}`;
+    if (targetType === 'update_comment') return `/activity/${target.updateId}`;
     if (targetType === 'review' || targetType === 'review_comment') return `/book/${target.workId}`;
     return `/u/${target.author}`;
 }

@@ -16,17 +16,17 @@ const KIND_ICONS = {
     started: 'reading',
 };
 
-function ActivityCard({ activity, currentUserId, onChange }) {
+function ActivityCard({ activity, currentUserId, onChange, openComments = false }) {
     const { t } = useTranslation();
     const [error, setError] = useState('');
-    const [showComments, setShowComments] = useState(false);
+    const [showComments, setShowComments] = useState(openComments);
 
     const isOwner = activity.userId === currentUserId;
     const bookLink = `/book/${activity.bookId}`;
 
     const handleLike = () => {
         setError('');
-        apiFetch(`/api/user-books/${activity.id}/like`, { method: activity.hasLiked ? 'DELETE' : 'POST' })
+        apiFetch(`/api/reading-updates/${activity.id}/like`, { method: activity.hasLiked ? 'DELETE' : 'POST' })
             .then(() =>
                 onChange(activity.id, {
                     hasLiked: !activity.hasLiked,
@@ -42,7 +42,9 @@ function ActivityCard({ activity, currentUserId, onChange }) {
                 <img className="post-avatar" src={getAvatarSrc(activity.avatarUrl)} alt="" />
                 <div>
                     <Link to={`/u/${activity.username}`} className="post-author">{activity.displayName}</Link>
-                    <div className="post-date">{timeAgo(activity.happenedAt)}</div>
+                    <div className="post-date">
+                        <Link to={`/activity/${activity.id}`} className="activity-time-link">{timeAgo(activity.happenedAt)}</Link>
+                    </div>
                 </div>
             </header>
 
@@ -117,7 +119,8 @@ function ActivityCard({ activity, currentUserId, onChange }) {
 
             {showComments && (
                 <ReviewComments
-                    reviewId={activity.id}
+                    endpoint={`/api/reading-updates/${activity.id}/comments`}
+                    reportType="update_comment"
                     onCountChange={(count) => onChange(activity.id, { commentCount: count })}
                 />
             )}

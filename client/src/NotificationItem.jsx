@@ -8,6 +8,7 @@ function notificationLink(notification) {
     if (type === 'follow') return `/u/${notification.actorUsername}`;
     if (type === 'list_like' || type === 'list_comment') return `/lists/${notification.listId}`;
     if (type === 'announcement') return notification.announcementLink || '/updates';
+    if (type === 'update_like' || type === 'update_comment') return `/activity/${notification.readingUpdateId}`;
     return `/book/${notification.workId}`;
 }
 
