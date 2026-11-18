@@ -9444,21 +9444,12 @@ a.search-title:hover {
   overflow: hidden;
   padding: 30px 16px 18px;
   background-color: var(--fabric-color, #655371);
-  background-image:
-    repeating-linear-gradient(0deg, transparent 0 2px, rgba(255, 255, 255, 0.04) 2px 3px),
-    repeating-linear-gradient(90deg, transparent 0 3px, rgba(0, 0, 0, 0.05) 3px 4px);
-  box-shadow: inset 7px 0 rgba(0, 0, 0, 0.14);
   color: #f4e9d2;
   text-align: center;
 }
 
 .cover-fabric::before {
-  position: absolute;
-  inset: 13px;
-  border: 1px solid rgba(244, 233, 210, 0.35);
-  border-radius: 50% 50% 3px 3px;
-  content: '';
-  pointer-events: none;
+  display: none;
 }
 
 .cover-fabric[data-tone="0"] {

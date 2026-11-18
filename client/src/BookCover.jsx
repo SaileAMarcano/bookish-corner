@@ -16,7 +16,6 @@ function BookCover({ src, className = '', title = '', author = '', bookId }) {
         >
             {title && (
                 <>
-                    <span className="cover-fabric-star">✦</span>
                     <strong className="cover-fabric-title">{title}</strong>
                     {author && <span className="cover-fabric-author">{author}</span>}
                 </>
