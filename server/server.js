@@ -7,6 +7,7 @@ const { syncMilestones } = require('./milestones');
 const { resolveReadingDates } = require('./readingDates');
 const { sendResetEmail } = require('./mailer');
 const { PUSH_GROUPS, pushEnabled, sendPushes, sendTestPush } = require('./push');
+const { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription, getSubscription } = require('./paddle');
 const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -29,11 +30,42 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-            frameSrc: ['https://open.spotify.com'],
-            connectSrc: ["'self'", 'https://api.web3forms.com'],
+            scriptSrc: ["'self'", 'https://cdn.paddle.com'],
+            frameSrc: ['https://open.spotify.com', 'https://buy.paddle.com', 'https://sandbox-buy.paddle.com'],
+            connectSrc: ["'self'", 'https://api.web3forms.com', 'https://*.paddle.com'],
         },
     },
 }));
+const MEMBERSHIP_STATUSES = ['active', 'trialing', 'past_due', 'paused', 'canceled'];
+
+async function saveSubscription(subscription) {
+    const userId = Number(subscription.custom_data?.userId);
+    const status = MEMBERSHIP_STATUSES.includes(subscription.status) ? subscription.status : null;
+    const paidUntil = subscription.current_billing_period?.ends_at ?? null;
+
+    await query(`
+        UPDATE users
+        SET membership_status = $3,
+            paddle_subscription_id = $2,
+            paddle_customer_id = $4,
+            plus_until = COALESCE($5::timestamptz, plus_until)
+        WHERE id = $1 OR paddle_subscription_id = $2
+    `, [Number.isInteger(userId) ? userId : null, subscription.id, status, subscription.customer_id, paidUntil]);
+}
+
+app.post('/api/membership/webhook', express.raw({ type: 'application/json', limit: '1mb' }), async (req, res) => {
+    const rawBody = req.body.toString('utf8');
+    if (!verifySignature(rawBody, req.get('Paddle-Signature'), process.env.PADDLE_WEBHOOK_SECRET)) {
+        return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    const event = JSON.parse(rawBody);
+    if (event.event_type?.startsWith('subscription.')) {
+        await saveSubscription(event.data);
+    }
+    res.json({ received: true });
+});
+
 app.use(express.json({ limit: '100kb' }));
 
 if (!isProduction) {
@@ -3506,6 +3538,45 @@ app.delete('/api/admin/announcements/:id', requireStaff(), async (req, res) => {
     if (!deleted) return res.status(404).json({ error: msg(req, 'notFound') });
     await logAction(req, 'announcement_deleted', deleted.titleEs);
     res.json({ id });
+});
+
+app.get('/api/membership', requireAuth, async (req, res) => {
+    const [user] = await query(
+        'SELECT email, plus_until, membership_status, paddle_subscription_id FROM users WHERE id = $1',
+        [req.session.user.id]
+    );
+
+    let cancelAt = null;
+    if (user.paddleSubscriptionId && paddleEnabled()) {
+        const subscription = await getSubscription(user.paddleSubscriptionId).catch(() => null);
+        if (subscription?.scheduled_change?.action === 'cancel') cancelAt = subscription.scheduled_change.effective_at;
+    }
+
+    res.json({
+        enabled: paddleEnabled(),
+        checkout: paddleEnabled() ? checkoutConfig() : null,
+        userId: req.session.user.id,
+        email: user.email,
+        status: user.membershipStatus,
+        paidUntil: user.plusUntil,
+        isMember: user.plusUntil !== null && user.plusUntil > new Date(),
+        hasSubscription: Boolean(user.paddleSubscriptionId),
+        cancelAt,
+    });
+});
+
+app.post('/api/membership/cancel', requireAuth, async (req, res) => {
+    const [user] = await query('SELECT paddle_subscription_id FROM users WHERE id = $1', [req.session.user.id]);
+    if (!user.paddleSubscriptionId) return res.status(400).json({ error: msg(req, 'membershipNone') });
+    if (!paddleEnabled()) return res.status(503).json({ error: msg(req, 'membershipUnavailable') });
+
+    try {
+        const subscription = await cancelSubscription(user.paddleSubscriptionId);
+        res.json({ cancelAt: subscription.scheduled_change?.effective_at ?? null });
+    } catch (error) {
+        console.error('Paddle cancel failed', error.status, error.message);
+        res.status(502).json({ error: msg(req, 'membershipCancelFailed') });
+    }
 });
 
 const PUSH_TYPES = Object.keys(PUSH_GROUPS);

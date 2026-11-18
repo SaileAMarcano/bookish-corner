@@ -64,4 +64,8 @@ function cancelSubscription(subscriptionId) {
     });
 }
 
-module.exports = { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription };
+function getSubscription(subscriptionId) {
+    return paddleRequest(`/subscriptions/${subscriptionId}`);
+}
+
+module.exports = { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription, getSubscription };

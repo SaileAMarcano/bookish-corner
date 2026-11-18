@@ -119,6 +119,9 @@ const MESSAGES = {
         pushTypesInvalid: 'Choose valid notification types.',
         pushUnavailable: 'Phone notifications are not available right now.',
         pushSendFailed: 'The test notification could not be sent. The server log explains why (usually the VAPID keys in the server settings).',
+        membershipUnavailable: 'Memberships are not available right now.',
+        membershipNone: "You don't have an active membership to cancel.",
+        membershipCancelFailed: 'We could not cancel your membership right now. Try again in a few minutes.',
         announcementInvalid: 'Write the title (up to 80 characters) and the message (up to 1000) in both languages. The link must start with / and point to a page in the app.',
     },
     es: {
@@ -239,6 +242,9 @@ const MESSAGES = {
         pushTypesInvalid: 'Elige tipos de notificación válidos.',
         pushUnavailable: 'Las notificaciones en el celular no están disponibles en este momento.',
         pushSendFailed: 'No se pudo enviar la notificación de prueba. El registro del servidor dice por qué (casi siempre son las claves VAPID en la configuración del servidor).',
+        membershipUnavailable: 'La membresía no está disponible en este momento.',
+        membershipNone: 'No tienes una membresía activa para cancelar.',
+        membershipCancelFailed: 'No pudimos cancelar tu membresía en este momento. Inténtalo de nuevo en unos minutos.',
         announcementInvalid: 'Escribe el título (hasta 80 caracteres) y el mensaje (hasta 1000) en los dos idiomas. El enlace debe empezar con / y llevar a una página de la app.',
     },
 };
