@@ -1,14 +1,11 @@
 import { useTranslation } from 'react-i18next';
-import Icon from './Icon';
 
-function SupporterBadge({ size = 14 }) {
+function SupporterBadge({ size = 20 }) {
     const { t } = useTranslation();
     const label = t('supporter.badge');
 
     return (
-        <span className="supporter-badge" title={label} role="img" aria-label={label}>
-            <Icon name="favorites" size={size} />
-        </span>
+        <img className="supporter-badge" src="/badges/supporter.webp" alt={label} title={label} width={size} height={size} />
     );
 }
 

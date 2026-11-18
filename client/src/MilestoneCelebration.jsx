@@ -40,7 +40,7 @@ const NOTE_BURST = [
 
 const NOTE_TWINKLES = [[-38, 30], [-50, 110], [-30, 180], [158, 40], [170, 120], [150, 190], [-22, 250], [160, 256]];
 
-function Star({ className, style, size }) {
+export function Star({ className, style, size }) {
     return (
         <svg className={className} style={style} viewBox="-8 -8 16 16" width={size} height={size} aria-hidden="true">
             <path d={STAR_PATH} />

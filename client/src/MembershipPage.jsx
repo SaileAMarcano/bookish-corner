@@ -1,17 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import Icon from './Icon';
 import Notice from './Notice';
 import LoadingState from './LoadingState';
+import SupporterCelebration from './SupporterCelebration';
 import { apiFetch } from './api';
 import { loadPaddle, onPaddleEvent } from './paddleCheckout';
 import './Membership.css';
 
 const BENEFITS = [
-    { id: 'themes', icon: 'flower' },
-    { id: 'badge', icon: 'favorites' },
-    { id: 'superStar', icon: 'sparkle' },
+    { id: 'themes', icon: 'flower', to: '/settings' },
+    { id: 'badge', icon: 'favorites', to: '/profile' },
+    { id: 'superStar', icon: 'sparkle', to: '/library' },
 ];
 
 const POLL_TRIES = 20;
@@ -26,6 +27,7 @@ function MembershipPage({ onChanged }) {
     const [waiting, setWaiting] = useState(false);
     const [confirming, setConfirming] = useState(false);
     const [canceling, setCanceling] = useState(false);
+    const [celebrating, setCelebrating] = useState(false);
     const timer = useRef(null);
 
     useEffect(() => {
@@ -48,6 +50,7 @@ function MembershipPage({ onChanged }) {
                         setData(next);
                         setWaiting(false);
                         setMessage(t('membership.thanks'));
+                        setCelebrating(true);
                         onChanged?.();
                     } else if (tries < POLL_TRIES) {
                         timer.current = setTimeout(check, POLL_DELAY);
@@ -62,6 +65,8 @@ function MembershipPage({ onChanged }) {
         };
         timer.current = setTimeout(check, POLL_DELAY);
     }), [t, onChanged]);
+
+    const closeCelebration = useCallback(() => setCelebrating(false), []);
 
     const formatDay = (value) => value
         ? new Date(value).toLocaleDateString(i18n.language, { day: 'numeric', month: 'long', year: 'numeric' })
@@ -139,6 +144,14 @@ function MembershipPage({ onChanged }) {
                                     <span>
                                         <strong>{t(`membership.benefits.${benefit.id}.name`)}</strong>
                                         <span>{t(`membership.benefits.${benefit.id}.text`)}</span>
+                                        {data.isMember ? (
+                                            <Link className="membership-benefit-where" to={benefit.to}>
+                                                {t(`membership.benefits.${benefit.id}.where`)}
+                                                <Icon name="arrowRight" size={14} />
+                                            </Link>
+                                        ) : (
+                                            <span className="membership-benefit-where">{t(`membership.benefits.${benefit.id}.where`)}</span>
+                                        )}
                                     </span>
                                 </li>
                             ))}
@@ -193,6 +206,8 @@ function MembershipPage({ onChanged }) {
                     </section>
                 </div>
             )}
+
+            {celebrating && <SupporterCelebration onClose={closeCelebration} />}
         </main>
     );
 }

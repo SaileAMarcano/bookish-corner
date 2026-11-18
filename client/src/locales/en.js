@@ -385,9 +385,9 @@ const en = {
         loading: 'Loading your membership…',
         includes: 'What you get',
         benefits: {
-            themes: { name: 'Every theme', text: 'Each seasonal and color theme we publish, as soon as it comes out.' },
-            badge: { name: 'Supporter badge', text: 'A little mark next to your name so the community knows you support the app.' },
-            superStar: { name: 'Super star', text: 'Give 6 glowing stars to up to 5 books that stayed with you.' },
+            themes: { name: 'Every theme', text: 'Each seasonal and color theme we publish, as soon as it comes out.', where: 'Pick them in Settings → Appearance.' },
+            badge: { name: 'Supporter badge', text: 'A little mark next to your name so the community knows you support the app.', where: 'It shows next to your name on your profile, posts and reviews.' },
+            superStar: { name: 'Super star', text: 'Give 6 glowing stars to up to 5 books that stayed with you.', where: 'In your library, open a book with 5 stars and tap “Give it the Super star”.' },
         },
         free: 'Everything else in the app stays free for everyone.',
         price: 'US$5.99 a month',
@@ -413,6 +413,13 @@ const en = {
     },
     supporter: {
         badge: 'Supports A Library of Us',
+        celebrate: {
+            kicker: 'Supporter membership',
+            title: "You're a supporter now!",
+            text: 'Thank you for helping this little corner keep growing. Your badge is already shining next to your name.',
+            profile: 'See my profile',
+            close: 'Close',
+        },
     },
     updates: {
         kicker: 'A Library of Us',

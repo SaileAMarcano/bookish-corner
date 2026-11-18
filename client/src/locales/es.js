@@ -385,9 +385,9 @@ const es = {
         loading: 'Cargando tu membresía…',
         includes: 'Qué incluye',
         benefits: {
-            themes: { name: 'Todos los temas', text: 'Cada tema de temporada y de color que publiquemos, apenas salga.' },
-            badge: { name: 'Insignia de apoyo', text: 'Un detalle junto a tu nombre para que la comunidad sepa que apoyas la app.' },
-            superStar: { name: 'Súper estrella', text: 'Dale 6 estrellas brillantes a hasta 5 libros que te marcaron.' },
+            themes: { name: 'Todos los temas', text: 'Cada tema de temporada y de color que publiquemos, apenas salga.', where: 'Elígelos en Configuración → Apariencia.' },
+            badge: { name: 'Insignia de apoyo', text: 'Un detalle junto a tu nombre para que la comunidad sepa que apoyas la app.', where: 'Sale junto a tu nombre en tu perfil, tus publicaciones y tus reseñas.' },
+            superStar: { name: 'Súper estrella', text: 'Dale 6 estrellas brillantes a hasta 5 libros que te marcaron.', where: 'En tu biblioteca, abre un libro con 5 estrellas y pulsa «Darle la Súper estrella».' },
         },
         free: 'Todo lo demás de la app sigue siendo gratis para todas las personas.',
         price: '20.000 COP al mes',
@@ -413,6 +413,13 @@ const es = {
     },
     supporter: {
         badge: 'Apoya A Library of Us',
+        celebrate: {
+            kicker: 'Membresía de apoyo',
+            title: '¡Ahora eres supporter!',
+            text: 'Gracias por ayudar a que este rincón siga creciendo. Tu insignia ya brilla junto a tu nombre.',
+            profile: 'Ver mi perfil',
+            close: 'Cerrar',
+        },
     },
     updates: {
         kicker: 'A Library of Us',
