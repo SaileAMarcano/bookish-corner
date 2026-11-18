@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { BOOKCASE_MODELS, SHELF_DENSITIES, BASE_WIDTH, layoutCases, decorationSize, caseGeometry } from '../src/bookcases.js';
+import { BOOKCASE_MODELS, SHELF_DENSITIES, BASE_WIDTH, layoutCases, decorationSize, caseGeometry, shelfFit } from '../src/bookcases.js';
 import { bookItem, decorationItem, groupItems, moveBy, moveToShelf, pinShelves, savedItems, toPayload } from '../src/shelfUtils.js';
 import { placementIssue, proposedMove, shelfCapacity } from '../src/decorationPlacement.js';
 
@@ -47,7 +47,7 @@ for (const {model, options} of profiles) {
     });
 
     test(`${label}: a genuinely full destination is rejected without changing the arrangement`, () => {
-        const count = SHELF_DENSITIES[options.density].spines;
+        const count = shelfFit(model, BASE_WIDTH, options).spines;
         const items = [...Array.from({length: count}, (_, i) => book(i + 1)), book(100, 'upright', 1)];
         const before = structuredClone(items);
         assert.equal(placementIssue(items, model, options), null);

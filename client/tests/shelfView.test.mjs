@@ -1,11 +1,13 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { BOOKCASE_MODELS, SHELF_DENSITIES, BASE_WIDTH, caseGeometry, layoutCases } from '../src/bookcases.js';
+import { BOOKCASE_MODELS, SHELF_DENSITIES, BASE_WIDTH, caseGeometry, layoutCases, shelfFit } from '../src/bookcases.js';
 import { bookItem, groupItems } from '../src/shelfUtils.js';
 import { shelfWell, shelfViewport } from '../src/shelfView.js';
 
-for (const model of BOOKCASE_MODELS) for (const [density, capacity] of Object.entries(SHELF_DENSITIES)) {
-    test(`${model}/${density}: narrow silhouettes preserve shelf capacity for spines and covers`, () => {
+for (const model of BOOKCASE_MODELS) for (const density of Object.keys(SHELF_DENSITIES)) {
+    test(`${model}/${density}: shelves hold as many spines and covers as fit their width`, () => {
+        const capacity = shelfFit(model, BASE_WIDTH, { immersive: true, density });
+        assert.ok(capacity.spines > SHELF_DENSITIES[density].spines);
         for (const [pose, count] of [['upright', capacity.spines], ['front', capacity.covers]]) {
             const groups = groupItems(Array.from({ length: count + 1 }, (_, index) => bookItem({ id: index + 1, title: `Book ${index + 1}` }, pose)));
             const rows = layoutCases(groups, model, BASE_WIDTH, { immersive: true, density })[0];

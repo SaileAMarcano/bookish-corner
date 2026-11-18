@@ -16,7 +16,15 @@ function bookDimensions(width, k, density) {
     const frontWidth = (width - (covers - 1) * gap) / covers;
     const h = frontWidth / 0.6;
     const span = (width - (spines - 1) * gap) / spines;
-    return { w: Math.min(span, h * 0.19), h, frontWidth, spines };
+    const w = Math.min(span, h * 0.19);
+    return { w, h, frontWidth, spines: Math.floor((width + gap + 0.01) / (w + gap)) };
+}
+
+export function shelfFit(model, caseWidth = BASE_WIDTH, options = {}) {
+    const density = options.density || 'desktop';
+    const { k, rows } = caseGeometry(model, caseWidth, { ...options, density });
+    const size = bookDimensions(rows[0].width, k, density);
+    return { spines: size.spines, covers: (SHELF_DENSITIES[density] || SHELF_DENSITIES.desktop).covers };
 }
 
 export const BOOKCASES = {
