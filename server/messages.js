@@ -200,7 +200,7 @@ const MESSAGES = {
         staffOnly: 'Esta sección es solo para el equipo de A Library of Us.',
         staffRoleInvalid: 'Elige Editor, Moderador o ningún rol.',
         ownStaffRole: 'No puedes cambiar tu propio rol.',
-        bookFieldsRequired: 'El título y el autor son obligatorios.',
+        bookFieldsRequired: 'El título y la autoría son obligatorios.',
         bookYearInvalid: 'Escribe un año válido.',
         bookInUse: 'Este libro está en la biblioteca de alguien, en una publicación o en una lista, así que no se puede borrar.',
         inviteInvalid: 'Este enlace de invitación no es válido, caducó o ya se usó.',

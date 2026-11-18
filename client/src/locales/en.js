@@ -76,7 +76,7 @@ const en = {
             "all": "Community",
             "following": "Following"
         },
-        "search": "Search by book, author or reader…",
+        "search": "Book, author or reader…",
         "searchButton": "Search",
         "orderLabel": "Order reviews",
         "recent": "Most recent",

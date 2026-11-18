@@ -76,7 +76,7 @@ const es = {
             "all": "Comunidad",
             "following": "Siguiendo"
         },
-        "search": "Busca por libro, autoría o persona…",
+        "search": "Libro, autoría o persona…",
         "searchButton": "Buscar",
         "orderLabel": "Ordenar reseñas",
         "recent": "Más recientes",
@@ -379,7 +379,7 @@ const es = {
         confirmDelete: '¿Borrar? Toca otra vez',
     },
     membership: {
-        kicker: 'Apoya a A Library of Us',
+        kicker: 'Apoya A Library of Us',
         title: 'Membresía de apoyo',
         lead: 'A Library of Us es un proyecto independiente y sin anuncios. Con tu membresía ayudas a mantener la app funcionando y a que sigan llegando cosas nuevas.',
         loading: 'Cargando tu membresía…',
@@ -1623,15 +1623,15 @@ const es = {
         cardLead: 'Descubre qué estoy leyendo, mis listas y mis reseñas.',
         cardBooks: 'libros leídos',
         cardReviews: 'reseñas',
-        cardFollowers: 'seguidores',
+        cardFollowers: 'le siguen',
         cardPreparing: 'Preparando…',
         cardError: 'No se pudo crear la imagen. Inténtalo de nuevo.',
     },
     userPage: {
         follow: 'Seguir',
         followingButton: 'Siguiendo',
-        followers: 'Seguidores',
-        followingCount: 'Seguidos',
+        followers: 'Le siguen',
+        followingCount: 'Siguiendo',
         tabs: {
             posts: 'Publicaciones',
             library: 'Biblioteca',
