@@ -17869,15 +17869,29 @@ a.post-tag:hover,
   opacity: 1;
 }
 
-:root[data-season="seaside"] body::before,
-:root[data-season="moonlit"] body::before,
-:root[data-season="adventure"] body::before {
+:root[data-season] body::before {
   content: '';
   position: fixed;
   z-index: -1;
   inset: 0;
   background: var(--season-corners) center / cover no-repeat;
   pointer-events: none;
+}
+
+:root[data-season="classic"] {
+  --season-corners: url('/seasons/classic/background-light.webp');
+}
+
+:root[data-theme="dark"][data-season="classic"] {
+  --season-corners: url('/seasons/classic/background-dark.webp');
+}
+
+:root[data-season="christmas"] {
+  --season-corners: url('/seasons/christmas/background-light.webp');
+}
+
+:root[data-theme="dark"][data-season="christmas"] {
+  --season-corners: url('/seasons/christmas/background-dark.webp');
 }
 
 :root[data-season="seaside"] {
@@ -17902,4 +17916,46 @@ a.post-tag:hover,
 
 :root[data-theme="dark"][data-season="adventure"] {
   --season-corners: url('/seasons/adventure/background-dark.webp');
+}
+
+@media (min-width: 861px) {
+  :root[data-season="classic"] {
+    --season-corners: url('/seasons/classic/background-light-wide.webp');
+  }
+
+  :root[data-theme="dark"][data-season="classic"] {
+    --season-corners: url('/seasons/classic/background-dark-wide.webp');
+  }
+
+  :root[data-season="christmas"] {
+    --season-corners: url('/seasons/christmas/background-light-wide.webp');
+  }
+
+  :root[data-theme="dark"][data-season="christmas"] {
+    --season-corners: url('/seasons/christmas/background-dark-wide.webp');
+  }
+
+  :root[data-season="seaside"] {
+    --season-corners: url('/seasons/seaside/background-light-wide.webp');
+  }
+
+  :root[data-theme="dark"][data-season="seaside"] {
+    --season-corners: url('/seasons/seaside/background-dark-wide.webp');
+  }
+
+  :root[data-season="moonlit"] {
+    --season-corners: url('/seasons/moonlit/background-light-wide.webp');
+  }
+
+  :root[data-theme="dark"][data-season="moonlit"] {
+    --season-corners: url('/seasons/moonlit/background-dark-wide.webp');
+  }
+
+  :root[data-season="adventure"] {
+    --season-corners: url('/seasons/adventure/background-light-wide.webp');
+  }
+
+  :root[data-theme="dark"][data-season="adventure"] {
+    --season-corners: url('/seasons/adventure/background-dark-wide.webp');
+  }
 }

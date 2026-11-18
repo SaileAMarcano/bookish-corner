@@ -81,7 +81,7 @@ function Sidebar({ readingCount = 0, seasonTheme, staffRole, moderationCount = 0
     const helpActive = location.pathname === '/help';
     const adminItems = ADMIN_ITEMS.filter((item) => item.roles.includes(staffRole));
     const illustration = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? `/seasons/${seasonTheme}/sidebar.png` : '/sidebar-illustration.png';
-    const mark = '/logo-mark.png';
+    const mark = SEASON_ILLUSTRATIONS.includes(seasonTheme) ? illustration : '/logo-mark.png';
 
     useEffect(() => {
         closeMenus(navRef.current);
