@@ -730,6 +730,7 @@ const en = {
                 christmas: 'Snow, deep reds and a cozy winter corner.',
                 seaside: 'Sea breeze, soft blues and beach watercolor.',
                 moonlit: 'Lilacs, blue nights and moonlit clouds.',
+                adventure: 'Maps, brave reds and deep sea blue.',
             },
             dark: 'Dark mode',
             darkHint: 'Easier on the eyes at night.',
@@ -810,6 +811,7 @@ const en = {
         christmas: 'Christmas',
         seaside: 'Seaside Chapters',
         moonlit: 'Moonlit Folio',
+        adventure: 'Adventure Edition',
     },
     public: {
         home: 'Home',
@@ -1452,6 +1454,7 @@ const en = {
     celebration: {
         seasideTitle: 'A message from the sea',
         moonlitTitle: 'Your story shines',
+        adventureTitle: 'Your story goes further',
         unlocked: 'Badge unlocked!',
         betaText: 'Thank you for being here from the very beginning.',
         seeAll: 'See my achievements',

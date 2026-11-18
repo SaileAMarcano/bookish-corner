@@ -146,7 +146,27 @@ function MoonPhases() {
     );
 }
 
-const SEASON_TITLES = { seaside: 'celebration.seasideTitle', moonlit: 'celebration.moonlitTitle' };
+function MapRoute() {
+    const id = useId().replaceAll(':', '');
+
+    return (
+        <svg className="milestone-note-route" viewBox="0 0 132 34" aria-hidden="true">
+            <defs>
+                <mask id={`${id}-route`}>
+                    <path className="milestone-note-route-reveal" d="M4 24c14-12 26-12 38-2s26 10 40 0 22-10 30-4" />
+                </mask>
+            </defs>
+            <path className="milestone-note-route-path" d="M4 24c14-12 26-12 38-2s26 10 40 0 22-10 30-4" mask={`url(#${id}-route)`} />
+            <g className="milestone-note-flag">
+                <line x1="114" y1="20" x2="114" y2="3" />
+                <path d="M114 3l13 4.5-13 4.5Z" />
+                <circle cx="114" cy="20" r="2" />
+            </g>
+        </svg>
+    );
+}
+
+const SEASON_TITLES = { seaside: 'celebration.seasideTitle', moonlit: 'celebration.moonlitTitle', adventure: 'celebration.adventureTitle' };
 
 function MilestoneCelebration({ currentUser, books, seasonTheme }) {
     const { t } = useTranslation();
@@ -285,6 +305,7 @@ function MilestoneCelebration({ currentUser, books, seasonTheme }) {
                                 <AchievementMark className="milestone-note-badge" milestoneKey={note.key} />
                             )}
                             {seasonTheme === 'moonlit' && <MoonPhases />}
+                            {seasonTheme === 'adventure' && <MapRoute />}
                             <strong className="milestone-note-title">
                                 {note.count
                                     ? t('celebration.manyTitle', { count: note.count })
