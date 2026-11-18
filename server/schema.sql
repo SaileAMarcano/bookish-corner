@@ -30,7 +30,10 @@ CREATE TABLE users(
     color_vision    TEXT NOT NULL DEFAULT 'default' CHECK (color_vision IN ('default', 'red-green', 'blue-yellow')),
     terms_accepted_at TIMESTAMPTZ,
     google_id       TEXT UNIQUE,
-    push_types      TEXT[] NOT NULL DEFAULT ARRAY['follows', 'comments', 'books', 'updates']
+    push_types      TEXT[] NOT NULL DEFAULT ARRAY['follows', 'comments', 'books', 'updates'],
+    membership_status TEXT CHECK (membership_status IN ('active', 'trialing', 'past_due', 'paused', 'canceled')),
+    paddle_subscription_id TEXT UNIQUE,
+    paddle_customer_id TEXT
 );
 
 CREATE TABLE works (

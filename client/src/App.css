@@ -7906,7 +7906,7 @@ a.comment-author:hover {
   background: #A23E4D;
 }
 
-:root[data-season="christmas"] .card {
+:where(:root[data-season="christmas"]) .card {
   position: relative;
 }
 
