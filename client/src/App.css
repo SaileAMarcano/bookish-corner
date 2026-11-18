@@ -17348,3 +17348,106 @@ a.post-tag:hover,
   appearance: none;
   display: none;
 }
+
+.year-shelf-lamp {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-end;
+  isolation: isolate;
+}
+
+.year-shelf-lamp-glow {
+  position: absolute;
+  z-index: -1;
+  top: 38%;
+  left: 50%;
+  width: 300%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255 238 196 / 60%) 0%, rgb(255 214 150 / 28%) 30%, rgb(255 214 150 / 0%) 62%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  animation: lamp-flicker 3.4s infinite;
+}
+
+.year-shelf-lamp .year-shelf-object {
+  filter: drop-shadow(0 0 5px rgb(255 230 175 / 85%)) brightness(1.05);
+  animation: lamp-shine 3.4s infinite;
+}
+
+@keyframes lamp-flicker {
+  0%,
+  100% {
+    opacity: 0.95;
+  }
+
+  6% {
+    opacity: 0.6;
+  }
+
+  8% {
+    opacity: 0.98;
+  }
+
+  36% {
+    opacity: 0.85;
+  }
+
+  38% {
+    opacity: 0.45;
+  }
+
+  40% {
+    opacity: 0.92;
+  }
+
+  66% {
+    opacity: 0.88;
+  }
+
+  69% {
+    opacity: 0.62;
+  }
+
+  72% {
+    opacity: 1;
+  }
+}
+
+@keyframes lamp-shine {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 5px rgb(255 230 175 / 85%)) brightness(1.05);
+  }
+
+  6% {
+    filter: drop-shadow(0 0 2px rgb(255 230 175 / 50%)) brightness(0.96);
+  }
+
+  8% {
+    filter: drop-shadow(0 0 6px rgb(255 230 175 / 90%)) brightness(1.06);
+  }
+
+  38% {
+    filter: drop-shadow(0 0 1px rgb(255 230 175 / 40%)) brightness(0.94);
+  }
+
+  40% {
+    filter: drop-shadow(0 0 5px rgb(255 230 175 / 85%)) brightness(1.05);
+  }
+
+  69% {
+    filter: drop-shadow(0 0 2px rgb(255 230 175 / 55%)) brightness(0.97);
+  }
+
+  72% {
+    filter: drop-shadow(0 0 6px rgb(255 230 175 / 95%)) brightness(1.07);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .year-shelf-lamp-glow,
+  .year-shelf-lamp .year-shelf-object {
+    animation: none;
+  }
+}
