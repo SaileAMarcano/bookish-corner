@@ -729,6 +729,7 @@ const es = {
                 classic: 'Papel cálido y rosa, todo el año.',
                 christmas: 'Nieve, rojos profundos y un rincón acogedor de invierno.',
                 seaside: 'Brisa de mar, azules suaves y acuarela de playa.',
+                moonlit: 'Lilas, noches azules y nubes de luna.',
             },
             dark: 'Modo oscuro',
             darkHint: 'Más cómodo para leer de noche.',
@@ -808,6 +809,7 @@ const es = {
         classic: 'Clásico',
         christmas: 'Navidad',
         seaside: 'Capítulos junto al mar',
+        moonlit: 'Folio a la luz de la luna',
     },
     public: {
         home: 'Inicio',
@@ -1449,6 +1451,7 @@ const es = {
     },
     celebration: {
         seasideTitle: 'Tu historia sigue su curso',
+        moonlitTitle: 'Tu historia brilla',
         unlocked: '¡Insignia desbloqueada!',
         betaText: 'Gracias por estar aquí desde el principio.',
         seeAll: 'Ver mis logros',

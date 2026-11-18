@@ -32,7 +32,7 @@ const NAV_ITEMS = [
     { to: '/reviews', label: 'nav.reviews', icon: 'feather' },
 ];
 
-const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'seaside'];
+const SEASON_ILLUSTRATIONS = ['classic', 'christmas', 'seaside', 'moonlit'];
 
 function isActive(item, location) {
     const [path, query] = item.to.split('?');

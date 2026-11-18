@@ -729,6 +729,7 @@ const en = {
                 classic: 'Warm paper and rose, all year long.',
                 christmas: 'Snow, deep reds and a cozy winter corner.',
                 seaside: 'Sea breeze, soft blues and beach watercolor.',
+                moonlit: 'Lilacs, blue nights and moonlit clouds.',
             },
             dark: 'Dark mode',
             darkHint: 'Easier on the eyes at night.',
@@ -808,6 +809,7 @@ const en = {
         classic: 'Classic',
         christmas: 'Christmas',
         seaside: 'Seaside Chapters',
+        moonlit: 'Moonlit Folio',
     },
     public: {
         home: 'Home',
@@ -1449,6 +1451,7 @@ const en = {
     },
     celebration: {
         seasideTitle: 'Your story flows on',
+        moonlitTitle: 'Your story shines',
         unlocked: 'Badge unlocked!',
         betaText: 'Thank you for being here from the very beginning.',
         seeAll: 'See my achievements',

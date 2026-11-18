@@ -2880,7 +2880,7 @@ app.patch('/api/me/theme', requireAuth, async (req, res) => {
     res.json({ theme });
 });
 
-const SEASON_THEMES = ['classic', 'christmas', 'seaside'];
+const SEASON_THEMES = ['classic', 'christmas', 'seaside', 'moonlit'];
 
 function hasPlus(user) {
     return user.staffRole === 'admin' || (user.plusUntil !== null && user.plusUntil > new Date());

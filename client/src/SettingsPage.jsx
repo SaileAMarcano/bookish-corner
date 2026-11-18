@@ -21,6 +21,7 @@ const SEASON_THEMES = [
     { id: 'classic', image: '/seasons/classic/sidebar.png' },
     { id: 'christmas', image: '/seasons/christmas/sidebar.png' },
     { id: 'seaside', image: '/seasons/seaside/sidebar.png' },
+    { id: 'moonlit', image: '/seasons/moonlit/sidebar.png' },
 ]
 
 function SettingsSection({ id, icon, children }) {

@@ -62,7 +62,7 @@ import './Mobile.css';
 
 const TOUR_STEPS = ['feed', 'composer', 'library', 'lists', 'search', 'bell', 'account', 'preferences'];
 
-const SEASON_THEMES = ['classic', 'christmas', 'seaside'];
+const SEASON_THEMES = ['classic', 'christmas', 'seaside', 'moonlit'];
 
 function applyUserLanguage(user) {
   if (user.language && user.language !== i18n.language) {

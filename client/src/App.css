@@ -17555,3 +17555,134 @@ a.post-tag:hover,
 :root[data-motion="reduce"] .milestone-note-wave path {
   stroke-dashoffset: 0;
 }
+
+:root[data-season="moonlit"] {
+  --bg: #FAF4EE;
+  --surface: #FDF9F5;
+  --surface-2: #E7DCE6;
+  --ink: #232650;
+  --text-2: #625C78;
+  --rose: #B57AD3;
+  --rose-deep: #3F4688;
+  --rose-ink: #6A2A80;
+  --rose-hover: #A86BC7;
+  --on-rose: #2A1442;
+  --on-rose-deep: #FFFFFF;
+  --rose-deep-hover: #353B74;
+  --rose-soft: #EDDDF0;
+  --glass: rgba(253, 249, 245, 0.86);
+}
+
+:root[data-theme="dark"][data-season="moonlit"] {
+  --bg: #171A2E;
+  --surface: #1E2138;
+  --surface-2: #33365A;
+  --ink: #ECE8F5;
+  --text-2: #ABA6C4;
+  --rose: #D29CE7;
+  --rose-deep: #9296E1;
+  --rose-ink: #D9B5EA;
+  --rose-hover: #DDB0EE;
+  --on-rose: #24123A;
+  --on-rose-deep: #15172B;
+  --rose-deep-hover: #A5A9EA;
+  --rose-soft: #4A3558;
+  --glass: rgba(30, 33, 56, 0.86);
+}
+
+:root[data-season="moonlit"] .app-main {
+  background: url('/seasons/moonlit/clouds-light.webp') top center / max(100%, 760px) auto no-repeat;
+}
+
+:root[data-theme="dark"][data-season="moonlit"] .app-main {
+  background-image: url('/seasons/moonlit/clouds-dark.webp');
+}
+
+:root[data-season="seaside"] .home-greeting-rays,
+:root[data-season="seaside"] .home-greeting-stars,
+:root[data-season="moonlit"] .home-greeting-rays,
+:root[data-season="moonlit"] .home-greeting-stars {
+  display: none;
+}
+
+:root[data-season="moonlit"] .sidebar-link.active {
+  background: var(--rose-soft);
+}
+
+:root[data-season="moonlit"] .home .continue-card .progress-fill {
+  background: #A96EC9;
+}
+
+:root[data-theme="dark"][data-season="moonlit"] .home .continue-card .progress-fill {
+  background: #D39CE7;
+}
+
+:root[data-season="moonlit"] .milestone-note-ribbon {
+  background: #3F4688;
+}
+
+.milestone-note-moons {
+  width: 126px;
+  height: 16px;
+  margin: 2px 0 4px;
+  overflow: visible;
+}
+
+.milestone-note-moon {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: moon-rise 0.5s var(--moon-delay) ease-out forwards;
+}
+
+.milestone-note-moon-lit {
+  fill: #F6E7B8;
+}
+
+.milestone-note-moon-shadow {
+  fill: #2B2F63;
+}
+
+.milestone-note-moon-rim {
+  fill: none;
+  stroke: var(--logo-gold);
+  stroke-width: 1;
+}
+
+.milestone-note-moon:last-child {
+  filter: drop-shadow(0 0 4px rgb(246 231 184 / 90%));
+  animation: moon-rise 0.5s var(--moon-delay) ease-out forwards, moon-glow 1.6s 2.2s ease-in-out infinite;
+}
+
+@keyframes moon-rise {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes moon-glow {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 3px rgb(246 231 184 / 70%));
+  }
+
+  50% {
+    filter: drop-shadow(0 0 7px rgb(246 231 184 / 100%));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .milestone-note-moon {
+    opacity: 1;
+  }
+}
+
+:root[data-motion="reduce"] .milestone-note-moon {
+  opacity: 1;
+}

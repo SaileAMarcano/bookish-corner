@@ -118,6 +118,32 @@ function SeaWave() {
     );
 }
 
+const MOON_PHASES = [0, 0.5, 0.9, 1.2, 1.5, 1.85, 2.4];
+
+function MoonPhases() {
+    const id = useId().replaceAll(':', '');
+
+    return (
+        <svg className="milestone-note-moons" viewBox="0 0 126 16" aria-hidden="true">
+            {MOON_PHASES.map((shift, index) => {
+                const cx = 9 + index * 18;
+                return (
+                    <g key={shift} className="milestone-note-moon" style={{ '--moon-delay': `${(0.3 + index * 0.22).toFixed(2)}s` }}>
+                        <clipPath id={`${id}-moon-${index}`}><circle cx={cx} cy="8" r="7" /></clipPath>
+                        <g clipPath={`url(#${id}-moon-${index})`}>
+                            <circle className="milestone-note-moon-lit" cx={cx} cy="8" r="7" />
+                            <circle className="milestone-note-moon-shadow" cx={cx - shift * 7} cy="8" r="7" />
+                        </g>
+                        <circle className="milestone-note-moon-rim" cx={cx} cy="8" r="7" />
+                    </g>
+                );
+            })}
+        </svg>
+    );
+}
+
+const SEASON_TITLES = { seaside: 'celebration.seasideTitle', moonlit: 'celebration.moonlitTitle' };
+
 function MilestoneCelebration({ currentUser, books, seasonTheme }) {
     const { t } = useTranslation();
     const location = useLocation();
@@ -245,9 +271,10 @@ function MilestoneCelebration({ currentUser, books, seasonTheme }) {
                 <div key={note.key} className={`milestone-note ${leaving ? 'leaving' : ''}`} role="status">
                     <Link to="/achievements" className="milestone-note-link">
                         <span className="milestone-note-ribbon">
-                            <span className="milestone-note-kicker">{seaside ? t('celebration.seasideTitle') : t('celebration.newAchievement')}</span>
+                            <span className="milestone-note-kicker">{t(SEASON_TITLES[seasonTheme] || 'celebration.newAchievement')}</span>
                             <AchievementMark className="milestone-note-badge" milestoneKey={note.key} />
                             {seaside && <SeaWave />}
+                            {seasonTheme === 'moonlit' && <MoonPhases />}
                             <strong className="milestone-note-title">
                                 {note.count
                                     ? t('celebration.manyTitle', { count: note.count })
