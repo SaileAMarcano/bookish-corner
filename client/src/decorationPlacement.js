@@ -23,13 +23,19 @@ export function placementIssue(items, model, options = {}) {
     return null;
 }
 
-export function proposedMove(items, from, to, before, shelf) {
+export function proposedMove(items, from, to, before, shelf, model = null, options = {}) {
     const moving = items.find(item => item.key === from);
     if (moving?.type === 'decoration' && to) {
         const pile = groupItems(items).find(group => group.type === 'pile' && group.items.some(item => item.key === to));
         if (pile?.top && pile.top.key !== from) return { items, issue: { kind: 'occupied', name: moving.name } };
     }
-    return { items: to ? moveItem(items, from, to, before) : moveToShelf(items, from, shelf), issue: null };
+    const next = to ? moveItem(items, from, to, before) : moveToShelf(items, from, shelf);
+    const moved = next.find(item => item.key === from);
+    if (model && moved?.type === 'book' && moved.pose === 'flat' && placementIssue(next, model, options)) {
+        const standing = next.map(item => (item.key === from ? { ...item, pose: 'upright' } : item));
+        if (!placementIssue(standing, model, options)) return { items: standing, issue: null };
+    }
+    return { items: next, issue: null };
 }
 
 export function shelfCapacity(items) {

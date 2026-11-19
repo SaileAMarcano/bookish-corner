@@ -184,13 +184,13 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
     }
 
     function checkMove(from, to, before, shelf) {
-        const next = proposedMove(editing.items, from, to, before, shelf);
+        const next = proposedMove(editing.items, from, to, before, shelf, editing.bookcase.model, shelfOptions);
         return next.issue || placementIssue(next.items, editing.bookcase.model, shelfOptions);
     }
 
     function move(from, to, before, shelf, x) {
         setMoveFeedback('');
-        const next = proposedMove(editing.items, from, to, before, shelf);
+        const next = proposedMove(editing.items, from, to, before, shelf, editing.bookcase.model, shelfOptions);
         if (next.issue) { setSaveError(issueMessage(next.issue)); return; }
         const placed = Number.isFinite(x)
             ? next.items.map((item) => (item.key === from ? { ...item, ...(item.type === 'decoration' ? { pose: 'upright' } : {}), x } : item))
@@ -223,7 +223,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
 
     function moveSelectedToShelf(shelf) {
         if (!Number.isInteger(shelf) || shelf < 0 || shelf >= shelfCapacity(editing.items)) return;
-        const next = proposedMove(editing.items, editing.selectedKey, null, false, shelf);
+        const next = proposedMove(editing.items, editing.selectedKey, null, false, shelf, editing.bookcase.model, shelfOptions);
         if (!changeItems(() => next.items)) return;
         setMoveFeedback(t('library.shelf.movedToShelf', { number: shelf + 1 }));
         revealItem(editing.selectedKey);

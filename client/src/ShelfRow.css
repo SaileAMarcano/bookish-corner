@@ -105,7 +105,7 @@
 }
 
 .year-shelf-cases .year-shelf-case .year-shelf-pile-top {
-  margin-bottom: calc(6px * var(--k, 1));
+  margin-bottom: calc(-1px * var(--k, 1));
 }
 
 .year-shelf-placement-notice {
