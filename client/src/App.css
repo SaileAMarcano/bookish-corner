@@ -17356,6 +17356,11 @@ a.post-tag:hover,
   isolation: isolate;
 }
 
+.year-shelf-case .year-shelf-lamp {
+  width: 100%;
+  height: 100%;
+}
+
 .year-shelf-light {
   position: absolute;
   z-index: -1;
@@ -18139,7 +18144,7 @@ a.post-tag:hover,
 .year-shelf-case-row > .year-shelf-free {
   position: absolute;
   bottom: 0;
-  left: calc(var(--x) * (100% - var(--w)));
+  left: var(--left);
   margin: 0;
 }
 

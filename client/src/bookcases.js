@@ -105,6 +105,7 @@ const DECORATION_HEIGHTS = {
 };
 const THIN_GENRES = ['Manga', 'Comics'];
 const THIN_RATIO = 0.62;
+const SNAP = 0.08;
 const LEGACY_PILE_SIZE = 3;
 
 export function bookcaseImage({ model, color }) {
@@ -284,14 +285,15 @@ function isFree(group) {
 function placeFree(groups, rowWidth, gap) {
     const flow = groups.filter((group) => !isFree(group));
     let floor = flow.reduce((total, group, index) => total + spanOf(group) + (index > 0 ? gap : 0), 0);
-    if (flow.length > 0) floor += gap;
 
     const free = groups.filter(isFree).sort((a, b) => freeX(a) - freeX(b));
     for (const group of free) {
         const room = Math.max(0, rowWidth - group.w);
-        const left = Math.min(room, Math.max(freeX(group) * room, floor));
+        const wanted = Math.max(freeX(group) * room, floor);
+        const left = Math.min(room, wanted - floor < rowWidth * SNAP ? floor : wanted);
         group.fx = room > 0 ? left / room : 0;
-        floor = left + group.w + gap;
+        group.left = left;
+        floor = left + group.w;
     }
 }
 
