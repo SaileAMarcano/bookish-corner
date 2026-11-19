@@ -1474,6 +1474,10 @@ const es = {
     },
     library: {
         shelf: {
+            size: 'Tamaño',
+            sizeValue: '{{value}} % del tamaño normal',
+            sizeSmall: 'Pequeño',
+            sizeBig: 'Grande',
             spot: 'Lugar en la repisa',
             spotValue: '{{value}} % desde la izquierda',
             spotLeft: 'Izquierda',
@@ -1615,6 +1619,7 @@ const es = {
                 'paper-lantern': 'Farol de papel',
                 daruma: 'Daruma lector',
                 'fox-mask': 'Máscara de zorro',
+                samurai: 'Samurái lector',
             },
             freeRule: 'Gratis para todas las personas',
             memberRule: 'Para quienes tienen la membresía de apoyo',

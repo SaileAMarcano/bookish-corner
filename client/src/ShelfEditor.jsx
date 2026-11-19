@@ -5,7 +5,7 @@ import { SHELF_POSES, SPINE_FACES } from './shelfUtils';
 import { SPINE_COLORS, SPINE_LIGHTNESS, spineColor, spineSliders } from './shelfSpines';
 import { BOOKCASES, BOOKCASE_MODELS, bookcaseImage } from './bookcases';
 
-function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray, saving, error, onMoveBy, onSpot, onShelf, onPose, onTone, onColor, onFace, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray, saving, error, onMoveBy, onSpot, onScale, onShelf, onPose, onTone, onColor, onFace, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
     const sliders = item?.type === 'book'
@@ -54,6 +54,19 @@ function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray
                                 <div className="year-shelf-spot-ends" aria-hidden="true">
                                     <span>{t('library.shelf.spotLeft')}</span>
                                     <span>{t('library.shelf.spotRight')}</span>
+                                </div>
+                            </div>
+                        )}
+                        {item.type === 'decoration' && (
+                            <div className="year-shelf-spot">
+                                <label htmlFor="shelf-scale">{t('library.shelf.size')}</label>
+                                <input id="shelf-scale" type="range" min="50" max="160" step="5"
+                                    value={Math.round((item.scale ?? 1) * 100)}
+                                    aria-valuetext={t('library.shelf.sizeValue', { value: Math.round((item.scale ?? 1) * 100) })}
+                                    onChange={event => onScale(Number(event.target.value) / 100)} />
+                                <div className="year-shelf-spot-ends" aria-hidden="true">
+                                    <span>{t('library.shelf.sizeSmall')}</span>
+                                    <span>{t('library.shelf.sizeBig')}</span>
                                 </div>
                             </div>
                         )}

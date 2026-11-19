@@ -1474,6 +1474,10 @@ const en = {
     },
     library: {
         shelf: {
+            size: 'Size',
+            sizeValue: '{{value}}% of the normal size',
+            sizeSmall: 'Small',
+            sizeBig: 'Big',
             spot: 'Spot on the shelf',
             spotValue: '{{value}}% from the left',
             spotLeft: 'Left',
@@ -1615,6 +1619,7 @@ const en = {
                 'paper-lantern': 'Paper lantern',
                 daruma: 'Reading daruma',
                 'fox-mask': 'Fox mask',
+                samurai: 'Reading samurai',
             },
             freeRule: 'Free for everyone',
             memberRule: 'For supporter members',

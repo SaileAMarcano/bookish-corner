@@ -16718,7 +16718,7 @@ a.post-tag:hover,
   position: absolute;
   display: flex;
   align-items: flex-end;
-  gap: calc(2px * var(--k, 1));
+  gap: calc(1px * var(--k, 1));
   box-sizing: border-box;
 }
 

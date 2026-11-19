@@ -29,7 +29,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const baseClass = (isBook ? (isFront ? 'year-shelf-front' : isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration') + (free ? ' year-shelf-free' : '');
     const coverTone = useCoverTone(isBook && !isFront && item.tone == null && !item.color ? item.book.coverImage : null);
     const fill = isBook ? item.color || SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
-    const size = { '--w': item.w + 'px', '--h': item.h + 'px', ...(free ? { '--left': item.left + 'px' } : {}), ...(item.tight ? { marginLeft: 'calc(-2px * var(--k, 1))' } : {}) };
+    const size = { '--w': item.w + 'px', '--h': item.h + 'px', ...(free ? { '--left': item.left + 'px' } : {}), ...(item.tight ? { marginLeft: 'calc(-0.5px * var(--k, 1))' } : {}) };
     const style = isBook
         ? { ...size, '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8' }
         : size;
@@ -140,7 +140,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
             const rowBox = node.getBoundingClientRect();
             const dragged = stageRef.current.querySelector('[data-shelf-key="' + CSS.escape(state.key) + '"]');
             const w = moving.type === 'decoration'
-                ? decorationSize(moving.name, k).w * (rowBox.width / Math.max(1, node.offsetWidth))
+                ? decorationSize(moving.name, k, moving.scale).w * (rowBox.width / Math.max(1, node.offsetWidth))
                 : dragged?.getBoundingClientRect().width ?? 0;
             const room = Math.max(1, rowBox.width - w);
             next.x = Math.round(Math.min(1, Math.max(0, (state.x - rowBox.left - w / 2) / room)) * 100) / 100;
@@ -152,7 +152,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
         let preview = null;
         if (moving?.type === 'decoration') {
             const { k } = caseGeometry(bookcase.model, width, { immersive, density });
-            const size = decorationSize(moving.name, k);
+            const size = decorationSize(moving.name, k, moving.scale);
             const stage = stageRef.current.getBoundingClientRect();
             const anchor = node.closest(next.onto ? '.year-shelf-pile' : '[data-shelf-row]') || node;
             const box = anchor.getBoundingClientRect();

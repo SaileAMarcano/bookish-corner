@@ -230,7 +230,7 @@ CREATE TABLE shelf_items (
         'bottle', 'seashell', 'compass', 'clock',
         'moon', 'moon-chest', 'geode', 'secret-door', 'dragon-egg',
         'treasure-map', 'suitcase', 'globe', 'camera',
-        'reading-cat', 'paper-lantern', 'daruma', 'fox-mask'
+        'reading-cat', 'paper-lantern', 'daruma', 'fox-mask', 'samurai'
     )),
     pose         TEXT NOT NULL DEFAULT 'upright' CHECK (pose IN ('upright', 'lean', 'flat', 'front')),
     tone         SMALLINT CHECK (tone BETWEEN 0 AND 11),
@@ -239,6 +239,7 @@ CREATE TABLE shelf_items (
     face         TEXT CHECK (face IN ('cover', 'solid')),
     motif        TEXT CHECK (motif IN ('star', 'heart', 'flower', 'quill', 'key', 'planet', 'moon', 'hourglass', 'leaf', 'bubble')),
     pos_x        REAL CHECK (pos_x >= 0 AND pos_x <= 1),
+    scale        REAL CHECK (scale >= 0.5 AND scale <= 1.6),
     CHECK ((user_book_id IS NULL) <> (decoration IS NULL)),
     UNIQUE (user_id, decoration)
 );

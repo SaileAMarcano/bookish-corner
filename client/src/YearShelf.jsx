@@ -398,6 +398,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
                                                 error={saveError}
                                                 onMoveBy={nudgeSelected}
                                                 onSpot={(x) => changeSelected({ x })}
+                                                onScale={(scale) => changeSelected({ scale: scale === 1 ? null : scale })}
                                                 onShelf={moveSelectedToShelf}
                                                 onPose={(pose) => changeSelected(pose === 'flat' ? { pose, x: null } : { pose })}
                                                 onTone={(tone) => changeSelected({ tone, color: null })}

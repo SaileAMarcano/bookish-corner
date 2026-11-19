@@ -2395,6 +2395,7 @@ const SHELF_DECORATIONS = {
     'paper-lantern': null,
     daruma: null,
     'fox-mask': null,
+    samurai: null,
 };
 const SHELF_POSES = ['upright', 'lean', 'flat', 'front'];
 const SHELF_TONES = 12;
@@ -2410,7 +2411,7 @@ const SHELF_CASES = {
 
 async function findShelf(userId) {
     return query(
-        `SELECT year, user_book_id, decoration, pose, tone, motif, face, shelf, color, pos_x
+        `SELECT year, user_book_id, decoration, pose, tone, motif, face, shelf, color, pos_x, scale
          FROM shelf_items WHERE user_id = $1 ORDER BY year, position`,
         [userId]
     );
@@ -2470,14 +2471,15 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
                 return res.status(400).json({ error: msg(req, 'shelfInvalid') });
             }
             bookIds.push(item.bookId);
-            rows.push({ bookId: item.bookId, decoration: null, pose, tone, motif, face, shelf, color, x });
+            rows.push({ bookId: item.bookId, decoration: null, pose, tone, motif, face, shelf, color, x, scale: null });
         } else if (item && typeof item.decoration === 'string'
             && Object.hasOwn(SHELF_DECORATIONS, item.decoration) && !decorations.includes(item.decoration)
             && ['upright', 'flat'].includes(item.pose ?? 'upright')
-            && (item.x == null || (typeof item.x === 'number' && item.x >= 0 && item.x <= 1))) {
+            && (item.x == null || (typeof item.x === 'number' && item.x >= 0 && item.x <= 1))
+            && (item.scale == null || (typeof item.scale === 'number' && item.scale >= 0.5 && item.scale <= 1.6))) {
             decorations.push(item.decoration);
             const pose = item.pose ?? 'upright';
-            rows.push({ bookId: null, decoration: item.decoration, pose, tone: null, motif: null, face: null, shelf, color: null, x: pose === 'upright' ? item.x ?? null : null });
+            rows.push({ bookId: null, decoration: item.decoration, pose, tone: null, motif: null, face: null, shelf, color: null, x: pose === 'upright' ? item.x ?? null : null, scale: item.scale ?? null });
         } else {
             return res.status(400).json({ error: msg(req, 'shelfInvalid') });
         }
@@ -2524,10 +2526,10 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
 
         if (rows.length > 0) {
             await tx(
-                `INSERT INTO shelf_items (user_id, year, position, user_book_id, decoration, pose, tone, motif, face, shelf, color, pos_x)
-                 SELECT $1, $2, item.position, item.user_book_id, item.decoration, item.pose, item.tone, item.motif, item.face, item.shelf, item.color, item.pos_x
-                 FROM unnest($3::int[], $4::int[], $5::text[], $6::text[], $7::int[], $8::text[], $9::text[], $10::int[], $11::text[], $12::real[])
-                      AS item(position, user_book_id, decoration, pose, tone, motif, face, shelf, color, pos_x)`,
+                `INSERT INTO shelf_items (user_id, year, position, user_book_id, decoration, pose, tone, motif, face, shelf, color, pos_x, scale)
+                 SELECT $1, $2, item.position, item.user_book_id, item.decoration, item.pose, item.tone, item.motif, item.face, item.shelf, item.color, item.pos_x, item.scale
+                 FROM unnest($3::int[], $4::int[], $5::text[], $6::text[], $7::int[], $8::text[], $9::text[], $10::int[], $11::text[], $12::real[], $13::real[])
+                      AS item(position, user_book_id, decoration, pose, tone, motif, face, shelf, color, pos_x, scale)`,
                 [
                     userId,
                     year,
@@ -2541,6 +2543,7 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
                     rows.map((row) => row.shelf),
                     rows.map((row) => row.color),
                     rows.map((row) => row.x),
+                    rows.map((row) => row.scale),
                 ]
             );
         }

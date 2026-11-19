@@ -17,7 +17,7 @@ function bookDimensions(width, k, density) {
     const h = frontWidth / 0.6;
     const span = (width - (spines - 1) * gap) / spines;
     const w = Math.min(span, h * 0.19);
-    return { w, h, frontWidth, spines: Math.floor((width + gap + 0.01) / (w + gap)) };
+    return { w, h, frontWidth, spines: Math.floor((width + k + 0.01) / (w + k)) };
 }
 
 export function shelfFit(model, caseWidth = BASE_WIDTH, options = {}) {
@@ -77,6 +77,7 @@ const DECORATION_RATIOS = {
     'paper-lantern': 0.75,
     daruma: 0.92,
     'fox-mask': 0.69,
+    samurai: 0.62,
 };
 const DECORATION_HEIGHTS = {
     candle: 60, quill: 76, stars: 64, flowers: 90, bookends: 56,
@@ -102,6 +103,7 @@ const DECORATION_HEIGHTS = {
     'paper-lantern': 62,
     daruma: 58,
     'fox-mask': 66,
+    samurai: 70,
 };
 const THIN_GENRES = ['Manga', 'Comics'];
 const THIN_RATIO = 0.5;
@@ -215,21 +217,21 @@ export function caseGeometry(model, width = BASE_WIDTH, { immersive = false, row
     return { width, height: cursor, artWidth, cropLeft, k, rows, slices };
 }
 
-export function decorationSize(name, k = 1) {
-    const h = (DECORATION_HEIGHTS[name] ?? 60) * k;
+export function decorationSize(name, k = 1, scale = 1) {
+    const h = (DECORATION_HEIGHTS[name] ?? 60) * k * (scale || 1);
     return { h, w: h * (DECORATION_RATIOS[name] ?? 0.8) };
 }
 
 function measure(group, k, bookSize) {
     if (group.type === 'decoration') {
-        const size = decorationSize(group.name, k);
+        const size = decorationSize(group.name, k, group.scale);
         return { ...group, ...size, span: size.w + 4 * k };
     }
 
     if (group.type === 'pile') {
         const items = group.items.map((item) => ({ ...item, w: bookSize.h, h: thickness(item, bookSize) }));
         const pileHeight = items.reduce((total, item) => total + item.h, 0) - Math.max(0, items.length - 1);
-        const top = group.top ? { ...group.top, ...decorationSize(group.top.name, k) } : null;
+        const top = group.top ? { ...group.top, ...decorationSize(group.top.name, k, group.top.scale) } : null;
 
         const w = Math.ceil(Math.max(bookSize.h, top ? top.w + 4 * k : 0));
         return { ...group, items, top, w, h: pileHeight };
@@ -244,7 +246,8 @@ function thickness(item, bookSize) {
 }
 
 function distributeGroups(groups, rowWidth, k, bookSize) {
-    const gap = 2 * k;
+    const gap = k;
+    const thinGap = 0.5 * k;
     const buckets = [];
     let cursor = 0;
 
@@ -256,7 +259,7 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
             const shaped = measure(group, k, bookSize);
             const bucket = buckets[index];
             shaped.tight = thinSpine(shaped) && thinSpine(bucket.groups.at(-1));
-            const needed = spanOf(shaped) + (bucket.used > 0 && !shaped.tight ? gap : 0);
+            const needed = spanOf(shaped) + (bucket.used > 0 ? (shaped.tight ? thinGap : gap) : 0);
 
             if (bucket.used === 0 || bucket.used + needed <= rowWidth + 0.01) {
                 bucket.groups.push(shaped);
@@ -269,7 +272,7 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
         cursor = index;
     }
 
-    for (const bucket of buckets) placeFree(bucket.groups, rowWidth, gap);
+    for (const bucket of buckets) placeFree(bucket.groups, rowWidth, gap, thinGap);
     return buckets;
 }
 
@@ -287,9 +290,9 @@ function isFree(group) {
     return freeX(group) !== undefined;
 }
 
-function placeFree(groups, rowWidth, gap) {
+function placeFree(groups, rowWidth, gap, thinGap) {
     const flow = groups.filter((group) => !isFree(group));
-    let floor = flow.reduce((total, group, index) => total + spanOf(group) + (index > 0 && !group.tight ? gap : 0), 0);
+    let floor = flow.reduce((total, group, index) => total + spanOf(group) + (index > 0 ? (group.tight ? thinGap : gap) : 0), 0);
 
     const free = groups.filter(isFree).sort((a, b) => freeX(a) - freeX(b));
     for (const group of free) {
