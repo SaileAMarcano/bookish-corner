@@ -14,7 +14,7 @@ export function placementIssue(items, model, options = {}, before = null) {
     const layout = layoutCases(groups, model, BASE_WIDTH, profile);
     const allowed = before ? excesses(before, model, profile) : [];
     for (const row of layout.flat()) {
-        if (row.excess > Math.max(0.01, (allowed[row.index] ?? 0) + 0.01)) return { kind: 'space', name: null };
+        if (row.excess > Math.max(row.width * 0.002, (allowed[row.index] ?? 0) + 0.01)) return { kind: 'space', name: null };
     }
     for (const rows of layout) for (const row of rows) for (const group of row.groups) {
         const members = group.type === 'pile' ? [...group.items, ...(group.top ? [group.top] : [])] : [group];

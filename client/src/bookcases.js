@@ -257,8 +257,7 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
     let cursor = 0;
 
     for (const group of groups) {
-        const pinned = Number.isInteger(group.shelf);
-        let index = pinned ? group.shelf : cursor;
+        let index = Number.isInteger(group.shelf) ? group.shelf : cursor;
 
         for (;;) {
             while (buckets.length <= index) buckets.push({ groups: [] });
@@ -266,7 +265,7 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
             const bucket = buckets[index];
             shaped.tight = thinSpine(shaped) && thinSpine(bucket.groups.at(-1));
 
-            if (pinned || bucket.groups.length === 0 || fits([...bucket.groups, shaped], rowWidth, gap, thinGap)) {
+            if (bucket.groups.length === 0 || fits([...bucket.groups, shaped], rowWidth, gap, thinGap)) {
                 bucket.groups.push(shaped);
                 break;
             }
@@ -309,7 +308,7 @@ function excessOf(groups, rowWidth, gap, thinGap) {
 }
 
 function fits(groups, rowWidth, gap, thinGap) {
-    return excessOf(groups, rowWidth, gap, thinGap) <= 0.01;
+    return excessOf(groups, rowWidth, gap, thinGap) <= rowWidth * 0.002;
 }
 
 function placeFree(groups, rowWidth, gap, thinGap) {
