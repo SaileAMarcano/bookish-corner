@@ -18143,6 +18143,10 @@ a.post-tag:hover,
   margin: 0;
 }
 
+.year-shelf-case-row > .year-shelf-pile.year-shelf-free {
+  width: var(--w);
+}
+
 .year-shelf-spot {
   display: grid;
   gap: 6px;

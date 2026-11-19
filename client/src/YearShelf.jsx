@@ -193,7 +193,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
         const next = proposedMove(editing.items, from, to, before, shelf);
         if (next.issue) { setSaveError(issueMessage(next.issue)); return; }
         const placed = Number.isFinite(x)
-            ? next.items.map((item) => (item.key === from ? { ...item, pose: 'upright', x } : item))
+            ? next.items.map((item) => (item.key === from ? { ...item, ...(item.type === 'decoration' ? { pose: 'upright' } : {}), x } : item))
             : next.items.map((item) => (item.key === from && to ? { ...item, x: null } : item));
         changeItems(() => placed);
     }
@@ -201,7 +201,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
     function nudgeSelected(step) {
         setMoveFeedback('');
         const selected = editing.items.find((item) => item.key === editing.selectedKey);
-        if (selected?.type === 'decoration' && Number.isFinite(selected.x)) {
+        if (Number.isFinite(selected?.x)) {
             changeSelected({ x: Math.round(Math.min(1, Math.max(0, selected.x + step * 0.1)) * 100) / 100 });
             return;
         }

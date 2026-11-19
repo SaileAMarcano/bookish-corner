@@ -2445,11 +2445,14 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
             const validMotif = motif === null || SHELF_MOTIFS.includes(motif);
             const validFace = face === null || SHELF_FACES.includes(face);
 
-            if (!SHELF_POSES.includes(pose) || !validTone || !validMotif || !validFace || !validColor || bookIds.includes(item.bookId)) {
+            const x = item.x ?? null;
+            const validX = x === null || (typeof x === 'number' && x >= 0 && x <= 1);
+
+            if (!SHELF_POSES.includes(pose) || !validTone || !validMotif || !validFace || !validColor || !validX || bookIds.includes(item.bookId)) {
                 return res.status(400).json({ error: msg(req, 'shelfInvalid') });
             }
             bookIds.push(item.bookId);
-            rows.push({ bookId: item.bookId, decoration: null, pose, tone, motif, face, shelf, color, x: null });
+            rows.push({ bookId: item.bookId, decoration: null, pose, tone, motif, face, shelf, color, x });
         } else if (item && typeof item.decoration === 'string'
             && Object.hasOwn(SHELF_DECORATIONS, item.decoration) && !decorations.includes(item.decoration)
             && ['upright', 'flat'].includes(item.pose ?? 'upright')

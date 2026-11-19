@@ -271,8 +271,14 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
     return buckets;
 }
 
+function freeX(group) {
+    if (group.type === 'pile') return group.items.map((item) => item.x).find(Number.isFinite);
+    if (group.type === 'decoration' && group.pose === 'flat') return undefined;
+    return Number.isFinite(group.x) ? group.x : undefined;
+}
+
 function isFree(group) {
-    return group.type === 'decoration' && group.pose !== 'flat' && Number.isFinite(group.x);
+    return freeX(group) !== undefined;
 }
 
 function placeFree(groups, rowWidth, gap) {
@@ -280,10 +286,10 @@ function placeFree(groups, rowWidth, gap) {
     let floor = flow.reduce((total, group, index) => total + spanOf(group) + (index > 0 ? gap : 0), 0);
     if (flow.length > 0) floor += gap;
 
-    const free = groups.filter(isFree).sort((a, b) => a.x - b.x);
+    const free = groups.filter(isFree).sort((a, b) => freeX(a) - freeX(b));
     for (const group of free) {
         const room = Math.max(0, rowWidth - group.w);
-        const left = Math.min(room, Math.max(group.x * room, floor));
+        const left = Math.min(room, Math.max(freeX(group) * room, floor));
         group.fx = room > 0 ? left / room : 0;
         floor = left + group.w + gap;
     }

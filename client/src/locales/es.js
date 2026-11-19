@@ -1529,7 +1529,7 @@ const es = {
             locked: 'Por descubrir',
             organize: 'Organizar estante',
             customize: 'Personalizar estantería',
-            editHint: 'Toca un libro o adorno y usa Subir, Bajar o Elegir repisa. Los adornos van en cualquier punto de la repisa con el deslizador o, en la computadora, arrastrándolos.',
+            editHint: 'Toca un libro o adorno y usa Subir, Bajar o Elegir repisa. Los libros y adornos pueden ir en cualquier punto de la repisa con el deslizador o, en la computadora, arrastrándolos a un espacio libre.',
             selectHint: 'Selecciona un libro o un adorno para cambiarlo.',
             position: 'Posición',
             moveLeft: 'Mover a la izquierda',

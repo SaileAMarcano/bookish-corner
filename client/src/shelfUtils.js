@@ -49,8 +49,8 @@ function startsPile(index, total) {
     return index % PILE_EVERY === PILE_AT && total - index >= 2;
 }
 
-export function bookItem(book, pose = 'upright', tone = null, motif = null, face = null, shelf = null, color = null) {
-    return { type: 'book', key: 'book-' + book.id, book, pose: SHELF_POSES.includes(pose) ? pose : 'upright', tone, motif, face, shelf, color };
+export function bookItem(book, pose = 'upright', tone = null, motif = null, face = null, shelf = null, color = null, x = null) {
+    return { type: 'book', key: 'book-' + book.id, book, pose: SHELF_POSES.includes(pose) ? pose : 'upright', tone, motif, face, shelf, color, x };
 }
 
 export function decorationItem(name, pose = 'upright', shelf = null, x = null) {
@@ -93,7 +93,7 @@ export function savedItems(books, rows, unlockedNames) {
         const book = booksById.get(row.userBookId);
         if (book && !placed.has(book.id)) {
             placed.add(book.id);
-            items.push(bookItem(book, row.pose, row.tone, row.motif, row.face, row.shelf, row.color));
+            items.push(bookItem(book, row.pose, row.tone, row.motif, row.face, row.shelf, row.color, row.posX ?? null));
         }
     }
 
@@ -242,7 +242,7 @@ export function pinShelves(items, model, width, options) {
 export function toPayload(items) {
     return items.map((item) =>
         item.type === 'book'
-            ? { bookId: item.book.id, pose: SHELF_POSES.includes(item.pose) ? item.pose : 'upright', tone: item.tone, color: item.color, motif: item.motif, face: item.face, shelf: item.shelf }
+            ? { bookId: item.book.id, pose: SHELF_POSES.includes(item.pose) ? item.pose : 'upright', tone: item.tone, color: item.color, motif: item.motif, face: item.face, shelf: item.shelf, x: item.x ?? null }
             : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright', shelf: item.shelf, x: item.pose === 'flat' ? null : item.x ?? null }
     );
 }

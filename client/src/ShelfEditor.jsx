@@ -44,7 +44,7 @@ function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray
                                 {t('library.shelf.moveRight')}
                             </button>
                         </div>
-                        {item.type === 'decoration' && item.pose !== 'flat' && (
+                        {!(item.type === 'decoration' && item.pose === 'flat') && (
                             <div className="year-shelf-spot">
                                 <label htmlFor="shelf-spot">{t('library.shelf.spot')}</label>
                                 <input id="shelf-spot" type="range" min="0" max="100" step="1"

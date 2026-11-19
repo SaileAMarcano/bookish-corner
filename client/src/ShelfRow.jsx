@@ -25,7 +25,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const isFlat = isBook && item.pose === 'flat';
     const isFront = isBook && item.pose === 'front';
     const label = isBook ? labelOf(item.book) : t('library.shelf.objects.' + item.name);
-    const free = !isBook && Number.isFinite(item.fx);
+    const free = Number.isFinite(item.fx);
     const baseClass = (isBook ? (isFront ? 'year-shelf-front' : isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration') + (free ? ' year-shelf-free' : '');
     const coverTone = useCoverTone(isBook && !isFront && item.tone == null && !item.color ? item.book.coverImage : null);
     const fill = isBook ? item.color || SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
@@ -135,10 +135,13 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
 
     function updateDrop(state, next, node) {
         const moving = items.find(item => item.key === state.key);
-        if (moving?.type === 'decoration' && next.key === null) {
+        if (moving && next.key === null) {
             const { k } = caseGeometry(bookcase.model, width, { immersive, density });
             const rowBox = node.getBoundingClientRect();
-            const w = decorationSize(moving.name, k).w * (rowBox.width / Math.max(1, node.offsetWidth));
+            const dragged = stageRef.current.querySelector('[data-shelf-key="' + CSS.escape(state.key) + '"]');
+            const w = moving.type === 'decoration'
+                ? decorationSize(moving.name, k).w * (rowBox.width / Math.max(1, node.offsetWidth))
+                : dragged?.getBoundingClientRect().width ?? 0;
             const room = Math.max(1, rowBox.width - w);
             next.x = Math.round(Math.min(1, Math.max(0, (state.x - rowBox.left - w / 2) / room)) * 100) / 100;
         }
@@ -312,7 +315,8 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
                                         {ambience && <ShelfLighting {...ambience} />}
                                         <div data-shelf-row={row.index} className={'year-shelf-case-row' + (drop && drop.key === null && drop.row === row.index ? ' is-drop' : '')}>
                                             {row.groups.map(group => group.type !== 'pile' ? renderItem(group) : (
-                                                <div key={group.key} className="year-shelf-pile" style={{ '--w': group.w + 'px' }}>
+                                                <div key={group.key} className={'year-shelf-pile' + (Number.isFinite(group.fx) ? ' year-shelf-free' : '')}
+                                                    style={{ '--w': group.w + 'px', ...(Number.isFinite(group.fx) ? { '--x': group.fx } : {}) }}>
                                                     {group.top && <div className="year-shelf-pile-top">{renderItem(group.top)}</div>}
                                                     {group.items.map(renderItem)}
                                                 </div>

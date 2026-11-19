@@ -1529,7 +1529,7 @@ const en = {
             locked: 'Yet to discover',
             organize: 'Organize shelf',
             customize: 'Customize bookshelf',
-            editHint: 'Tap a book or decoration and use Move up, Move down or Choose shelf. Decorations can go anywhere on the shelf with the slider or, on a computer, by dragging them.',
+            editHint: 'Tap a book or decoration and use Move up, Move down or Choose shelf. Books and decorations can go anywhere on the shelf with the slider or, on a computer, by dragging them to an empty spot.',
             selectHint: 'Select a book or a decoration to change it.',
             position: 'Position',
             moveLeft: 'Move left',
