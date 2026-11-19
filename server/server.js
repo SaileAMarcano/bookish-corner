@@ -7,7 +7,7 @@ const { syncMilestones } = require('./milestones');
 const { resolveReadingDates } = require('./readingDates');
 const { sendResetEmail } = require('./mailer');
 const { PUSH_GROUPS, pushEnabled, sendPushes, sendTestPush } = require('./push');
-const { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription, getSubscription } = require('./paddle');
+const { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription, getSubscription, getTransaction } = require('./paddle');
 const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -38,30 +38,48 @@ app.use(helmet({
 }));
 const MEMBERSHIP_STATUSES = ['active', 'trialing', 'past_due', 'paused', 'canceled'];
 
-async function saveSubscription(subscription) {
-    const userId = Number(subscription.custom_data?.userId);
+async function saveSubscription(subscription, knownUserId = null) {
+    const userId = Number(knownUserId ?? subscription.custom_data?.userId);
     const status = MEMBERSHIP_STATUSES.includes(subscription.status) ? subscription.status : null;
     const paidUntil = subscription.current_billing_period?.ends_at ?? null;
 
-    await query(`
+    const updated = await query(`
         UPDATE users
         SET membership_status = $3,
             paddle_subscription_id = $2,
             paddle_customer_id = $4,
             plus_until = COALESCE($5::timestamptz, plus_until)
         WHERE id = $1 OR paddle_subscription_id = $2
+        RETURNING id
     `, [Number.isInteger(userId) ? userId : null, subscription.id, status, subscription.customer_id, paidUntil]);
+    if (updated.length === 0) console.warn('Paddle subscription matched no user:', subscription.id);
+    return updated.length > 0;
+}
+
+async function saveFromTransaction(transaction, userId) {
+    if (!transaction?.subscription_id) return false;
+    const subscription = await getSubscription(transaction.subscription_id);
+    return saveSubscription(subscription, userId);
 }
 
 app.post('/api/membership/webhook', express.raw({ type: 'application/json', limit: '1mb' }), async (req, res) => {
     const rawBody = req.body.toString('utf8');
+    if (!process.env.PADDLE_WEBHOOK_SECRET) console.error('Paddle webhook: PADDLE_WEBHOOK_SECRET is missing');
     if (!verifySignature(rawBody, req.get('Paddle-Signature'), process.env.PADDLE_WEBHOOK_SECRET)) {
+        console.warn('Paddle webhook: invalid signature');
         return res.status(401).json({ error: 'Invalid signature' });
     }
 
     const event = JSON.parse(rawBody);
-    if (event.event_type?.startsWith('subscription.')) {
-        await saveSubscription(event.data);
+    try {
+        if (event.event_type?.startsWith('subscription.')) {
+            await saveSubscription(event.data);
+        } else if (event.event_type === 'transaction.completed' && event.data?.custom_data?.userId) {
+            await saveFromTransaction(event.data, event.data.custom_data.userId);
+        }
+    } catch (error) {
+        console.error('Paddle webhook failed:', event.event_type, error.message);
+        return res.status(500).json({ error: 'Webhook failed' });
     }
     res.json({ received: true });
 });
@@ -3628,6 +3646,26 @@ app.get('/api/membership', requireAuth, async (req, res) => {
         hasSubscription: Boolean(user.paddleSubscriptionId),
         cancelAt,
     });
+});
+
+app.post('/api/membership/sync', requireAuth, async (req, res) => {
+    const transactionId = req.body.transactionId;
+    if (typeof transactionId !== 'string' || !/^txn_[a-z0-9]+$/.test(transactionId)) {
+        return res.status(400).json({ error: msg(req, 'membershipNone') });
+    }
+    if (!paddleEnabled()) return res.status(503).json({ error: msg(req, 'membershipUnavailable') });
+
+    try {
+        const transaction = await getTransaction(transactionId);
+        if (String(transaction.custom_data?.userId) !== String(req.session.user.id)) {
+            return res.status(403).json({ error: msg(req, 'membershipNone') });
+        }
+        const saved = await saveFromTransaction(transaction, req.session.user.id);
+        res.json({ saved });
+    } catch (error) {
+        console.error('Paddle sync failed:', transactionId, error.message);
+        res.status(502).json({ error: msg(req, 'membershipUnavailable') });
+    }
 });
 
 app.post('/api/membership/cancel', requireAuth, async (req, res) => {

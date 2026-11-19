@@ -68,4 +68,8 @@ function getSubscription(subscriptionId) {
     return paddleRequest(`/subscriptions/${subscriptionId}`);
 }
 
-module.exports = { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription, getSubscription };
+function getTransaction(transactionId) {
+    return paddleRequest(`/transactions/${transactionId}`);
+}
+
+module.exports = { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription, getSubscription, getTransaction };

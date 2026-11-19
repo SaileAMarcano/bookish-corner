@@ -66,6 +66,10 @@ function MembershipPage({ onChanged }) {
         if (event.name !== 'checkout.completed') return;
         setPending(true);
         window.Paddle?.Checkout.close();
+        const transactionId = event.data?.transaction_id;
+        if (transactionId) {
+            apiFetch('/api/membership/sync', { method: 'POST', body: { transactionId } }).catch(() => { });
+        }
         setWaiting(true);
         setMessage('');
         let tries = 0;
