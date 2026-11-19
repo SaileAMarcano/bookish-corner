@@ -388,6 +388,7 @@ const en = {
             themes: { name: 'Every theme', text: 'Each seasonal and color theme we publish, as soon as it comes out.', where: 'Pick them in Settings → Appearance.' },
             badge: { name: 'Supporter badge', text: 'A little mark next to your name so the community knows you support the app.', where: 'It shows next to your name on your profile, posts and reviews.' },
             superStar: { name: 'Super star', text: 'Give 6 glowing stars to up to 5 books that stayed with you.', where: 'In your library, open a book with 5 stars and tap “Give it the Super star”.' },
+            decorations: { name: 'Shelf decorations', text: 'More than 15 theme decorations to style your bookshelf your way.', where: 'Find them on your shelf, in Organize → Add a decoration.' },
         },
         free: 'Everything else in the app stays free for everyone.',
         price: 'US$5.99 a month',
@@ -410,6 +411,9 @@ const en = {
         legal: 'You can cancel any time. If you change your mind, we refund the full amount within 5 business days of your first payment.',
         processor: 'Payments are processed by Paddle, our official reseller. We never see your card.',
         terms: 'Read the terms and refunds',
+    },
+    pricing: {
+        signup: 'Create your free account',
     },
     supporter: {
         badge: 'Supports A Library of Us',
@@ -1036,6 +1040,8 @@ const en = {
         guidelines: 'Community guidelines',
         privacy: 'Privacy policy',
         terms: 'Terms of service',
+        refunds: 'Refund policy',
+        pricing: 'Pricing',
         updated: 'Last updated: {{date}}',
         backToApp: 'Back to the app',
     },

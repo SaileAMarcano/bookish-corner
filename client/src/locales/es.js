@@ -388,6 +388,7 @@ const es = {
             themes: { name: 'Todos los temas', text: 'Cada tema de temporada y de color que publiquemos, apenas salga.', where: 'Elígelos en Configuración → Apariencia.' },
             badge: { name: 'Insignia de apoyo', text: 'Un detalle junto a tu nombre para que la comunidad sepa que apoyas la app.', where: 'Sale junto a tu nombre en tu perfil, tus publicaciones y tus reseñas.' },
             superStar: { name: 'Súper estrella', text: 'Dale 6 estrellas brillantes a hasta 5 libros que te marcaron.', where: 'En tu biblioteca, abre un libro con 5 estrellas y pulsa «Darle la Súper estrella».' },
+            decorations: { name: 'Adornos para tu estantería', text: 'Más de 15 adornos de los temas para decorar tu estantería como quieras.', where: 'Están en tu estantería, en Organizar → Añadir un adorno.' },
         },
         free: 'Todo lo demás de la app sigue siendo gratis para todas las personas.',
         price: '20.000 COP al mes',
@@ -410,6 +411,9 @@ const es = {
         legal: 'Puedes cancelar cuando quieras. Si te arrepientes, te devolvemos el dinero completo dentro de los 5 días hábiles siguientes a tu primer pago.',
         processor: 'Los pagos los procesa Paddle, nuestro revendedor oficial. Nunca vemos tu tarjeta.',
         terms: 'Ver los términos y los reembolsos',
+    },
+    pricing: {
+        signup: 'Crea tu cuenta gratis',
     },
     supporter: {
         badge: 'Apoya A Library of Us',
@@ -1036,6 +1040,8 @@ const es = {
         guidelines: 'Normas de la comunidad',
         privacy: 'Política de privacidad',
         terms: 'Términos y condiciones',
+        refunds: 'Política de reembolsos',
+        pricing: 'Precios',
         updated: 'Última actualización: {{date}}',
         backToApp: 'Volver a la app',
     },

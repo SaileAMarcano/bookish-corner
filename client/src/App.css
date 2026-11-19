@@ -18165,3 +18165,28 @@ a.post-tag:hover,
   color: var(--text-2);
   font-size: 12px;
 }
+
+.pricing-page {
+  max-width: 1040px;
+}
+
+.pricing-head {
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.pricing-lead {
+  max-width: 620px;
+  margin: 10px auto 0;
+  color: var(--text-2);
+  line-height: 1.6;
+}
+
+.pricing-page .membership-join {
+  text-decoration: none;
+}
+
+.pricing-page .membership-legal a {
+  display: block;
+  margin-top: 4px;
+}

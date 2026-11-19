@@ -16,6 +16,7 @@ import { LEGAL_PAGES } from './legalTexts';
 import Landing from './Landing';
 import BetaPage from './BetaPage';
 import AboutPage from './AboutPage';
+import PricingPage from './PricingPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import LibraryPage from './LibraryPage';
@@ -364,6 +365,10 @@ function App() {
 
   if (path === '/forgot-password' || path === '/reset-password') {
     return <PasswordPage key={path} mode={path === '/forgot-password' ? 'forgot' : 'reset'} />;
+  }
+
+  if (path === '/pricing') {
+    return <PricingPage signedIn={Boolean(currentUser)} />;
   }
 
   if (LEGAL_PAGES[path]) {

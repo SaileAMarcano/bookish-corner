@@ -2,6 +2,7 @@ export const LEGAL_PAGES = {
     '/guidelines': 'guidelines',
     '/privacy': 'privacy',
     '/terms': 'terms',
+    '/refunds': 'refunds',
 };
 
 export const LEGAL_UPDATED = {
@@ -134,7 +135,7 @@ We may review, hide or remove content that breaks these terms or the guidelines,
 
 ## 7. Supporter membership
 - The **supporter membership** costs **US$5.99 per month**, or **20,000 COP per month in Colombia** (plus any taxes that apply in your country). It renews every month until you cancel.
-- **It includes:** all the app themes we publish, a supporter badge on your profile and the **Super star** (6 stars for up to 5 books). The app's core features stay **free** for everyone.
+- **It includes:** all the app themes we publish, extra decorations for your bookshelf, a supporter badge on your profile and the **Super star** (6 stars for up to 5 books). The app's core features stay **free** for everyone.
 - Payments are processed by **Paddle (Paddle.com Market Limited)**, which acts as merchant of record: it is the seller on your receipt and handles the charge, taxes and invoices. Its [buyer terms](https://www.paddle.com/legal/checkout-buyer-terms) also apply to the purchase.
 - **Cancel:** you can cancel at any time from **Supporter membership** in the app or the link in your purchase email from Paddle. Your membership stays active until the end of the month you already paid, and you won't be charged again.
 - If we change the price, we'll tell you at least **30 days in advance**, and it will apply from your next renewal.
@@ -162,6 +163,30 @@ If we change these terms, we'll tell you in the app or by email before they appl
 
 ## 14. Contact
 [admin@alibraryofus.com](mailto:admin@alibraryofus.com)`,
+        },
+        refunds: {
+            title: "Refund policy",
+            body: `This policy covers the **Supporter membership** of A Library of Us, run by **Saile Adriana Marcano Mejias** from Bogotá, Colombia. Payments are processed by **Paddle (Paddle.com Market Limited)**, our merchant of record.
+
+## 1. Right of withdrawal
+If you change your mind, you can ask for a **full refund** within **5 business days** of your **first payment**, no questions asked.
+
+## 2. Monthly renewals
+Renewals are not refunded, unless you were **charged by mistake** or a **problem on our side** kept you from using the membership. In those cases we refund the affected month.
+
+## 3. Cancelling
+You can cancel at any time from **Supporter membership** in the app or from the link in your purchase email from Paddle. Your membership stays active until the end of the month you already paid, and you won't be charged again.
+
+## 4. How to ask for a refund
+- Write to [admin@alibraryofus.com](mailto:admin@alibraryofus.com) from your account's email, or
+- Use the link in the purchase email from Paddle.
+
+We answer within **5 business days**. The refund goes back to the same payment method; how long it takes to appear depends on your bank.
+
+## 5. Your rights
+None of this limits the rights Colombian consumer law, or the law of your country, gives you.
+
+See also the [Terms and conditions](/terms) and [Paddle's buyer terms](https://www.paddle.com/legal/checkout-buyer-terms).`,
         },
     },
     es: {
@@ -288,7 +313,7 @@ Podemos revisar, ocultar o borrar contenido que no cumpla los términos o las no
 
 ## 7. Membresía de soporte
 - La **membresía de soporte** cuesta **US$5,99 al mes**, o **20.000 COP al mes en Colombia** (más los impuestos que apliquen según tu país). Se renueva sola cada mes hasta que la canceles.
-- **Incluye:** todos los temas de la app que publiquemos, una insignia de apoyo en tu perfil y la **Súper estrella** (6 estrellas para hasta 5 libros). Las funciones básicas de la app siguen siendo **gratis** para todas las personas.
+- **Incluye:** todos los temas de la app que publiquemos, adornos extra para tu estantería, una insignia de apoyo en tu perfil y la **Súper estrella** (6 estrellas para hasta 5 libros). Las funciones básicas de la app siguen siendo **gratis** para todas las personas.
 - El pago lo procesa **Paddle (Paddle.com Market Limited)**, que actúa como vendedor oficial: es quien aparece en tu recibo y gestiona el cobro, los impuestos y las facturas. Sus [términos para compradores](https://www.paddle.com/legal/checkout-buyer-terms) también aplican a la compra.
 - **Cancelar:** puedes cancelar cuando quieras desde **Membresía de apoyo** en la app o con el enlace del correo de compra de Paddle. La membresía sigue activa hasta el final del mes ya pagado y no se vuelve a cobrar.
 - Si cambiamos el precio te avisaremos al menos **30 días antes**, y el cambio se aplicará desde la siguiente renovación.
@@ -316,6 +341,30 @@ Si cambiamos estos términos te avisaremos en la app o por correo antes de que s
 
 ## 14. Contacto
 [admin@alibraryofus.com](mailto:admin@alibraryofus.com)`,
+        },
+        refunds: {
+            title: "Política de reembolsos",
+            body: `Esta política aplica a la **membresía de apoyo** de A Library of Us, operada por **Saile Adriana Marcano Mejias** desde Bogotá, Colombia. Los pagos los procesa **Paddle (Paddle.com Market Limited)**, nuestro vendedor oficial.
+
+## 1. Derecho de retracto
+Si te arrepientes, puedes pedir el **reembolso completo** dentro de los **5 días hábiles** siguientes a tu **primer pago**, sin tener que dar explicaciones.
+
+## 2. Renovaciones mensuales
+Las renovaciones no se reembolsan, salvo que haya un **cobro por error** o un **problema nuestro** que no te haya dejado usar la membresía. En esos casos devolvemos el mes afectado.
+
+## 3. Cancelar
+Puedes cancelar cuando quieras desde **Membresía de apoyo** en la app o desde el enlace del correo de compra que te envía Paddle. Tu membresía sigue activa hasta el final del mes que ya pagaste y no se te vuelve a cobrar.
+
+## 4. Cómo pedir un reembolso
+- Escribe a [admin@alibraryofus.com](mailto:admin@alibraryofus.com) desde el correo de tu cuenta, o
+- Usa el enlace del correo de compra que te envía Paddle.
+
+Respondemos en un máximo de **5 días hábiles**. El reembolso vuelve al mismo medio de pago; el tiempo en que aparece depende de tu banco.
+
+## 5. Tus derechos
+Nada de esto limita los derechos que te da la ley de protección al consumidor de Colombia o la de tu país.
+
+Consulta también los [Términos y condiciones](/terms) y los [términos para compradores de Paddle](https://www.paddle.com/legal/checkout-buyer-terms).`,
         },
     },
 };

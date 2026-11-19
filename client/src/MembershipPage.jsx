@@ -13,6 +13,7 @@ const BENEFITS = [
     { id: 'themes', icon: 'flower', to: '/settings' },
     { id: 'badge', icon: 'favorites', to: '/profile' },
     { id: 'superStar', icon: 'sparkle', to: '/library' },
+    { id: 'decorations', icon: 'library', to: '/library/shelves' },
 ];
 
 const POLL_TRIES = 20;

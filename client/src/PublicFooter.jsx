@@ -37,6 +37,8 @@ function PublicFooter() {
                 <Link to="/guidelines">{t('legal.guidelines')}</Link>
                 <Link to="/privacy">{t('legal.privacy')}</Link>
                 <Link to="/terms">{t('legal.terms')}</Link>
+                <Link to="/refunds">{t('legal.refunds')}</Link>
+                <Link to="/pricing">{t('legal.pricing')}</Link>
             </nav>
 
             <p className="public-footer-credit">
