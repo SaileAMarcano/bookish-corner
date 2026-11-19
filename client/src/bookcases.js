@@ -32,22 +32,22 @@ export const BOOKCASES = {
         colors: ['black', 'tan', 'walnut'],
         frame: [11, 89],
         rows: [[13.96, 26.63], [29.29, 41.96], [44.63, 57.29], [59.96, 72.63], [75.29, 88]],
-        left: 20.3,
-        right: 80.4,
+        left: 19.33,
+        right: 80.67,
     },
     gothic: {
         colors: ['oak', 'honey', 'walnut'],
         frame: [7, 93],
         rows: [[27.67, 35.75], [39.21, 47.29], [50.75, 58.83], [62.29, 70.38], [73.83, 81.92]],
-        left: 20.2,
-        right: 80.7,
+        left: 19,
+        right: 80.83,
     },
     floral: {
         colors: ['rose', 'sage', 'night'],
         frame: [8, 92],
         rows: [[16.42, 25.54], [27.92, 37.04], [39.42, 48.54], [50.92, 60.04], [62.42, 71.63]],
-        left: 16.3,
-        right: 83.6,
+        left: 16.33,
+        right: 83.67,
     },
 };
 
@@ -108,7 +108,7 @@ const DECORATION_HEIGHTS = {
 const THIN_GENRES = ['Manga', 'Comics'];
 const THIN_RATIO = 0.5;
 const PILE_THIN_RATIO = 0.75;
-const SNAP = 0.08;
+const SNAP = 0.025;
 const LEGACY_PILE_SIZE = 3;
 
 export function bookcaseImage({ model, color }) {
@@ -137,9 +137,8 @@ export function isThin(book) {
 function rowsOf(model, caseWidth, k) {
     const { rows, left, right } = BOOKCASES[model];
     const caseHeight = caseWidth * 2;
-    const padding = k;
-    const x = (left / 100) * caseWidth + padding;
-    const width = ((right - left) / 100) * caseWidth - padding * 2;
+    const x = (left / 100) * caseWidth;
+    const width = ((right - left) / 100) * caseWidth;
 
     return rows.map(([top, bottom]) => ({
         top: (top / 100) * caseHeight,
