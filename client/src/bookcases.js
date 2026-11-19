@@ -107,6 +107,7 @@ const DECORATION_HEIGHTS = {
 };
 const THIN_GENRES = ['Manga', 'Comics'];
 const THIN_RATIO = 0.5;
+const PILE_THIN_RATIO = 0.75;
 const SNAP = 0.08;
 const LEGACY_PILE_SIZE = 3;
 
@@ -229,7 +230,7 @@ function measure(group, k, bookSize) {
     }
 
     if (group.type === 'pile') {
-        const items = group.items.map((item) => ({ ...item, w: bookSize.h, h: thickness(item, bookSize) }));
+        const items = group.items.map((item) => ({ ...item, w: bookSize.h, h: pileThickness(item, bookSize) }));
         const pileHeight = items.reduce((total, item) => total + item.h, 0) - Math.max(0, items.length - 1);
         const top = group.top ? { ...group.top, ...decorationSize(group.top.name, k, group.top.scale) } : null;
 
@@ -239,6 +240,10 @@ function measure(group, k, bookSize) {
 
     const w = group.pose === 'front' ? bookSize.frontWidth : thickness(group, bookSize);
     return { ...group, ...bookSize, w, span: w };
+}
+
+function pileThickness(item, bookSize) {
+    return item.book && isThin(item.book) ? bookSize.w * PILE_THIN_RATIO : bookSize.w;
 }
 
 function thickness(item, bookSize) {

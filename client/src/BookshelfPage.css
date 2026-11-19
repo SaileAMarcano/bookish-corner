@@ -100,7 +100,7 @@
 .year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-cap { display: none; }
 .year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-body { padding: 0 3px; }
 .year-shelf-cases.is-unified .year-shelf-case .year-shelf-spine .spine-title { font-size: min(calc(var(--h) * .10), calc(var(--w) * .72)); font-weight: 500; padding: 0; line-height: 1.1; text-shadow: none; max-height: 100%; }
-.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-title { font-size: calc(var(--w) * .08); font-weight: 500; padding: 0; line-height: 1.1; text-shadow: none; }
+.year-shelf-cases.is-unified .year-shelf-case .year-shelf-flat .spine-title { font-size: min(calc(var(--w) * .08), calc(var(--h) * .62)); font-weight: 500; padding: 0; line-height: 1.1; text-shadow: none; }
 .year-shelf-cases.is-unified .year-shelf-case .spine-title { font-optical-sizing: none; font-variation-settings: 'opsz' 20; }
 .year-shelf-cases.is-unified .year-shelf-case .year-shelf-front-art { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; }
 .year-shelf-cases.is-unified .year-shelf-front-art.cover-fabric { gap: 4px; justify-content: space-between; background: var(--spine-fill); color: var(--spine-ink); padding: 8%; }

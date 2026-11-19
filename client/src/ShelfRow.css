@@ -230,3 +230,7 @@
     top: 0;
   }
 }
+
+.year-shelf-cases .year-shelf-case.is-immersive .year-shelf-pile .year-shelf-flat .spine-title {
+  font-size: min(clamp(10px, calc(9px * var(--k, 1)), 15px), calc(var(--h) * .62));
+}
