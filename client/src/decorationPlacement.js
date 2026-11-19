@@ -3,13 +3,18 @@ import { groupItems, moveItem, moveToShelf, pinShelves } from './shelfUtils.js';
 
 const OPTIONS = { immersive: true };
 
-export function placementIssue(items, model, options = {}) {
+function excesses(items, model, profile) {
+    return layoutCases(groupItems(items), model, BASE_WIDTH, profile).flat().map(row => row.excess);
+}
+
+export function placementIssue(items, model, options = {}, before = null) {
     const profile = { ...OPTIONS, ...options };
     const groups = groupItems(items);
     const { k } = caseGeometry(model, BASE_WIDTH, profile, groups);
     const layout = layoutCases(groups, model, BASE_WIDTH, profile);
-    for (const rows of layout) for (const row of rows) {
-        if (row.overflow) return { kind: 'space', name: null };
+    const allowed = before ? excesses(before, model, profile) : [];
+    for (const row of layout.flat()) {
+        if (row.excess > Math.max(0.01, (allowed[row.index] ?? 0) + 0.01)) return { kind: 'space', name: null };
     }
     for (const rows of layout) for (const row of rows) for (const group of row.groups) {
         const members = group.type === 'pile' ? [...group.items, ...(group.top ? [group.top] : [])] : [group];
@@ -34,9 +39,9 @@ export function proposedMove(items, from, to, before, shelf, model = null, optio
     }
     const next = to ? moveItem(items, from, to, before) : moveToShelf(items, from, shelf);
     const moved = next.find(item => item.key === from);
-    if (model && moved?.type === 'book' && moved.pose === 'flat' && placementIssue(next, model, options)) {
+    if (model && moved?.type === 'book' && moved.pose === 'flat' && placementIssue(next, model, options, items)) {
         const standing = next.map(item => (item.key === from ? { ...item, pose: 'upright' } : item));
-        if (!placementIssue(standing, model, options)) return { items: standing, issue: null };
+        if (!placementIssue(standing, model, options, items)) return { items: standing, issue: null };
     }
     return { items: next, issue: null };
 }

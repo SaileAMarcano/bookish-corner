@@ -277,7 +277,7 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
     }
 
     for (const bucket of buckets) {
-        bucket.overflow = !fits(bucket.groups, rowWidth, gap, thinGap);
+        bucket.excess = excessOf(bucket.groups, rowWidth, gap, thinGap);
         placeFree(bucket.groups, rowWidth, gap, thinGap);
     }
     return buckets;
@@ -302,10 +302,14 @@ function flowWidth(groups, gap, thinGap) {
         .reduce((total, group, index) => total + spanOf(group) + (index > 0 ? (group.tight ? thinGap : gap) : 0), 0);
 }
 
-function fits(groups, rowWidth, gap, thinGap) {
+function excessOf(groups, rowWidth, gap, thinGap) {
     const floor = flowWidth(groups, gap, thinGap);
     const free = groups.filter(isFree).reduce((total, group) => total + group.w, 0);
-    return floor + free <= rowWidth + 0.01;
+    return Math.max(0, floor + free - rowWidth);
+}
+
+function fits(groups, rowWidth, gap, thinGap) {
+    return excessOf(groups, rowWidth, gap, thinGap) <= 0.01;
 }
 
 function placeFree(groups, rowWidth, gap, thinGap) {
@@ -342,7 +346,7 @@ export function layoutCases(groups, model, caseWidth = BASE_WIDTH, options = {})
     return Array.from({ length: caseCount }, (_, caseIndex) =>
         rows.map((row, rowIndex) => {
             const index = caseIndex * rows.length + rowIndex;
-            return { ...row, index, groups: buckets[index]?.groups ?? [], overflow: Boolean(buckets[index]?.overflow) };
+            return { ...row, index, groups: buckets[index]?.groups ?? [], excess: buckets[index]?.excess ?? 0 };
         })
     );
 }

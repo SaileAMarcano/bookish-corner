@@ -38,7 +38,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
             setEditing(current => {
                 if (!current || current.density === nextDensity) return current;
                 const prepared = prepareDecorations(current.items, current.bookcase.model, { density: nextDensity });
-                return { ...current, items: prepared.items, density: nextDensity,
+                return { ...current, items: prepared.items, initial: prepared.items, density: nextDensity,
                     selectedKey: prepared.items.some(item => item.key === current.selectedKey) ? current.selectedKey : null,
                     unplaced: [...new Set([...(current.unplaced || []), ...prepared.unplaced])] };
             });
@@ -170,7 +170,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
 
     function changeItems(change) {
         const items = change(editing.items);
-        const issue = placementIssue(items, editing.bookcase.model, shelfOptions);
+        const issue = placementIssue(items, editing.bookcase.model, shelfOptions, editing.items);
         if (issue) { setMoveFeedback(''); setSaveError(issueMessage(issue)); return false; }
         setSaveError('');
         setEditing({ ...editing, items });
@@ -185,7 +185,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
 
     function checkMove(from, to, before, shelf) {
         const next = proposedMove(editing.items, from, to, before, shelf, editing.bookcase.model, shelfOptions);
-        return next.issue || placementIssue(next.items, editing.bookcase.model, shelfOptions);
+        return next.issue || placementIssue(next.items, editing.bookcase.model, shelfOptions, editing.items);
     }
 
     function move(from, to, before, shelf, x) {
@@ -249,6 +249,22 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
         );
     }
 
+    function scaleSelected(scale) {
+        const sized = (value) => editing.items.map((item) => (item.key === editing.selectedKey ? { ...item, scale: value === 1 ? null : value } : item));
+        const current = editing.items.find((item) => item.key === editing.selectedKey)?.scale ?? 1;
+        const fits = (value) => !placementIssue(sized(value), editing.bookcase.model, shelfOptions, editing.items);
+        let best = scale;
+        if (scale > current && !fits(scale)) {
+            best = current;
+            for (let low = current, high = scale, step = 0; step < 12; step++) {
+                const middle = (low + high) / 2;
+                if (fits(middle)) { best = middle; low = middle; } else high = middle;
+            }
+            best = Math.floor(best * 100) / 100;
+        }
+        changeItems(() => sized(best));
+    }
+
     function removeSelected() {
         if (changeItems(items => items.filter(item => item.key !== editing.selectedKey))) {
             setEditing(current => ({ ...current, selectedKey: null }));
@@ -275,7 +291,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
     }
 
     function save() {
-        const issue = placementIssue(editing.items, editing.bookcase.model, shelfOptions);
+        const issue = placementIssue(editing.items, editing.bookcase.model, shelfOptions, editing.initial);
         if (issue) { setSaveError(issueMessage(issue)); return; }
         setSaving(true);
         setSaveError('');
@@ -321,7 +337,8 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
             : view.prepared.relocated ? t('library.shelf.placement.relocated') : '');
         setToolsOpen(false);
         setMoveFeedback('');
-        setEditing({ yearKey: view.yearKey, items: pinShelves(view.items, view.bookcase.model, BASE_WIDTH, shelfOptions), bookcase: view.bookcase, selectedKey: null, density });
+        const pinned = pinShelves(view.items, view.bookcase.model, BASE_WIDTH, shelfOptions);
+        setEditing({ yearKey: view.yearKey, items: pinned, initial: pinned, bookcase: view.bookcase, selectedKey: null, density });
     }
 
     return (
@@ -398,7 +415,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
                                                 error={saveError}
                                                 onMoveBy={nudgeSelected}
                                                 onSpot={(x) => changeSelected({ x })}
-                                                onScale={(scale) => changeSelected({ scale: scale === 1 ? null : scale })}
+                                                onScale={scaleSelected}
                                                 onShelf={moveSelectedToShelf}
                                                 onPose={(pose) => changeSelected(pose === 'flat' ? { pose, x: null } : { pose })}
                                                 onTone={(tone) => changeSelected({ tone, color: null })}
