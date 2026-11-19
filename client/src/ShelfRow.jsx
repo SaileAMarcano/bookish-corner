@@ -29,7 +29,7 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const baseClass = (isBook ? (isFront ? 'year-shelf-front' : isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration') + (free ? ' year-shelf-free' : '');
     const coverTone = useCoverTone(isBook && !isFront && item.tone == null && !item.color ? item.book.coverImage : null);
     const fill = isBook ? item.color || SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
-    const size = { '--w': item.w + 'px', '--h': item.h + 'px', ...(free ? { '--left': item.left + 'px' } : {}) };
+    const size = { '--w': item.w + 'px', '--h': item.h + 'px', ...(free ? { '--left': item.left + 'px' } : {}), ...(item.tight ? { marginLeft: 'calc(-2px * var(--k, 1))' } : {}) };
     const style = isBook
         ? { ...size, '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8' }
         : size;

@@ -104,7 +104,7 @@ const DECORATION_HEIGHTS = {
     'fox-mask': 66,
 };
 const THIN_GENRES = ['Manga', 'Comics'];
-const THIN_RATIO = 0.62;
+const THIN_RATIO = 0.5;
 const SNAP = 0.08;
 const LEGACY_PILE_SIZE = 3;
 
@@ -255,7 +255,8 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
             while (buckets.length <= index) buckets.push({ groups: [], used: 0 });
             const shaped = measure(group, k, bookSize);
             const bucket = buckets[index];
-            const needed = spanOf(shaped) + (bucket.used > 0 ? gap : 0);
+            shaped.tight = thinSpine(shaped) && thinSpine(bucket.groups.at(-1));
+            const needed = spanOf(shaped) + (bucket.used > 0 && !shaped.tight ? gap : 0);
 
             if (bucket.used === 0 || bucket.used + needed <= rowWidth + 0.01) {
                 bucket.groups.push(shaped);
@@ -272,6 +273,10 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
     return buckets;
 }
 
+function thinSpine(group) {
+    return Boolean(group?.book) && group.pose === 'upright' && !Number.isFinite(group.x) && isThin(group.book);
+}
+
 function freeX(group) {
     if (group.type === 'pile') return group.items.map((item) => item.x).find(Number.isFinite);
     if (group.type === 'decoration' && group.pose === 'flat') return undefined;
@@ -284,7 +289,7 @@ function isFree(group) {
 
 function placeFree(groups, rowWidth, gap) {
     const flow = groups.filter((group) => !isFree(group));
-    let floor = flow.reduce((total, group, index) => total + spanOf(group) + (index > 0 ? gap : 0), 0);
+    let floor = flow.reduce((total, group, index) => total + spanOf(group) + (index > 0 && !group.tight ? gap : 0), 0);
 
     const free = groups.filter(isFree).sort((a, b) => freeX(a) - freeX(b));
     for (const group of free) {
