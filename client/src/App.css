@@ -18135,3 +18135,33 @@ a.post-tag:hover,
 :root[data-motion="reduce"] .milestone-note-ink-lines i {
   opacity: 1;
 }
+
+.year-shelf-case-row > .year-shelf-free {
+  position: absolute;
+  bottom: 0;
+  left: calc(var(--x) * (100% - var(--w)));
+  margin: 0;
+}
+
+.year-shelf-spot {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.year-shelf-spot label {
+  font-size: 14px;
+}
+
+.year-shelf-spot input {
+  width: 100%;
+  min-height: 32px;
+  accent-color: var(--rose-deep);
+}
+
+.year-shelf-spot-ends {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-2);
+  font-size: 12px;
+}

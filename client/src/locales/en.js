@@ -1468,6 +1468,10 @@ const en = {
     },
     library: {
         shelf: {
+            spot: 'Spot on the shelf',
+            spotValue: '{{value}}% from the left',
+            spotLeft: 'Left',
+            spotRight: 'Right',
             viewer: {
                 organize: 'Organize',
                 customizeCase: 'Customize bookcase',
@@ -1519,7 +1523,7 @@ const en = {
             locked: 'Yet to discover',
             organize: 'Organize shelf',
             customize: 'Customize bookshelf',
-            editHint: 'Tap a book or decoration and use Move up, Move down or Choose shelf. On a computer, you can also drag it.',
+            editHint: 'Tap a book or decoration and use Move up, Move down or Choose shelf. Decorations can go anywhere on the shelf with the slider or, on a computer, by dragging them.',
             selectHint: 'Select a book or a decoration to change it.',
             position: 'Position',
             moveLeft: 'Move left',

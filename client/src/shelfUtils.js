@@ -53,8 +53,8 @@ export function bookItem(book, pose = 'upright', tone = null, motif = null, face
     return { type: 'book', key: 'book-' + book.id, book, pose: SHELF_POSES.includes(pose) ? pose : 'upright', tone, motif, face, shelf, color };
 }
 
-export function decorationItem(name, pose = 'upright', shelf = null) {
-    return { type: 'decoration', key: 'decoration-' + name, name, pose, shelf };
+export function decorationItem(name, pose = 'upright', shelf = null, x = null) {
+    return { type: 'decoration', key: 'decoration-' + name, name, pose, shelf, x: pose === 'flat' ? null : x };
 }
 
 export function autoItems(books) {
@@ -86,7 +86,7 @@ export function savedItems(books, rows, unlockedNames) {
 
     for (const row of rows) {
         if (row.decoration) {
-            if (unlockedNames.includes(row.decoration)) items.push(decorationItem(row.decoration, row.pose, row.shelf));
+            if (unlockedNames.includes(row.decoration)) items.push(decorationItem(row.decoration, row.pose, row.shelf, row.posX ?? null));
             continue;
         }
 
@@ -243,6 +243,6 @@ export function toPayload(items) {
     return items.map((item) =>
         item.type === 'book'
             ? { bookId: item.book.id, pose: SHELF_POSES.includes(item.pose) ? item.pose : 'upright', tone: item.tone, color: item.color, motif: item.motif, face: item.face, shelf: item.shelf }
-            : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright', shelf: item.shelf }
+            : { decoration: item.name, pose: item.pose === 'flat' ? 'flat' : 'upright', shelf: item.shelf, x: item.pose === 'flat' ? null : item.x ?? null }
     );
 }

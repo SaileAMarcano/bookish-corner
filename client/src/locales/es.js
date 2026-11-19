@@ -1468,6 +1468,10 @@ const es = {
     },
     library: {
         shelf: {
+            spot: 'Lugar en la repisa',
+            spotValue: '{{value}} % desde la izquierda',
+            spotLeft: 'Izquierda',
+            spotRight: 'Derecha',
             viewer: {
                 organize: 'Organizar',
                 customizeCase: 'Personalizar mueble',
@@ -1519,7 +1523,7 @@ const es = {
             locked: 'Por descubrir',
             organize: 'Organizar estante',
             customize: 'Personalizar estantería',
-            editHint: 'Toca un libro o adorno y usa Subir, Bajar o Elegir repisa. En la computadora también puedes arrastrarlo.',
+            editHint: 'Toca un libro o adorno y usa Subir, Bajar o Elegir repisa. Los adornos van en cualquier punto de la repisa con el deslizador o, en la computadora, arrastrándolos.',
             selectHint: 'Selecciona un libro o un adorno para cambiarlo.',
             position: 'Posición',
             moveLeft: 'Mover a la izquierda',

@@ -224,13 +224,21 @@ CREATE TABLE shelf_items (
     year         SMALLINT NOT NULL CHECK (year = 0 OR year BETWEEN 1000 AND 9999),
     position     SMALLINT NOT NULL CHECK (position >= 0),
     user_book_id INTEGER UNIQUE REFERENCES user_books (id) ON DELETE CASCADE,
-    decoration   TEXT CHECK (decoration IN ('candle', 'quill', 'stars', 'flowers', 'bookends')),
+    decoration   TEXT CHECK (decoration IN (
+        'candle', 'quill', 'stars', 'flowers', 'bookends',
+        'tree', 'gift-books', 'reindeer', 'snowman', 'snow-globe',
+        'bottle', 'seashell', 'compass', 'clock',
+        'moon', 'moon-chest', 'geode', 'secret-door', 'dragon-egg',
+        'treasure-map', 'suitcase', 'globe', 'camera',
+        'reading-cat', 'paper-lantern', 'daruma', 'fox-mask'
+    )),
     pose         TEXT NOT NULL DEFAULT 'upright' CHECK (pose IN ('upright', 'lean', 'flat', 'front')),
     tone         SMALLINT CHECK (tone BETWEEN 0 AND 11),
     shelf        SMALLINT CHECK (shelf BETWEEN 0 AND 499),
     color        TEXT CHECK (color ~ '^#[0-9a-f]{6}$'),
     face         TEXT CHECK (face IN ('cover', 'solid')),
     motif        TEXT CHECK (motif IN ('star', 'heart', 'flower', 'quill', 'key', 'planet', 'moon', 'hourglass', 'leaf', 'bubble')),
+    pos_x        REAL CHECK (pos_x >= 0 AND pos_x <= 1),
     CHECK ((user_book_id IS NULL) <> (decoration IS NULL)),
     UNIQUE (user_id, decoration)
 );

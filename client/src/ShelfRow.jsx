@@ -25,10 +25,11 @@ function ShelfItem({ item, editing, selected, offset, dropSide, onPointerDown, o
     const isFlat = isBook && item.pose === 'flat';
     const isFront = isBook && item.pose === 'front';
     const label = isBook ? labelOf(item.book) : t('library.shelf.objects.' + item.name);
-    const baseClass = isBook ? (isFront ? 'year-shelf-front' : isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration';
+    const free = !isBook && Number.isFinite(item.fx);
+    const baseClass = (isBook ? (isFront ? 'year-shelf-front' : isFlat ? 'year-shelf-flat' : 'year-shelf-spine') : 'year-shelf-decoration') + (free ? ' year-shelf-free' : '');
     const coverTone = useCoverTone(isBook && !isFront && item.tone == null && !item.color ? item.book.coverImage : null);
     const fill = isBook ? item.color || SPINE_COLORS[item.tone ?? coverTone ?? item.look.tone].hex : null;
-    const size = { '--w': item.w + 'px', '--h': item.h + 'px' };
+    const size = { '--w': item.w + 'px', '--h': item.h + 'px', ...(free ? { '--x': item.fx } : {}) };
     const style = isBook
         ? { ...size, '--spine-fill': fill, '--spine-ink': isLightColor(fill) ? '#2D241F' : '#FAF4E8' }
         : size;
@@ -119,6 +120,11 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
 
         const box = target.getBoundingClientRect();
         const onto = Boolean(target.dataset.shelfFlat) && state.key.startsWith('decoration-');
+        const freeRow = state.key.startsWith('decoration-') && !onto ? target.closest('[data-shelf-row]') : null;
+        if (freeRow && stage.contains(freeRow)) {
+            updateDrop(state, { key: null, row: Number(freeRow.dataset.shelfRow) }, freeRow);
+            return;
+        }
         const before = target.dataset.shelfFlat
             ? state.y < box.top + box.height / 2
             : state.x < box.left + box.width / 2;
@@ -128,11 +134,18 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
     }
 
     function updateDrop(state, next, node) {
+        const moving = items.find(item => item.key === state.key);
+        if (moving?.type === 'decoration' && next.key === null) {
+            const { k } = caseGeometry(bookcase.model, width, { immersive, density });
+            const rowBox = node.getBoundingClientRect();
+            const w = decorationSize(moving.name, k).w * (rowBox.width / Math.max(1, node.offsetWidth));
+            const room = Math.max(1, rowBox.width - w);
+            next.x = Math.round(Math.min(1, Math.max(0, (state.x - rowBox.left - w / 2) / room)) * 100) / 100;
+        }
         const message = onCheckMove?.(state.key, next.key, next.before, next.row) || null;
         const current = dropRef.current;
         if (current && current.key === next.key && current.row === next.row && current.before === next.before
-            && current.onto === next.onto && current.message === message) return;
-        const moving = items.find(item => item.key === state.key);
+            && current.onto === next.onto && current.x === next.x && current.message === message) return;
         let preview = null;
         if (moving?.type === 'decoration') {
             const { k } = caseGeometry(bookcase.model, width, { immersive, density });
@@ -141,8 +154,10 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
             const anchor = node.closest(next.onto ? '.year-shelf-pile' : '[data-shelf-row]') || node;
             const box = anchor.getBoundingClientRect();
             const itemBox = node.getBoundingClientRect();
+            const scale = box.width / Math.max(1, anchor.offsetWidth);
             const left = next.onto ? box.left + (box.width - size.w) / 2
-                : next.key ? (next.before ? itemBox.left : itemBox.right) : box.left;
+                : next.key ? (next.before ? itemBox.left : itemBox.right)
+                    : box.left + (next.x ?? 0) * Math.max(0, box.width - size.w * scale);
             preview = { name: moving.name, w: size.w, h: size.h,
                 left: left - stage.left, top: (next.onto ? box.top - 6 * k : box.bottom) - size.h - stage.top };
         }
@@ -227,7 +242,7 @@ function ShelfRow({ items, bookcase, width = BASE_WIDTH, immersive = false, dens
                 }, 80);
                 setDrag(null);
                 setDrop(null);
-                if (apply && target) onMove(key, target.key, target.before, target.row);
+                if (apply && target) onMove(key, target.key, target.before, target.row, target.x);
             }
         };
 

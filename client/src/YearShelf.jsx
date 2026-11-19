@@ -188,11 +188,24 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
         return next.issue || placementIssue(next.items, editing.bookcase.model, shelfOptions);
     }
 
-    function move(from, to, before, shelf) {
+    function move(from, to, before, shelf, x) {
         setMoveFeedback('');
         const next = proposedMove(editing.items, from, to, before, shelf);
         if (next.issue) { setSaveError(issueMessage(next.issue)); return; }
-        changeItems(() => next.items);
+        const placed = Number.isFinite(x)
+            ? next.items.map((item) => (item.key === from ? { ...item, pose: 'upright', x } : item))
+            : next.items.map((item) => (item.key === from && to ? { ...item, x: null } : item));
+        changeItems(() => placed);
+    }
+
+    function nudgeSelected(step) {
+        setMoveFeedback('');
+        const selected = editing.items.find((item) => item.key === editing.selectedKey);
+        if (selected?.type === 'decoration' && Number.isFinite(selected.x)) {
+            changeSelected({ x: Math.round(Math.min(1, Math.max(0, selected.x + step * 0.1)) * 100) / 100 });
+            return;
+        }
+        changeItems(list => moveBy(list, editing.selectedKey, step));
     }
 
     function selectItem(key) {
@@ -371,17 +384,22 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
                                             <summary>{t('library.shelf.customize')}</summary>
                                             <ShelfEditor
                                                 item={openView.selectedIndex >= 0 ? openView.items[openView.selectedIndex] : null}
-                                                isFirst={openView.selectedIndex <= 0 || openView.items[openView.selectedIndex - 1]?.shelf !== openView.items[openView.selectedIndex]?.shelf}
-                                                isLast={openView.selectedIndex === openView.items.length - 1 || openView.items[openView.selectedIndex + 1]?.shelf !== openView.items[openView.selectedIndex]?.shelf}
+                                                isFirst={Number.isFinite(openView.items[openView.selectedIndex]?.x)
+                                                    ? openView.items[openView.selectedIndex].x <= 0
+                                                    : openView.selectedIndex <= 0 || openView.items[openView.selectedIndex - 1]?.shelf !== openView.items[openView.selectedIndex]?.shelf}
+                                                isLast={Number.isFinite(openView.items[openView.selectedIndex]?.x)
+                                                    ? openView.items[openView.selectedIndex].x >= 1
+                                                    : openView.selectedIndex === openView.items.length - 1 || openView.items[openView.selectedIndex + 1]?.shelf !== openView.items[openView.selectedIndex]?.shelf}
                                                 shelfCount={shelfCapacity(openView.items)}
                                                 feedback={moveFeedback}
                                                 canTop={openView.selectedIndex >= 0 && canSitOnPile(openView.items, editing.selectedKey)}
                                                 tray={unlocked.filter((name) => !openView.items.some((item) => item.name === name))}
                                                 saving={saving}
                                                 error={saveError}
-                                                onMoveBy={(step) => { setMoveFeedback(''); changeItems(list => moveBy(list, editing.selectedKey, step)); }}
+                                                onMoveBy={nudgeSelected}
+                                                onSpot={(x) => changeSelected({ x })}
                                                 onShelf={moveSelectedToShelf}
-                                                onPose={(pose) => changeSelected({ pose })}
+                                                onPose={(pose) => changeSelected(pose === 'flat' ? { pose, x: null } : { pose })}
                                                 onTone={(tone) => changeSelected({ tone, color: null })}
                                                 onColor={(color) => changeSelected({ color })}
                                                 onFace={(face) => changeSelected({ face })}

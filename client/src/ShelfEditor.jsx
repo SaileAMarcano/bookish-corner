@@ -5,7 +5,7 @@ import { SHELF_POSES, SPINE_FACES } from './shelfUtils';
 import { SPINE_COLORS, SPINE_LIGHTNESS, spineColor, spineSliders } from './shelfSpines';
 import { BOOKCASES, BOOKCASE_MODELS, bookcaseImage } from './bookcases';
 
-function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray, saving, error, onMoveBy, onShelf, onPose, onTone, onColor, onFace, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
+function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray, saving, error, onMoveBy, onSpot, onShelf, onPose, onTone, onColor, onFace, bookcase, onBookcase, onRemove, onAdd, onSave, onCancel }) {
     const { t } = useTranslation();
     const name = item && (item.type === 'book' ? item.book.title : t('library.shelf.objects.' + item.name));
     const sliders = item?.type === 'book'
@@ -44,6 +44,19 @@ function ShelfEditor({ item, isFirst, isLast, canTop, shelfCount, feedback, tray
                                 {t('library.shelf.moveRight')}
                             </button>
                         </div>
+                        {item.type === 'decoration' && item.pose !== 'flat' && (
+                            <div className="year-shelf-spot">
+                                <label htmlFor="shelf-spot">{t('library.shelf.spot')}</label>
+                                <input id="shelf-spot" type="range" min="0" max="100" step="1"
+                                    value={Math.round((item.x ?? 0) * 100)}
+                                    aria-valuetext={t('library.shelf.spotValue', { value: Math.round((item.x ?? 0) * 100) })}
+                                    onChange={event => onSpot(Number(event.target.value) / 100)} />
+                                <div className="year-shelf-spot-ends" aria-hidden="true">
+                                    <span>{t('library.shelf.spotLeft')}</span>
+                                    <span>{t('library.shelf.spotRight')}</span>
+                                </div>
+                            </div>
+                        )}
                         {feedback && <p className="year-shelf-move-feedback" role="status">{feedback}</p>}
                         {error && <Notice message={error} />}
                         {item.type === 'decoration' && (

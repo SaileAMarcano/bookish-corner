@@ -267,7 +267,26 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
         cursor = index;
     }
 
+    for (const bucket of buckets) placeFree(bucket.groups, rowWidth, gap);
     return buckets;
+}
+
+function isFree(group) {
+    return group.type === 'decoration' && group.pose !== 'flat' && Number.isFinite(group.x);
+}
+
+function placeFree(groups, rowWidth, gap) {
+    const flow = groups.filter((group) => !isFree(group));
+    let floor = flow.reduce((total, group, index) => total + spanOf(group) + (index > 0 ? gap : 0), 0);
+    if (flow.length > 0) floor += gap;
+
+    const free = groups.filter(isFree).sort((a, b) => a.x - b.x);
+    for (const group of free) {
+        const room = Math.max(0, rowWidth - group.w);
+        const left = Math.min(room, Math.max(group.x * room, floor));
+        group.fx = room > 0 ? left / room : 0;
+        floor = left + group.w + gap;
+    }
 }
 
 function spanOf(group) {
