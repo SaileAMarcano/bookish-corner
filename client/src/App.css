@@ -18199,3 +18199,14 @@ a.post-tag:hover,
   display: block;
   margin-top: 4px;
 }
+
+:root[data-theme="dark"] .year-shelf-zoom {
+  background: rgb(0 0 0 / 70%);
+}
+
+:root[data-theme="dark"] .year-shelf-zoom-panel {
+  --surface: #141414;
+  --surface-2: #232323;
+  background: #141414;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 50%);
+}
