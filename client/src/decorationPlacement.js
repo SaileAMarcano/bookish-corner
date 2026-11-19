@@ -8,6 +8,9 @@ export function placementIssue(items, model, options = {}) {
     const groups = groupItems(items);
     const { k } = caseGeometry(model, BASE_WIDTH, profile, groups);
     const layout = layoutCases(groups, model, BASE_WIDTH, profile);
+    for (const rows of layout) for (const row of rows) {
+        if (row.overflow) return { kind: 'space', name: null };
+    }
     for (const rows of layout) for (const row of rows) for (const group of row.groups) {
         const members = group.type === 'pile' ? [...group.items, ...(group.top ? [group.top] : [])] : [group];
         if (group.type === 'pile' && group.top) {

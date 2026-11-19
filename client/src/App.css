@@ -18141,14 +18141,14 @@ a.post-tag:hover,
   opacity: 1;
 }
 
-.year-shelf-case-row > .year-shelf-free {
+.year-shelf-cases .year-shelf-case .year-shelf-case-row > .year-shelf-free {
   position: absolute;
   bottom: 0;
   left: var(--left);
   margin: 0;
 }
 
-.year-shelf-case-row > .year-shelf-pile.year-shelf-free {
+.year-shelf-cases .year-shelf-case .year-shelf-case-row > .year-shelf-pile.year-shelf-free {
   width: var(--w);
 }
 

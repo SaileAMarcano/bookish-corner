@@ -257,7 +257,8 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
     let cursor = 0;
 
     for (const group of groups) {
-        let index = Number.isInteger(group.shelf) ? group.shelf : cursor;
+        const pinned = Number.isInteger(group.shelf);
+        let index = pinned ? group.shelf : cursor;
 
         for (;;) {
             while (buckets.length <= index) buckets.push({ groups: [] });
@@ -265,7 +266,7 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
             const bucket = buckets[index];
             shaped.tight = thinSpine(shaped) && thinSpine(bucket.groups.at(-1));
 
-            if (bucket.groups.length === 0 || extentOf([...bucket.groups, shaped], rowWidth, gap, thinGap) <= rowWidth + 0.01) {
+            if (pinned || bucket.groups.length === 0 || fits([...bucket.groups, shaped], rowWidth, gap, thinGap)) {
                 bucket.groups.push(shaped);
                 break;
             }
@@ -275,7 +276,10 @@ function distributeGroups(groups, rowWidth, k, bookSize) {
         cursor = index;
     }
 
-    for (const bucket of buckets) placeFree(bucket.groups, rowWidth, gap, thinGap);
+    for (const bucket of buckets) {
+        bucket.overflow = !fits(bucket.groups, rowWidth, gap, thinGap);
+        placeFree(bucket.groups, rowWidth, gap, thinGap);
+    }
     return buckets;
 }
 
@@ -298,24 +302,30 @@ function flowWidth(groups, gap, thinGap) {
         .reduce((total, group, index) => total + spanOf(group) + (index > 0 ? (group.tight ? thinGap : gap) : 0), 0);
 }
 
-function extentOf(groups, rowWidth, gap, thinGap) {
-    return placeFree(groups.map((group) => ({ ...group })), rowWidth, gap, thinGap, false);
+function fits(groups, rowWidth, gap, thinGap) {
+    const floor = flowWidth(groups, gap, thinGap);
+    const free = groups.filter(isFree).reduce((total, group) => total + group.w, 0);
+    return floor + free <= rowWidth + 0.01;
 }
 
-function placeFree(groups, rowWidth, gap, thinGap, clamp = true) {
+function placeFree(groups, rowWidth, gap, thinGap) {
     let floor = flowWidth(groups, gap, thinGap);
-
     const free = groups.filter(isFree).sort((a, b) => freeX(a) - freeX(b));
+
     for (const group of free) {
         const room = Math.max(0, rowWidth - group.w);
         const wanted = Math.max(freeX(group) * room, floor);
-        const snapped = wanted - floor < rowWidth * SNAP ? floor : wanted;
-        const left = clamp ? Math.min(room, snapped) : snapped;
-        group.fx = room > 0 ? left / room : 0;
-        group.left = left;
-        floor = left + group.w;
+        group.left = wanted - floor < rowWidth * SNAP ? floor : wanted;
+        floor = group.left + group.w;
     }
-    return floor;
+
+    let limit = rowWidth;
+    for (const group of [...free].reverse()) {
+        group.left = Math.max(0, Math.min(group.left, limit - group.w));
+        limit = group.left;
+        const room = Math.max(0, rowWidth - group.w);
+        group.fx = room > 0 ? Math.min(1, group.left / room) : 0;
+    }
 }
 
 function spanOf(group) {
@@ -332,7 +342,7 @@ export function layoutCases(groups, model, caseWidth = BASE_WIDTH, options = {})
     return Array.from({ length: caseCount }, (_, caseIndex) =>
         rows.map((row, rowIndex) => {
             const index = caseIndex * rows.length + rowIndex;
-            return { ...row, index, groups: buckets[index]?.groups ?? [] };
+            return { ...row, index, groups: buckets[index]?.groups ?? [], overflow: Boolean(buckets[index]?.overflow) };
         })
     );
 }
