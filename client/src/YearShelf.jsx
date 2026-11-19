@@ -141,12 +141,12 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
         ...allGroups.filter((group) => group.year !== currentYear),
     ];
     const unlocked = DECORATIONS
-        .filter((decoration) => decoration.member
+        .filter((decoration) => decoration.free || (decoration.member
             ? isMember
             : milestones?.some((milestone) => milestone.key === decoration.milestone && milestone.achieved)
-        )
+        ))
         .map((decoration) => decoration.name);
-    const earned = DECORATIONS.filter((decoration) => !decoration.member).map((decoration) => decoration.name);
+    const earned = DECORATIONS.filter((decoration) => decoration.milestone).map((decoration) => decoration.name);
     const rows = layout || [];
     const density = shelfDensity(viewport);
     const shelfOptions = { immersive: true, density };
@@ -410,7 +410,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
                 <details className="year-shelf-rewards">
                     <summary className="display" id="year-shelf-rewards-title">{t('library.shelf.rewards')}</summary>
                     <ul className="year-shelf-reward-list">
-                        {DECORATIONS.map(({ name, milestone, member }) => {
+                        {DECORATIONS.map(({ name, milestone, member, free }) => {
                             const achieved = unlocked.includes(name);
 
                             return (
@@ -420,7 +420,7 @@ function YearShelf({ books, booksStatus, readingGoal, username, isMember }) {
                                         <strong>{t('library.shelf.objects.' + name)}</strong>
                                         <span>{t(achieved ? 'library.shelf.unlocked' : 'library.shelf.locked')}</span>
                                         <small>
-                                            {member ? (
+                                            {free ? t('library.shelf.freeRule') : member ? (
                                                 isMember ? t('library.shelf.memberRule') : <Link to="/membership">{t('library.shelf.join')}</Link>
                                             ) : t('milestones.items.' + milestone + '.rule')}
                                         </small>

@@ -2355,6 +2355,11 @@ const SHELF_DECORATIONS = {
     stars: 'bookworm',
     flowers: 'genre-wanderer',
     bookends: 'goal-reached',
+    tree: 'free',
+    'gift-books': 'free',
+    reindeer: 'free',
+    snowman: 'free',
+    'snow-globe': 'free',
     bottle: null,
     seashell: null,
     compass: null,
@@ -2477,7 +2482,7 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
             return res.status(403).json({ error: msg(req, 'decorationMembers') });
         }
         const unlocked = decorations
-            .filter((decoration) => SHELF_DECORATIONS[decoration] !== null)
+            .filter((decoration) => SHELF_DECORATIONS[decoration] !== null && SHELF_DECORATIONS[decoration] !== 'free')
             .every((decoration) =>
                 milestones.some((milestone) => milestone.key === SHELF_DECORATIONS[decoration] && milestone.achieved)
             );

@@ -55,6 +55,11 @@ export const BOOKCASE_MODELS = Object.keys(BOOKCASES);
 
 const DECORATION_RATIOS = {
     candle: 0.72, quill: 0.52, stars: 0.75, flowers: 0.88, bookends: 1.89,
+    tree: 0.73,
+    'gift-books': 1.16,
+    reindeer: 0.67,
+    snowman: 0.72,
+    'snow-globe': 0.74,
     bottle: 0.88,
     seashell: 1.23,
     compass: 0.7,
@@ -75,6 +80,11 @@ const DECORATION_RATIOS = {
 };
 const DECORATION_HEIGHTS = {
     candle: 60, quill: 76, stars: 64, flowers: 90, bookends: 56,
+    tree: 76,
+    'gift-books': 52,
+    reindeer: 64,
+    snowman: 66,
+    'snow-globe': 62,
     bottle: 58,
     seashell: 50,
     compass: 62,
