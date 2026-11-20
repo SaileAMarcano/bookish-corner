@@ -87,6 +87,10 @@ function App() {
   const [toast, setToast] = useState('');
   const [currentUser, setCurrentUser] = useState(null);
   const [tourReplay, setTourReplay] = useState(false);
+  const [tourReady, setTourReady] = useState(false);
+  const handleCelebrationIdle = useCallback((idle) => {
+    if (idle) setTourReady(true);
+  }, []);
   const [showFirstBook, setShowFirstBook] = useState(false);
   const userLoadVersion = useRef(0);
   const [userStatus, setUserStatus] = useState('loading');
@@ -621,9 +625,9 @@ function App() {
         </div>
       )}
 
-      <MilestoneCelebration currentUser={currentUser} books={books} seasonTheme={seasonTheme} />
+      <MilestoneCelebration currentUser={currentUser} books={books} seasonTheme={seasonTheme} onIdleChange={handleCelebrationIdle} />
     
-      {!currentUser.tourSeenAt && location.pathname === '/' && (
+      {!currentUser.tourSeenAt && location.pathname === '/' && (tourReady || tourReplay) && (
         <Tour
           key={tourReplay ? 'replay' : 'first'}
           showWelcome={!tourReplay}

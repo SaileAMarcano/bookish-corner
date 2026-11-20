@@ -180,13 +180,14 @@ function InkLines({ side }) {
 
 const SEASON_TITLES = { seaside: 'celebration.seasideTitle', moonlit: 'celebration.moonlitTitle', adventure: 'celebration.adventureTitle', ink: 'celebration.inkTitle' };
 
-function MilestoneCelebration({ currentUser, books, seasonTheme }) {
+function MilestoneCelebration({ currentUser, books, seasonTheme, onIdleChange }) {
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
     const [showBeta, setShowBeta] = useState(false);
     const [notes, setNotes] = useState([]);
     const [leaving, setLeaving] = useState(false);
+    const [checked, setChecked] = useState(false);
 
     const celebrated = useRef(new Set());
 
@@ -218,7 +219,10 @@ function MilestoneCelebration({ currentUser, books, seasonTheme }) {
 
                 apiFetch('/api/milestones/seen', { method: 'POST', body: { keys: fresh } }).catch(() => { });
             })
-            .catch(() => { });
+            .catch(() => { })
+            .finally(() => {
+                if (!ignore) setChecked(true);
+            });
 
         return () => {
             ignore = true;
@@ -238,6 +242,11 @@ function MilestoneCelebration({ currentUser, books, seasonTheme }) {
     }, [showBeta]);
 
     const note = showBeta ? null : notes[0];
+    const idle = checked && !showBeta && notes.length === 0;
+
+    useEffect(() => {
+        onIdleChange?.(idle);
+    }, [idle, onIdleChange]);
     const seaside = seasonTheme === 'seaside';
 
     useEffect(() => {
