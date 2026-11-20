@@ -620,7 +620,7 @@ function App() {
         </div>
       )}
 
-      <MilestoneCelebration currentUser={currentUser} books={books} seasonTheme={seasonTheme} onIdleChange={handleCelebrationIdle} />
+      <MilestoneCelebration currentUser={currentUser} books={books} seasonTheme={seasonTheme} onIdleChange={handleCelebrationIdle} paused={showFirstBook} />
     
       {!currentUser.tourSeenAt && location.pathname === '/' && (tourReady || tourReplay) && (
         <Tour

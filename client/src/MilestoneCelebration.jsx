@@ -180,7 +180,7 @@ function InkLines({ side }) {
 
 const SEASON_TITLES = { seaside: 'celebration.seasideTitle', moonlit: 'celebration.moonlitTitle', adventure: 'celebration.adventureTitle', ink: 'celebration.inkTitle' };
 
-function MilestoneCelebration({ currentUser, books, seasonTheme, onIdleChange }) {
+function MilestoneCelebration({ currentUser, books, seasonTheme, onIdleChange, paused = false }) {
     const { t } = useTranslation();
     const location = useLocation();
     const navigate = useNavigate();
@@ -241,7 +241,7 @@ function MilestoneCelebration({ currentUser, books, seasonTheme, onIdleChange })
         return () => document.removeEventListener('keydown', handleKey);
     }, [showBeta]);
 
-    const note = showBeta ? null : notes[0];
+    const note = showBeta || paused ? null : notes[0];
     const idle = checked && !showBeta && notes.length === 0;
 
     useEffect(() => {
@@ -273,7 +273,7 @@ function MilestoneCelebration({ currentUser, books, seasonTheme, onIdleChange })
 
     return (
         <>
-            {showBeta && (
+            {showBeta && !paused && (
                 <div className="celebration-overlay" onClick={close}>
                     <div
                         className="beta-card"
