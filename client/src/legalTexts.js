@@ -2,12 +2,11 @@ export const LEGAL_PAGES = {
     '/guidelines': 'guidelines',
     '/privacy': 'privacy',
     '/terms': 'terms',
-    '/refunds': 'refunds',
 };
 
 export const LEGAL_UPDATED = {
-    en: 'November 18, 2026',
-    es: '18 de noviembre de 2026',
+    en: 'November 20, 2026',
+    es: '20 de noviembre de 2026',
 };
 
 export const LEGAL_TEXTS = {
@@ -41,7 +40,6 @@ A Library of Us is a platform to track your reading and share it with other read
 - **Phone and computer notifications (only if you turn them on):** a technical address for each device where you turn them on, and which types of alerts you want. You can turn them off anytime in Settings.
 - **What you send us:** support messages (with the page you wrote from and your browser type, so we can understand the problem) and reports.
 - **Beta application:** name, email, age, social media (optional), language, favorite genres, how you track your reading, how you found us and your sentence.
-- **Membership:** payments are processed by **Paddle**. We **never see or store your card**: we only know whether your membership is active and until when.
 - **Technical data:** a cookie to keep you logged in, and your IP address, used briefly to stop attacks (for example, too many login attempts), which may stay in our providers' technical logs.
 
 ## 3. Why we use it
@@ -67,7 +65,6 @@ We use providers that store or process data for us, only so the service works:
 - **Resend:** account emails.
 - **Your browser's notification service** (Google, Apple, Mozilla or Microsoft): delivers the notifications you turn on, with the text of the alert.
 - **Web3Forms:** an email to the team when a beta application arrives.
-- **Paddle (Paddle.com Market Limited):** membership payments, as merchant of record (it handles payment, taxes and invoices). It receives your email, country and payment details under its own privacy policy.
 - **Spotify:** if a post has music, the player is loaded by Spotify (see section 6).
 - **Open Library:** book data comes from there; we don't send it your data.
 
@@ -98,7 +95,6 @@ Under Colombian Law 1581 of 2012, you can:
 - **While you have your account.** If you delete it, we delete your account, profile, library, posts, reviews, comments, lists and images. Backups renew automatically and deleted data disappears from them within a few days.
 - **Beta applications:** until the end of the beta (February 2027); then we delete the ones that didn't become an account.
 - **Support messages and reports:** while they're useful to solve them and keep moderation records.
-- **Payments:** payment records are kept by Paddle for as long as the law requires.
 
 ## 10. Age
 A Library of Us is **only for people 18 and older**. If we find an account of someone younger, we close it and delete their data.
@@ -133,60 +129,27 @@ Follow the **Community guidelines**. Don't try to access other people's accounts
 ## 6. Moderation
 We may review, hide or remove content that breaks these terms or the guidelines, and suspend or close accounts, especially for serious or repeated problems. If you disagree with a decision, write to us.
 
-## 7. Supporter membership
-- The **supporter membership** costs **US$5.99 per month**, or **20,000 COP per month in Colombia** (plus any taxes that apply in your country). It renews every month until you cancel.
-- **It includes:** all the app themes we publish, extra decorations for your bookshelf, a supporter badge on your profile and the **Super star** (6 stars for up to 5 books). The app's core features stay **free** for everyone.
-- Payments are processed by **Paddle (Paddle.com Market Limited)**, which acts as merchant of record: it is the seller on your receipt and handles the charge, taxes and invoices. Its [buyer terms](https://www.paddle.com/legal/checkout-buyer-terms) also apply to the purchase.
-- **Cancel:** you can cancel at any time from **Supporter membership** in the app or the link in your purchase email from Paddle. Your membership stays active until the end of the month you already paid, and you won't be charged again.
-- If we change the price, we'll tell you at least **30 days in advance**, and it will apply from your next renewal.
-- We may change or add benefits; if we remove an important one, we'll let you know.
+## 7. Membership
+- During the beta, the membership benefits (all the app themes, the theme decorations for your bookshelf and the **Super star**) are **free** for everyone.
+- We don't charge for anything right now. If we offer a paid membership later, we'll tell you before it starts, with its price and conditions, and you'll decide whether you want it.
 
-## 8. Refunds
-- **Right of withdrawal:** if you change your mind, you can ask for a **full refund** within **5 business days** of your **first payment**.
-- Monthly **renewals** are not refunded, unless you were charged by mistake or a problem on our side kept you from using the membership.
-- **How to ask:** write to [admin@alibraryofus.com](mailto:admin@alibraryofus.com) from your account's email, or use the link in the purchase email from Paddle. The refund goes back to the same payment method.
-
-## 9. What belongs to A Library of Us
+## 8. What belongs to A Library of Us
 The name, logo, illustrations, design and code of the app belong to A Library of Us. Don't copy or use them without permission.
 
-## 10. Liability
+## 9. Liability
 We do our best to keep the app working and your data safe, but it's offered **as is**. To the extent the law allows, we're not responsible for indirect losses, for what other people publish or for external sites we link to (for example, Spotify or bookstores). None of this limits the rights Colombian consumer law gives you.
 
-## 11. Closing your account
-You can delete your account at any time in **Settings → Delete account**. If your membership is active, cancel it too so it doesn't renew.
+## 10. Closing your account
+You can delete your account at any time in **Settings → Delete account**.
 
-## 12. Governing law
+## 11. Governing law
 These terms are governed by the laws of **Colombia**.
 
-## 13. Changes
+## 12. Changes
 If we change these terms, we'll tell you in the app or by email before they apply. If you keep using the app afterwards, we understand you accept them.
 
-## 14. Contact
+## 13. Contact
 [admin@alibraryofus.com](mailto:admin@alibraryofus.com)`,
-        },
-        refunds: {
-            title: "Refund policy",
-            body: `This policy covers the **Supporter membership** of A Library of Us, run by **Saile Adriana Marcano Mejias** from Bogotá, Colombia. Payments are processed by **Paddle (Paddle.com Market Limited)**, our merchant of record.
-
-## 1. Right of withdrawal
-If you change your mind, you can ask for a **full refund** within **5 business days** of your **first payment**, no questions asked.
-
-## 2. Monthly renewals
-Renewals are not refunded, unless you were **charged by mistake** or a **problem on our side** kept you from using the membership. In those cases we refund the affected month.
-
-## 3. Cancelling
-You can cancel at any time from **Supporter membership** in the app or from the link in your purchase email from Paddle. Your membership stays active until the end of the month you already paid, and you won't be charged again.
-
-## 4. How to ask for a refund
-- Write to [admin@alibraryofus.com](mailto:admin@alibraryofus.com) from your account's email, or
-- Use the link in the purchase email from Paddle.
-
-We answer within **5 business days**. The refund goes back to the same payment method; how long it takes to appear depends on your bank.
-
-## 5. Your rights
-None of this limits the rights Colombian consumer law, or the law of your country, gives you.
-
-See also the [Terms and conditions](/terms) and [Paddle's buyer terms](https://www.paddle.com/legal/checkout-buyer-terms).`,
         },
     },
     es: {
@@ -219,7 +182,6 @@ A Library of Us es una plataforma para registrar lecturas y compartir con otras 
 - **Notificaciones en el celular o la computadora (solo si las activas):** una dirección técnica por cada dispositivo donde las activas y qué tipos de avisos quieres. Puedes apagarlas cuando quieras en Configuración.
 - **Lo que nos envías:** mensajes de soporte (con la página desde donde escribes y el tipo de navegador, para entender el problema) y reportes.
 - **Postulación a la beta:** nombre, correo, edad, red social (opcional), idioma, géneros favoritos, cómo llevas tus lecturas, cómo nos conociste y tu frase.
-- **Membresía:** los pagos los procesa **Paddle**. Nosotros **no vemos ni guardamos tu tarjeta**: solo sabemos si tu membresía está activa y hasta cuándo.
 - **Datos técnicos:** una cookie para mantener tu sesión abierta y la dirección IP, que se usa un momento para frenar ataques (por ejemplo, demasiados intentos de inicio de sesión) y que puede quedar en los registros técnicos de nuestros proveedores.
 
 ## 3. Para qué los usamos
@@ -245,7 +207,6 @@ Usamos proveedores que guardan o procesan datos por nosotros y solo para que el 
 - **Resend:** envío de los correos de la cuenta.
 - **El servicio de notificaciones de tu navegador** (Google, Apple, Mozilla o Microsoft): entrega las notificaciones que actives, con el texto del aviso.
 - **Web3Forms:** aviso por correo al equipo cuando llega una postulación a la beta.
-- **Paddle (Paddle.com Market Limited):** cobro de la membresía, como vendedor oficial (gestiona el pago, los impuestos y las facturas). Recibe tu correo, tu país y los datos de pago según su propia política de privacidad.
 - **Spotify:** si una publicación tiene música, el reproductor lo carga Spotify (ver punto 6).
 - **Open Library:** de ahí vienen datos de libros; no le enviamos datos tuyos.
 
@@ -276,7 +237,6 @@ Según la Ley 1581 de 2012, puedes:
 - **Mientras tengas tu cuenta.** Si la borras, se eliminan tu cuenta, tu perfil, tu biblioteca, tus publicaciones, reseñas, comentarios, listas e imágenes. Las copias de seguridad se renuevan solas y lo borrado desaparece de ellas en pocos días.
 - **Postulaciones a la beta:** hasta el final de la beta (febrero de 2027); después se borran las que no se convirtieron en cuenta.
 - **Mensajes de soporte y reportes:** mientras sean útiles para resolverlos y llevar la moderación.
-- **Pagos:** los registros de pago los conserva Paddle el tiempo que le exige la ley.
 
 ## 10. Edad
 A Library of Us es **solo para mayores de 18 años**. Si descubrimos una cuenta de alguien menor, la cerramos y borramos sus datos.
@@ -311,60 +271,27 @@ Sigue las **Normas de la comunidad**. No intentes entrar en cuentas ajenas, salt
 ## 6. Moderación
 Podemos revisar, ocultar o borrar contenido que no cumpla los términos o las normas, y suspender o cerrar cuentas, sobre todo si el problema es grave o se repite. Si no estás de acuerdo con una decisión, escríbenos.
 
-## 7. Membresía de soporte
-- La **membresía de soporte** cuesta **US$5,99 al mes**, o **20.000 COP al mes en Colombia** (más los impuestos que apliquen según tu país). Se renueva sola cada mes hasta que la canceles.
-- **Incluye:** todos los temas de la app que publiquemos, adornos extra para tu estantería, una insignia de apoyo en tu perfil y la **Súper estrella** (6 estrellas para hasta 5 libros). Las funciones básicas de la app siguen siendo **gratis** para todas las personas.
-- El pago lo procesa **Paddle (Paddle.com Market Limited)**, que actúa como vendedor oficial: es quien aparece en tu recibo y gestiona el cobro, los impuestos y las facturas. Sus [términos para compradores](https://www.paddle.com/legal/checkout-buyer-terms) también aplican a la compra.
-- **Cancelar:** puedes cancelar cuando quieras desde **Membresía de apoyo** en la app o con el enlace del correo de compra de Paddle. La membresía sigue activa hasta el final del mes ya pagado y no se vuelve a cobrar.
-- Si cambiamos el precio te avisaremos al menos **30 días antes**, y el cambio se aplicará desde la siguiente renovación.
-- Podemos cambiar o añadir beneficios; si quitamos uno importante, te avisaremos.
+## 7. Membresía
+- Durante la beta, los beneficios de la membresía (todos los temas de la app, los adornos de los temas para tu estantería y la **Súper estrella**) son **gratis** para todas las personas.
+- Por ahora no cobramos nada. Si más adelante ofrecemos una membresía de pago, te avisaremos antes de que empiece, con su precio y sus condiciones, y tú decides si la quieres.
 
-## 8. Reembolsos
-- **Derecho de retracto:** si te arrepientes, puedes pedir el **reembolso completo** dentro de los **5 días hábiles** siguientes a tu **primer pago**.
-- Las **renovaciones** mensuales no se reembolsan, salvo que haya un cobro por error o un problema nuestro que no te haya dejado usar la membresía.
-- **Cómo pedirlo:** escribe a [admin@alibraryofus.com](mailto:admin@alibraryofus.com) con el correo de tu cuenta, o usa el enlace del correo de compra que te envía Paddle. El reembolso vuelve al mismo medio de pago.
-
-## 9. Lo que es de A Library of Us
+## 8. Lo que es de A Library of Us
 El nombre, el logo, las ilustraciones, el diseño y el código de la app son de A Library of Us. No los copies ni los uses sin permiso.
 
-## 10. Responsabilidad
+## 9. Responsabilidad
 Hacemos lo posible para que la app funcione bien y tus datos estén seguros, pero se ofrece **tal como está**. En la medida que permite la ley, no somos responsables por pérdidas indirectas, por lo que publiquen otras personas ni por sitios externos enlazados (por ejemplo, Spotify o tiendas de libros). Nada de esto limita los derechos que te da la ley colombiana como consumidora o consumidor.
 
-## 11. Cerrar tu cuenta
-Puedes borrar tu cuenta cuando quieras en **Configuración → Eliminar cuenta**. Si tienes la membresía activa, cancélala también para que no se renueve.
+## 10. Cerrar tu cuenta
+Puedes borrar tu cuenta cuando quieras en **Configuración → Eliminar cuenta**.
 
-## 12. Ley aplicable
+## 11. Ley aplicable
 Estos términos se rigen por las leyes de **Colombia**.
 
-## 13. Cambios
+## 12. Cambios
 Si cambiamos estos términos te avisaremos en la app o por correo antes de que se apliquen. Si sigues usando la app después, entendemos que los aceptas.
 
-## 14. Contacto
+## 13. Contacto
 [admin@alibraryofus.com](mailto:admin@alibraryofus.com)`,
-        },
-        refunds: {
-            title: "Política de reembolsos",
-            body: `Esta política aplica a la **membresía de apoyo** de A Library of Us, operada por **Saile Adriana Marcano Mejias** desde Bogotá, Colombia. Los pagos los procesa **Paddle (Paddle.com Market Limited)**, nuestro vendedor oficial.
-
-## 1. Derecho de retracto
-Si te arrepientes, puedes pedir el **reembolso completo** dentro de los **5 días hábiles** siguientes a tu **primer pago**, sin tener que dar explicaciones.
-
-## 2. Renovaciones mensuales
-Las renovaciones no se reembolsan, salvo que haya un **cobro por error** o un **problema nuestro** que no te haya dejado usar la membresía. En esos casos devolvemos el mes afectado.
-
-## 3. Cancelar
-Puedes cancelar cuando quieras desde **Membresía de apoyo** en la app o desde el enlace del correo de compra que te envía Paddle. Tu membresía sigue activa hasta el final del mes que ya pagaste y no se te vuelve a cobrar.
-
-## 4. Cómo pedir un reembolso
-- Escribe a [admin@alibraryofus.com](mailto:admin@alibraryofus.com) desde el correo de tu cuenta, o
-- Usa el enlace del correo de compra que te envía Paddle.
-
-Respondemos en un máximo de **5 días hábiles**. El reembolso vuelve al mismo medio de pago; el tiempo en que aparece depende de tu banco.
-
-## 5. Tus derechos
-Nada de esto limita los derechos que te da la ley de protección al consumidor de Colombia o la de tu país.
-
-Consulta también los [Términos y condiciones](/terms) y los [términos para compradores de Paddle](https://www.paddle.com/legal/checkout-buyer-terms).`,
         },
     },
 };

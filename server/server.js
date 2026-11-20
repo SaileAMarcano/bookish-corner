@@ -7,7 +7,6 @@ const { syncMilestones } = require('./milestones');
 const { resolveReadingDates } = require('./readingDates');
 const { sendResetEmail } = require('./mailer');
 const { PUSH_GROUPS, pushEnabled, sendPushes, sendTestPush } = require('./push');
-const { paddleEnabled, checkoutConfig, verifySignature, cancelSubscription, getSubscription, getTransaction } = require('./paddle');
 const cors = require('cors');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -30,60 +29,11 @@ app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             imgSrc: ["'self'", 'data:', 'blob:', 'https:'],
-            scriptSrc: ["'self'", 'https://cdn.paddle.com'],
-            frameSrc: ['https://open.spotify.com', 'https://buy.paddle.com', 'https://sandbox-buy.paddle.com'],
-            connectSrc: ["'self'", 'https://api.web3forms.com', 'https://*.paddle.com'],
+            frameSrc: ['https://open.spotify.com'],
+            connectSrc: ["'self'", 'https://api.web3forms.com'],
         },
     },
 }));
-const MEMBERSHIP_STATUSES = ['active', 'trialing', 'past_due', 'paused', 'canceled'];
-
-async function saveSubscription(subscription, knownUserId = null) {
-    const userId = Number(knownUserId ?? subscription.custom_data?.userId);
-    const status = MEMBERSHIP_STATUSES.includes(subscription.status) ? subscription.status : null;
-    const paidUntil = subscription.current_billing_period?.ends_at ?? null;
-
-    const updated = await query(`
-        UPDATE users
-        SET membership_status = $3,
-            paddle_subscription_id = $2,
-            paddle_customer_id = $4,
-            plus_until = COALESCE($5::timestamptz, plus_until)
-        WHERE id = $1 OR paddle_subscription_id = $2
-        RETURNING id
-    `, [Number.isInteger(userId) ? userId : null, subscription.id, status, subscription.customer_id, paidUntil]);
-    if (updated.length === 0) console.warn('Paddle subscription matched no user:', subscription.id);
-    return updated.length > 0;
-}
-
-async function saveFromTransaction(transaction, userId) {
-    if (!transaction?.subscription_id) return false;
-    const subscription = await getSubscription(transaction.subscription_id);
-    return saveSubscription(subscription, userId);
-}
-
-app.post('/api/membership/webhook', express.raw({ type: 'application/json', limit: '1mb' }), async (req, res) => {
-    const rawBody = req.body.toString('utf8');
-    if (!process.env.PADDLE_WEBHOOK_SECRET) console.error('Paddle webhook: PADDLE_WEBHOOK_SECRET is missing');
-    if (!verifySignature(rawBody, req.get('Paddle-Signature'), process.env.PADDLE_WEBHOOK_SECRET)) {
-        console.warn('Paddle webhook: invalid signature');
-        return res.status(401).json({ error: 'Invalid signature' });
-    }
-
-    const event = JSON.parse(rawBody);
-    try {
-        if (event.event_type?.startsWith('subscription.')) {
-            await saveSubscription(event.data);
-        } else if (event.event_type === 'transaction.completed' && event.data?.custom_data?.userId) {
-            await saveFromTransaction(event.data, event.data.custom_data.userId);
-        }
-    } catch (error) {
-        console.error('Paddle webhook failed:', event.event_type, error.message);
-        return res.status(500).json({ error: 'Webhook failed' });
-    }
-    res.json({ received: true });
-});
-
 app.use(express.json({ limit: '100kb' }));
 
 if (!isProduction) {
@@ -236,7 +186,8 @@ async function unnotify(userId, actorId, type, refs = {}) {
 }
 
 const TRANSLATED_TITLE = 'COALESCE(t.title, w.title)';
-const OWNER_HAS_PLUS = `EXISTS (SELECT 1 FROM users pu WHERE pu.id = ub.user_id AND (pu.plus_until > now() OR pu.staff_role = 'admin'))`;
+const PLUS_FOR_EVERYONE = true;
+const OWNER_HAS_PLUS = PLUS_FOR_EVERYONE ? 'TRUE' : `EXISTS (SELECT 1 FROM users pu WHERE pu.id = ub.user_id AND (pu.plus_until > now() OR pu.staff_role = 'admin'))`;
 const SUPER_STAR = `(ub.super_star AND ${OWNER_HAS_PLUS})`;
 const SUPER_STAR_LIMIT = 5;
 const IS_SUPPORTER = (alias) => `COALESCE(${alias}.plus_until > now(), false)`;
@@ -2498,10 +2449,8 @@ app.put('/api/shelf/:year', requireAuth, async (req, res) => {
 
     if (decorations.length > 0) {
         const milestones = await syncMilestones(userId);
-        const [{ plus }] = await query(
-            "SELECT (plus_until > now() OR staff_role = 'admin') IS TRUE AS plus FROM users WHERE id = $1",
-            [userId]
-        );
+        const [owner] = await query('SELECT plus_until, staff_role FROM users WHERE id = $1', [userId]);
+        const plus = hasPlus(owner);
         const memberOnly = decorations.filter((decoration) => SHELF_DECORATIONS[decoration] === null);
         if (memberOnly.length > 0 && !plus) {
             return res.status(403).json({ error: msg(req, 'decorationMembers') });
@@ -2942,7 +2891,7 @@ app.patch('/api/me/theme', requireAuth, async (req, res) => {
 const SEASON_THEMES = ['classic', 'christmas', 'seaside', 'moonlit', 'adventure', 'ink'];
 
 function hasPlus(user) {
-    return user.staffRole === 'admin' || (user.plusUntil !== null && user.plusUntil > new Date());
+    return PLUS_FOR_EVERYONE || user.staffRole === 'admin' || (user.plusUntil !== null && user.plusUntil > new Date());
 }
 
 async function findMe(userId) {
@@ -3626,63 +3575,8 @@ app.delete('/api/admin/announcements/:id', requireStaff(), async (req, res) => {
     res.json({ id });
 });
 
-app.get('/api/membership', requireAuth, async (req, res) => {
-    const [user] = await query(
-        'SELECT email, plus_until, membership_status, paddle_subscription_id FROM users WHERE id = $1',
-        [req.session.user.id]
-    );
-
-    let cancelAt = null;
-    if (user.paddleSubscriptionId && paddleEnabled()) {
-        const subscription = await getSubscription(user.paddleSubscriptionId).catch(() => null);
-        if (subscription?.scheduled_change?.action === 'cancel') cancelAt = subscription.scheduled_change.effective_at;
-    }
-
-    res.json({
-        enabled: paddleEnabled(),
-        checkout: paddleEnabled() ? checkoutConfig() : null,
-        userId: req.session.user.id,
-        email: user.email,
-        status: user.membershipStatus,
-        paidUntil: user.plusUntil,
-        isMember: user.plusUntil !== null && user.plusUntil > new Date(),
-        hasSubscription: Boolean(user.paddleSubscriptionId),
-        cancelAt,
-    });
-});
-
-app.post('/api/membership/sync', requireAuth, async (req, res) => {
-    const transactionId = req.body.transactionId;
-    if (typeof transactionId !== 'string' || !/^txn_[a-z0-9]+$/.test(transactionId)) {
-        return res.status(400).json({ error: msg(req, 'membershipNone') });
-    }
-    if (!paddleEnabled()) return res.status(503).json({ error: msg(req, 'membershipUnavailable') });
-
-    try {
-        const transaction = await getTransaction(transactionId);
-        if (String(transaction.custom_data?.userId) !== String(req.session.user.id)) {
-            return res.status(403).json({ error: msg(req, 'membershipNone') });
-        }
-        const saved = await saveFromTransaction(transaction, req.session.user.id);
-        res.json({ saved });
-    } catch (error) {
-        console.error('Paddle sync failed:', transactionId, error.message);
-        res.status(502).json({ error: msg(req, 'membershipUnavailable') });
-    }
-});
-
-app.post('/api/membership/cancel', requireAuth, async (req, res) => {
-    const [user] = await query('SELECT paddle_subscription_id FROM users WHERE id = $1', [req.session.user.id]);
-    if (!user.paddleSubscriptionId) return res.status(400).json({ error: msg(req, 'membershipNone') });
-    if (!paddleEnabled()) return res.status(503).json({ error: msg(req, 'membershipUnavailable') });
-
-    try {
-        const subscription = await cancelSubscription(user.paddleSubscriptionId);
-        res.json({ cancelAt: subscription.scheduled_change?.effective_at ?? null });
-    } catch (error) {
-        console.error('Paddle cancel failed', error.status, error.message);
-        res.status(502).json({ error: msg(req, 'membershipCancelFailed') });
-    }
+app.get('/api/membership', requireAuth, (req, res) => {
+    res.json({ freeDuringBeta: PLUS_FOR_EVERYONE });
 });
 
 const PUSH_TYPES = Object.keys(PUSH_GROUPS);

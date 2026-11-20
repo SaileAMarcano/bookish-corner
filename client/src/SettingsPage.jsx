@@ -148,7 +148,7 @@ function SettingsPage({ currentUser, theme, seasonTheme, onThemeToggle, onSeason
                     </SettingsSection>
 
                     <SettingsSection id="membership" icon="favorites">
-                        <SettingRow label={t('settings.membership.row')} hint={t(currentUser.isPlus ? 'settings.membership.rowMember' : 'settings.membership.rowHint')}>
+                        <SettingRow label={t('settings.membership.row')} hint={t('settings.membership.rowHint')}>
                             <Link to="/membership" className="ghost-button">
                                 {t('settings.membership.open')}
                             </Link>

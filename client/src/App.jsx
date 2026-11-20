@@ -16,7 +16,6 @@ import { LEGAL_PAGES } from './legalTexts';
 import Landing from './Landing';
 import BetaPage from './BetaPage';
 import AboutPage from './AboutPage';
-import PricingPage from './PricingPage';
 import FeaturesPages from './FeaturesPage';
 import Sidebar from './Sidebar';
 import LibraryPage from './LibraryPage';
@@ -371,10 +370,6 @@ function App() {
     return <PasswordPage key={path} mode={path === '/forgot-password' ? 'forgot' : 'reset'} />;
   }
 
-  if (path === '/pricing') {
-    return <PricingPage signedIn={Boolean(currentUser)} />;
-  }
-
   if (LEGAL_PAGES[path]) {
     return <LegalPage doc={LEGAL_PAGES[path]} signedIn={Boolean(currentUser)} />;
   }
@@ -583,7 +578,7 @@ function App() {
           <Route path="/achievements" element={<AchievementsPage currentUser={currentUser} />} />
           <Route path="/notifications" element={<NotificationsPage />} />
           <Route path="/updates" element={<UpdatesPage />} />
-          <Route path="/membership" element={<MembershipPage onChanged={loadCurrentUser} />} />
+          <Route path="/membership" element={<MembershipPage />} />
           <Route path="/post/:id" element={<PostPage currentUser={currentUser} books={books} />} />
           <Route path="/activity/:id" element={<ActivityPage currentUser={currentUser} />} />
           <Route path="/lists/:id" element={<ListPage currentUser={currentUser} books={books} onLibraryChange={loadUserBooks} />} />
