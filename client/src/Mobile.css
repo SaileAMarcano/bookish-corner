@@ -121,8 +121,14 @@
   }
 
   .app-shell .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
     gap: 8px;
-    padding: 8px 12px;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
 
   .topbar .topbar-search {
@@ -208,4 +214,8 @@
   textarea {
     font-size: 16px !important;
   }
+}
+
+.public-header {
+  padding-top: calc(16px + env(safe-area-inset-top));
 }
